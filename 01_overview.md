@@ -35,6 +35,8 @@ This prototype will involve the implementation of physics in our virtual world.
 
 In this final prototype, we will ensure that the server can handle up to 100 people per instance. We will also calculate the bandwidth and object/mesh complexity limit.
 
+The estimated timeline for this project is between 2 to 4 weeks.
+
 ## Additional Prototypes
 
 The following prototypes are under consideration:
@@ -45,4 +47,9 @@ The following prototypes are under consideration:
 4. **Avatar Customization**: This prototype will allow users to customize their avatars with different outfits, accessories, and animations.
 5. **Gameplay Mechanics**: This prototype will introduce gameplay mechanics like quests, combat systems, and item collection.
 
-The estimated timeline for this project is between 2 to 4 weeks.
+## Asset Management Prototypes
+
+1. **Inventory Synchronization**: This prototype will establish a system for synchronizing inventory between the datastore and the Digital Content Creation (DCC) tools.
+2. **Asset Validation**: This prototype will create a process for validating assets before they are uploaded to the server.
+3. **Asset Optimization**: This prototype will develop methods for optimizing assets to ensure efficient use of resources.
+4. **Asset Moderation**: This prototype will implement a system for moderating user-generated content to maintain a safe and enjoyable environment for all users.
