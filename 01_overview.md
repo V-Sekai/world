@@ -43,6 +43,6 @@ The following prototypes are under consideration:
 2. **VR Interaction Menus**: This prototype will develop interaction menus for Virtual Reality (VR) users.
 3. **Social Interactions**: This prototype will implement social interactions such as friend requests, private messaging, and public chat rooms.
 4. **Avatar Customization**: This prototype will allow users to customize their avatars with different outfits, accessories, and animations.
-5. **Gameplay Mechanics**: This prototype will introduce gameplay mechanics like quests, combat systems, and item collection.s
+5. **Gameplay Mechanics**: This prototype will introduce gameplay mechanics like quests, combat systems, and item collection.
 
 The estimated timeline for this project is between 2 to 4 weeks.
