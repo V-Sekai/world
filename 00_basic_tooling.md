@@ -1,4 +1,4 @@
-# Basic Tooling: Bill of Materials
+# v-sekai-other-world-architecture: Basic Tooling: Bill of Materials
 
 This section outlines the essential tools we use in our VR world architecture.
 
@@ -16,6 +16,8 @@ We adhere to the following standards for 3D models:
 - **glTF (GL Transmission Format)**: This is a standard file format for three-dimensional scenes and models. It's designed for efficient transmission and loading of 3D content.
 - **VRM**: This is a 3D avatar file format for VR applications. It's based on glTF 2.0 and allows for the use of humanoid animations and interactions in VR.
 - **Godot Scene (.tscn)**: This is Godot's native scene format. It's text-based, making it friendly for version control systems.
+
+In addition to these, we'll also introduce audio and music files.
 
 ## Software Languages
 
