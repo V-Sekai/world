@@ -34,6 +34,8 @@ To manage and automate our infrastructure, we use:
 - **Terraform**: An open-source infrastructure as code software tool that provides a consistent CLI workflow to manage hundreds of cloud services.
 - **Ansible**: An open-source software provisioning, configuration management, and application-deployment tool enabling infrastructure as code.
 
+The specifics of the Docker containers and the Linux operating system are to be determined in the future.
+
 ## Local and Cloud Storage with SeaweedFS and S3
 
 For local storage, we use:
