@@ -4,7 +4,6 @@
 
 These prototypes are crucial for the basic functionality and user experience of the VR social networking service.
 
-1. **Interactive Objects**: This prototype will add interactive objects into the virtual world, such as doors that open, items that can be picked up, etc.
 1. **VOIP Integration**: This prototype will focus on integrating Voice over IP (VoIP) into the virtual world for real-time voice communication.
 1. **VR Interaction Menus**: This prototype will develop interaction menus for Virtual Reality (VR) users.
 1. **Social Interactions**: This prototype will implement social interactions such as friend requests, private messaging, and public chat rooms.
