@@ -1,29 +1,44 @@
 # Basic Tooling: Bill of Materials
 
-This section will cover the basic tools required in our VR world architecture.
+This section outlines the essential tools we use in our VR world architecture.
 
 ## VR Software
 
-Creating virtual worlds requires specific software. Here are the ones we use:
+The creation of virtual worlds necessitates specific software. We utilize:
 
-1. **Godot Engine 4.0**: This is a powerful and open-source game engine that supports both 2D and 3D games and interactive experiences.
-2. **Blender**: This is a free and open-source 3D creation suite that supports the entirety of the 3D pipeline—modeling, rigging, animation, simulation, rendering, compositing, and motion tracking.
+1. **Godot Engine 4.2**: An open-source game engine renowned for its power and versatility, supporting both 2D and 3D games as well as interactive experiences.
+2. **Blender**: A comprehensive, free, and open-source 3D creation suite that caters to all aspects of the 3D pipeline—modeling, rigging, animation, simulation, rendering, compositing, and motion tracking.
 
-## Scripting Languages
+## File Formats
 
-Scripting languages are essential for adding interactivity to our VR worlds:
+We adhere to the following standards for 3D models:
 
-- **C++**: A versatile language that allows developers to script complex behavior.
-- **GDScript**: The native scripting language for Godot Engine, GDScript is designed specifically for games and offers a simple syntax similar to Python.
-- **Elixir**: A dynamic, functional language designed for building scalable and maintainable applications.
+- **glTF (GL Transmission Format)**: This is a standard file format for three-dimensional scenes and models. It's designed for efficient transmission and loading of 3D content.
+- **VRM**: This is a 3D avatar file format for VR applications. It's based on glTF 2.0 and allows for the use of humanoid animations and interactions in VR.
+- **Godot Scene (.tscn)**: This is Godot's native scene format. It's text-based, making it friendly for version control systems.
+
+## Software Languages
+
+Software languages are indispensable for infusing interactivity into our VR worlds:
+
+- **C++**: This versatile language empowers developers to script intricate behavior.
+- **GDScript**: As the native scripting language for Godot Engine, GDScript is game-specific and boasts a simple syntax akin to Python.
+- **Elixir**: A dynamic, functional language engineered for crafting scalable and maintainable applications.
+
+## Infrastructure Automation Tools
+
+To manage and automate our infrastructure, we use:
+
+- **Terraform**: An open-source infrastructure as code software tool that provides a consistent CLI workflow to manage hundreds of cloud services.
+- **Ansible**: An open-source software provisioning, configuration management, and application-deployment tool enabling infrastructure as code.
 
 ## Database
 
-We use **CockroachDB**, an open-source, distributed SQL database that lets you build, scale, and manage modern, data-intensive applications.
+Our choice for database management is **CockroachDB**, an open-source, distributed SQL database designed for building, scaling, and managing modern, data-intensive applications.
 
 ## Hardware
 
-VR hardware is necessary for testing and experiencing our virtual worlds:
+To test and experience our virtual worlds, VR hardware is essential:
 
-- **VR Headsets**: Devices like the Meta Quest 3, Beyond HMD, or Valve Index provide the means to view and interact with our virtual worlds.
-- **Controllers**: These devices allow users to interact with the virtual environment in a more intuitive way than traditional input devices.
+- **VR Headsets**: Devices such as the Meta Quest 3, Beyond HMD, or Valve Index offer the means to view and interact with our virtual worlds.
+- **Controllers**: These devices facilitate user interaction with the virtual environment, providing a more intuitive interface than traditional input devices.
