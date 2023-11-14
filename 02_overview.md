@@ -4,41 +4,37 @@ The V-Sekai Other World Architecture project aims to create a virtual world usin
 
 ```mermaid
 flowchart TB
-    subgraph user [Users]
-        desktop[Desktop] -- "Open a login page" --> third_party_login_flow
+    subgraph player_area [Player's Entrance]
+        device[Player's VR Device] -- "Player connects to the virtual realm" --> connection_portal
     end
 
-    subgraph third_party [Secure Login Service]
-        third_party_login_flow -- "Start secure login process" --> secure_login
-        secure_login -- "Handle login" --> login_flow_response
-        login_flow_response -- "Login successful" --> game_engine_interface
-        login_flow_response -- "Login failed" --> game_engine_interface
+    subgraph connection_portal [Connection Portal]
+        connection_portal -- "Identifies and welcomes the player" --> gateway_team[Gateway Team]
+        gateway_team -- "Gateway team provides access" --> virtual_realm
+        gateway_team -- "In case of an issue, gateway team assists" --> virtual_realm
     end
 
-    subgraph game_engine_interface [Game Engine Interface]
-        game_engine_interface -- "Establish real-time communication" --> real_time_comm
-        game_engine_interface -- "Receive game assets" --> asset_service
+    subgraph virtual_realm [Virtual Realm Core]
+        virtual_realm -- "Opens the doorway to interactive spaces" --> interaction_center
     end
 
-    subgraph real_time_comm_s [Real-Time Communication Service]
-        real_time_comm -- "Confirm user is logged in" --> session_created
-        session_created -- "Create a user session" --> real_time_comm
-        real_time_comm -- "Facilitate asset interaction" --> asset_service
-        asset_service -- "Check asset status" --> real_time_comm
+    subgraph interaction_center [Interaction Center]
+        interaction_center -- "Facilitates player-to-player and player-to-world interactions" --> realm_champions
     end
 
-    subgraph asset [Asset Management Service]
-        asset_service -- "Request game assets" --> cloud_storage
-        cloud_storage -- "Validate asset session" --> asset_service
-        asset_service -- "Store asset data" --> project_database
-        project_database -- "Retrieve asset data" --> asset_service
-        asset_service -- "Process new game assets" --> validation_service
-        asset_service -- "Handle invalid assets" --> validation_service
-        validation_service -- "Validate and store valid assets" --> asset_service
+    subgraph realm_champions [Realm Champions]
+        realm_champions -- "Brings the world alive with features and events" --> central_archive[Central Archive]
+        realm_champions -- "Ensures the realm's elements are engaging" --> experience_architects[Experience Architects]
+        central_archive -- "Securely stores and retrieves realm's artifacts" --> realm_champions
+        experience_architects -- "Architects design and validate engaging experiences" --> realm_champions
     end
 
-    subgraph login [User Session Service]
-        session_created -. "Manage user sessions" .-> user_session_service
+    subgraph central_archive [Central Archive]
+        %% The central hub for data management, akin to cloud storage.
+    end
+
+    subgraph experience_architects [Experience Architects]
+        %% This team designs, constructs, and refines the elements that make up the player's experience.
     end
 ```
 
