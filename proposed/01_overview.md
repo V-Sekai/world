@@ -6,6 +6,8 @@ The V-Sekai Other World Architecture project aims to create a virtual world usin
 
 ## Prototype 0: Push an asset to a service
 
+> **Note:** In Elixir, we can directly call functions using the Interactive Elixir (IEX) shell.
+
 Work on the function calls for sanitization and validation service.
 
 ### Input 
