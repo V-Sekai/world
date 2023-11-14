@@ -16,10 +16,10 @@
 
 3. **Mozilla Hubs**
 
-   - **Overview**: Mozilla Hubs is a virtual collaboration platform, designed for educators, teams, and organizations, functioning directly in web browsers without requiring software downloads https://hubs.mozilla.com/#:~:text=Welcome%20to%20Mozilla%20Hubs%2C%20the,all%20while%20prioritizing%20your%20privacy.
-   - **Functionality**: It allows the creation of 3D spaces and provides a platform for remote connection, making it suitable for education and virtual meetings https://www.xrpedagogy.com/en/what-is-hubs-by-mozilla/.
-   - **Content Integration**: Users can import diverse media types like 3D models, images, and videos from various sources for use in their virtual spaces https://hubs.mozilla.com/docs/intro-hubs.html#:~:text=In%20Hubs%20you%20can%20import,the%20top%20of%20the%20screen.
-   - **Accessibility**: This hardware-agnostic platform is accessible on various devices, offering avatar customization and other features without needing permanent profiles https://www.makeuseof.com/how-to-use-mozilla-hubs-new-features/#:~:text=Mozilla%20Hubs%20is%20a%20free,with%20perks%20like%20avatar%20customization.
+   - **Overview**: Mozilla Hubs is a virtual collaboration platform, designed for educators, teams, and organizations, functioning directly in web browsers without requiring software downloads [hubs.mozilla.com](https://hubs.mozilla.com/#:~:text=Welcome%20to%20Mozilla%20Hubs%2C%20the,all%20while%20prioritizing%20your%20privacy).
+   - **Functionality**: It allows the creation of 3D spaces and provides a platform for remote connection, making it suitable for education and virtual meetings [xrpedagogy](https://www.xrpedagogy.com/en/what-is-hubs-by-mozilla/).
+   - **Content Integration**: Users can import diverse media types like 3D models, images, and videos from various sources for use in their virtual spaces [hubs.mozilla.com/docs](https://hubs.mozilla.com/docs/intro-hubs.html#:~:text=In%20Hubs%20you%20can%20import,the%20top%20of%20the%20screen).
+   - **Accessibility**: This hardware-agnostic platform is accessible on various devices, offering avatar customization and other features without needing permanent profiles [makeuseof](https://www.makeuseof.com/how-to-use-mozilla-hubs-new-features/#:~:text=Mozilla%20Hubs%20is%20a%20free,with%20perks%20like%20avatar%20customization).
 
 4. **Overte**
 
