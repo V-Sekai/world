@@ -17,9 +17,11 @@ Work on the function calls for sanitization and validation service.
 
 ### Data Structures
 
-- An Elixir struct representing GLTFDocument.
+- An Elixir struct representing glTF2.
+- An Elixir struct representing VRM0.
+- An Elixir struct representing VRM1.
 - An Elixir struct representing Godot Text Scene.
-- An Elixir struct represents the list of validations.
+- An Elixir struct represents the list of validations for 3D modeling and animation.
   - Validate Model Name
   - Validate Model Content
   - Validate Transform Naming Suffix
