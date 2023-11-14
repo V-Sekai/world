@@ -27,7 +27,6 @@ Some platforms from a presentation, titled "Frequently used Social VR", from the
    - **Functionality**: It's a VR real-time service tool that enables users to become a virtual character and live broadcast. Users can either use pre-installed model characters or upload their own, requiring only a VR headset and a compatible PC.
    - **URLs**:
    - Steam Store: [VirtualCast on Steam](https://store.steampowered.com/app/755770/VirtualCast/)
-   - Live3D: [Virtual Cast best alternatives](https://live3d.io/virtual-cast-best-alternatives/)
 
 5. **ChilloutVR**
 
