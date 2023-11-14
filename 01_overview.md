@@ -36,7 +36,8 @@ Work on the function calls for sanitization and validation service.
   - Validate Mesh Edge Length Non Zero
   - Validate Mesh Normals Unlocked
   - Validate Mesh UV Set Map 1
-  - Validate model's default uv set exists and is named 'UVMap'.
+  - ~~Validate model's default uv set exists and is named 'UVMap'.~~
+  - Validate model's default uv set exists.
   - Validate Mesh Vertices Have Edges
   - Validate No Animation
   - Ensure no keyframes on nodes in the Instance.
