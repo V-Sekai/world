@@ -1,5 +1,7 @@
 # Platforms of Note
 
+Some platforms from a presentation, titled "Frequently used Social VR", from the "Social VR Lifestyle Survey 2023". It's a bar graph showing the popularity of various social VR platforms by region, with the regions being Europe, North America, Asia (excluding Japan), and Japan. 
+
 1. **Roblox**
 
    - **Description**: Roblox is an online game platform and game creation system, allowing users to program and play games created by others. It uses Lua for coding and hosts a variety of game genres [Wikipedia: Roblox](https://en.wikipedia.org/wiki/Roblox#:~:text=Roblox%20,in%20the%20programming%20language%20Lua).
