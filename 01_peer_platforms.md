@@ -3,8 +3,8 @@
 1. **Roblox**
 
    - **Description**: Roblox is an online game platform and game creation system, allowing users to program and play games created by others. It uses Lua for coding and hosts a variety of game genres [Wikipedia: Roblox](https://en.wikipedia.org/wiki/Roblox#:~:text=Roblox%20,in%20the%20programming%20language%20Lua).
-   - **Features**: It combines gaming, social media, and commerce. Users can socialize, build spaces, and engage in virtual commerce within this "ultimate virtual universe" [](https://blog.hootsuite.com/what-is-roblox/#:~:text=Roblox%20is%20an%20app%20that,earn%20and%20spend%20virtual%20money).
-   - **Functionality**: Roblox is a platform and storefront for user-made games, rather than being a game itself. It enables users to create and play games developed by others [](https://www.polygon.com/22326123/what-is-roblox-explainer-public-offering#:~:text=Roblox%20is%20an%20online%20platform,this%20sense%2C%20it%20is%20more).
+   - **Features**: It combines gaming, social media, and commerce. Users can socialize, build spaces, and engage in virtual commerce within this "ultimate virtual universe" [what-is-roblox](https://blog.hootsuite.com/what-is-roblox/#:~:text=Roblox%20is%20an%20app%20that,earn%20and%20spend%20virtual%20money).
+   - **Functionality**: Roblox is a platform and storefront for user-made games, rather than being a game itself. It enables users to create and play games developed by others [what-is-roblox-explainer](https://www.polygon.com/22326123/what-is-roblox-explainer-public-offering#:~:text=Roblox%20is%20an%20online%20platform,this%20sense%2C%20it%20is%20more).
    - **Vision**: Roblox aims to empower people to create immersive experiences, reimagining how people collaborate creatively and socially [corp.roblox.com](https://corp.roblox.com/).
    - **Community**: Launched in 2007, Roblox boasts 64 million monthly players and around 178 million accounts, positioning itself as an ‘Imagination Platform’ [explained-what-is-roblox](https://www.webwise.ie/parents/explainers/explained-what-is-roblox/#:~:text=Roblox%20advertises%20itself%20as%20an,million%20accounts%20on%20the%20platform).
 
