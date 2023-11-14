@@ -8,7 +8,7 @@ The V-Sekai Other World Architecture project aims to create a virtual world usin
 
 > **Note:** In Elixir, we can directly call functions using the Interactive Elixir (IEX) shell.
 
-Work on the function calls for sanitization and validation service.
+Work on the function calls for sanitization and validation service. Provide an independent implementation of Godot Engine data structures.
 
 ### Input
 
