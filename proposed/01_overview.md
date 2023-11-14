@@ -6,6 +6,8 @@ The V-Sekai Other World Architecture project aims to create a virtual world usin
 
 ## Prototype 0: Push an asset to a service
 
+Work on the function calls for sanitization and validation service.
+
 Before the game client/server architecture is sound, we need to be able to push an asset to a service with sanitization and validation. This service will separate the colliders and other elements. Then, the game server pulls those colliders in.
 
 ## Prototype 1: Element Instantiation and Uploading
