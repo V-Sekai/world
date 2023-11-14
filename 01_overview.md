@@ -12,7 +12,7 @@ Work on the function calls for sanitization and validation service. Provide an i
 
 ### Input
 
-2. Input godot text scene.
+1. Input godot text scene.
 
 ### Data Structures
 
@@ -44,14 +44,14 @@ Work on the function calls for sanitization and validation service. Provide an i
 15. **Validate Model Name**: Ensure that the model has a valid name.
 16. **Validate Model Content**: Check that the content of the model is valid.
 17. **Validate Transform Naming Suffix**: Confirm that the naming suffix for transforms is correct.
-19. **Validate No Null Transforms**: Check that there are no null or empty transforms in the model.
-20. **Validate No Unknown Nodes**: Confirm that there are no unknown nodes in the model.
-21. **Validate Node No Ghosting**: Verify that there is no ghosting effect on any node.
-22. **Validate Shape Default Names**: Ensure that the default names for shapes are valid.
-23. **Validate Shape Render Stats**: Check the render statistics for each shape.
-24. **Validate Shape Zero**: Confirm that the zero position for each shape is correctly set.
-25. **Validate Transform Zero**: Ensure that the zero position for each transform is correctly set.
-26. **Validate Unique Names**: Verify that all names in the model are unique.
+18. **Validate No Null Transforms**: Check that there are no null or empty transforms in the model.
+19. **Validate No Unknown Nodes**: Confirm that there are no unknown nodes in the model.
+20. **Validate Node No Ghosting**: Verify that there is no ghosting effect on any node.
+21. **Validate Shape Default Names**: Ensure that the default names for shapes are valid.
+22. **Validate Shape Render Stats**: Check the render statistics for each shape.
+23. **Validate Shape Zero**: Confirm that the zero position for each shape is correctly set.
+24. **Validate Transform Zero**: Ensure that the zero position for each transform is correctly set.
+25. **Validate Unique Names**: Verify that all names in the model are unique.
 
 #### Animations
 
