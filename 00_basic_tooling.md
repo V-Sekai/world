@@ -31,8 +31,7 @@ Software languages are indispensable for infusing interactivity into our VR worl
 
 To manage and automate our infrastructure, we use:
 
-- **Terraform**: An open-source infrastructure as code software tool that provides a consistent CLI workflow to manage hundreds of cloud services.
-- **Ansible**: An open-source software provisioning, configuration management, and application-deployment tool enabling infrastructure as code.
+- **OpenTofu**: An open-source infrastructure as code software tool that provides a consistent CLI workflow to manage hundreds of cloud services.
 
 The specifics of the Docker containers and the Linux operating system are to be determined in the future.
 
@@ -54,7 +53,7 @@ Our choice for database management is **CockroachDB**, an open-source, distribut
 
 To test and experience our virtual worlds, VR hardware is essential:
 
-- **VR Headsets**: Devices such as the Meta Quest, Beyond HMD, or Valve Index offer the means to view and interact with our virtual worlds.
+- **VR Headsets**: Devices such as the Meta Quest 2, Meta Quest 3, Beyond HMD, or Valve Index offer the means to view and interact with our virtual worlds.
 - **Controllers**: These devices facilitate user interaction with the virtual environment, providing a more intuitive interface than traditional input devices.
 - **Windows PCVR**: Placeholder for Windows PCVR.
 - **VR GPUs**: Graphics processing units for rendering VR content. They provide the computational power necessary to create immersive, realistic virtual environments.
