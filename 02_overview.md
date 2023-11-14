@@ -27,13 +27,15 @@ flowchart TB
         realm_champions --> asset_ingest_validate[Asset Ingest and Validate]
         central_archive --> realm_champions
         asset_ingest_validate --> realm_champions
-        asset_ingest_validate --> device
     end
 
     subgraph "Asset Storage"
         asset_ingest_validate --> local_cloud[Local Cloud -SeaweedFS]
         asset_ingest_validate --> cloud_s3[Cloud S3]
     end
+
+    device --> local_cloud
+    device --> cloud_s3
 ```
 
 > **Note:** Instead of working on a car engine, work on the body. Instead of a bicycle wheel, work on the frame.
