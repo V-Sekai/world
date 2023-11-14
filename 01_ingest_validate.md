@@ -6,7 +6,7 @@
 
 ### Data Structures
 
-- An Elixir struct representing Godot Text Scene.
+- An Elixir struct representing Godot Scene.
 - An Elixir struct represents the list of validations for 3D modeling and animation.
 
 #### Godot Scene
