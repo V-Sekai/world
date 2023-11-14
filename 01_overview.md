@@ -44,7 +44,6 @@ Work on the function calls for sanitization and validation service.
 15. **Validate Model Name**: Ensure that the model has a valid name.
 16. **Validate Model Content**: Check that the content of the model is valid.
 17. **Validate Transform Naming Suffix**: Confirm that the naming suffix for transforms is correct.
-18. **Validate No Namespace**: Ensure that there are no namespaces in the model.
 19. **Validate No Null Transforms**: Check that there are no null or empty transforms in the model.
 20. **Validate No Unknown Nodes**: Confirm that there are no unknown nodes in the model.
 21. **Validate Node No Ghosting**: Verify that there is no ghosting effect on any node.
