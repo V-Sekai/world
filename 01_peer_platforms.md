@@ -26,7 +26,7 @@ Some platforms from a presentation, titled "Frequently used Social VR", from the
    - **Description**: VirtualCast is a metaverse communication service that allows sharing of extraordinary experiences with friends, featuring unique events, VR games, and personal spaces filled with memories.
    - **Functionality**: It's a VR real-time service tool that enables users to become a virtual character and live broadcast. Users can either use pre-installed model characters or upload their own, requiring only a VR headset and a compatible PC.
    - **URLs**:
-   - Steam Store: [VirtualCast on Steam](https://store.steampowered.com/app/755770/VirtualCast/)
+   - Steam Store: [VirtualCast on Steam](https://store.steampowered.com/app/947890/VirtualCast/)
 
 5. **ChilloutVR**
 
