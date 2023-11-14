@@ -27,6 +27,7 @@ flowchart TB
         realm_champions --> asset_ingest_validate[Asset Ingest and Validate]
         central_archive --> realm_champions
         asset_ingest_validate --> realm_champions
+        asset_ingest_validate --> device
     end
 ```
 
