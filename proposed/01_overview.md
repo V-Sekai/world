@@ -10,10 +10,16 @@ The V-Sekai Other World Architecture project aims to create a virtual world usin
 
 Work on the function calls for sanitization and validation service.
 
-### Input 
+### Input
 
 1. Input gltf.
 2. Input godot text scene.
+
+### Data Structures
+
+- An elixir struct representing GLTFDocument.
+- An elixir struct representing Godot Text Scene.
+- An elixir struct represents the list of validations.
 
 ### Output
 
