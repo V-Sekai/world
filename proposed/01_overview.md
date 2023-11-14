@@ -9,8 +9,6 @@ In this prototype, we will instantiate elements into our virtual world and make 
 1. **Colliders**: Invisible objects that simulate solid matter.
 2. **Per Bone Capsules**: Simplified user avatars used for collision detection.
 
-By the end of this prototype, we will have established a basic system for adding and sharing elements in our virtual world.
-
 ## Prototype 2: Packaging, Marker3D, and Quad Plane
 
 This prototype involves packaging colliders and per bone capsules for upload/download. We will introduce a Marker3D at coordinates (0, 0, 1) as a reference point in the 3D space. Additionally, we will add a quad plane to our virtual world, which will serve as a basic surface or platform within the environment.
