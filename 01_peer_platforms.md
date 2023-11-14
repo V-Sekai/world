@@ -88,9 +88,19 @@
 
 13. **VKet Cloud**
 
-   - **Description**: VKet Cloud is a development engine designed for deploying metaverse services directly in the browser, catering to both creators and business users.
-   - **Accessibility and Features**: The platform emphasizes ease of access as it operates in the browser, eliminating the need for high-performance PCs, IT knowledge, or VR goggles. It allows for the creation of personal metaverses and supports features like voice and text chat.
-   - **URLs**:
-     - VKet Cloud: [Vket Cloud｜Develop your own virtual world service](https://cloud.vket.com/)
-     - VKet Magazine: [Vket Cloud Commentary Article](https://magazine.vket.com/vketcloud-tour/)
-     - The Metaculture: [HIKKY Expands With Vket Cloud](https://www.themetaculture.co/articles/hikky-expands-with-vket-cloud-an-engine-that-works-on-your-phone-and-its-free)
+    - **Description**: VKet Cloud is a development engine designed for deploying metaverse services directly in the browser, catering to both creators and business users.
+    - **Accessibility and Features**: The platform emphasizes ease of access as it operates in the browser, eliminating the need for high-performance PCs, IT knowledge, or VR goggles. It allows for the creation of personal metaverses and supports features like voice and text chat.
+    - **URLs**:
+    - VKet Cloud: [Vket Cloud ｜ Develop your own virtual world service](https://cloud.vket.com/)
+    - VKet Magazine: [Vket Cloud Commentary Article](https://magazine.vket.com/vketcloud-tour/)
+    - The Metaculture: [HIKKY Expands With Vket Cloud](https://www.themetaculture.co/articles/hikky-expands-with-vket-cloud-an-engine-that-works-on-your-phone-and-its-free)
+
+14. **Tokyo Game Show VR**
+
+    - **Description**: Tokyo Game Show VR is a virtual space that hosts the Tokyo Game Show, offering a super-participatory experience where attendees can explore as avatars and enjoy special content from various exhibitors and sponsors.
+    - **Platform and Accessibility**: It operates on the xambr social VR platform, accessible via Oculus Quest, PC VR headsets, and regular PCs, ensuring wide availability for different users.
+    - **Experience**: The virtual world of TGS is divided into several "islands," providing an exploratory experience where attendees can teleport between islands and visit virtual booths.
+    - **URLs**:
+    - Tokyo Game Show VR: [TOKYO GAME SHOW VR 2023](https://www.tgsvr.com/)
+    - UploadVR: [Tokyo Game Show VR: How To Attend](https://www.uploadvr.com/tokyo-game-show-vr-how-to-attend/)
+    - Skarred Ghost: [Tokyo Game Show VR 2023 feels like a magical trip](https://skarredghost.com/2023/10/05/tokyo-game-show-vr-2023-feels-like-a-magical-trip-to-a-fantasy-japanese-theme-park/)
