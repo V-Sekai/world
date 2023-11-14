@@ -4,34 +4,33 @@ The V-Sekai Other World Architecture project aims to create a virtual world usin
 
 ```mermaid
 flowchart TB
-    subgraph "Game Client (VR Headset)"
-        device[Player's VR Device] --> connection_portal[Godot Engine]
+    subgraph "Game Client"
+        device[VR Device] --> connection_portal[Godot]
     end
 
-    subgraph "Simulation Server: Connection Portal"
-        connection_portal --> gateway_team[Gateway Team]
-        gateway_team --> virtual_realm[Virtual Realm Core]
-        gateway_team --> virtual_realm
+    subgraph "Connection Portal"
+        connection_portal --> gateway_team[Gateway]
+        gateway_team --> virtual_realm[Realm Core]
     end
 
-    subgraph "Simulation Server: Virtual Realm Core"
-        virtual_realm --> interaction_center[Interaction Center]
+    subgraph "Virtual Realm Core"
+        virtual_realm --> interaction_center[Interaction]
     end
 
-    subgraph "Simulation Server: Interaction Center"
-        interaction_center --> realm_champions[Realm Champions]
+    subgraph "Interaction Center"
+        interaction_center --> realm_champions[Champions]
     end
 
-    subgraph "Backend Infrastructure (Elixir, OpenTofu, VictoriaMetrics)"
+    subgraph "Backend Infrastructure"
         realm_champions --> central_archive[CockroachDB]
-        realm_champions --> asset_ingest_validate[Asset Ingest and Validate]
+        realm_champions --> asset_ingest_validate[Asset Ingest]
         central_archive --> realm_champions
         asset_ingest_validate --> realm_champions
     end
 
     subgraph "Asset Storage"
-        asset_ingest_validate --> local_cloud[Local Cloud -SeaweedFS]
-        asset_ingest_validate --> cloud_s3[Cloud S3]
+        asset_ingest_validate --> local_cloud[Local Cloud]
+        asset_ingest_validate --> cloud_s3[S3]
     end
 
     device --> local_cloud
