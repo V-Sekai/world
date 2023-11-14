@@ -2,6 +2,8 @@
 
 The V-Sekai Other World Architecture project aims to create a virtual world using the binary Godot Engine client and server. The development process is divided into several prototypes, each with its own specific goals and objectives.
 
+> **Note:** Instead of working on a car engine, work on the body. Instead of a bicycle wheel, work on the frame.
+
 ## Prototype 0: Push an asset to a service
 
 Before the game client/server architecture is sound, we need to be able to push an asset to a service with sanitization and validation. This service will separate the colliders and other elements. Then, the game server pulls those colliders in.
@@ -24,6 +26,14 @@ During this prototype, we will decide between the GLTF2 concept of a unified nod
 ## Prototype 4: Object Uploads and Positioning
 
 In this prototype, we will develop the capability to upload objects like a teacup (possibly a collider) and an avatar. Users will be able to drag and scale these objects.
+
+- name
+- user_uid
+- attachments
+  - avatar (materials, meshes, animations)
+  - colliders
+- scale
+- skeleton
 
 ## Prototype 5: Server Management and Scripting
 
