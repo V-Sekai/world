@@ -19,6 +19,10 @@ Work on the function calls for sanitization and validation service. Provide an i
 - An Elixir struct representing Godot Text Scene.
 - An Elixir struct represents the list of validations for 3D modeling and animation.
 
+> :warning: **Caution:** While it may seem tempting to write a parser from scratch for Godot's TSCN format, remember that most distributed assets are binary SCNs rather than TSCNs for faster loading and smaller download sizes. Loading TSCNs can be extremely slow. Also, bundling assets like textures can lead to issues similar to the Doom 3 problem where every asset was a text file, resulting in easy modding but terrible loading times.
+
+> :bulb: **Solution:** To overcome this issue, consider reading and writing both TSCN and SCN formats. This approach will allow you to balance between fast loading times and small download sizes of binary SCNs, and the flexibility and ease of use of TSCNs.
+
 #### Mesh Vertex Attributes
 
 1. **Validate Mesh Vertices Have Edges**: Ensure that each vertex in the mesh is connected to at least one edge.
