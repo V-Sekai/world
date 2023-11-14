@@ -43,8 +43,8 @@ Work on the function calls for sanitization and validation service. Provide an i
 
 15. **Validate Model Name**: Ensure that the model has a valid name.
 16. **Validate Model Content**: Check that the content of the model is valid.
-17. **Validate Transform Naming Suffix**: Confirm that the naming suffix for transforms is correct.
-18. **Validate No Null Transforms**: Check that there are no null or empty transforms in the model.
+17. **Validate Node3D Naming Suffix**: Confirm that the naming suffix for Node3D is correct.
+18. **Validate No Node3D Transforms**: Check that there are no null or empty Node3D transforms in the model.
 19. **Validate No Unknown Nodes**: Confirm that there are no unknown nodes in the model.
 20. **Validate Node No Ghosting**: Verify that there is no ghosting effect on any node.
 21. **Validate Shape Default Names**: Ensure that the default names for shapes are valid.
