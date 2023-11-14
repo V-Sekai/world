@@ -61,7 +61,7 @@
    - **Features**: The platform is a hub for building and playing games, allowing users to explore millions of player-created rooms, chat, and hang out with friends worldwide. More about this can be found on their [Steam page](https://store.steampowered.com/app/471710/rec_room) and [official website](https://recroom.com/#:~:text=00%3A30%20,from%20phones%20to%20VR%20headsets).
    - **Community and Accessibility**: Rec Room fosters a global community for playing and creating games, offering cross-platform playability on everything from phones to VR headsets, and it's free to use. More about this can be found on their [Pitchbook profile](https://pitchbook.com/profiles/company/156041-29#:~:text=Rec%20Room%20Rec%20Room%20Overview,to%20play%20and%20create%20games).
 
-10. **Meta Horizon**
+10. **Meta Horizon Worlds**
 
     - **Description**: [Meta Horizon](https://en.wikipedia.org/wiki/Horizon_Worlds#:~:text=Meta%20Horizon%20is%20a%20virtual,Platforms%2C%20formerly%20known%20as%20Facebook) is a virtual reality platform enabling users to create, explore, and socialize in various virtual worlds. It offers profile and avatar customization to match user preferences and identities.
     - **Collaborative Platform**: It's known for its collaborative capabilities in VR, offering virtual realities and multiplayer games. More about this can be found on their [official website](https://horizon.meta.com/#:~:text=Explore%20Meta%20Horizon%20on%20Meta,that%20will%20bring%20your%20wildest).
