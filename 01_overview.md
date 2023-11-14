@@ -25,47 +25,47 @@ Work on the function calls for sanitization and validation service.
 
 #### Mesh Vertex Attributes
 
-1. Validate Mesh Vertices Have Edges
-2. Validate Mesh Has Overlapping UVs
-3. Validate Mesh Single UV Set
-4. Validate Mesh Has UVs
-5. Validate Mesh No Co-Planar Faces
-6. Validate Mesh Ngons
-7. Validate Mesh Non-Manifold
-8. Validate Mesh No Negative Scale
-9. Validate Mesh Edge Length Non Zero
-10. Validate Mesh Normals Unlocked
-11. Validate Mesh UV Set Map 1
-12. Validate if Mesh is Triangulated
+1. **Validate Mesh Vertices Have Edges**: Ensure that each vertex in the mesh is connected to at least one edge.
+2. **Validate Mesh Has Overlapping UVs**: Check if any UV coordinates in the mesh overlap.
+3. **Validate Mesh Single UV Set**: Confirm that the mesh only has one set of UV coordinates.
+4. **Validate Mesh Has UVs**: Verify that the mesh has UV coordinates.
+5. **Validate Mesh No Co-Planar Faces**: Ensure that there are no faces in the mesh that lie on the same plane.
+6. **Validate Mesh Ngons**: Check for the presence of polygons with more than four sides in the mesh.
+7. **Validate Mesh Non-Manifold**: Confirm that the mesh does not have any non-manifold geometry.
+8. **Validate Mesh No Negative Scale**: Ensure that the scale of the mesh is not negative.
+9. **Validate Mesh Edge Length Non Zero**: Verify that all edges in the mesh have a length greater than zero.
+10. **Validate Mesh Normals Unlocked**: Check that the normals of the mesh are not locked and can be modified.
+11. **Validate Mesh UV Set Map 1**: Confirm that the first UV set map of the mesh is correctly configured.
+12. **Validate if Mesh is Triangulated**: Ensure that the mesh is composed entirely of triangular faces.
 
 #### Material
 
-13. Validate Color Sets
-14. Validate Model's default uv set exists.
+13. **Validate Color Sets**: Check that the color sets used in the material are valid.
+14. **Validate Model's default uv set exists**: Confirm that the model has a default UV set.
 
 #### Images
 
-15. Validate Alembic Visible Node
+15. **Validate Alembic Visible Node**: Verify that the Alembic node is visible in the rendered image.
 
 #### General
 
-16. Validate Model Name
-17. Validate Model Content
-18. Validate Transform Naming Suffix
-19. Validate No Namespace
-20. Validate No Null Transforms
-21. Validate No Unknown Nodes
-22. Validate Node No Ghosting
-23. Validate Shape Default Names
-24. Validate Shape Render Stats
-25. Validate Shape Zero
-26. Validate Transform Zero
-27. Validate Unique Names
+16. **Validate Model Name**: Ensure that the model has a valid name.
+17. **Validate Model Content**: Check that the content of the model is valid.
+18. **Validate Transform Naming Suffix**: Confirm that the naming suffix for transforms is correct.
+19. **Validate No Namespace**: Ensure that there are no namespaces in the model.
+20. **Validate No Null Transforms**: Check that there are no null or empty transforms in the model.
+21. **Validate No Unknown Nodes**: Confirm that there are no unknown nodes in the model.
+22. **Validate Node No Ghosting**: Verify that there is no ghosting effect on any node.
+23. **Validate Shape Default Names**: Ensure that the default names for shapes are valid.
+24. **Validate Shape Render Stats**: Check the render statistics for each shape.
+25. **Validate Shape Zero**: Confirm that the zero position for each shape is correctly set.
+26. **Validate Transform Zero**: Ensure that the zero position for each transform is correctly set.
+27. **Validate Unique Names**: Verify that all names in the model are unique.
 
 #### Animations
 
-28. Validate No Animation
-29. Ensure no keyframes on nodes in the Instance.
+28. **Validate No Animation**: Check that there are no animations in the model.
+29. **Ensure no keyframes on nodes in the Instance**: Confirm that there are no keyframes on any nodes in the instance.
 
 ### Output
 
