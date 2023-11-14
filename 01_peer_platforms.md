@@ -23,9 +23,9 @@
 
 4. **Overte**
 
-   - **Architecture**: Overte provides a comprehensive VR experience through its interface and domain server, enabling users to explore VR worlds, socialize, and participate in events https://docs.overte.org/en/latest/explore/get-started/architecture.html#:~:text=Overte%27s%20architecture%20consists%20of%20the,server%20that%20hosts%20a%20domain.
-   - **Open Source Nature**: As an open-source virtual world and social VR software, it supports both VR and desktop experiences, allowing users to create and host their own virtual worlds https://overte.org/#:~:text=About%20,VR%20events%2C%20and%20much%20more https://docs.overte.org/en/latest/#:~:text=Overte%20is%20open,in%20social.
-   - **Community and Creativity**: It fosters a community-focused environment where users can create, explore, and interact in various virtual worlds, emphasizing immersive and interactive experiences https://docs.overte.org/en/latest/explore.html#:~:text=Explore,interactive%20experience%20with%20realistic.
+   - **Architecture**: Overte provides a comprehensive VR experience through its interface and domain server, enabling users to explore VR worlds, socialize, and participate in events [docs.overte.org](https://docs.overte.org/en/latest/explore/get-started/architecture).html#:~:text=Overte%27s%20architecture%20consists%20of%20the,server%20that%20hosts%20a%20domain.
+   - **Open Source Nature**: As an open-source virtual world and social VR software, it supports both VR and desktop experiences, allowing users to create and host their own virtual worlds [overte](https://overte.org/#:~:text=About%20,VR%20events%2C%20and%20much%20more) [docs.overte.org/en/latest](https://docs.overte.org/en/latest/#:~:text=Overte%20is%20open,in%20social).
+   - **Community and Creativity**: It fosters a community-focused environment where users can create, explore, and interact in various virtual worlds, emphasizing immersive and interactive experiences [docs.overte.org](https://docs.overte.org/en/latest/explore.html#:~:text=Explore,interactive%20experience%20with%20realistic).
 
 5. **Resonite**
 
