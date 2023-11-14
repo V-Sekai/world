@@ -97,7 +97,7 @@ Some platforms from a presentation, titled "Frequently used Social VR", from the
     - VKet Magazine: [Vket Cloud Commentary Article](https://magazine.vket.com/vketcloud-tour/)
     - The Metaculture: [HIKKY Expands With Vket Cloud](https://www.themetaculture.co/articles/hikky-expands-with-vket-cloud-an-engine-that-works-on-your-phone-and-its-free)
 
-14. **Tokyo Game Show VR**
+14. **xambr social VR (Tokyo Game Show VR)**
 
     - **Description**: Tokyo Game Show VR is a virtual space that hosts the Tokyo Game Show, offering a super-participatory experience where attendees can explore as avatars and enjoy special content from various exhibitors and sponsors.
     - **Platform and Accessibility**: It operates on the xambr social VR platform, accessible via Oculus Quest, PC VR headsets, and regular PCs, ensuring wide availability for different users.
