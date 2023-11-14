@@ -4,37 +4,29 @@ The V-Sekai Other World Architecture project aims to create a virtual world usin
 
 ```mermaid
 flowchart TB
-    subgraph player_area [Player's Entrance]
-        device[Player's VR Device] -- "Player connects to the virtual realm" --> connection_portal
+    subgraph "Player's Entrance"
+        device[Player's VR Device] --> connection_portal[Connection Portal]
     end
 
-    subgraph connection_portal [Connection Portal]
-        connection_portal -- "Identifies and welcomes the player" --> gateway_team[Gateway Team]
-        gateway_team -- "Gateway team provides access" --> virtual_realm
-        gateway_team -- "In case of an issue, gateway team assists" --> virtual_realm
+    subgraph "Connection Portal"
+        connection_portal --> gateway_team[Gateway Team]
+        gateway_team --> virtual_realm[Virtual Realm Core]
+        gateway_team --> virtual_realm
     end
 
-    subgraph virtual_realm [Virtual Realm Core]
-        virtual_realm -- "Opens the doorway to interactive spaces" --> interaction_center
+    subgraph "Virtual Realm Core"
+        virtual_realm --> interaction_center[Interaction Center]
     end
 
-    subgraph interaction_center [Interaction Center]
-        interaction_center -- "Facilitates player-to-player and player-to-world interactions" --> realm_champions
+    subgraph "Interaction Center"
+        interaction_center --> realm_champions[Realm Champions]
     end
 
-    subgraph realm_champions [Realm Champions]
-        realm_champions -- "Brings the world alive with features and events" --> central_archive[Central Archive]
-        realm_champions -- "Ensures the realm's elements are engaging" --> experience_architects[Experience Architects]
-        central_archive -- "Securely stores and retrieves realm's artifacts" --> realm_champions
-        experience_architects -- "Architects design and validate engaging experiences" --> realm_champions
-    end
-
-    subgraph central_archive [Central Archive]
-        %% The central hub for data management, akin to cloud storage.
-    end
-
-    subgraph experience_architects [Experience Architects]
-        %% This team designs, constructs, and refines the elements that make up the player's experience.
+    subgraph "Realm Champions"
+        realm_champions --> central_archive[Central Archive]
+        realm_champions --> experience_architects[Experience Architects]
+        central_archive --> realm_champions
+        experience_architects --> realm_champions
     end
 ```
 
