@@ -32,7 +32,8 @@ Software languages are indispensable for infusing interactivity into our VR worl
 To manage and automate our infrastructure, we use:
 
 - **OpenTofu**: An open-source infrastructure as code software tool that provides a consistent CLI workflow to manage hundreds of cloud services.
-- **VictoriaMetrics** VictoriaMetrics is a fast, cost-effective and scalable time series database. 
+- **VictoriaMetrics** VictoriaMetrics is a fast, cost-effective and scalable time series database.
+- **Desync** Desync is a project for a drop-in replacement for the upstream casync in Go. It aims to maintain compatibility with casync's data structures, protocols, and types such as chunk stores (castr), index files (caibx/caidx), and archives (catar).
 
 The specifics of the Docker containers and the Linux operating system are to be determined in the future.
 
