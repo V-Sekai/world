@@ -5,7 +5,7 @@ Some platforms from a presentation, titled "Frequently used Social VR", from the
 1. **VRChat**
 
    - **Description**: VRChat is a virtual reality social platform that allows user interaction through 3D character models. Users can explore and create virtual worlds [Wikipedia: VRChat](https://en.m.wikipedia.org/wiki/VRChat#:~:text=VRChat%20is%20a%20virtual%20reality,Graham%20Gaylor%20and%20Jesse%20Joudrey).
-   - **Features**: The platform supports user-created 3D avatars and worlds, focusing on immersive virtual reality social experiences [VRChat is an online virtual,created 3D avatars and worlds](https://en.wikipedia.org/wiki/VRChat#:~:text=VRChat%20is%20an%20online%20virtual,created%203D%20avatars%20and%20worlds)【17†source】.
+   - **Features**: The platform supports user-created 3D avatars and worlds, focusing on immersive virtual reality social experiences [VRChat is an online virtual,created 3D avatars and worlds](https://en.wikipedia.org/wiki/VRChat#:~:text=VRChat%20is%20an%20online%20virtual,created%203D%20avatars%20and%20worlds).
    - **Accessibility**: It is a free-to-play platform, emphasizing user creation and community interaction in a variety of virtual settings [g2 VRChat](https://www.g2.com/articles/vrchat#:~:text=VRChat%20is%20an%20immersive%20virtual,by%20others%20using%20the%20platform).
 
 2. **Cluster**
