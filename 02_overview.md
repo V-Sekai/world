@@ -31,10 +31,12 @@ flowchart TB
     subgraph "Asset Storage"
         asset_ingest_validate --> local_cloud[Local Cloud]
         asset_ingest_validate --> cloud_s3[S3]
+        asset_ingest_validate --> desync_casync[Casync]
     end
 
     device --> local_cloud
     device --> cloud_s3
+    device --> desync_casync
 ```
 
 > **Note:** Instead of working on a car engine, work on the body. Instead of a bicycle wheel, work on the frame.
