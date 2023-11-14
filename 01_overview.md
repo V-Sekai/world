@@ -22,36 +22,50 @@ Work on the function calls for sanitization and validation service.
 - An Elixir struct representing VRM1.
 - An Elixir struct representing Godot Text Scene.
 - An Elixir struct represents the list of validations for 3D modeling and animation.
-  - Validate Model Name
-  - Validate Model Content
-  - Validate Transform Naming Suffix
-  - Validate Color Sets
-  - Validate Mesh Has Overlapping UVs
-  - Validate Mesh Single UV Set
-  - Validate Mesh Has UVs
-  - Validate Mesh No Co-Planar Faces
-  - Validate Mesh Ngons
-  - Validate Mesh Non-Manifold
-  - Validate Mesh No Negative Scale
-  - Validate Mesh Edge Length Non Zero
-  - Validate Mesh Normals Unlocked
-  - Validate Mesh UV Set Map 1
-  - ~~Validate model's default uv set exists and is named 'UVMap'.~~
-  - Validate model's default uv set exists.
-  - Validate Mesh Vertices Have Edges
-  - Validate No Animation
-  - Ensure no keyframes on nodes in the Instance.
-  - Validate No Namespace
-  - Validate No Null Transforms
-  - Validate No Unknown Nodes
-  - Validate Node No Ghosting
-  - Validate Shape Default Names
-  - Validate Shape Render Stats
-  - Validate Shape Zero
-  - Validate Transform Zero
-  - Validate Unique Names
-  - Validate if Mesh is Triangulated
-  - Validate Alembic Visible Node
+
+#### Mesh Vertex Attributes
+
+1. Validate Mesh Vertices Have Edges
+2. Validate Mesh Has Overlapping UVs
+3. Validate Mesh Single UV Set
+4. Validate Mesh Has UVs
+5. Validate Mesh No Co-Planar Faces
+6. Validate Mesh Ngons
+7. Validate Mesh Non-Manifold
+8. Validate Mesh No Negative Scale
+9. Validate Mesh Edge Length Non Zero
+10. Validate Mesh Normals Unlocked
+11. Validate Mesh UV Set Map 1
+12. Validate if Mesh is Triangulated
+
+#### Material
+
+13. Validate Color Sets
+14. Validate Model's default uv set exists.
+
+#### Images
+
+15. Validate Alembic Visible Node
+
+#### General
+
+16. Validate Model Name
+17. Validate Model Content
+18. Validate Transform Naming Suffix
+19. Validate No Namespace
+20. Validate No Null Transforms
+21. Validate No Unknown Nodes
+22. Validate Node No Ghosting
+23. Validate Shape Default Names
+24. Validate Shape Render Stats
+25. Validate Shape Zero
+26. Validate Transform Zero
+27. Validate Unique Names
+
+#### Animations
+
+28. Validate No Animation
+29. Ensure no keyframes on nodes in the Instance.
 
 ### Output
 
