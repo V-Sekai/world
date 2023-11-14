@@ -59,3 +59,17 @@ To test and experience our virtual worlds, VR hardware is essential:
 - **Controllers**: These devices facilitate user interaction with the virtual environment, providing a more intuitive interface than traditional input devices.
 - **Windows PCVR**: Placeholder for Windows PCVR.
 - **VR GPUs**: Graphics processing units for rendering VR content. They provide the computational power necessary to create immersive, realistic virtual environments.
+
+## Siege for Performance Testing
+
+**Siege** is used for HTTP load testing our VR world architecture. It simulates user-defined number of users to stress test a URL.
+
+Example usage:
+
+```bash
+siege -c5 -t10M http://your-url-here.com
+```
+
+`-c5` implies 5 concurrent users and `-t10M` runs the test for 10 minutes.
+
+Note: Siege tests web servers and APIs, not VR interactions. For VR load testing, use specialized tools. Always inform your hosting provider before running load tests.
