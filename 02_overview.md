@@ -31,7 +31,7 @@ flowchart TB
     end
 
     subgraph "Asset Storage"
-        asset_ingest_validate --> local_cloud[Local Cloud (SeaweedFS)]
+        asset_ingest_validate --> local_cloud[Local Cloud -SeaweedFS]
         asset_ingest_validate --> cloud_s3[Cloud S3]
     end
 ```
