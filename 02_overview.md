@@ -5,40 +5,40 @@ The V-Sekai Other World Architecture project aims to create a virtual world usin
 ```mermaid
 flowchart TB
     subgraph user [Users]
-        desktop[Desktop] -- "2a. Open URL" --> third_party_login_flow
+        desktop[Desktop] -- "Open a login page" --> third_party_login_flow
     end
 
-    subgraph third_party [3rd Party OAuth Provider]
-        third_party_login_flow -- "2b. 3rd Party Login Flow" --> oauth_provider
-        oauth_provider -- "3. Login Flow" --> login_flow_response
-        login_flow_response -- "3a. Successful Login" --> godot_engine
-        login_flow_response -- "3b. Login Failed" --> godot_engine
+    subgraph third_party [Secure Login Service]
+        third_party_login_flow -- "Start secure login process" --> secure_login
+        secure_login -- "Handle login" --> login_flow_response
+        login_flow_response -- "Login successful" --> game_engine_interface
+        login_flow_response -- "Login failed" --> game_engine_interface
     end
 
-    subgraph godot [Godot Engine]
-        godot_engine -- "1. Establish Websocket" --> websocket_service
-        godot_engine -- "6. Asset Response" --> asset_service
+    subgraph game_engine_interface [Game Engine Interface]
+        game_engine_interface -- "Establish real-time communication" --> real_time_comm
+        game_engine_interface -- "Receive game assets" --> asset_service
     end
 
-    subgraph websocket_s [Websocket Service]
-        websocket_service -- "4. Notify Login Success" --> session_created
-        session_created -- "4a. Session Created" --> websocket_service
-        websocket_service -- "5. Asset Interaction" --> asset_service
-        asset_service -- "5c. Asset Status" --> websocket_service
+    subgraph real_time_comm_s [Real-Time Communication Service]
+        real_time_comm -- "Confirm user is logged in" --> session_created
+        session_created -- "Create a user session" --> real_time_comm
+        real_time_comm -- "Facilitate asset interaction" --> asset_service
+        asset_service -- "Check asset status" --> real_time_comm
     end
 
-    subgraph asset [Asset Service]
-        asset_service -- "5f. Asset Request" --> cloud_storage
-        cloud_storage -- "5g. Signed Session" --> asset_service
-        asset_service -- "5d. Asset Data Storage" --> project_database
-        project_database -- "5e. Asset Data Retrieval" --> asset_service
-        asset_service -- "5a. Process new Asset" --> validation_service
-        asset_service -- "5b. Asset Invalid" --> validation_service
-        validation_service -- "5c. Asset Valid for Storage" --> asset_service
+    subgraph asset [Asset Management Service]
+        asset_service -- "Request game assets" --> cloud_storage
+        cloud_storage -- "Validate asset session" --> asset_service
+        asset_service -- "Store asset data" --> project_database
+        project_database -- "Retrieve asset data" --> asset_service
+        asset_service -- "Process new game assets" --> validation_service
+        asset_service -- "Handle invalid assets" --> validation_service
+        validation_service -- "Validate and store valid assets" --> asset_service
     end
 
-    subgraph login [Login Service]
-        session_created -. "Session Management" .-> login_service
+    subgraph login [User Session Service]
+        session_created -. "Manage user sessions" .-> user_session_service
     end
 ```
 
