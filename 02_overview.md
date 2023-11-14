@@ -29,12 +29,12 @@ flowchart TB
     end
 
     subgraph "Asset Storage"
-        asset_ingest_validate --> local_cloud[Local Cloud]
+        asset_ingest_validate --> local_cloud_s3[Local Cloud S3]
         asset_ingest_validate --> cloud_s3[S3]
         asset_ingest_validate --> desync_casync[Casync]
     end
 
-    device --> local_cloud
+    device --> local_cloud_s3
     device --> cloud_s3
     device --> desync_casync
 ```
