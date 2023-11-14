@@ -12,14 +12,10 @@ Work on the function calls for sanitization and validation service.
 
 ### Input
 
-1. Input gltf.
 2. Input godot text scene.
 
 ### Data Structures
 
-- An Elixir struct representing glTF2.
-- An Elixir struct representing VRM0.
-- An Elixir struct representing VRM1.
 - An Elixir struct representing Godot Text Scene.
 - An Elixir struct represents the list of validations for 3D modeling and animation.
 
