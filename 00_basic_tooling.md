@@ -6,7 +6,7 @@ This section outlines the essential tools we use in our VR world architecture.
 
 The creation of virtual worlds necessitates specific software. We utilize:
 
-1. **Godot Engine**: An open-source game engine renowned for its power and versatility, supporting both 2D and 3D games as well as interactive experiences.
+1. **Godot Engine**: An open-source game engine renowned for its power and versatility, supporting both 2D and 3D games as well as interactive experiences. Supports WebRTC and ENet.
 2. **Blender**: A comprehensive, free, and open-source 3D creation suite that caters to all aspects of the 3D pipeline—modeling, rigging, animation, simulation, rendering, compositing, and motion tracking.
 
 ## File Formats
