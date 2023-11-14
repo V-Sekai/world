@@ -60,13 +60,20 @@ Some platforms from a presentation, titled "Frequently used Social VR", from the
    - **Vision**: Roblox aims to empower people to create immersive experiences, reimagining how people collaborate creatively and socially [corp.roblox.com](https://corp.roblox.com/).
    - **Community**: Launched in 2007, Roblox boasts 64 million monthly players and around 178 million accounts, positioning itself as an ‘Imagination Platform’ [explained-what-is-roblox](https://www.webwise.ie/parents/explainers/explained-what-is-roblox/#:~:text=Roblox%20advertises%20itself%20as%20an,million%20accounts%20on%20the%20platform).
 
-9. **Overte**
+9. **Meta Horizon Worlds**
 
-   - **Architecture**: Overte provides a comprehensive VR experience through its interface and domain server, enabling users to explore VR worlds, socialize, and participate in events [docs.overte.org](https://docs.overte.org/en/latest/explore/get-started/architecture.html).
-   - **Open Source Nature**: As an open-source virtual world and social VR software, it supports both VR and desktop experiences, allowing users to create and host their own virtual worlds [overte](https://overte.org/#:~:text=About%20,VR%20events%2C%20and%20much%20more) [docs.overte.org/en/latest](https://docs.overte.org/en/latest/#:~:text=Overte%20is%20open,in%20social).
-   - **Community and Creativity**: It fosters a community-focused environment where users can create, explore, and interact in various virtual worlds, emphasizing immersive and interactive experiences [docs.overte.org](https://docs.overte.org/en/latest/explore.html#:~:text=Explore,interactive%20experience%20with%20realistic).
+   - **Description**: [Meta Horizon](https://en.wikipedia.org/wiki/Horizon_Worlds#:~:text=Meta%20Horizon%20is%20a%20virtual,Platforms%2C%20formerly%20known%20as%20Facebook) is a virtual reality platform enabling users to create, explore, and socialize in various virtual worlds. It offers profile and avatar customization to match user preferences and identities.
+   - **Collaborative Platform**: It's known for its collaborative capabilities in VR, offering virtual realities and multiplayer games. More about this can be found on their [official website](https://horizon.meta.com/#:~:text=Explore%20Meta%20Horizon%20on%20Meta,that%20will%20bring%20your%20wildest).
+   - **Components**: The platform includes Meta Horizon Worlds, Meta Horizon Workrooms, and Meta Horizon Home, each serving different purposes like social VR experiences and virtual workrooms. More about this can be found on their [help page](https://www.meta.com/help/quest/articles/in-vr-experiences/social-features-and-sharing/what-is-horizon/#:~:text=Meta%20Horizon%20includes%20destinations%20like,currently%20available%20in%20select%20countries).
+   - **Meta Accounts**: In 2022, Meta introduced a new system for VR headset login that doesn't require a Facebook account, further integrating users into the Meta Horizon ecosystem. More about this can be found on their [news page](https://about.fb.com/news/2022/07/meta-accounts-and-horizon-profiles-for-vr/#:~:text=July%207%2C%202022%20Takeaways%20In,your%20social%20profile%20in%20VR).
 
-10. **Second Life**
+10. **Overte**
+
+    - **Architecture**: Overte provides a comprehensive VR experience through its interface and domain server, enabling users to explore VR worlds, socialize, and participate in events [docs.overte.org](https://docs.overte.org/en/latest/explore/get-started/architecture.html).
+    - **Open Source Nature**: As an open-source virtual world and social VR software, it supports both VR and desktop experiences, allowing users to create and host their own virtual worlds [overte](https://overte.org/#:~:text=About%20,VR%20events%2C%20and%20much%20more) [docs.overte.org/en/latest](https://docs.overte.org/en/latest/#:~:text=Overte%20is%20open,in%20social).
+    - **Community and Creativity**: It fosters a community-focused environment where users can create, explore, and interact in various virtual worlds, emphasizing immersive and interactive experiences [docs.overte.org](https://docs.overte.org/en/latest/explore.html#:~:text=Explore,interactive%20experience%20with%20realistic).
+
+11. **Second Life**
 
     - **Overview**: Second Life is an online multimedia platform that allows users to create avatars for interacting with others and user-created content within a virtual world [Wikipedia: Second Life](https://en.wikipedia.org/wiki/Second_Life#:~:text=,user%20online%20virtual%20world).
     - **Characteristics**: It is a free 3D virtual world and metaverse where users can create, connect, and communicate using voice and text, hosting a rich array of user-generated content [secondlife.com](https://secondlife.com/#:~:text=Second%20Life%20is%20a%20free,world%20using%20voice%20and%20text).
@@ -74,19 +81,12 @@ Some platforms from a presentation, titled "Frequently used Social VR", from the
     - **Functionality**: Users in Second Life, known as residents, can do more than just communicate; they can interact with various virtual environments and objects [howstuffworks: Second Life](https://computer.howstuffworks.com/internet/social-networking/networks/second-life.htm#:~:text=Second%20Life%20is%20an%20online,than%20communicate%20with%20one%20another).
     - **Applications**: Second Life is used for various purposes, including music clubs, roleplaying, virtual cinemas, and hosting virtual meetings and classes [Second Life: Events](https://secondlife.com/index.php?v=1&lang=en-US#:~:text=Music%20clubs%2C%20roleplaying%20communities%2C%20virtual,for%20events%20and%20remote%20meetings).
 
-11. **IMVU**
+12. **IMVU**
 
     - **Description**: IMVU is a leading friendship discovery and social platform, boasting a wide user base and ranking as a top-grossing app in both iOS/Apple App Store and Google Play Store. It allows millions of users to customize their avatars and explore over 40,000 destinations for social connections [CrunchBase: IMVU](https://www.crunchbase.com/organization/imvu#:~:text=Contact%20Email%20socialmedia%40imvu,40%2C000%2B%20destinations%20to%20connect).
     - **Avatar and Social Features**: Known as the world's largest avatar social platform, it enables users to create stunning collections of customizable avatars and unique 3D chat-based environments for immersive social experiences [crunchbase: IMVU](https://www.crunchbase.com/organization/imvu#:~:text=Contact%20Email%20socialmedia%40imvu,40%2C000%2B%20destinations%20to%20connect).
     - **Metaverse Characteristics**: IMVU is considered a metaverse where users can shop for clothing, furniture, and accessories, engage in user-generated content, and maintain a safe online identity. It combines aspects of virtual reality with an e-commerce engine and 3D characters [IMVU: Lean Startup](https://openstax.org/books/entrepreneurship/pages/10-1-launching-the-imperfect-business-lean-startup#:~:text=After%20his%20first%20startup%20proved,D%20characters).
     - **Digital Economy Integration**: The platform has integrated blockchain technology with the creation of VCOIN, an ERC-20 token, enhancing its digital currency capabilities and peer-to-peer transactions [prnewswire: VCOIN](https://www.prnewswire.com/news-releases/imvu-sets-new-standard-for-digital-currencies-with-vcoin-launch-301207660.html#:~:text=Created%20by%20IMVU%2C%20the%20world%27s,peer).
-
-12. **Meta Horizon Worlds**
-
-    - **Description**: [Meta Horizon](https://en.wikipedia.org/wiki/Horizon_Worlds#:~:text=Meta%20Horizon%20is%20a%20virtual,Platforms%2C%20formerly%20known%20as%20Facebook) is a virtual reality platform enabling users to create, explore, and socialize in various virtual worlds. It offers profile and avatar customization to match user preferences and identities.
-    - **Collaborative Platform**: It's known for its collaborative capabilities in VR, offering virtual realities and multiplayer games. More about this can be found on their [official website](https://horizon.meta.com/#:~:text=Explore%20Meta%20Horizon%20on%20Meta,that%20will%20bring%20your%20wildest).
-    - **Components**: The platform includes Meta Horizon Worlds, Meta Horizon Workrooms, and Meta Horizon Home, each serving different purposes like social VR experiences and virtual workrooms. More about this can be found on their [help page](https://www.meta.com/help/quest/articles/in-vr-experiences/social-features-and-sharing/what-is-horizon/#:~:text=Meta%20Horizon%20includes%20destinations%20like,currently%20available%20in%20select%20countries).
-    - **Meta Accounts**: In 2022, Meta introduced a new system for VR headset login that doesn't require a Facebook account, further integrating users into the Meta Horizon ecosystem. More about this can be found on their [news page](https://about.fb.com/news/2022/07/meta-accounts-and-horizon-profiles-for-vr/#:~:text=July%207%2C%202022%20Takeaways%20In,your%20social%20profile%20in%20VR).
 
 13. **VKet Cloud**
 
