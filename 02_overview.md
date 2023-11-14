@@ -5,10 +5,14 @@ The V-Sekai Other World Architecture project aims to create a virtual world usin
 ```mermaid
 flowchart TB
     subgraph user [Users]
-        desktop[Desktop]
-        desktop -- "2a. Open URL" --> third_party_login_flow
-        third_party_login_flow -- "3a. Successful Login" --> godot_engine
-        third_party_login_flow -- "3b. Login Failed" --> godot_engine
+        desktop[Desktop] -- "2a. Open URL" --> third_party_login_flow
+    end
+
+    subgraph third_party [3rd Party OAuth Provider]
+        third_party_login_flow -- "2b. 3rd Party Login Flow" --> oauth_provider
+        oauth_provider -- "3. Login Flow" --> login_flow_response
+        login_flow_response -- "3a. Successful Login" --> godot_engine
+        login_flow_response -- "3b. Login Failed" --> godot_engine
     end
 
     subgraph godot [Godot Engine]
@@ -16,23 +20,16 @@ flowchart TB
         godot_engine -- "6. Asset Response" --> asset_service
     end
 
-    subgraph third_party [3rd Party OAuth Provider]
-        third_party_login_flow -- "2b. 3rd Party Login Flow" --> oauth_provider
-        oauth_provider -- "3. Login Flow" --> third_party_login_flow
-    end
-
-    subgraph login [Login Service]
+    subgraph websocket_s [Websocket Service]
         websocket_service -- "4. Notify Login Success" --> session_created
         session_created -- "4a. Session Created" --> websocket_service
-    end
-
-    subgraph websocket_s [Websocket Service]
         websocket_service -- "5. Asset Interaction" --> asset_service
         asset_service -- "5c. Asset Status" --> websocket_service
     end
 
     subgraph asset [Asset Service]
         asset_service -- "5f. Asset Request" --> cloud_storage
+        cloud_storage -- "5g. Signed Session" --> asset_service
         asset_service -- "5d. Asset Data Storage" --> project_database
         project_database -- "5e. Asset Data Retrieval" --> asset_service
         asset_service -- "5a. Process new Asset" --> validation_service
@@ -40,16 +37,8 @@ flowchart TB
         validation_service -- "5c. Asset Valid for Storage" --> asset_service
     end
 
-    subgraph cloud [Cloud Storage]
-        cloud_storage -- "5g. Signed Session" --> asset_service
-    end
-
-    subgraph project_db [Project Database]
-        project_database -.-> asset_service
-    end
-
-    subgraph validation [Asset Validation Sanitization Service]
-        validation_service -.-> asset_service
+    subgraph login [Login Service]
+        session_created -. "Session Management" .-> login_service
     end
 ```
 
