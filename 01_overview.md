@@ -39,24 +39,20 @@ Work on the function calls for sanitization and validation service.
 13. **Validate Color Sets**: Check that the color sets used in the material are valid.
 14. **Validate Model's default uv set exists**: Confirm that the model has a default UV set.
 
-#### Images
-
-15. **Validate Alembic Visible Node**: Verify that the Alembic node is visible in the rendered image.
-
 #### General
 
-16. **Validate Model Name**: Ensure that the model has a valid name.
-17. **Validate Model Content**: Check that the content of the model is valid.
-18. **Validate Transform Naming Suffix**: Confirm that the naming suffix for transforms is correct.
-19. **Validate No Namespace**: Ensure that there are no namespaces in the model.
-20. **Validate No Null Transforms**: Check that there are no null or empty transforms in the model.
-21. **Validate No Unknown Nodes**: Confirm that there are no unknown nodes in the model.
-22. **Validate Node No Ghosting**: Verify that there is no ghosting effect on any node.
-23. **Validate Shape Default Names**: Ensure that the default names for shapes are valid.
-24. **Validate Shape Render Stats**: Check the render statistics for each shape.
-25. **Validate Shape Zero**: Confirm that the zero position for each shape is correctly set.
-26. **Validate Transform Zero**: Ensure that the zero position for each transform is correctly set.
-27. **Validate Unique Names**: Verify that all names in the model are unique.
+15. **Validate Model Name**: Ensure that the model has a valid name.
+16. **Validate Model Content**: Check that the content of the model is valid.
+17. **Validate Transform Naming Suffix**: Confirm that the naming suffix for transforms is correct.
+18. **Validate No Namespace**: Ensure that there are no namespaces in the model.
+19. **Validate No Null Transforms**: Check that there are no null or empty transforms in the model.
+20. **Validate No Unknown Nodes**: Confirm that there are no unknown nodes in the model.
+21. **Validate Node No Ghosting**: Verify that there is no ghosting effect on any node.
+22. **Validate Shape Default Names**: Ensure that the default names for shapes are valid.
+23. **Validate Shape Render Stats**: Check the render statistics for each shape.
+24. **Validate Shape Zero**: Confirm that the zero position for each shape is correctly set.
+25. **Validate Transform Zero**: Ensure that the zero position for each transform is correctly set.
+26. **Validate Unique Names**: Verify that all names in the model are unique.
 
 #### Animations
 
