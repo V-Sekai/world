@@ -17,9 +17,38 @@ Work on the function calls for sanitization and validation service.
 
 ### Data Structures
 
-- An elixir struct representing GLTFDocument.
-- An elixir struct representing Godot Text Scene.
-- An elixir struct represents the list of validations.
+- An Elixir struct representing GLTFDocument.
+- An Elixir struct representing Godot Text Scene.
+- An Elixir struct represents the list of validations.
+  - Validate Model Name
+  - Validate Model Content
+  - Validate Transform Naming Suffix
+  - Validate Color Sets
+  - Validate Mesh Has Overlapping UVs
+  - Validate Mesh Single UV Set
+  - Validate Mesh Has UVs
+  - Validate Mesh No Co-Planar Faces
+  - Validate Mesh Ngons
+  - Validate Mesh Non-Manifold
+  - Validate Mesh No Negative Scale
+  - Validate Mesh Edge Length Non Zero
+  - Validate Mesh Normals Unlocked
+  - Validate Mesh UV Set Map 1
+  - Validate model's default uv set exists and is named 'UVMap'.
+  - Validate Mesh Vertices Have Edges
+  - Validate No Animation
+  - Ensure no keyframes on nodes in the Instance.
+  - Validate No Namespace
+  - Validate No Null Transforms
+  - Validate No Unknown Nodes
+  - Validate Node No Ghosting
+  - Validate Shape Default Names
+  - Validate Shape Render Stats
+  - Validate Shape Zero
+  - Validate Transform Zero
+  - Validate Unique Names
+  - Validate if Mesh is Triangulated
+  - Validate Alembic Visible Node
 
 ### Output
 
