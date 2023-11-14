@@ -36,11 +36,11 @@
 
 6. **Second Life**
 
-   - **Overview**: Second Life is an online multimedia platform that allows users to create avatars for interacting with others and user-created content within a virtual world https://en.wikipedia.org/wiki/Second_Life#:~:text=,user%20online%20virtual%20world.
-   - **Characteristics**: It is a free 3D virtual world and metaverse where users can create, connect, and communicate using voice and text, hosting a rich array of user-generated content https://secondlife.com/#:~:text=Second%20Life%20is%20a%20free,world%20using%20voice%20and%20text.
-   - **Content and Economy**: The platform supports real-time interaction and features a thriving in-world economy, launched in 2003 by Linden Lab https://www.makeuseof.com/what-is-second-life-history-metaverse/#:~:text=Second%20Life%20is%20a%20vast,at%20least%20the%20late%201990s.
-   - **Functionality**: Users in Second Life, known as residents, can do more than just communicate; they can interact with various virtual environments and objectshttps://computer.howstuffworks.com/internet/social-networking/networks/second-life.htm#:~:text=Second%20Life%20is%20an%20online,than%20communicate%20with%20one%20another .
-   - **Applications**: Second Life is used for various purposes, including music clubs, roleplaying, virtual cinemas, and hosting virtual meetings and classes https://secondlife.com/index.php?v=1&lang=en-US#:~:text=Music%20clubs%2C%20roleplaying%20communities%2C%20virtual,for%20events%20and%20remote%20meetings.
+   - **Overview**: Second Life is an online multimedia platform that allows users to create avatars for interacting with others and user-created content within a virtual world [Wikipedia: Second Life](https://en.wikipedia.org/wiki/Second_Life#:~:text=,user%20online%20virtual%20world).
+   - **Characteristics**: It is a free 3D virtual world and metaverse where users can create, connect, and communicate using voice and text, hosting a rich array of user-generated content [secondlife.com](https://secondlife.com/#:~:text=Second%20Life%20is%20a%20free,world%20using%20voice%20and%20text).
+   - **Content and Economy**: The platform supports real-time interaction and features a thriving in-world economy, launched in 2003 by Linden Lab [makeuseof: Second Life](https://www.makeuseof.com/what-is-second-life-history-metaverse/#:~:text=Second%20Life%20is%20a%20vast,at%20least%20the%20late%201990s).
+   - **Functionality**: Users in Second Life, known as residents, can do more than just communicate; they can interact with various virtual environments and objects [howstuffworks: Second Life](https://computer.howstuffworks.com/internet/social-networking/networks/second-life.htm#:~:text=Second%20Life%20is%20an%20online,than%20communicate%20with%20one%20another).
+   - **Applications**: Second Life is used for various purposes, including music clubs, roleplaying, virtual cinemas, and hosting virtual meetings and classes [Second Life: Events](https://secondlife.com/index.php?v=1&lang=en-US#:~:text=Music%20clubs%2C%20roleplaying%20communities%2C%20virtual,for%20events%20and%20remote%20meetings).
 
 7. **IMVU**
 
@@ -49,4 +49,39 @@
    - **Metaverse Characteristics**: IMVU is considered a metaverse where users can shop for clothing, furniture, and accessories, engage in user-generated content, and maintain a safe online identity. It combines aspects of virtual reality with an e-commerce engine and 3D characters [IMVU: Lean Startup](https://openstax.org/books/entrepreneurship/pages/10-1-launching-the-imperfect-business-lean-startup#:~:text=After%20his%20first%20startup%20proved,D%20characters).
    - **Digital Economy Integration**: The platform has integrated blockchain technology with the creation of VCOIN, an ERC-20 token, enhancing its digital currency capabilities and peer-to-peer transactions [prnewswire: VCOIN](https://www.prnewswire.com/news-releases/imvu-sets-new-standard-for-digital-currencies-with-vcoin-launch-301207660.html#:~:text=Created%20by%20IMVU%2C%20the%20world%27s,peer).
 
-This list now comprehensively covers a range of platforms that offer varied experiences in virtual reality, social networking, game creation, and digital economies, each serving a unique niche in the digital and virtual world space.
+8. **Cluster**
+
+   - **Description**: [Cluster](https://cluster.mu/en/e#:~:text=,participate%20in%20at%20any%20time) is a metaverse platform accessible from various devices including smartphones, PCs, and VR devices. It allows users to gather and engage in virtual spaces.
+   - **World Creation**: Users can create their own virtual worlds, with guides available for beginners to assist in world creation using tools like Unity and the [Cluster Creator Kit](https://help.cluster.mu/hc/en-us/articles/360042705211-Information-for-Beginners#:~:text=Creating%20Worlds%20World%20Creation%20Information,and%20the%20Cluster%20Creator%20Kit).
+   - **Goal and Research**: Cluster's main goal is to accelerate human creativity, backed by research in fields like computer vision, computer graphics, human-computer interaction, and virtual reality. More about this can be found on their [research lab page](https://lab.cluster.mu/en/#:~:text=The%20Metaverse%20Lab%20leads%20Cluster%27s,aim%20is%20to%20produce).
+
+9. **Rec Room**
+
+   - **Overview**: [Rec Room](<https://en.wikipedia.org/wiki/Rec_Room_(video_game)#:~:text=Rec%20Room%20is%20a%20virtual,Gameplay>) is a virtual reality massively multiplayer online game with an integrated game creation system, launched in 2016. It's available on a wide range of platforms including Microsoft Windows, Xbox, PlayStation, iOS, Android, and various VR headsets.
+   - **Features**: The platform is a hub for building and playing games, allowing users to explore millions of player-created rooms, chat, and hang out with friends worldwide. More about this can be found on their [Steam page](https://store.steampowered.com/app/471710/rec_room) and [official website](https://recroom.com/#:~:text=00%3A30%20,from%20phones%20to%20VR%20headsets).
+   - **Community and Accessibility**: Rec Room fosters a global community for playing and creating games, offering cross-platform playability on everything from phones to VR headsets, and it's free to use. More about this can be found on their [Pitchbook profile](https://pitchbook.com/profiles/company/156041-29#:~:text=Rec%20Room%20Rec%20Room%20Overview,to%20play%20and%20create%20games).
+
+10. **Meta Horizon**
+
+    - **Description**: [Meta Horizon](https://en.wikipedia.org/wiki/Horizon_Worlds#:~:text=Meta%20Horizon%20is%20a%20virtual,Platforms%2C%20formerly%20known%20as%20Facebook) is a virtual reality platform enabling users to create, explore, and socialize in various virtual worlds. It offers profile and avatar customization to match user preferences and identities.
+    - **Collaborative Platform**: It's known for its collaborative capabilities in VR, offering virtual realities and multiplayer games. More about this can be found on their [official website](https://horizon.meta.com/#:~:text=Explore%20Meta%20Horizon%20on%20Meta,that%20will%20bring%20your%20wildest).
+    - **Components**: The platform includes Meta Horizon Worlds, Meta Horizon Workrooms, and Meta Horizon Home, each serving different purposes like social VR experiences and virtual workrooms. More about this can be found on their [help page](https://www.meta.com/help/quest/articles/in-vr-experiences/social-features-and-sharing/what-is-horizon/#:~:text=Meta%20Horizon%20includes%20destinations%20like,currently%20available%20in%20select%20countries).
+    - **Meta Accounts**: In 2022, Meta introduced a new system for VR headset login that doesn't require a Facebook account, further integrating users into the Meta Horizon ecosystem. More about this can be found on their [news page](https://about.fb.com/news/2022/07/meta-accounts-and-horizon-profiles-for-vr/#:~:text=July%207%2C%202022%20Takeaways%20In,your%20social%20profile%20in%20VR).
+
+11. **ChilloutVR**
+
+    - **Description**: ChilloutVR is a social sandbox game that enables players and content creators to create, share, and explore content in a massive multiplayer metaverse. It supports both VR and desktop modes, making it accessible with or without a VR headset【94†source】.
+    - **Gameplay and Community**: The game focuses on social interaction, allowing players to meet new people and explore virtual worlds together【95†source】.
+    - **Development**: Developed and published by Alpha Bend, ChilloutVR was released on Steam for Microsoft Windows on February 9, 2021【97†source】.
+    - **URLs**:
+    - Steam Store: [ChilloutVR on Steam](https://store.steampowered.com/app/661130/ChilloutVR/)
+    - Ryan Schultz Blog: [ChilloutVR: A Brief Introduction](https://ryanschultz.com/2021/01/28/chilloutvr-a-brief-introduction/)
+    - VR Fandom: [ChilloutVR - Virtual Reality Wiki](https://vr.fandom.com/wiki/ChilloutVR)
+
+12. **VirtualCast**
+
+    - **Description**: VirtualCast is a metaverse communication service that allows sharing of extraordinary experiences with friends, featuring unique events, VR games, and personal spaces filled with memories【101†source】.
+    - **Functionality**: It's a VR real-time service tool that enables users to become a virtual character and live broadcast. Users can either use pre-installed model characters or upload their own, requiring only a VR headset and a compatible PC【102†source】.
+    - **URLs**:
+    - Steam Store: [VirtualCast on Steam](https://store.steampowered.com/app/755770/VirtualCast/)
+    - Live3D: [Virtual Cast best alternatives](https://live3d.io/virtual-cast-best-alternatives/)
