@@ -70,9 +70,9 @@
 
 11. **ChilloutVR**
 
-    - **Description**: ChilloutVR is a social sandbox game that enables players and content creators to create, share, and explore content in a massive multiplayer metaverse. It supports both VR and desktop modes, making it accessible with or without a VR headset【94†source】.
-    - **Gameplay and Community**: The game focuses on social interaction, allowing players to meet new people and explore virtual worlds together【95†source】.
-    - **Development**: Developed and published by Alpha Bend, ChilloutVR was released on Steam for Microsoft Windows on February 9, 2021【97†source】.
+    - **Description**: ChilloutVR is a social sandbox game that enables players and content creators to create, share, and explore content in a massive multiplayer metaverse. It supports both VR and desktop modes, making it accessible with or without a VR headset.
+    - **Gameplay and Community**: The game focuses on social interaction, allowing players to meet new people and explore virtual worlds together.
+    - **Development**: Developed and published by Alpha Bend, ChilloutVR was released on Steam for Microsoft Windows on February 9, 2021.
     - **URLs**:
     - Steam Store: [ChilloutVR on Steam](https://store.steampowered.com/app/661130/ChilloutVR/)
     - Ryan Schultz Blog: [ChilloutVR: A Brief Introduction](https://ryanschultz.com/2021/01/28/chilloutvr-a-brief-introduction/)
@@ -80,8 +80,17 @@
 
 12. **VirtualCast**
 
-    - **Description**: VirtualCast is a metaverse communication service that allows sharing of extraordinary experiences with friends, featuring unique events, VR games, and personal spaces filled with memories【101†source】.
-    - **Functionality**: It's a VR real-time service tool that enables users to become a virtual character and live broadcast. Users can either use pre-installed model characters or upload their own, requiring only a VR headset and a compatible PC【102†source】.
+    - **Description**: VirtualCast is a metaverse communication service that allows sharing of extraordinary experiences with friends, featuring unique events, VR games, and personal spaces filled with memories.
+    - **Functionality**: It's a VR real-time service tool that enables users to become a virtual character and live broadcast. Users can either use pre-installed model characters or upload their own, requiring only a VR headset and a compatible PC.
     - **URLs**:
     - Steam Store: [VirtualCast on Steam](https://store.steampowered.com/app/755770/VirtualCast/)
     - Live3D: [Virtual Cast best alternatives](https://live3d.io/virtual-cast-best-alternatives/)
+
+13. **VKet Cloud**
+
+   - **Description**: VKet Cloud is a development engine designed for deploying metaverse services directly in the browser, catering to both creators and business users.
+   - **Accessibility and Features**: The platform emphasizes ease of access as it operates in the browser, eliminating the need for high-performance PCs, IT knowledge, or VR goggles. It allows for the creation of personal metaverses and supports features like voice and text chat.
+   - **URLs**:
+     - VKet Cloud: [Vket Cloud｜Develop your own virtual world service](https://cloud.vket.com/)
+     - VKet Magazine: [Vket Cloud Commentary Article](https://magazine.vket.com/vketcloud-tour/)
+     - The Metaculture: [HIKKY Expands With Vket Cloud](https://www.themetaculture.co/articles/hikky-expands-with-vket-cloud-an-engine-that-works-on-your-phone-and-its-free)
