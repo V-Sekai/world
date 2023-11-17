@@ -1,65 +1,61 @@
-# v-sekai-other-world-architecture: Basic Tooling: Bill of Materials
+Sure, here's a simplified version of your document:
+
+# Basic Tooling: Bill of Materials
 
 This section outlines the essential tools we use in our VR world architecture.
 
 ## VR Software
 
-The creation of virtual worlds necessitates specific software. We utilize:
+We utilize:
 
-1. **Godot Engine**: An open-source game engine renowned for its power and versatility, supporting both 2D and 3D games as well as interactive experiences. Supports WebRTC and ENet.
-2. **Blender**: A comprehensive, free, and open-source 3D creation suite that caters to all aspects of the 3D pipeline—modeling, rigging, animation, simulation, rendering, compositing, and motion tracking.
+1. **Godot Engine**: An open-source game engine supporting both 2D and 3D games as well as interactive experiences.
+2. **Blender**: A comprehensive, free, and open-source 3D creation suite.
 
 ## File Formats
 
 We adhere to the following standards for 3D models:
 
-- **glTF (GL Transmission Format)**: This is a standard file format for three-dimensional scenes and models. It's designed for efficient transmission and loading of 3D content.
-- **VRM**: This is a 3D avatar file format for VR applications. It's based on glTF 2.0 and allows for the use of humanoid animations and interactions in VR.
-- **Godot Scene (.tscn)**: This is Godot's native scene format. It's text-based, making it friendly for version control systems.
-
-In addition to these, we'll also introduce video, audio and music files at a later point.
+- **glTF (GL Transmission Format)**: A standard file format for three-dimensional scenes and models.
+- **VRM**: A 3D avatar file format for VR applications based on glTF 2.0.
+- **Godot Scene (.tscn)**: Godot's native scene format.
 
 ## Software Languages
 
 Software languages are indispensable for infusing interactivity into our VR worlds:
 
-- **C++**: This versatile language empowers developers to script intricate behavior.
-- **GDScript**: As the native scripting language for Godot Engine, GDScript is game-specific and boasts a simple syntax akin to Python.
-- **Elixir**: A dynamic, functional language engineered for crafting scalable and maintainable applications.
+- **C++**
+- **GDScript**: The native scripting language for Godot Engine.
+- **Elixir**
 
 ## Infrastructure Automation Tools
 
 To manage and automate our infrastructure, we use:
 
-- **OpenTofu**: An open-source infrastructure as code software tool that provides a consistent CLI workflow to manage hundreds of cloud services.
-- **VictoriaMetrics** VictoriaMetrics is a fast, cost-effective and scalable time series database.
-- **Desync** Desync is a project for a drop-in replacement for the upstream casync in Go. It aims to maintain compatibility with casync's data structures, protocols, and types such as chunk stores (castr), index files (caibx/caidx), and archives (catar).
+- **OpenTofu**: An open-source infrastructure as code software tool.
+- **VictoriaMetrics** A fast, cost-effective and scalable time series database.
 
-The specifics of the Docker containers and the Linux operating system are to be determined in the future.
-
-## Local and Cloud Storage with SeaweedFS and S3
+## Local and Cloud Storage
 
 For local storage, we use:
 
-- **SeaweedFS**: A simple and highly scalable distributed file system. It provides an S3-compatible API and can handle billions of files with ease. This makes it a perfect choice for environments where scalability and compatibility are key requirements.
+- **SeaweedFS**: A simple and highly scalable distributed file system.
 
 For cloud storage, we use:
 
-- **Cloud's S3 Compatible Storage**: Many cloud service providers offer storage solutions that are compatible with the S3 API. These services provide the scalability and reliability of cloud storage while maintaining compatibility with the widely used S3 API.
+- **Cloud's S3 Compatible Storage**: Many cloud service providers offer storage solutions that are compatible with the S3 API.
 
 ## Database
 
-Our choice for database management is **CockroachDB**, an open-source, distributed SQL database designed for building, scaling, and managing modern, data-intensive applications.
+Our choice for database management is **CockroachDB**, an open-source, distributed SQL database.
 
 ## Hardware
 
 To test and experience our virtual worlds, VR hardware is essential:
 
-- **VR Headsets**: Devices such as the Meta Quest 2, Meta Quest 3, Beyond HMD, or Valve Index offer the means to view and interact with our virtual worlds.
-- **Controllers**: These devices facilitate user interaction with the virtual environment, providing a more intuitive interface than traditional input devices.
-- **Windows PCVR**: Placeholder for Windows PCVR.
-- **VR GPUs**: Graphics processing units for rendering VR content. They provide the computational power necessary to create immersive, realistic virtual environments.
+- **VR Headsets**: Devices such as the Meta Quest 2, Meta Quest 3, Beyond HMD, or Valve Index.
+- **Controllers**: These devices facilitate user interaction with the virtual environment.
+- **VR GPUs**: Graphics processing units for rendering VR content.
 
 ## Performance Testing
 
-Load test our VR world architecture. It simulates user-defined number of users to stress test a URL.
+Load test our VR world architecture. It simulates a user-defined number of users to stress test a URL.
