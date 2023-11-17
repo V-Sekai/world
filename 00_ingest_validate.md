@@ -2,7 +2,7 @@
 
 ### Input
 
-1. Input godot text scene or godot binary scene.
+1. Godot text scene or godot binary scene.
 
 ### Data Structures
 
@@ -34,6 +34,6 @@
 
 ### Output
 
-1. Output Godot Scene
+1. Godot Scene
 
-Before the game client/server architecture is sound, we need to be able to push an asset to a service with sanitization and validation. This service will separate the Node3D, colliders, and skeletons. Then, the game server pulls those elements in.
+The goal of this prototype is to push an asset to a service with sanitization and validation. This service will separate the Node3D, colliders, and skeletons. Then, the game server pulls those elements in.
