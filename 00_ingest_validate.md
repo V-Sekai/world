@@ -1,42 +1,5 @@
 ## Prototype 0: Push an asset to a service
 
-```mermaid
-flowchart TB
-    subgraph "Game Client"
-        device[VR Device] --> connection_portal[Godot]
-    end
-
-    subgraph "Connection Portal"
-        connection_portal --> gateway_team[Gateway]
-        gateway_team --> virtual_realm[Realm Core]
-    end
-
-    subgraph "Virtual Realm Core"
-        virtual_realm --> interaction_center[Interaction]
-    end
-
-    subgraph "Interaction Center"
-        interaction_center --> realm_champions[Champions]
-    end
-
-    subgraph "Backend Infrastructure"
-        realm_champions --> central_archive[CockroachDB]
-        realm_champions --> asset_ingest_validate[Asset Ingest]
-        central_archive --> realm_champions
-        asset_ingest_validate --> realm_champions
-    end
-
-    subgraph "Asset Storage"
-        asset_ingest_validate --> local_cloud_s3[Local Cloud S3]
-        asset_ingest_validate --> cloud_s3[S3]
-        asset_ingest_validate --> desync_casync[Casync]
-    end
-
-    device --> local_cloud_s3
-    device --> cloud_s3
-    device --> desync_casync
-```
-
 ### Input
 
 1. Input godot text scene or godot binary scene.
