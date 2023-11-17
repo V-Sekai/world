@@ -1,6 +1,16 @@
 # Prototype 1: Element Instantiation and Uploading
 
-In this prototype, we will instantiate elements into our virtual world and pull them for user interaction. These elements include:
+This prototype involves two main steps:
 
-1. **Colliders**: Invisible objects that simulate solid matter.
-2. **Per Bone Capsules**: Simplified user avatars used for collision detection.
+## Instantiating Elements into the Virtual World
+
+The first part of this prototype is focused on instantiating elements into our virtual world. These elements will be available for user interaction.
+
+### Elements include:
+
+1. **Colliders**: These are invisible objects that simulate solid matter.
+2. **Per Bone Capsules**: These are simplified user avatars used for collision detection.
+
+## Pulling Elements for User Interaction
+
+After instantiation, these elements will be pulled for user interaction. This allows users to interact with the colliders and per bone capsules within the virtual environment.
