@@ -21,15 +21,11 @@ struct DataPacket {
     int16_t y_offset;      // [Y bit width] (signed)
     int16_t z_offset;      // [Z bit width] (signed)
 };
-
-// A full RigidBody structure on the server consists of position, orientation, linear_velocity and angular_velocity. 
-// Rotation is stored as x/y is an octahedral normal storing axis, while z is the rotation. Converting from this to quaternion is extremely efficient.
-
-struct Entity {
-    TimeOffsetPacket time_offset_packet;
-    Vector<DataPacket> data_packets;
-};
 ```
+
+1. `TimeOffsetPacket``
+1. A full RigidBody structure on the server consists of position, orientation, linear_velocity and angular_velocity. 
+1. Rotation is stored as x/y is an octahedral normal storing axis, while z is the rotation. Converting from this to quaternion is extremely efficient.
 
 ## Scenario
 
