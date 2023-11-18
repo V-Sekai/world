@@ -24,22 +24,10 @@ struct DataPacket {
 
 A full RigidBody structure on the server consists of position, orientation, linear_velocity and angular_velocity. Rotation is stored as x/y is an octahedral normal storing axis, while z is the rotation. Converting from this to quaternion is extremely efficient.
 
-struct RigidBody {
-    TimeOffsetPacket time_offset_packet;
-    Vector<DataPacket> packets;
-};
-
-struct Bone {
-    TimeOffsetPacket time_offset_packet;
-    Vector<DataPacket> packets;
-};
-
 struct Entity {
-    RigidBody entity_packet;
-    Vector<BlendShape> bone_packets;
-    Vector<Bone> bone_packets;
+    TimeOffsetPacket time_offset_packet;
+    Vector<DataPacket> data_packets;
 }
-
 ```
 
 The size of each `TimeOffsetPacket` is `8 bytes` and the size of each `DataPacket` is `12 bytes`. Therefore, the size of each `Entity` would be `(1 * 8) + (4 * 12) = 56 bytes`.
