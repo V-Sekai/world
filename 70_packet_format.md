@@ -1,5 +1,7 @@
 # Snapshot Size Calculation with Octahedral Compression
 
+This design is using a bit packed variable bit rate which means we can omit keyframes.
+
 Given the `Entity` struct:
 
 ```cpp
