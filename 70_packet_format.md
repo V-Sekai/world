@@ -65,13 +65,6 @@ int total_bones = data_packet_count / packets_per_bone; // This will be 54
 1. Lets assume all bones are in constant motion at all time.
 1. We can pretend a entity is a skeleton without bones and that will work out since a skeleton is a Node3D.
 
-## Scenario
-
-Let's define the following constants:
-
-- **Total Players (TOTAL_PLAYERS)**: 100 players.
-- **Total Data Packets per Player (TOTAL_DATA_PACKETS)**: 54 data packets.
-
 ## Snapshot Size
 
 The total snapshot size would be the sum of the sizes of all the `Entity` structs for all players and their data packets.
