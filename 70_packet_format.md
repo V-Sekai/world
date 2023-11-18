@@ -79,7 +79,7 @@ The limitation boundaries based on distance from the player.
 
 ## Targets
 
-For AAA game developement, target $2.50 to $3 USD per user per server per month.
+For AAA game development, target $2.50 to $3 USD per user per server per month.
 
 ## References
 
