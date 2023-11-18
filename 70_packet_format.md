@@ -66,6 +66,7 @@ Remember, this is just an approximation. The actual number may vary depending on
 1. Rotation is stored as x/y is an octahedral normal storing axis, while z is the rotation. Converting from this to quaternion is extremely efficient.
 1. A bone is similar to the rigid body.
 1. We omit frames for the worst representation to represent a user at distances.
+1. Lets assume all bones are in constant motion at all time.
 
 ## Scenario
 
