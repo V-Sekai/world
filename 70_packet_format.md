@@ -28,14 +28,17 @@ struct DataPacket {
 
 // FIXME: Make this better. fire 2023-11-17
 
-struct Entity {
-    TimeOffsetPacket time_offset_packet;
+struct RigidBody {
     DataPacket position_packet;
     // Rotation is stored as follows: x/y is an octahedral normal storing axis, while z is the rotation. Converting from this to quaternion is extremely efficient.
     DataPacket orientation_packet; 
     DataPacket linear_velocity_packet;
     DataPacket angular_velocity_packet;
-    Vector<DataPacket> packets; 
+}
+
+struct Entity {
+    TimeOffsetPacket time_offset_packet;
+    Vector<RigidBody> packets;
     // Must be able to contain 54 bones.
     // Must be able to contain 52 blend shapes.
     // Variable number of other DataPackets.
