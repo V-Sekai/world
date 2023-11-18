@@ -26,19 +26,11 @@ struct DataPacket {
     int16_t z_offset;      // [Z bit width] (signed)
 };
 
-// FIXME: Make this better. fire 2023-11-17
-
-struct RigidBody {
-    DataPacket position_packet;
-    // Rotation is stored as follows: x/y is an octahedral normal storing axis, while z is the rotation. Converting from this to quaternion is extremely efficient.
-    DataPacket orientation_packet; 
-    DataPacket linear_velocity_packet;
-    DataPacket angular_velocity_packet;
-}
+A full RigidBody structure on the server consists of position, orientation, linear_velocity and angular_velocity. Rotation is stored as x/y is an octahedral normal storing axis, while z is the rotation. Converting from this to quaternion is extremely efficient.
 
 struct Entity {
     TimeOffsetPacket time_offset_packet;
-    Vector<RigidBody> packets;
+    Vector<DataPacket> packets;
     // Must be able to contain 54 bones.
     // Must be able to contain 52 blend shapes.
     // Variable number of other DataPackets.
@@ -50,7 +42,7 @@ The size of each `TimeOffsetPacket` is `8 bytes` and the size of each `DataPacke
 ## Scenario
 
 - **Total Players (n)**: 64 players.
-- **Total Bones per Player (b)**: 256 bones.
+- **Total Bones per Player (b)**: 54 bones.
 - **Grid Cells (c)**: 100 cells.
 - **Average Players per Cell**: Approximately 0.64 players.
 - **Adjacent Cells (m)**: 9 cells (including own cell).
