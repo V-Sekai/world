@@ -65,17 +65,6 @@ int total_bones = data_packet_count / packets_per_bone; // This will be 54
 1. Lets assume all bones are in constant motion at all time.
 1. We can pretend a entity is a skeleton without bones and that will work out since a skeleton is a Node3D.
 
-## Snapshot Size
-
-The total snapshot size would be the sum of the sizes of all the `Entity` structs for all players and their data packets.
-
-- Player's `Entity`: `TOTAL_PLAYERS * DATAPACKET_BYTES`.
-- Player's Data Packets: `TOTAL_PLAYERS * TOTAL_DATA_PACKETS * DATAPACKET_BYTES`.
-
-This calculation assumes that there are no other data included in the snapshot and that the `Entity` struct does not have any padding or alignment issues. In a real-world scenario, the actual snapshot size might be larger due to additional game state information, network overhead, etc.
-
-By using octahedral compression for orientation, we can significantly reduce the snapshot size. However, the exact amount of savings depends on the specific details of the game state and the effectiveness of the compression algorithm.
-
 ## Unknowns
 
 Define some character limitations, for the skeleton.
