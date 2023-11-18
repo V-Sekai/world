@@ -24,13 +24,14 @@ struct DataPacket {
     int16_t z_offset;      // [Z bit width] (signed)
 };
 
-struct RigidBody {
+struct Entity {
     TimeOffsetPacket time_offset_packet;
-    DataPacket position_packet;
     // Rotation is stored as follows: x/y is an octahedral normal storing axis, while z is the rotation. Converting from this to quaternion is extremely efficient.
-    DataPacket orientation_packet; 
-    DataPacket linear_velocity_packet;
-    DataPacket angular_velocity_packet;
+    Vector<DataPacket> data_packets;
+    // Position;
+    // Orientation is stored as follows: x/y is an octahedral normal storing axis, while z is the rotation. Converting from this to quaternion is extremely efficient.
+    // linear_velocity
+    // angular_velocity
 };
 ```
 
