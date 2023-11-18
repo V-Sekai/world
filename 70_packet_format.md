@@ -81,6 +81,8 @@ The limitation boundaries based on distance from the player.
 
 For AAA game development, target $2.50 to $3 USD per user per server per month.
 
+00knight at Winter Pixel Games tries to keep each players state update under 1.2 kilobytes. So 1.2 kilobytes x 30hz x number of players + whatever meta data is transferred at a lesser rate.
+
 ## References
 
 1. [Serialization Strategies](https://gafferongames.com/post/serialization_strategies/)
