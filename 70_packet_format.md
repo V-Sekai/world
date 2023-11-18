@@ -57,10 +57,6 @@ data_packet_count = data_packet_count - packets_per_entity; // This will be 109
 int total_bones = data_packet_count / packets_per_bone; // This will be 54
 ```
 
-So, with 1.2 KB of space, you could store 1 `TimeOffsetPacket` and approximately 84 `DataPacket` structures. This calculation assumes that all the `DataPacket` structures are fully utilized. If the bit widths for the offsets are less than the maximum, you may be able to fit more `DataPacket` structures.
-
-Remember, this is just an approximation. The actual number may vary depending on the specific values of the bit widths and offsets.
-
 1. `TimeOffsetPacket`
 1. A full RigidBody structure on the server consists of position, orientation, linear_velocity and angular_velocity.
 1. Rotation is stored as x/y is an octahedral normal storing axis, while z is the rotation. Converting from this to quaternion is extremely efficient.
