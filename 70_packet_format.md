@@ -63,6 +63,20 @@ This calculation assumes that there are no other data included in the snapshot a
 
 By using octahedral compression for orientation, we can significantly reduce the snapshot size. However, the exact amount of savings depends on the specific details of the game state and the effectiveness of the compression algorithm.
 
+## Unknowns
+
+Define some character limitations, for the skeleton.
+
+We need to define that before we start coding on it, else your going to be chasing a very long ouroboros and it will come back to bite you.
+
+Distance limitations, farther you get the higher the positional precision losses which will cause issues with converting for math.
+
+Also need some sort of id system for player info.
+
+Max number of bones, min number of bones, bone important so as you move farther away the # of bones decreases in association to what informaiton you need to send.
+
+The limitation boundaries based on distance from the player.
+
 ## References
 
 1. [Serialization Strategies](https://gafferongames.com/post/serialization_strategies/)
