@@ -2,7 +2,7 @@
 
 The strategy we want to use is called variable bit rate encoding to optimize the use of bandwidth.
 
-In the context of our game, this strategy can be applied to reduce the amount of data that needs to be sent over the network for each snapshot. Here's how it could work with your `TimeOffsetPacket` and `DataPacket` structures:
+In the context of our game, this strategy can be applied to reduce the amount of data that needs to be sent over the network for each snapshot. Here's how it could work with our `TimeOffsetPacket` and `DataPacket` structures:
 
 1. **Keyframe Omission**: Instead of sending a full update (a keyframe) for every single frame, you only send keyframes at certain intervals. In between these keyframes, you send smaller updates (delta frames) that describe how the game state has changed since the last keyframe. This is where the `frame_within_metablock` and `frame_offset` fields come into play. They allow you to specify which keyframe a particular delta frame is relative to.
 
