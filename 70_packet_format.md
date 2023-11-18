@@ -39,7 +39,7 @@ struct DataPacket {
 };
 ```
 
-1. `TimeOffsetPacket``
+1. `TimeOffsetPacket`
 1. A full RigidBody structure on the server consists of position, orientation, linear_velocity and angular_velocity.
 1. Rotation is stored as x/y is an octahedral normal storing axis, while z is the rotation. Converting from this to quaternion is extremely efficient.
 
