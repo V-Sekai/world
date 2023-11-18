@@ -43,7 +43,7 @@ struct DataPacket {
 // Given values
 int size_of_time_offset_packet = 11;
 int size_of_data_packet = 14;
-int total_bytes = 1600;
+int total_bytes = 1596;
 int packets_per_entity = 4;
 int packets_per_bone = 2;
 
