@@ -41,20 +41,20 @@ struct DataPacket {
 
 ```cpp
 // Given values
-int sizeofTimeOffsetPacket = 11;
-int sizeofDataPacket = 14;
-int totalBytes = 1600;
-int packetsPerEntity = 4;
-int packetsPerBone = 2;
+int size_of_time_offset_packet = 11;
+int size_of_data_packet = 14;
+int total_bytes = 1600;
+int packets_per_entity = 4;
+int packets_per_bone = 2;
 
 // Calculate the number of DataPackets we can store after accounting for one TimeOffsetPacket
-int dataPacketCount = (totalBytes - sizeofTimeOffsetPacket) / sizeofDataPacket; // This will be 113
+int data_packet_count = (total_bytes - size_of_time_offset_packet) / size_of_data_packet; // This will be 113
 
 // Calculate the number of DataPackets we can store after accounting for the entity's position, orientation, linear_velocity and angular_velocity
-dataPacketCount = dataPacketCount - packetsPerEntity; // This will be 109
+data_packet_count = data_packet_count - packets_per_entity; // This will be 109
 
 // Now, let's solve for the number of bones
-int totalBones = dataPacketCount / packetsPerBone; // This will be 54
+int total_bones = data_packet_count / packets_per_bone; // This will be 54
 ```
 
 So, with 1.2 KB of space, you could store 1 `TimeOffsetPacket` and approximately 84 `DataPacket` structures. This calculation assumes that all the `DataPacket` structures are fully utilized. If the bit widths for the offsets are less than the maximum, you may be able to fit more `DataPacket` structures.
