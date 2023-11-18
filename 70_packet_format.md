@@ -28,7 +28,11 @@ struct DataPacket {
 
 struct Entity {
     TimeOffsetPacket time_offset_packet;
-    Vector<DataPacket> mandatory_data_packets; // Always contains 4 DataPackets
+    DataPacket position_packet;
+    // Rotation is stored as follows: x/y is an octahedral normal storing axis, while z is the rotation. Converting from this to quaternion is extremely efficient.
+    DataPacket orientation_packet; 
+    DataPacket linear_velocity_packet;
+    DataPacket angular_velocity_packet;
     Vector<DataPacket> base_bone_data_packets; // Contains up to 54 * 4 DataPackets
     Vector<DataPacket> facial_blend_shape_data_packets; // Must be able to contain 52 blend shapes.
     Vector<DataPacket> other_data_packets; // Variable number of DataPackets. Assumed to be empty.
