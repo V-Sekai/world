@@ -24,6 +24,8 @@ struct DataPacket {
     int16_t z_offset;      // [Z bit width] (signed)
 };
 
+// FIXME: Make this better. fire 2023-11-17
+
 struct Entity {
     TimeOffsetPacket time_offset_packet;
     Vector<DataPacket> mandatory_data_packets; // Always contains 4 DataPackets
