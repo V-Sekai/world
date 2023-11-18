@@ -43,7 +43,7 @@ struct DataPacket {
 1. A full RigidBody structure on the server consists of position, orientation, linear_velocity and angular_velocity.
 1. Rotation is stored as x/y is an octahedral normal storing axis, while z is the rotation. Converting from this to quaternion is extremely efficient.
 1. A bone is similar to the rigid body.
-1. You may omit frames and do variable bit rate.
+1. We omit frames for the worst representation to represent a user at distances.
 
 ## Scenario
 
