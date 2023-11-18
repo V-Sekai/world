@@ -1,6 +1,6 @@
 # Snapshot Size Calculation with Octahedral Compression
 
-Given the `RigidBody` struct:
+Given the `Entity` struct:
 
 ```cpp
 struct TimeOffsetPacket {
@@ -26,19 +26,14 @@ struct DataPacket {
 
 struct Entity {
     TimeOffsetPacket time_offset_packet;
-    // Mandatory data packet.
-    // Position
-    // Orientation is stored as follows: x/y is an octahedral normal storing axis, while z is the rotation. Converting from this to quaternion is extremely efficient.
-    // linear_velocity
-    // angular_velocity
     Vector<DataPacket> mandatory_data_packets; // Always contains 4 DataPackets
-    Vector<DataPacket> base_bone_data_packets; // Contains up to 54 DataPackets
-    Vector<DataPacket> facial_blend_shape_data_packets; // Variable number of DataPackets
-    Vector<DataPacket> other_bone_data_packets; // Variable number of DataPackets
+    Vector<DataPacket> base_bone_data_packets; // Contains up to 54 * 4 DataPackets
+    Vector<DataPacket> facial_blend_shape_data_packets; // Must be able to contain 52 blend shapes.
+    Vector<DataPacket> other_data_packets; // Variable number of DataPackets. Assumed to be empty.
 };
 ```
 
-The size of each `TimeOffsetPacket` is `8 bytes` and the size of each `DataPacket` is `12 bytes`. Therefore, the size of each `RigidBody` would be `(1 * 8) + (4 * 12) = 56 bytes`.
+The size of each `TimeOffsetPacket` is `8 bytes` and the size of each `DataPacket` is `12 bytes`. Therefore, the size of each `Entity` would be `(1 * 8) + (4 * 12) = 56 bytes`.
 
 ## Scenario
 
@@ -50,14 +45,14 @@ The size of each `TimeOffsetPacket` is `8 bytes` and the size of each `DataPacke
 
 ## Snapshot Size
 
-The total snapshot size would be the sum of the sizes of all the `RigidBody` structs for all players and their bones.
+The total snapshot size would be the sum of the sizes of all the `Entity` structs for all players and their bones.
 
-- Player's `RigidBody`: `n * 56 bytes = 64 * 56 bytes = 3584 bytes`.
+- Player's `Entity`: `n * 56 bytes = 64 * 56 bytes = 3584 bytes`.
 - Player's Bones: `n * b * 56 bytes = 64 * 256 * 56 bytes = 917504 bytes`.
 
 So, the total snapshot size would be `3584 bytes + 917504 bytes = 921088 bytes`, or approximately `899 KB`.
 
-This calculation assumes that there are no other data included in the snapshot and that the `RigidBody` struct does not have any padding or alignment issues. In a real-world scenario, the actual snapshot size might be larger due to additional game state information, network overhead, etc. 
+This calculation assumes that there are no other data included in the snapshot and that the `Entity` struct does not have any padding or alignment issues. In a real-world scenario, the actual snapshot size might be larger due to additional game state information, network overhead, etc. 
 
 By using octahedral compression for orientation, we have reduced the snapshot size from `962 KB` to `899 KB`, saving approximately `63 KB`.
 
