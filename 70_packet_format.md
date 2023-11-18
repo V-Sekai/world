@@ -67,6 +67,7 @@ Remember, this is just an approximation. The actual number may vary depending on
 1. A bone is similar to the rigid body.
 1. We omit frames for the worst representation to represent a user at distances.
 1. Lets assume all bones are in constant motion at all time.
+1. We can pretend a entity is a skeleton without bones and that will work out since a skeleton is a Node3D.
 
 ## Scenario
 
