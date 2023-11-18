@@ -33,9 +33,10 @@ struct Entity {
     DataPacket orientation_packet; 
     DataPacket linear_velocity_packet;
     DataPacket angular_velocity_packet;
-    Vector<DataPacket> base_bone_data_packets; // Contains up to 54 * 4 DataPackets
-    Vector<DataPacket> facial_blend_shape_data_packets; // Must be able to contain 52 blend shapes.
-    Vector<DataPacket> other_data_packets; // Variable number of DataPackets. Assumed to be empty.
+    Vector<DataPacket> packets; 
+    // Must be able to contain 54 bones.
+    // Must be able to contain 52 blend shapes.
+    // Variable number of other DataPackets.
 };
 ```
 
