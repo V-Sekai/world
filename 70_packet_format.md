@@ -40,20 +40,26 @@ struct DataPacket {
 ```
 
 ```cpp
-sizeof(TimeOffsetPacket) = 11 bytes // As per the given structure
-sizeof(DataPacket) = 14 bytes // As per the given structure
-int totalBytes = 1200; // 1.2 KB = 1200 bytes
-// We store one TimeOffsetPacket.
-int remainingBytes = totalBytes - sizeof(TimeOffsetPacket); // Equals 1200 - 11 = 1189 bytes
-int dataPacketCount = remainingBytes / sizeof(DataPacket); // Equals 1189 / 14 = 84 (rounded down)
-// With 1.2 KB of space, you could store 1 TimeOffsetPacket and approximately 84 DataPacket structures.
+// Given values
+int sizeofTimeOffsetPacket = 11;
+int sizeofDataPacket = 14;
+int totalBytes = 1200;
+int packetsPerEntity = 4;
+int packetsPerBone = 2;
+
+// Calculate the number of DataPackets we can store after accounting for one TimeOffsetPacket
+int dataPacketCount = (totalBytes - sizeofTimeOffsetPacket) / sizeofDataPacket; // 84
+
+// Calculate how many entities we can store
+int entityCount = dataPacketCount / packetsPerEntity; // 21
+
+// Now, let's solve for the number of bones
+int totalBones = entityCount * packetsPerEntity / packetsPerBone; // 42
 ```
 
 So, with 1.2 KB of space, you could store 1 `TimeOffsetPacket` and approximately 84 `DataPacket` structures. This calculation assumes that all the `DataPacket` structures are fully utilized. If the bit widths for the offsets are less than the maximum, you may be able to fit more `DataPacket` structures.
 
 Remember, this is just an approximation. The actual number may vary depending on the specific values of the bit widths and offsets.
-```
-
 
 1. `TimeOffsetPacket`
 1. A full RigidBody structure on the server consists of position, orientation, linear_velocity and angular_velocity.
@@ -105,3 +111,4 @@ For AAA game development, target $2.50 to $3 USD per user per server per month.
 2. [Networked Physics in Virtual Reality](https://www.youtube.com/watch?v=sx4IIQL0x7c)
 3. [Godot Engine Proposal](https://github.com/godotengine/godot-proposals/issues/3375)
 4. [Host your Unreal Engine game for under $1 USD](https://aws.amazon.com/blogs/gametech/how-to-host-your-unreal-engine-game-for-under-1-per-player-with-amazon-gamelift/)
+```
