@@ -39,6 +39,22 @@ struct DataPacket {
 };
 ```
 
+```cpp
+sizeof(TimeOffsetPacket) = 11 bytes // As per the given structure
+sizeof(DataPacket) = 14 bytes // As per the given structure
+int totalBytes = 1200; // 1.2 KB = 1200 bytes
+// We store one TimeOffsetPacket.
+int remainingBytes = totalBytes - sizeof(TimeOffsetPacket); // Equals 1200 - 11 = 1189 bytes
+int dataPacketCount = remainingBytes / sizeof(DataPacket); // Equals 1189 / 14 = 84 (rounded down)
+// With 1.2 KB of space, you could store 1 TimeOffsetPacket and approximately 84 DataPacket structures.
+```
+
+So, with 1.2 KB of space, you could store 1 `TimeOffsetPacket` and approximately 84 `DataPacket` structures. This calculation assumes that all the `DataPacket` structures are fully utilized. If the bit widths for the offsets are less than the maximum, you may be able to fit more `DataPacket` structures.
+
+Remember, this is just an approximation. The actual number may vary depending on the specific values of the bit widths and offsets.
+```
+
+
 1. `TimeOffsetPacket`
 1. A full RigidBody structure on the server consists of position, orientation, linear_velocity and angular_velocity.
 1. Rotation is stored as x/y is an octahedral normal storing axis, while z is the rotation. Converting from this to quaternion is extremely efficient.
