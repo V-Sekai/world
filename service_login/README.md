@@ -15,18 +15,25 @@ These instructions will get you a copy of the project up and running on your loc
 ### Installing
 
 1. Clone the repository:
+
 ```
 git clone https://github.com/Bioblaze/2dgodot_mmo_login_service.git
 ```
+
 2. Navigate to the project directory:
+
 ```
 cd ./2dgodot_mmo_login_service
 ```
+
 3. Install the required dependencies:
+
 ```
 go mod download
 ```
+
 4. Create a `.env` file in the project directory with the following variables:
+
 ```
 GOOGLE_CLIENT_ID=<your-google-client-id>
 GOOGLE_CLIENT_SECRET=<your-google-client-secret>
@@ -36,11 +43,15 @@ CLIENT_SECRET=<your-discord-client-secret>
 REDIRECT_URI=<your-discord-redirect-uri>
 JWT_SECRET=<your-jwt-secret>
 ```
+
 5. Build the application:
+
 ```
 go build
 ```
+
 6. Run the application:
+
 ```
 ./2dgodot_mmo_login_service
 ```

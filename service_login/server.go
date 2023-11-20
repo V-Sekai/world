@@ -28,7 +28,7 @@ type Client struct {
 
 type Payload struct {
 	Action string `json:"action"`
-	Type string `json:"type"`
+	Type   string `json:"type"`
 	URL    string `json:"url"`
 }
 
@@ -39,16 +39,13 @@ type Claims struct {
 
 // Add a new struct for Provider
 type Provider struct {
-	Platform string `json:"platform,omitempty"`
-	Id       string `json:"id,omitempty"`
-	Username string `json:"username,omitempty"`
+	Platform      string `json:"platform,omitempty"`
+	Id            string `json:"id,omitempty"`
+	Username      string `json:"username,omitempty"`
 	Discriminator string `json:"discriminator,omitempty"`
-	Avatar string `json:"avatar,omitempty"`
-	Email  string `json:"email,omitempty"`
+	Avatar        string `json:"avatar,omitempty"`
+	Email         string `json:"email,omitempty"`
 }
-
-
-
 
 var clients sync.Map
 
@@ -75,7 +72,6 @@ func main() {
 
 	router.HandleFunc("/auth/discord/callback", handleDiscordCallback)
 
-
 	router.HandleFunc("/auth/discord/{cid}", handleDiscordOAuth)
 
 	router.HandleFunc("/success", handleSuccess)
@@ -91,10 +87,10 @@ func main() {
 
 func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
-    if err != nil {
-        logrus.Error("Error upgrading websocket connection:", err)
-        return
-    }
+	if err != nil {
+		logrus.Error("Error upgrading websocket connection:", err)
+		return
+	}
 
 	logrus.Info("Client Connected")
 
@@ -104,7 +100,6 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	clients.Store(client.Id, client)
-
 
 	for {
 		var payload Payload
@@ -120,18 +115,17 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 				client.LoginStatus = true
 				var url string
 
-				switch(payload.Type) {
+				switch payload.Type {
 				case "discord":
 					url = fmt.Sprintf("/auth/discord/%s", client.Id)
 				default:
 					logrus.Warn("Defaulting to Discord, Unknown type of getLogin:", payload.Type)
 					url = fmt.Sprintf("/auth/discord/%s", client.Id)
 				}
-				
 
 				loginPayload := Payload{
 					Action: "login_url",
-					Type: payload.Type,
+					Type:   payload.Type,
 					URL:    fmt.Sprintf("%s%s", os.Getenv("URL_BASE"), url),
 				}
 
@@ -150,18 +144,16 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 
 // Add a function to remove a client from the clients slice
 func removeClient(clientToRemove *Client) {
-    // Assuming RemoteAddr() returns IP in format "ip:port", extracting IP
-    ip := strings.Split(clientToRemove.Conn.RemoteAddr().String(), ":")[0]
-    
-    // Remove the rate limiter for this IP
-    limiters.Delete(ip)
+	// Assuming RemoteAddr() returns IP in format "ip:port", extracting IP
+	ip := strings.Split(clientToRemove.Conn.RemoteAddr().String(), ":")[0]
 
-    time.Sleep(15 * time.Second)
-    clientToRemove.Conn.Close()
-    clients.Delete(clientToRemove.Id)
+	// Remove the rate limiter for this IP
+	limiters.Delete(ip)
+
+	time.Sleep(15 * time.Second)
+	clientToRemove.Conn.Close()
+	clients.Delete(clientToRemove.Id)
 }
-
-
 
 // Handler for Discord OAuth login
 func handleDiscordOAuth(w http.ResponseWriter, r *http.Request) {
@@ -224,7 +216,7 @@ func handleDiscordCallback(w http.ResponseWriter, r *http.Request) {
 	// Send the JWT to the client over the WebSocket
 	payload := Payload{
 		Action: "jwt",
-		Type: "discord",
+		Type:   "discord",
 		URL:    token,
 	}
 
@@ -248,7 +240,6 @@ func getClientByState(state string) *Client {
 	}
 	return nil
 }
-
 
 // Exchange the authorization code for an access token
 func exchangeCodeForToken(code string) (string, error) {

@@ -78,6 +78,4 @@ func (bot *DiscordBotImpl) RegisterEventHandlers() {
 		// You can also send a farewell message or any other action upon a member leaving.
 		// Example: s.ChannelMessageSend(farewellChannelID, fmt.Sprintf("Goodbye %s!", m.Member.User.Username))
 	})
-
-	// ... Add other event handlers as required
 }
