@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai/godot_mmo_client.git
 	branch = main
-	commit = 7619cfefcf6d882f75ab5efd4b87b38a0c0c9756
-	parent = 8a65126711ee25b0dfe663050585bdd2bbdb2b04
+	commit = 064eb3cdd17c6751bd0c985983e415572851341a
+	parent = 852c48b308c02775b1c19ce5a81f04dd50667fdd
 	method = merge
 	cmdver = 0.4.6
