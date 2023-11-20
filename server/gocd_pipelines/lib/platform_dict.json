@@ -1,0 +1,120 @@
+{
+  "platform_info_dict": {
+    "windows": {
+      "platform_name": "windows",
+      "scons_env": "mkdir -p ../.cicd_cache && PATH=/opt/llvm-mingw/bin:$PATH SCONS_CACHE=../.cicd_cache ",
+      "intermediate_godot_binary": "godot.windows.editor.double.x86_64.llvm.exe",
+      "editor_godot_binary": "godot.windows.editor.double.x86_64.llvm.exe",
+      "template_debug_binary": "windows_debug_x86_64.exe",
+      "template_release_binary": "windows_release_x86_64.exe",
+      "export_directory": "export_windows",
+      "scons_platform": "windows",
+      "gdextension_platform": "windows",
+      "gdextension_target": "template_debug",
+      "strip_command": "mingw-strip --strip-debug",
+      "godot_scons_arguments": "precision=double use_mingw=yes use_llvm=yes use_thinlto=no warnings=no LINKFLAGS=-Wl,-pdb= CCFLAGS='-Wall -Wno-tautological-compare -g -gcodeview' debug_symbols=no",
+      "extra_commands": [],
+      "environment_variables": [],
+      "template_artifacts_override": null,
+      "template_output_artifacts": null,
+      "template_extra_commands": [],
+      "target": "editor"
+    },
+    "linux": {
+      "platform_name": "linux",
+      "scons_env": "mkdir -p ../.cicd_cache && SCONS_CACHE=../.cicd_cache ",
+      "intermediate_godot_binary": "godot.linuxbsd.editor.double.x86_64.llvm",
+      "editor_godot_binary": "godot.linuxbsd.editor.double.x86_64.llvm",
+      "template_debug_binary": "linux_debug.x86_64",
+      "template_release_binary": "linux_release.x86_64",
+      "export_directory": "export_linuxbsd",
+      "scons_platform": "linuxbsd",
+      "gdextension_platform": "linux",
+      "gdextension_target": "template_debug",
+      "strip_command": "strip --strip-debug",
+      "godot_scons_arguments": "precision=double use_static_cpp=yes use_llvm=yes builtin_freetype=yes",
+      "extra_commands": [],
+      "environment_variables": [],
+      "template_artifacts_override": null,
+      "template_output_artifacts": null,
+      "template_extra_commands": [],
+      "target": "editor"
+    },
+    "web": {
+      "platform_name": "web",
+      "scons_env": "source /opt/emsdk/emsdk_env.sh && mkdir -p ../.cicd_cache && SCONS_CACHE=../.cicd_cache EM_CACHE=/tmp ",
+      "intermediate_godot_binary": "godot.web.template_release.double.wasm32.zip",
+      "editor_godot_binary": "godot.web.template_release.double.wasm32.zip",
+      "template_debug_binary": "web_debug.zip",
+      "template_release_binary": "web_release.zip",
+      "strip_command": null,
+      "scons_platform": "web",
+      "gdextension_platform": "linux",
+      "gdextension_target": "template_debug",
+      "godot_scons_arguments": "optimize=speed use_llvm=yes precision=double builtin_freetype=yes initial_memory=256 CCFLAGS='-fno-stack-protector -fno-exceptions'",
+      "extra_commands": [],
+      "environment_variables": [],
+      "template_artifacts_override": null,
+      "template_output_artifacts": null,
+      "template_extra_commands": [],
+      "target": "template_release"
+    },
+    "macos": {
+      "platform_name": "macos",
+      "scons_env": "mkdir -p ../.cicd_cache && SCONS_CACHE=../.cicd_cache OSXCROSS_ROOT=\"LD_LIBRARY_PATH=/opt/osxcross/target/bin /opt/osxcross\" ",
+      "intermediate_godot_binary": "godot.macos.editor.double.x86_64",
+      "editor_godot_binary": "Godot.app",
+      "template_debug_binary": "godot_macos_debug.x86_64",
+      "template_release_binary": "godot_macos_release.x86_64",
+      "scons_platform": "macos",
+      "gdextension_platform": "macos",
+      "gdextension_target": "template_debug",
+      "strip_command": "LD_LIBRARY_PATH=/opt/osxcross/target/bin /opt/osxcross/target/bin/x86_64-apple-darwin19-strip -S",
+      "godot_scons_arguments": "precision=double ccache_bin= osxcross_sdk=darwin19 arch=x86_64 CXXFLAGS=\"-Wno-deprecated-declarations -Wno-error \" builtin_freetype=yes use_static_mvk=yes",
+      "extra_commands": [
+        "OSXCROSS_ROOT=\"LD_LIBRARY_PATH=/opt/osxcross/target/bin /opt/osxcross\" scons ccache_bin= platform=macos arch=arm64 osxcross_sdk=darwin19 CXXFLAGS=\"-Wno-deprecated-declarations -Wno-error \" builtin_freetype=yes use_static_mvk=yes",
+        "lipo -create bin/godot.macos.editor.double.x86_64 bin/godot.macos.editor.double.arm64 -output bin/godot.macos.editor.double.universal",
+        "rm -rf ./bin/Godot.app",
+        "cp -r ./misc/dist/macos_tools.app ./bin/",
+        "cp bin/godot.macos.editor.double.universal ./bin/Godot.app/Contents/MacOS/Godot",
+        "chmod +x ./bin/Godot.app/Contents/MacOS/Godot"
+      ],
+      "environment_variables": [
+        {
+          "name": "PATH",
+          "value": "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+        }
+      ],
+      "template_artifacts_override": [
+        {
+          "type": "build",
+          "source": "g/bin/macos.zip",
+          "destination": ""
+        },
+        {
+          "type": "build",
+          "source": "Godot.app",
+          "destination": ""
+        },
+        {
+          "type": "build",
+          "source": "g/bin/version.txt",
+          "destination": ""
+        }
+      ],
+      "template_output_artifacts": ["macos.zip"],
+      "template_extra_commands": [
+        "rm -rf ./bin/macos_template.app",
+        "cp -r ./misc/dist/macos_template.app ./bin/",
+        "mkdir -p ./bin/macos_template.app/Contents/MacOS",
+        "cp ./bin/godot.macos.editor.double.universal macos_template.app/Contents/MacOS/godot_macos_release.64",
+        "cp ./bin/godot.macos.editor.double.universal macos_template.app/Contents/MacOS/godot_macos_debug.64",
+        "chmod +x macos_template.app/Contents/MacOS/godot_macos*",
+        "rm -rf bin/macos.zip",
+        "cd bin && zip -1 -r macos.zip macos_template.app/",
+        "cd .. && rm -rf Godot.app && cp -r ./g/misc/dist/macos_template.app Godot.app"
+      ],
+      "target": "editor"
+    }
+  }
+}

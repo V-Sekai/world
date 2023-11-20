@@ -1,0 +1,61 @@
+{
+  "groups_export_configurations": {
+    "windows": {
+      "export_name": "windows",
+      "platform_name": "windows",
+      "gdextension_platform": "windows",
+      "editor_godot_binary": "godot.windows.editor.double.x86_64.llvm.exe",
+      "editor_godot_binary_debug": "godot.windows.editor.double.x86_64.llvm.pdb",
+      "export_configuration": "Windows Desktop",
+      "export_directory": "export_windows",
+      "export_executable": "v_sekai_windows.exe",
+      "export_editor": "v_sekai_windows_editor.exe",
+      "export_executable_debug": "v_sekai_windows.pdb",
+      "template_release_binary": "windows_release_x86_64.exe",
+      "itchio_out": "windows-master",
+      "prepare_commands": [],
+      "extra_commands": []
+    },
+    "linux": {
+      "export_name": "linux",
+      "platform_name": "linux",
+      "gdextension_platform": "linux",
+      "template_release_binary": "linux_release.x86_64",
+      "export_executable_debug": "",
+      "editor_godot_binary": "godot.linuxbsd.editor.double.x86_64.llvm",
+      "editor_godot_binary_debug": "",
+      "export_configuration": "Linux/X11",
+      "export_directory": "export_linuxbsd",
+      "export_executable": "v_sekai_linuxbsd",
+      "export_editor": "v_sekai_linuxbsd_editor",
+      "itchio_out": "linux-master",
+      "prepare_commands": [],
+      "extra_commands": []
+    },
+    "macos": {
+      "export_name": "macos",
+      "platform_name": "macos",
+      "editor_godot_binary": "Godot.app",
+      "gdextension_platform": "osx",
+      "export_configuration": "Mac OSX",
+      "export_directory": "export_macos",
+      "export_executable": "macos.zip",
+      "itchio_out": "macos",
+      "prepare_commands": [],
+      "extra_commands": [
+        "cd export_macos && unzip macos.zip && rm macos.zip"
+      ]
+    },
+    "web": {
+      "export_name": "web",
+      "platform_name": "web",
+      "gdextension_platform": "linux",
+      "export_configuration": "HTML5",
+      "export_directory": "export_web",
+      "export_executable": "v_sekai_web.html",
+      "itchio_out": "web",
+      "prepare_commands": [],
+      "extra_commands": []
+    }
+  }
+}
