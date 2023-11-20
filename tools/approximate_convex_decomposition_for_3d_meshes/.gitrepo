@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/V-Sekai/TOOL_coacd.git
+	branch = main
+	commit = 4db23d543ad4e8297268d8a2d59d336141c3c34c
+	parent = 5c0eaada90dcb21504cad1033d68140ff850aa5c
+	method = merge
+	cmdver = 0.4.6
