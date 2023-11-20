@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai/TOOL_intrinsic_triangulations.git
 	branch = main
-	commit = d6b5898dc09dc12a1097b0f7538ee9739f24bdaf
-	parent = 13f0166a950c5e5715327edb81560cb0af3882ba
+	commit = 340616dc16f2d1817ab7809724f1fa0fb3671250
+	parent = ba52da618cd2639c45a0a1008625b1f0b3084526
 	method = merge
 	cmdver = 0.4.6
