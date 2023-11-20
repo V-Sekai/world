@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/V-Sekai/TOOL_intrinsic_triangulations.git
+	branch = main
+	commit = d6b5898dc09dc12a1097b0f7538ee9739f24bdaf
+	parent = 13f0166a950c5e5715327edb81560cb0af3882ba
+	method = merge
+	cmdver = 0.4.6
