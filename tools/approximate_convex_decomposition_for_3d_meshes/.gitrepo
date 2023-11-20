@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai/TOOL_coacd.git
 	branch = main
-	commit = 4db23d543ad4e8297268d8a2d59d336141c3c34c
-	parent = 5c0eaada90dcb21504cad1033d68140ff850aa5c
+	commit = eff146574b5979da434582a078f916417fff7171
+	parent = 618e286bd96d7a12d4c047fd40969c4929f9b4e3
 	method = merge
 	cmdver = 0.4.6
