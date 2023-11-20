@@ -27,7 +27,8 @@
         "code",
         "design",
         "research",
-        "ideas"
+        "ideas",
+        "infra"
       ]
     },
     {
@@ -94,6 +95,6 @@
   "skipCi": true,
   "repoType": "github",
   "repoHost": "https://github.com",
-  "projectName": "v-sekai-other-world-architecture",
+  "projectName": "v-sekai-other-world",
   "projectOwner": "V-Sekai"
 }
