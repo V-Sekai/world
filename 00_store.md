@@ -112,3 +112,7 @@ tailscale ip -4
 ```
 
 Please note that you'll need to replace `your-server-ip` with the actual IP address of your server. Also, the port numbers used here are just examples. You should use the port numbers that are appropriate for your setup.
+
+## TODO: Generate certificate with Caddy
+
+Instruct how to generate certificates with Caddy.
