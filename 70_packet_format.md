@@ -2,7 +2,7 @@
 
 The strategy we want to use is called variable bit rate encoding to optimize the use of bandwidth.
 
-In the context of our game, this strategy can be applied to reduce the amount of data that needs to be sent over the network for each snapshot. Here's how it could work with your `TimeOffsetPacket` and `DataPacket` structures:
+In the context of our game, this strategy can be applied to reduce the amount of data that needs to be sent over the network for each snapshot. Here's how it could work with our `TimeOffsetPacket` and `DataPacket` structures:
 
 1. **Keyframe Omission**: Instead of sending a full update (a keyframe) for every single frame, you only send keyframes at certain intervals. In between these keyframes, you send smaller updates (delta frames) that describe how the game state has changed since the last keyframe. This is where the `frame_within_metablock` and `frame_offset` fields come into play. They allow you to specify which keyframe a particular delta frame is relative to.
 
@@ -57,10 +57,6 @@ data_packet_count = data_packet_count - packets_per_entity; // This will be 109
 int total_bones = data_packet_count / packets_per_bone; // This will be 54
 ```
 
-So, with 1.2 KB of space, you could store 1 `TimeOffsetPacket` and approximately 84 `DataPacket` structures. This calculation assumes that all the `DataPacket` structures are fully utilized. If the bit widths for the offsets are less than the maximum, you may be able to fit more `DataPacket` structures.
-
-Remember, this is just an approximation. The actual number may vary depending on the specific values of the bit widths and offsets.
-
 1. `TimeOffsetPacket`
 1. A full RigidBody structure on the server consists of position, orientation, linear_velocity and angular_velocity.
 1. Rotation is stored as x/y is an octahedral normal storing axis, while z is the rotation. Converting from this to quaternion is extremely efficient.
@@ -68,24 +64,6 @@ Remember, this is just an approximation. The actual number may vary depending on
 1. We omit frames for the worst representation to represent a user at distances.
 1. Lets assume all bones are in constant motion at all time.
 1. We can pretend a entity is a skeleton without bones and that will work out since a skeleton is a Node3D.
-
-## Scenario
-
-Let's define the following constants:
-
-- **Total Players (TOTAL_PLAYERS)**: 100 players.
-- **Total Data Packets per Player (TOTAL_DATA_PACKETS)**: 54 data packets.
-
-## Snapshot Size
-
-The total snapshot size would be the sum of the sizes of all the `Entity` structs for all players and their data packets.
-
-- Player's `Entity`: `TOTAL_PLAYERS * DATAPACKET_BYTES`.
-- Player's Data Packets: `TOTAL_PLAYERS * TOTAL_DATA_PACKETS * DATAPACKET_BYTES`.
-
-This calculation assumes that there are no other data included in the snapshot and that the `Entity` struct does not have any padding or alignment issues. In a real-world scenario, the actual snapshot size might be larger due to additional game state information, network overhead, etc.
-
-By using octahedral compression for orientation, we can significantly reduce the snapshot size. However, the exact amount of savings depends on the specific details of the game state and the effectiveness of the compression algorithm.
 
 ## Unknowns
 
