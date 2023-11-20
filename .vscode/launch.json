@@ -14,9 +14,9 @@
       "name": "Build the editor",
       "type": "lldb",
       "request": "launch",
-      "args": ["--path", "game", "-e"],
+      "args": ["--path", "thirdparty/client_2d", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/godot/bin/godot.macos.editor.dev.double.arm64",
+      "program": "${workspaceFolder}/godot/bin/godot.windows.editor.dev.double.x86_64.console.exe",
       "preLaunchTask": "Godot Engine"
     }
   ]
