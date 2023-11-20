@@ -1,0 +1,48 @@
+project:
+  type: website
+  output-dir: _site
+
+resources:
+  - docs/decisions/attachments
+
+website:
+  site-url: https://v-sekai.github.io/manuals
+  repo-url: https://github.com/V-Sekai/manuals
+  repo-branch: master
+  repo-actions: edit
+  title: V-Sekai - Manuals
+  page-navigation: true
+  navbar:
+    logo: 68604884.png
+    logo-alt: V-Sekai
+    background: primary
+    search: true
+    left:
+      - text: "Decisions"
+        file: decisions.qmd
+      - text: "Demo to Game"
+        file: demo_to_game.qmd
+  page-footer:
+    right:
+      - icon: github
+        href: https://github.com/V-Sekai/manuals
+      - icon: twitter
+        href: https://twitter.com/VSekaiOfficial
+      - icon: discord
+        href: https://discord.gg/2YwPmnbqcN    
+      - icon: web
+        href: https://v-sekai.org/
+
+format:
+  html:
+    toc: true
+    theme:
+      light: flatly
+      dark: darkly
+
+filters:
+  - quarto
+
+freeze: true
+
+editor: visual
