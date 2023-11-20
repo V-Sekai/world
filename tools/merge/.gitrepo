@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai/godot-vsekai-merge.git
 	branch = main
-	commit = 360239f3e288a24fe9443284f5b9e93bd4817ae6
-	parent = c956117c5ad106ecf8a6f2b1720fe03e2279047f
+	commit = 4f1a82041b2042a5008b697817fb72bb4f020492
+	parent = 47fa0b74b243bef5833f685787adae5953ff3647
 	method = merge
 	cmdver = 0.4.6
