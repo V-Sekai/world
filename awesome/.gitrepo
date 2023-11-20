@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/V-Sekai/awesome-v-sekai.git
+	branch = master
+	commit = b4c9f9d2090a6ba662d11358e651ad869ac5720d
+	parent = 7e8aed145a38621ace679fb04443c27bd4345bd2
+	method = merge
+	cmdver = 0.4.6
