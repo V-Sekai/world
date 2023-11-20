@@ -1,0 +1,265 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://Fonts/Sizes/OldWizard_30.tres" type="DynamicFont" id=1]
+[ext_resource path="res://Fonts/Sizes/OldWizard_75.tres" type="DynamicFont" id=2]
+[ext_resource path="res://Fonts/Sizes/OldWizard_20.tres" type="DynamicFont" id=3]
+[ext_resource path="res://Fonts/OldWizard.ttf" type="DynamicFontData" id=5]
+[ext_resource path="res://Menus/MainMenu/MainMenu.gd" type="Script" id=6]
+
+[sub_resource type="DynamicFont" id=1]
+size = 35
+font_data = ExtResource( 5 )
+
+[node name="Control" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 6 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0, 0, 0, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Title" type="Label" parent="ColorRect"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -299.568
+margin_top = 63.5678
+margin_right = 304.432
+margin_bottom = 134.568
+custom_fonts/font = ExtResource( 2 )
+text = "The Obscured World"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Tagline" type="Label" parent="ColorRect"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -283.059
+margin_top = -172.233
+margin_right = 280.941
+margin_bottom = -19.2335
+custom_fonts/font = SubResource( 1 )
+text = "Presents
+The Dwarven Expedition
+Recovering the Lost Realm
+"
+align = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Login" type="VBoxContainer" parent="ColorRect"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -154.878
+margin_top = -78.3667
+margin_right = 157.122
+margin_bottom = 181.633
+alignment = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="UsernameTitle" type="Label" parent="ColorRect/Login"]
+margin_top = 58.0
+margin_right = 312.0
+margin_bottom = 89.0
+custom_fonts/font = ExtResource( 1 )
+text = "Username"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Username" type="LineEdit" parent="ColorRect/Login"]
+margin_top = 93.0
+margin_right = 312.0
+margin_bottom = 123.0
+custom_fonts/font = ExtResource( 3 )
+placeholder_text = "Username goes here"
+
+[node name="MarginContainer" type="MarginContainer" parent="ColorRect/Login"]
+margin_top = 127.0
+margin_right = 312.0
+margin_bottom = 132.0
+rect_min_size = Vector2( 0, 5 )
+
+[node name="Password Title" type="Label" parent="ColorRect/Login"]
+visible = false
+margin_top = 102.0
+margin_right = 312.0
+margin_bottom = 133.0
+custom_fonts/font = ExtResource( 1 )
+text = "Password"
+
+[node name="Password" type="LineEdit" parent="ColorRect/Login"]
+visible = false
+margin_top = 119.0
+margin_right = 312.0
+margin_bottom = 149.0
+custom_fonts/font = ExtResource( 3 )
+placeholder_text = "Password goes here"
+
+[node name="MarginContainer2" type="MarginContainer" parent="ColorRect/Login"]
+margin_top = 136.0
+margin_right = 312.0
+margin_bottom = 176.0
+rect_min_size = Vector2( 0, 40 )
+
+[node name="LoginButton" type="Button" parent="ColorRect/Login"]
+margin_top = 180.0
+margin_right = 312.0
+margin_bottom = 200.0
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="ColorRect/Login/LoginButton"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 3 )
+text = "Login"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="AdditionalButtons" type="VBoxContainer" parent="ColorRect"]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -176.939
+margin_top = -200.0
+margin_right = -26.9391
+size_flags_horizontal = 3
+size_flags_vertical = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="RegisterButton" type="Button" parent="ColorRect/AdditionalButtons"]
+visible = false
+margin_right = 149.0
+margin_bottom = 20.0
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="ColorRect/AdditionalButtons/RegisterButton"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 3 )
+text = "Create Account"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MarginContainer" type="MarginContainer" parent="ColorRect/AdditionalButtons"]
+margin_right = 149.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VerifyRegisterAccountButton" type="Button" parent="ColorRect/AdditionalButtons"]
+visible = false
+margin_top = 4.0
+margin_right = 149.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="ColorRect/AdditionalButtons/VerifyRegisterAccountButton"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 3 )
+text = "Verify Account"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MarginContainer2" type="MarginContainer" parent="ColorRect/AdditionalButtons"]
+margin_top = 4.0
+margin_right = 149.0
+margin_bottom = 4.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="DiscordButton" type="Button" parent="ColorRect/AdditionalButtons"]
+margin_top = 8.0
+margin_right = 149.0
+margin_bottom = 28.0
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="ColorRect/AdditionalButtons/DiscordButton"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 3 )
+text = "Official Discord"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MarginContainer3" type="MarginContainer" parent="ColorRect/AdditionalButtons"]
+margin_top = 32.0
+margin_right = 149.0
+margin_bottom = 72.0
+rect_min_size = Vector2( 0, 40 )
+
+[node name="ExitButton" type="Button" parent="ColorRect/AdditionalButtons"]
+margin_top = 76.0
+margin_right = 149.0
+margin_bottom = 96.0
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="ColorRect/AdditionalButtons/ExitButton"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = ExtResource( 3 )
+text = "Quit Game"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="BuildNumber" type="Label" parent="ColorRect"]
+margin_left = 8.97971
+margin_top = 565.721
+margin_right = 113.98
+margin_bottom = 585.721
+custom_fonts/font = ExtResource( 3 )
+text = "Build: 0.0.0.1"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Errors" type="VBoxContainer" parent="ColorRect"]
+margin_left = 318.779
+margin_top = 465.822
+margin_right = 718.779
+margin_bottom = 593.822
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HTTPRequest" type="HTTPRequest" parent="."]
+[connection signal="pressed" from="ColorRect/Login/LoginButton" to="." method="_on_LoginButton_pressed"]
+[connection signal="pressed" from="ColorRect/AdditionalButtons/RegisterButton" to="." method="_on_RegisterButton_pressed"]
+[connection signal="pressed" from="ColorRect/AdditionalButtons/VerifyRegisterAccountButton" to="." method="_on_VerifyRegisterAccountButton_pressed"]
+[connection signal="pressed" from="ColorRect/AdditionalButtons/DiscordButton" to="." method="_on_DiscordButton_pressed"]
+[connection signal="pressed" from="ColorRect/AdditionalButtons/ExitButton" to="." method="_on_ExitButton_pressed"]

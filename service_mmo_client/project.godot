@@ -1,0 +1,32 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=4
+
+_global_script_classes=[  ]
+_global_script_class_icons={
+
+}
+
+[application]
+
+config/name="Text Mmo Client"
+run/main_scene="res://GodotLoadScreen/GodotLoadScreenFinal/GodotStartupScreen.tscn"
+boot_splash/image="res://GodotLoadScreen/GodotLoadScreenFinal/GodotBootSplash.png"
+config/icon="res://favicon.png"
+config/windows_native_icon="res://favicon.ico"
+config/version="0.0.1"
+
+[autoload]
+
+TcpClient="*res://Scripts/tcp_client.gd"
+Global="*res://Scripts/global.gd"
+
+[rendering]
+
+environment/default_environment="res://default_env.tres"

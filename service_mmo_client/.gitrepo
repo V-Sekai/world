@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/V-Sekai/godot_mmo_client.git
+	branch = main
+	commit = 584a7334c8ebaa506be56f164bea1286f300069d
+	parent = aa2fd05e372337fd15683503e0f7bae12495cb54
+	method = merge
+	cmdver = 0.4.6
