@@ -16,7 +16,7 @@
       "request": "launch",
       "args": ["--path", "game", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/godot/bin/godot.macos.editor.dev.double.x86_64.llvm",
+      "program": "${workspaceFolder}/godot/bin/godot.macos.editor.dev.double.arm64",
       "preLaunchTask": "Godot Engine"
     }
   ]
