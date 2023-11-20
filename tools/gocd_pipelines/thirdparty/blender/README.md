@@ -1,2 +1,0 @@
-# blender-tools-V-Sekai
-
