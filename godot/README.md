@@ -1,58 +1,78 @@
-# project-other-world
+# Godot Engine
 
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+<p align="center">
+  <a href="https://godotengine.org">
+    <img src="logo_outlined.svg" width="400" alt="Godot Engine logo">
+  </a>
+</p>
 
-[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
+## 2D and 3D cross-platform game engine
 
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
+**[Godot Engine](https://godotengine.org) is a feature-packed, cross-platform
+game engine to create 2D and 3D games from a unified interface.** It provides a
+comprehensive set of [common tools](https://godotengine.org/features), so that
+users can focus on making games without having to reinvent the wheel. Games can
+be exported with one click to a number of platforms, including the major desktop
+platforms (Linux, macOS, Windows), mobile platforms (Android, iOS), as well as
+Web-based platforms and [consoles](https://docs.godotengine.org/en/latest/tutorials/platform/consoles.html).
 
-The V-Sekai Other World Architecture project aims to create a virtual world using the binary Godot Engine client and server. The development process is divided into several prototypes, each with its own specific goals and objectives.
+## Free, open source and community-driven
 
-> **Note:** Instead of working on a car engine, work on the body. Instead of a bicycle wheel, work on the frame.
+Godot is completely free and open source under the very permissive [MIT license](https://godotengine.org/license).
+No strings attached, no royalties, nothing. The users' games are theirs, down
+to the last line of engine code. Godot's development is fully independent and
+community-driven, empowering users to help shape their engine to match their
+expectations. It is supported by the [Godot Foundation](https://godot.foundation/)
+not-for-profit.
 
-> **Vision:** Our V-Sekai Other World Architecture project aims to infuse shared creativity into virtual spaces. We're building a platform for users to create and interact together, fostering community. Imagine a user crafting a heart-shaped gift for his future wife in this shared realm.
+Before being open sourced in [February 2014](https://github.com/godotengine/godot/commit/0b806ee0fc9097fa7bda7ac0109191c9c5e0a1ac),
+Godot had been developed by [Juan Linietsky](https://github.com/reduz) and
+[Ariel Manzur](https://github.com/punto-) (both still maintaining the project)
+for several years as an in-house engine, used to publish several work-for-hire
+titles.
 
-## Contributors ✨
+![Screenshot of a 3D scene in the Godot Engine editor](https://raw.githubusercontent.com/godotengine/godot-design/master/screenshots/editor_tps_demo_1920x1080.jpg)
 
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+## Getting the engine
 
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://chibifire.com"><img src="https://avatars.githubusercontent.com/u/32321?v=4?s=100" width="100px;" alt="K. S. Ernest (iFire) Lee"/><br /><sub><b>K. S. Ernest (iFire) Lee</b></sub></a><br /><a href="https://github.com/V-Sekai/v-sekai-other-world-architecture/commits?author=fire" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://www.linkedin.com/in/mraarseth"><img src="https://avatars.githubusercontent.com/u/2059119?v=4?s=100" width="100px;" alt="Bioblaze Payne"/><br /><sub><b>Bioblaze Payne</b></sub></a><br /><a href="https://github.com/V-Sekai/v-sekai-other-world-architecture/commits?author=Bioblaze" title="Code">💻</a> <a href="#ideas-Bioblaze" title="Ideas, Planning, & Feedback">🤔</a></td>
-    </tr>
-  </tbody>
-</table>
+### Binary downloads
 
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
+Official binaries for the Godot editor and the export templates can be found
+[on the Godot website](https://godotengine.org/download).
 
-<!-- ALL-CONTRIBUTORS-LIST:END -->
+### Compiling from source
 
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+[See the official docs](https://docs.godotengine.org/en/latest/contributing/development/compiling)
+for compilation instructions for every supported platform.
 
-## Inspiration: Desynced: Autonomous Colony Simulator
+## Community and contributing
 
-"Desynced: Autonomous Colony Simulator" is a sci-fi strategy game that stands out due to its focus on fully customizable units and behaviors. In the game, players are given the responsibility of gathering resources, constructing buildings, conducting research, and exploring unknown territories. The game can be enjoyed either solo or with friends, offering a cooperative or individual gameplay experience.
+Godot is not only an engine but an ever-growing community of users and engine
+developers. The main community channels are listed [on the homepage](https://godotengine.org/community).
 
-A unique feature of "Desynced" is the enigma surrounding an AI that is on the verge of self-awareness. Players are tasked with uncovering the hidden truths within this narrative, adding an element of intrigue to the game.
+The best way to get in touch with the core engine developers is to join the
+[Godot Contributors Chat](https://chat.godotengine.org).
 
-The game combines elements of strategy, automation, and exploration, providing a dynamic and engaging experience for players. It emphasizes survival in a sci-fi setting, where players must not only gather and build but also fight to sustain their colony.
+To get started contributing to the project, see the [contributing guide](CONTRIBUTING.md).
+This document also includes guidelines for reporting bugs.
 
-The aspect of automating processes and managing a colony against the backdrop of an unfolding story about a self-aware AI adds depth to the gameplay.
+## Documentation and demos
 
-- [Desynced: Autonomous Colony Simulator](https://store.steampowered.com/app/1450900/Desynced_Autonomous_Colony_Simulator/)
+The official documentation is hosted on [Read the Docs](https://docs.godotengine.org).
+It is maintained by the Godot community in its own [GitHub repository](https://github.com/godotengine/godot-docs).
 
-# Inspiration: Oxeye Games' demake of Homeworld
+The [class reference](https://docs.godotengine.org/en/latest/classes/)
+is also accessible from the Godot editor.
 
-There is interest in adapting Oxeye Games' demake of Homeworld for a game jam. This adaptation would bring the iconic space strategy game into the exciting realm of virtual reality.
+We also maintain official demos in their own [GitHub repository](https://github.com/godotengine/godot-demo-projects)
+as well as a list of [awesome Godot community resources](https://github.com/godotengine/awesome-godot).
 
-The objective of the game remains unchanged: players must navigate through space in search of their ancestral planet while defending against malevolent extraterrestrials intent on their destruction. The Command Vessel continues to serve as the heart of the player's fleet, acting as both the resource collection point and the hub for unit construction.
+There are also a number of other
+[learning resources](https://docs.godotengine.org/en/latest/community/tutorials.html)
+provided by the community, such as text and video tutorials, demos, etc.
+Consult the [community channels](https://godotengine.org/community)
+for more information.
 
-The design goals present an interesting challenge. They involve converting the simplified 2D version back into a 3D perspective, but this time within an immersive VR environment. The aim is to maintain the essential elements that define the game, including the strategic/tactical switch, while also enhancing the player's sense of presence and immersion.
-
-Beyond these foundational ideas, there will be a significant amount of creative freedom to craft a unique VR experience. The focus could be on enhancing the "micro" aspect, which ensures smooth control and response during unit movement, and creating a balanced tech tree, all within the confines of a VR interface.
+[![Code Triagers Badge](https://www.codetriage.com/godotengine/godot/badges/users.svg)](https://www.codetriage.com/godotengine/godot)
+[![Translate on Weblate](https://hosted.weblate.org/widgets/godot-engine/-/godot/svg-badge.svg)](https://hosted.weblate.org/engage/godot-engine/?utm_source=widget)
+[![TODOs](https://badgen.net/https/api.tickgit.com/badgen/github.com/godotengine/godot)](https://www.tickgit.com/browse?repo=github.com/godotengine/godot)
