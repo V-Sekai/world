@@ -22,13 +22,13 @@
       }
     },
     {
-      "label": "Godot fetch",
+      "label": "Godot Clean Engine",
       "type": "shell",
       "options": {
-        "cwd": "${workspaceFolder}/vsk_godot"
+        "cwd": "${workspaceFolder}/godot"
       },
       "command": [
-        "git fetch origin"
+        "scons -c verbose=no warnings=no werror=yes dev_build=yes precision=double compiledb=yes optimize=speed_trace use_static_cpp=true target=editor"
       ],
       "problemMatcher": [],
       "group": {
@@ -36,23 +36,5 @@
         "isDefault": true
       }
     },
-    {
-      "label": "Godot Checkout Godot",
-      "type": "shell",
-      "options": {
-        "cwd": "${workspaceFolder}/vsk_godot"
-      },
-      "command": [
-        "git merge -s recursive -X theirs origin/groups-staging-4.x"
-      ],
-      "problemMatcher": [],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "dependsOn": [
-        "Godot fetch"
-      ]
-    }
   ]
 }
