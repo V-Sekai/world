@@ -212,14 +212,6 @@ func main() {
 	case "windows":
 		fmt.Println("Windows not setting max open files limit.")
 	default:
-		// Set the maximum number of open files allowed by the system
-		/*
-			err := setMaxOpenFiles(2048)
-			if err != nil {
-				fmt.Printf("Error setting max open files limit: %v\n", err)
-				return
-			}
-		*/
 	}
 
 	err := startServer()
@@ -253,24 +245,6 @@ func startServer() error {
 		}
 	}
 }
-
-/*
-func setMaxOpenFiles(limit uint64) error {
-	var rLimit syscall.Rlimit
-	err := syscall.Getrlimit(syscall.RLIMIT_NOFILE, &rLimit)
-	if err != nil {
-		return err
-	}
-
-	rLimit.Cur = rLimit.Max
-	err = syscall.Setrlimit(syscall.RLIMIT_NOFILE, &rLimit)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-*/
 
 func handleConnection(conn net.Conn) {
 	defer conn.Close()
@@ -398,53 +372,6 @@ func handleCommand(cli *client, msg string) {
 			message := strings.Join(args[1:], " ")
 			broadcastSay(cli, message)
 		}
-		/*
-			case "msg":
-				if len(args) < 3 {
-					cli.conn.Write([]byte("Usage: /msg [username] [message]\n"))
-				} else {
-					targetUsername := args[1]
-					message := strings.Join(args[2:], " ")
-					privateMessage(cli, targetUsername, message)
-				}
-			case "list":
-				listUsers(cli)
-			case "mute":
-				if len(args) < 2 {
-					cli.conn.Write([]byte("Usage: /mute [username]\n"))
-				} else {
-					mute(cli, args)
-				}
-			case "unmute":
-				if len(args) < 2 {
-					cli.conn.Write([]byte("Usage: /unmute [username]\n"))
-				} else {
-					unmute(cli, args)
-				}
-			case "create":
-				if len(args) < 2 {
-					cli.conn.Write([]byte("Usage: /create [channel_name]\n"))
-				} else {
-					channelName := args[1]
-					createChannel(cli, channelName)
-				}
-			case "join":
-				if len(args) < 2 {
-					cli.conn.Write([]byte("Usage: /join [channel_name]\n"))
-				} else {
-					channelName := args[1]
-					joinChannel(cli, channelName)
-				}
-			case "part":
-				partChannel(cli)
-			case "setChannelTitle":
-				if len(args) < 2 {
-					cli.conn.Write([]byte("Usage: /setChannelTitle [title]\n"))
-				} else {
-					title := strings.Join(args[1:], " ")
-					setChannelTitle(cli, title)
-				}
-		*/
 	case "north":
 		moveClient(cli, 0, -1)
 	case "east":
@@ -453,37 +380,6 @@ func handleCommand(cli *client, msg string) {
 		moveClient(cli, 0, 1)
 	case "west":
 		moveClient(cli, -1, 0)
-		/*
-			case "travel":
-				jwt, err := generateJWT(serverName, cli.username)
-				if err != nil {
-					cli.conn.Write([]byte("Error generating travel token.\n"))
-					return
-				}
-				response := fmt.Sprintf("Travel token: %s\n", jwt)
-				cli.conn.Write([]byte(response))
-
-			case "whisper":
-				if len(args) < 3 {
-					cli.conn.Write([]byte("Usage: /whisper [username] [message]\n"))
-				} else {
-					targetUsername := args[1]
-					message := strings.Join(args[2:], " ")
-					whisper(cli, targetUsername, message)
-				}
-			case "moveTo":
-				if len(args) < 3 {
-					cli.conn.Write([]byte("Usage: /moveTo [x] [y]\n"))
-				} else {
-					x, err1 := strconv.Atoi(args[1])
-					y, err2 := strconv.Atoi(args[2])
-					if err1 != nil || err2 != nil {
-						cli.conn.Write([]byte("Invalid coordinates. Please enter integers.\n"))
-					} else {
-						moveTo(cli, x, y, cli.sleepDelay)
-					}
-				}
-		*/
 	case "help":
 		help(cli)
 	default:
