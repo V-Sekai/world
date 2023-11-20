@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai/V-Sekai.blender-game-tools.git
 	branch = main
-	commit = 9cc9199c948416d994c66f29b862e3b5eb8299b2
-	parent = 7b97ef55b50dbe55634f9ffe214f4ad701100ca0
+	commit = 081efef600fece31dac8cf219cd076e38c636eae
+	parent = 8b6f236eafb612fb76795c6b6d68262953e209a5
 	method = merge
 	cmdver = 0.4.6
