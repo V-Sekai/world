@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai/TOOL_geodesiac_path.git
 	branch = main
-	commit = eea65ee54cd43bd9846aa0a33b3c41a31c88303f
-	parent = 167c2fd0748667f542598eae434e50dbbb2794fe
+	commit = 6b6f16fe5427dd2c77e7a153fe4a7ee2d7a4bf75
+	parent = 8d0967ebb7771f6be03906a4e829426faf314b8c
 	method = merge
 	cmdver = 0.4.6
