@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/V-Sekai/shader-motion-navy-lead-ostrich.git
+	branch = main
+	commit = 7d67f667530e4422e2f0f4544491a2427bd1f9db
+	parent = 268a495f5a7c47059aa4fb51c7bed0d65db0aa77
+	method = merge
+	cmdver = 0.4.6
