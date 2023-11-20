@@ -1,13 +1,11 @@
 extends Node
 
-
 # Declare member variables here. Examples:
 # var a = 2
 # var b = "text"
 # Set the IP address and port for the connection
 
 var discord_url = "https://discord.gg/pTGZuaf"
-
 
 # Define the terrain scene or resource that you want to instantiate
 var terrain_scene = preload("res://Assets/terrain.tscn")
@@ -19,12 +17,9 @@ var player_scene = preload("res://Assets/player.tscn")
 var map_scene = preload("res://Assets/map.tscn")
 
 
-
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	pass
-
-
 
 
 func process_map_event(map_data):
@@ -36,22 +31,22 @@ func process_map_event(map_data):
 
 			# Instantiate a square and add it to the scene at the specified position
 			var terrain = terrain_scene.instance()
-			terrain.set("TYPE", map_cell["type"]) # Set the TYPE property of the square scene
+			terrain.set("TYPE", map_cell["type"])  # Set the TYPE property of the square scene
 			terrain.position = Vector2(x, y)
 			map.add_child(terrain)
 	if get_tree().change_scene(map_scene) != OK:
 		print("Failed to Load Map.")
 
 
-
 # Update the process_spawn_player_event function to include X and Y position arguments
 func process_spawn_player_event(player_id, player_name, x, y):
 	# Instantiate a square and add it to the scene
 	var player = player_scene.instance()
-	player.set("ID", player_id) # Set the ID property of the square scene
-	player.set("Name", player_name) # Set the Name property of the square scene
-	player.position = Vector2(x, y) # Set the X and Y position of the square scene
+	player.set("ID", player_id)  # Set the ID property of the square scene
+	player.set("Name", player_name)  # Set the Name property of the square scene
+	player.position = Vector2(x, y)  # Set the X and Y position of the square scene
 	map_scene.add_child(player)
+
 
 # Add this new function after the process_spawn_player_event function
 func process_move_event(player_id, x, y):
@@ -61,6 +56,7 @@ func process_move_event(player_id, x, y):
 			# Set the new X and Y position for the square scene
 			child.position = Vector2(x, y)
 			break
+
 
 # Add this new function after the process_move_event function
 func process_say_event(username, message):

@@ -1,6 +1,5 @@
 extends Node
 
-
 @onready var FadeIn = $Transition/FadeIn
 @onready var FadeOut = $Transition/Fadeout
 

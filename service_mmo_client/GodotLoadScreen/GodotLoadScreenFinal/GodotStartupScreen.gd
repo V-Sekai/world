@@ -1,6 +1,5 @@
 extends ColorRect
 
-
 @onready var godotSprite = $Control/GodotAnimatedSprite
 @onready var godotTXT = $Control/Godot
 @onready var lightFlikceringSound = $LightFlickerSound
@@ -10,21 +9,24 @@ var tween: Tween = Tween.new()
 
 func _ready():
 	lightFlikceringSound.play()
-	godotTXT.set("modulate", tween.interpolate_value(Color(1,1,1,0), Color(1,1,1,0).lerp(Color(1,1,1,1), 1), 0, 1, Tween.TRANS_BOUNCE, Tween.EASE_IN_OUT))
+	godotTXT.set("modulate", tween.interpolate_value(Color(1, 1, 1, 0), Color(1, 1, 1, 0).lerp(Color(1, 1, 1, 1), 1), 0, 1, Tween.TRANS_BOUNCE, Tween.EASE_IN_OUT))
 	tween.play()
 
+
 func _process(delta):
-	godotTXT.set("modulate", tween.interpolate_value(godotTXT.modulate, Color(1,1,1,0).lerp(Color(1,1,1,1), 1), delta, 1, Tween.TRANS_BOUNCE, Tween.EASE_IN_OUT))
+	godotTXT.set("modulate", tween.interpolate_value(godotTXT.modulate, Color(1, 1, 1, 0).lerp(Color(1, 1, 1, 1), 1), delta, 1, Tween.TRANS_BOUNCE, Tween.EASE_IN_OUT))
 
 
 func _on_AnimationPlayTimer_timeout():
 	godotSprite.play()
+
 
 func _on_GodotAnimatedSprite_animation_finished():
 	# Here I added camera shake, you will need to do this on your own
 	# if you  are interested in how I made a camera shake function, message
 	# me or comment on my video.
 	$ChangeSceneTimer.start()
+
 
 func _on_ChangeSceneTimer_timeout():
 	animation.play("Fade")

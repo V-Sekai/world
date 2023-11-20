@@ -1,8 +1,8 @@
 extends Node
 
-
 @onready var FadeIn = $Transition/FadeIn
 @onready var FadeOut = $Transition/FadeOut
+
 
 func _ready():
 	FadeIn.play_backwards("Fade")
