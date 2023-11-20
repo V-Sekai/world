@@ -4,10 +4,11 @@ extends ColorRect
 @onready var godotTXT = $Control/Godot
 @onready var lightFlikceringSound = $LightFlickerSound
 @onready var animation = $SceneTransition/AnimationPlayer
-var tween: Tween = Tween.new()
+var tween: Tween = null
 
 
 func _ready():
+	tween = create_tween()
 	lightFlikceringSound.play()
 	godotTXT.set("modulate", tween.interpolate_value(Color(1, 1, 1, 0), Color(1, 1, 1, 0).lerp(Color(1, 1, 1, 1), 1), 0, 1, Tween.TRANS_BOUNCE, Tween.EASE_IN_OUT))
 	tween.play()
