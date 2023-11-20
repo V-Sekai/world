@@ -1,0 +1,41 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: groups-server-01
+  name: groups-server-01
+  namespace: default
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: groups-server-01
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp:
+      labels:
+        app: groups-server-01
+    spec:
+      containers:
+      - env:
+        image: groupsinfra/groups-server:groups-4.2.groups-4.2.0.daee525b.627.1314.1534
+        args: ["--headless","--public", "--dedicated", "--max_retries", "100", "--map", "uro://69ba151f-a0ca-41e4-b918-f7d7e7399d79",
+          "--server_name", "V-Sekai Preview Hut", "--port", "7801"]
+        imagePullPolicy: IfNotPresent
+        name: groups-server-01
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      hostNetwork: true
+      restartPolicy: Always
+      serviceAccount: default
+      serviceAccountName: default
+      terminationGracePeriodSeconds: 30

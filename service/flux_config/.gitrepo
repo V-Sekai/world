@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/V-Sekai/flux-config.git
+	branch = flux2
+	commit = d65649fcafbe38150df1cdac41e932f501a86d74
+	parent = 2a0a4a0e290f2c6f7d30df73d2816f615975c2bb
+	method = merge
+	cmdver = 0.4.6
