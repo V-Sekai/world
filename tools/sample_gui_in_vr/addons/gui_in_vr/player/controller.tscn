@@ -1,0 +1,54 @@
+[gd_scene load_steps=7 format=3 uid="uid://deonary444dfo"]
+
+[ext_resource type="Script" path="res://addons/gui_in_vr/player/controller_mesh.gd" id="1"]
+[ext_resource type="Script" path="res://addons/gui_in_vr/player/controller_ray_cast.gd" id="2"]
+
+[sub_resource type="SphereMesh" id="1"]
+radius = 0.003
+height = 0.006
+radial_segments = 16
+rings = 8
+
+[sub_resource type="CylinderMesh" id="2"]
+top_radius = 0.02
+bottom_radius = 0.02
+height = 0.01
+
+[sub_resource type="StandardMaterial3D" id="3"]
+albedo_color = Color(1, 1, 1, 0)
+refraction_enabled = true
+refraction_scale = 1.0
+
+[sub_resource type="CylinderMesh" id="4"]
+top_radius = 1e-05
+bottom_radius = 0.0001
+radial_segments = 6
+rings = 1
+
+[node name="Controller" type="XRController3D"]
+
+[node name="ControllerMesh" type="MeshInstance3D" parent="."]
+script = ExtResource("1")
+
+[node name="Touchpad" type="Node3D" parent="ControllerMesh"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.05)
+
+[node name="SelectionDot" type="MeshInstance3D" parent="ControllerMesh/Touchpad"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.01, 0)
+mesh = SubResource("1")
+skeleton = NodePath("")
+
+[node name="Cylinder" type="MeshInstance3D" parent="ControllerMesh/Touchpad"]
+visible = false
+mesh = SubResource("2")
+skeleton = NodePath("")
+
+[node name="ControllerRayCast" type="RayCast3D" parent="."]
+target_position = Vector3(0, 0, -2)
+script = ExtResource("2")
+
+[node name="RayMesh" type="MeshInstance3D" parent="ControllerRayCast"]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, -1)
+material_override = SubResource("3")
+cast_shadow = 0
+mesh = SubResource("4")

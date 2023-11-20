@@ -1,0 +1,45 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="GUI in VR"
+run/main_scene="res://addons/gui_in_vr/world.tscn"
+config/features=PackedStringArray("4.1")
+config/icon="res://addons/gui_in_vr/icon.png"
+
+[display]
+
+window/vsync/vsync_mode=false
+
+[gdnative]
+
+singletons=["res://addons/godot-openvr/godot_openvr.gdnlib"]
+
+[gui]
+
+theme/default_font_multichannel_signed_distance_field=true
+
+[physics]
+
+3d/physics_engine="GodotPhysics"
+common/physics_fps=180
+
+[rendering]
+
+environment/defaults/default_environment="res://default_env.tres"
+quality/filters/msaa=4
+quality/depth/hdr=false
+
+[xr]
+
+openxr/enabled=true
+openxr/startup_alert=false
+shaders/enabled=true

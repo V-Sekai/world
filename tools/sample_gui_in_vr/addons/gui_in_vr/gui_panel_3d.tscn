@@ -1,0 +1,39 @@
+[gd_scene load_steps=7 format=3 uid="uid://bsu1sgfgm46oi"]
+
+[ext_resource type="PackedScene" uid="uid://ffmp06i7baex" path="res://addons/gui_in_vr/gui.tscn" id="1"]
+[ext_resource type="Script" path="res://addons/gui_in_vr/gui_panel_3d.gd" id="1_5csgu"]
+
+[sub_resource type="BoxShape3D" id="1"]
+resource_local_to_scene = true
+size = Vector3(1, 1, 0)
+
+[sub_resource type="QuadMesh" id="QuadMesh_xx8ge"]
+resource_local_to_scene = true
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_fmcvr"]
+viewport_path = NodePath("SubViewport")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ld1cm"]
+resource_local_to_scene = true
+cull_mode = 2
+shading_mode = 0
+albedo_texture = SubResource("ViewportTexture_fmcvr")
+
+[node name="GUIPanel3D" type="StaticBody3D"]
+script = ExtResource("1_5csgu")
+
+[node name="SubViewport" type="SubViewport" parent="."]
+disable_3d = true
+gui_embed_subwindows = true
+size = Vector2i(280, 180)
+render_target_update_mode = 4
+
+[node name="GUI" parent="SubViewport" instance=ExtResource("1")]
+mouse_filter = 1
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("1")
+
+[node name="Quad" type="MeshInstance3D" parent="."]
+mesh = SubResource("QuadMesh_xx8ge")
+surface_material_override/0 = SubResource("StandardMaterial3D_ld1cm")
