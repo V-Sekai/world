@@ -1,0 +1,44 @@
+[gd_scene load_steps=3 format=3 uid="uid://djpvyvuw1k4e"]
+
+[ext_resource type="Script" path="res://Node2D.gd" id="1_nwxrr"]
+[ext_resource type="Script" path="res://HTTPRequest.gd" id="2_86wer"]
+
+[node name="Node2D" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_nwxrr")
+godot_project = "."
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HTTPRequest" type="HTTPRequest" parent="VBoxContainer/VBoxContainer"]
+script = ExtResource("2_86wer")
+
+[node name="On" type="Button" parent="VBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "On"
+
+[node name="Off" type="Button" parent="VBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "Off"
+
+[connection signal="pressed" from="VBoxContainer/VBoxContainer/On" to="." method="_on_Button2_pressed"]
+[connection signal="pressed" from="VBoxContainer/VBoxContainer/Off" to="." method="_on_Off_pressed"]
