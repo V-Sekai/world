@@ -10,10 +10,10 @@
       "label": "Godot Engine",
       "type": "shell",
       "options": {
-        "cwd": "${workspaceFolder}/vsk_godot"
+        "cwd": "${workspaceFolder}/godot"
       },
       "command": [
-        "scons vsproj=no use_llvm=yes use_mingw=yes precision=double target=editor"
+        "scons verbose=no warnings=no werror=yes dev_build=yes precision=double compiledb=yes optimize=speed_trace use_static_cpp=true target=editor"
       ],
       "problemMatcher": [],
       "group": {
