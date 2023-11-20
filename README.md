@@ -1,7 +1,9 @@
 # project-other-world
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+
 [![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
+
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 The V-Sekai Other World Architecture project aims to create a virtual world using the binary Godot Engine client and server. The development process is divided into several prototypes, each with its own specific goals and objectives.
@@ -47,10 +49,10 @@ The aspect of automating processes and managing a colony against the backdrop of
 
 # Inspiration: Oxeye Games' demake of Homeworld
 
-V-Sekai, an open-source group known for their innovative "other-world" projects, has expressed interest in adapting Oxeye Games' demake of Homeworld for a game jam. This adaptation would bring the iconic space strategy game into the exciting realm of virtual reality.
+There is interest in adapting Oxeye Games' demake of Homeworld for a game jam. This adaptation would bring the iconic space strategy game into the exciting realm of virtual reality.
 
 The objective of the game remains unchanged: players must navigate through space in search of their ancestral planet while defending against malevolent extraterrestrials intent on their destruction. The Command Vessel continues to serve as the heart of the player's fleet, acting as both the resource collection point and the hub for unit construction.
 
 The design goals present an interesting challenge. They involve converting the simplified 2D version back into a 3D perspective, but this time within an immersive VR environment. The aim is to maintain the essential elements that define the game, including the strategic/tactical switch, while also enhancing the player's sense of presence and immersion.
 
-Beyond these foundational ideas, V-Sekai will have a significant amount of creative freedom to craft their own VR experience. They could choose to focus on enhancing the "micro" aspect, which ensures smooth control and response during unit movement, and creating a balanced tech tree, all within the confines of a VR interface.
+Beyond these foundational ideas, there will be a significant amount of creative freedom to craft a unique VR experience. The focus could be on enhancing the "micro" aspect, which ensures smooth control and response during unit movement, and creating a balanced tech tree, all within the confines of a VR interface.
