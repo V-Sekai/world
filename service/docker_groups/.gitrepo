@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/V-Sekai/docker-groups.git
+	branch = master
+	commit = 410caff51ebc18864b18fc2307708df8094f646d
+	parent = e0c10645058bf7d6eab134681444bde68411b4fd
+	method = merge
+	cmdver = 0.4.6
