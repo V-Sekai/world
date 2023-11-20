@@ -2,20 +2,20 @@ package main
 
 import (
 	"bufio"
-	"fmt"
-	"net"
-	"testing"
-	"time"
+	"bytes"
 	"encoding/json"
-	"net/http/httptest"
-	"strings"
-	"os"
+	"errors"
+	"fmt"
+	"github.com/golang-jwt/jwt"
 	"io"
 	"log"
+	"net"
 	"net/http"
-	"bytes"
-	"errors"
-	"github.com/golang-jwt/jwt"
+	"net/http/httptest"
+	"os"
+	"strings"
+	"testing"
+	"time"
 )
 
 func TestConnection(t *testing.T) {
@@ -76,23 +76,20 @@ func TestClientKickUser(t *testing.T) {
 	}()
 	go startAPI()
 
-    // Connect two clients
-    conn1 := connectClient(t)
-    defer conn1.Close()
-    conn2 := connectClient(t)
-    defer conn2.Close()
-
+	// Connect two clients
+	conn1 := connectClient(t)
+	defer conn1.Close()
+	conn2 := connectClient(t)
+	defer conn2.Close()
 
 	loginTest(t, conn1, "testUser1")
 
 	loginTest(t, conn2, "testUser2")
 
-	
 	checkUserJoinedReceived(t, conn1, "testUser2", "joined the chat!")
 
 	// Give the clients some time to connect
 	time.Sleep(5 * time.Second)
-
 
 	kickReq := struct {
 		Username string `json:"username"`
@@ -110,7 +107,6 @@ func TestClientKickUser(t *testing.T) {
 		t.Fatal("Failed to create kick request")
 	}
 
-	
 	// Set the RPG_AUTH header
 	req.Header.Set("RPG_AUTH", createTestJWT())
 
@@ -156,7 +152,7 @@ func TestClientKickUser(t *testing.T) {
 
 	// Parse the response
 	var actionResponse struct {
-		Action   string `json:"action"`
+		Action  string `json:"action"`
 		Message string `json:"message"`
 	}
 	fmt.Printf("Server Response: %s", response)
@@ -168,7 +164,6 @@ func TestClientKickUser(t *testing.T) {
 		t.Fatalf("Unexpected kicked response: %+v", actionResponse)
 	}
 
-
 	_, err2 := bufio.NewReader(conn2).ReadString('\n')
 	if errors.Is(err2, io.EOF) {
 		fmt.Println("TestClientKickUser: PASSED")
@@ -178,30 +173,30 @@ func TestClientKickUser(t *testing.T) {
 }
 
 func connectClient(t *testing.T) net.Conn {
-    conn, err := net.Dial("tcp", "localhost:6000")
-    if err != nil {
-        t.Fatalf("Failed to connect to server: %v", err)
-    }
-    return conn
+	conn, err := net.Dial("tcp", "localhost:6000")
+	if err != nil {
+		t.Fatalf("Failed to connect to server: %v", err)
+	}
+	return conn
 }
 
 func loginTest(t *testing.T, conn net.Conn, username string) {
-// Send a username to the server
-fmt.Fprintf(conn, username + "\n")
+	// Send a username to the server
+	fmt.Fprintf(conn, username+"\n")
 
-// Read server response
-response, err := bufio.NewReader(conn).ReadString('\n')
-if err != nil {
-	t.Fatalf("Failed to read server response: %v", err)
-}
+	// Read server response
+	response, err := bufio.NewReader(conn).ReadString('\n')
+	if err != nil {
+		t.Fatalf("Failed to read server response: %v", err)
+	}
 
-// Parse the response
-var mapUpdate [][]CellInfo
-err = json.Unmarshal([]byte(response), &mapUpdate)
-if err != nil {
-	t.Fatalf("Failed to parse map update: %v", err)
-}
-fmt.Fprintf(os.Stdout, "loginTest(%s): PASSED\n", username)
+	// Parse the response
+	var mapUpdate [][]CellInfo
+	err = json.Unmarshal([]byte(response), &mapUpdate)
+	if err != nil {
+		t.Fatalf("Failed to parse map update: %v", err)
+	}
+	fmt.Fprintf(os.Stdout, "loginTest(%s): PASSED\n", username)
 }
 
 func moveTest(t *testing.T, conn net.Conn, username string) {
@@ -272,7 +267,7 @@ func TestSendAnnouncementHandler(t *testing.T) {
 	payload := strings.NewReader(`{"message": "This is a test announcement."}`)
 	req := httptest.NewRequest("POST", "/api/sendAnnouncement", payload)
 	req.Header.Set("Content-Type", "application/json")
-	
+
 	// Set the RPG_AUTH header
 	req.Header.Set("RPG_AUTH", createTestJWT())
 
@@ -325,9 +320,9 @@ func checkUserJoinedReceived(t *testing.T, conn net.Conn, username, expectedMsg 
 	fmt.Println(msg)
 
 	var joined struct {
-		Action  string `json:"action"`
+		Action   string `json:"action"`
 		Username string `json:"username"`
-		Message string `json:"message"`
+		Message  string `json:"message"`
 	}
 
 	err = json.Unmarshal([]byte(msg), &joined)
@@ -376,7 +371,7 @@ func TestLoadUserHandler(t *testing.T) {
 	payload := strings.NewReader(`{"username": "testUser1", "x": 5, "y": 5}`)
 	req := httptest.NewRequest("POST", "/api/loadUser", payload)
 	req.Header.Set("Content-Type", "application/json")
-	
+
 	// Set the RPG_AUTH header
 	req.Header.Set("RPG_AUTH", createTestJWT())
 
@@ -410,18 +405,16 @@ func TestClientKickAllUsers(t *testing.T) {
 	}()
 	go startAPI()
 
-    // Connect two clients
-    conn1 := connectClient(t)
-    defer conn1.Close()
-    conn2 := connectClient(t)
-    defer conn2.Close()
-
+	// Connect two clients
+	conn1 := connectClient(t)
+	defer conn1.Close()
+	conn2 := connectClient(t)
+	defer conn2.Close()
 
 	loginTest(t, conn1, "testUser1")
 
 	loginTest(t, conn2, "testUser2")
 
-	
 	checkUserJoinedReceived(t, conn1, "testUser2", "joined the chat!")
 
 	// Give the clients some time to connect
@@ -431,7 +424,7 @@ func TestClientKickAllUsers(t *testing.T) {
 	if err != nil {
 		t.Fatal("Failed to create kick request")
 	}
-	
+
 	// Set the RPG_AUTH header
 	req.Header.Set("RPG_AUTH", createTestJWT())
 
@@ -471,10 +464,9 @@ func TestSendMessageToUserHandler(t *testing.T) {
 	}()
 	go startAPI()
 
-    // Connect two clients
-    conn1 := connectClient(t)
-    defer conn1.Close()
-
+	// Connect two clients
+	conn1 := connectClient(t)
+	defer conn1.Close()
 
 	loginTest(t, conn1, "testUser1")
 
@@ -487,22 +479,21 @@ func TestSendMessageToUserHandler(t *testing.T) {
 		FromServer   string `json:"from_server"`
 		Message      string `json:"message"`
 	}{
-		ToUsername:       "testUser1",
-		FromUsername:       "testUser2",
-		FromServer: "testServer2",
-		Message:    "This is only a test",
+		ToUsername:   "testUser1",
+		FromUsername: "testUser2",
+		FromServer:   "testServer2",
+		Message:      "This is only a test",
 	}
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		t.Fatalf("Failed to marshal payload: %v", err)
 	}
 
-
 	req, err := http.NewRequest("POST", "http://localhost:5000/api/sendMessageToUser", bytes.NewBuffer(payloadBytes))
 	if err != nil {
 		t.Fatal("Failed to create message request")
 	}
-	
+
 	// Set the RPG_AUTH header
 	req.Header.Set("RPG_AUTH", createTestJWT())
 
@@ -534,11 +525,11 @@ func checkUserMessageViaAPIReceived(t *testing.T, conn net.Conn, toUsername, fro
 	fmt.Println(msg)
 
 	var fromMsg struct {
-		Action string `json:"action"`
-		Message  string `json:"message"`
-		From string `json:"from"`
-		FromServer  string `json:"fromServer"`
-		To  string `json:"to"`
+		Action     string `json:"action"`
+		Message    string `json:"message"`
+		From       string `json:"from"`
+		FromServer string `json:"fromServer"`
+		To         string `json:"to"`
 	}
 
 	err = json.Unmarshal([]byte(msg), &fromMsg)
@@ -561,10 +552,9 @@ func TestMoveUserHandler(t *testing.T) {
 	}()
 	go startAPI()
 
-    // Connect two clients
-    conn1 := connectClient(t)
-    defer conn1.Close()
-
+	// Connect two clients
+	conn1 := connectClient(t)
+	defer conn1.Close()
 
 	loginTest(t, conn1, "testUser1")
 
@@ -592,7 +582,7 @@ func TestMoveUserHandler(t *testing.T) {
 	if err != nil {
 		t.Fatal("Failed to create message request")
 	}
-	
+
 	// Set the RPG_AUTH header
 	req.Header.Set("RPG_AUTH", createTestJWT())
 
@@ -649,18 +639,16 @@ func TestSendMessageToCellHandler(t *testing.T) {
 	}()
 	go startAPI()
 
-    // Connect two clients
-    conn1 := connectClient(t)
-    defer conn1.Close()
-    conn2 := connectClient(t)
-    defer conn2.Close()
-
+	// Connect two clients
+	conn1 := connectClient(t)
+	defer conn1.Close()
+	conn2 := connectClient(t)
+	defer conn2.Close()
 
 	loginTest(t, conn1, "testUser1")
 
 	loginTest(t, conn2, "testUser2")
 
-	
 	checkUserJoinedReceived(t, conn1, "testUser2", "joined the chat!")
 
 	// Give the clients some time to connect
@@ -682,12 +670,11 @@ func TestSendMessageToCellHandler(t *testing.T) {
 		t.Fatalf("Failed to marshal payload: %v", err)
 	}
 
-
 	req, err := http.NewRequest("POST", "http://localhost:5000/api/sendMessageToCell", bytes.NewBuffer(payloadBytes))
 	if err != nil {
 		t.Fatal("Failed to create message request")
 	}
-	
+
 	// Set the RPG_AUTH header
 	req.Header.Set("RPG_AUTH", createTestJWT())
 
@@ -705,9 +692,9 @@ func TestSendMessageToCellHandler(t *testing.T) {
 	// Give the server some time to process the kick action
 	time.Sleep(2 * time.Second)
 
-// Check if both clients received the announcement
-checkCellMessageReceived(t, conn1, "Hello, cell!")
-checkCellMessageReceived(t, conn2, "Hello, cell!")
+	// Check if both clients received the announcement
+	checkCellMessageReceived(t, conn1, "Hello, cell!")
+	checkCellMessageReceived(t, conn2, "Hello, cell!")
 
 	fmt.Println("TestSendMessageToCellHandler: PASSED")
 }
@@ -745,18 +732,16 @@ func TestMuteUserHandler(t *testing.T) {
 	}()
 	go startAPI()
 
-    // Connect two clients
-    conn1 := connectClient(t)
-    defer conn1.Close()
-    conn2 := connectClient(t)
-    defer conn2.Close()
-
+	// Connect two clients
+	conn1 := connectClient(t)
+	defer conn1.Close()
+	conn2 := connectClient(t)
+	defer conn2.Close()
 
 	loginTest(t, conn1, "testUser1")
 
 	loginTest(t, conn2, "testUser2")
 
-	
 	checkUserJoinedReceived(t, conn1, "testUser2", "joined the chat!")
 
 	// Give the clients some time to connect
@@ -773,12 +758,11 @@ func TestMuteUserHandler(t *testing.T) {
 		t.Fatalf("Failed to marshal payload: %v", err)
 	}
 
-
 	req, err := http.NewRequest("POST", "http://localhost:5000/api/muteUser", bytes.NewBuffer(payloadBytes))
 	if err != nil {
 		t.Fatal("Failed to create message request")
 	}
-	
+
 	// Set the RPG_AUTH header
 	req.Header.Set("RPG_AUTH", createTestJWT())
 
@@ -796,19 +780,19 @@ func TestMuteUserHandler(t *testing.T) {
 	// Give the server some time to process the kick action
 	time.Sleep(2 * time.Second)
 
-		// Iterate over the clients sync.Map to find the user and disconnect them
-		clients.Range(func(_, v interface{}) bool {
-			cli := v.(*client)
-			if cli.username == "testUser2" {
-				fmt.Println("User Found!")
-				if (!cli.muted) {
-					t.Fatalf("Failed to mute user: %+v", cli.username)
-				}
-				return false
+	// Iterate over the clients sync.Map to find the user and disconnect them
+	clients.Range(func(_, v interface{}) bool {
+		cli := v.(*client)
+		if cli.username == "testUser2" {
+			fmt.Println("User Found!")
+			if !cli.muted {
+				t.Fatalf("Failed to mute user: %+v", cli.username)
 			}
-			return true
-		})
-	
+			return false
+		}
+		return true
+	})
+
 	fmt.Println("TestMuteUserHandler: PASSED")
 }
 
@@ -822,16 +806,14 @@ func TestSaveMapHandler(t *testing.T) {
 	}()
 	go startAPI()
 
-
 	// Give the clients some time to connect
 	time.Sleep(5 * time.Second)
-
 
 	req, err := http.NewRequest("GET", "http://localhost:5000/api/saveMap", nil)
 	if err != nil {
 		t.Fatal("Failed to create message request")
 	}
-	
+
 	// Set the RPG_AUTH header
 	req.Header.Set("RPG_AUTH", createTestJWT())
 
@@ -876,7 +858,6 @@ func TestLoadMapHandler(t *testing.T) {
 	}()
 	go startAPI()
 
-
 	// Give the clients some time to connect
 	time.Sleep(5 * time.Second)
 
@@ -886,13 +867,11 @@ func TestLoadMapHandler(t *testing.T) {
 		t.Fatalf("Failed to create test map file: %v", err)
 	}
 
-
-
 	req, err := http.NewRequest("GET", "http://localhost:5000/api/loadMap", nil)
 	if err != nil {
 		t.Fatal("Failed to create message request")
 	}
-	
+
 	// Set the RPG_AUTH header
 	req.Header.Set("RPG_AUTH", createTestJWT())
 
@@ -946,12 +925,11 @@ func TestAddCellHandler(t *testing.T) {
 		t.Fatalf("Failed to marshal payload: %v", err)
 	}
 
-
 	req, err := http.NewRequest("POST", "http://localhost:5000/api/addCell", bytes.NewBuffer(payloadBytes))
 	if err != nil {
 		t.Fatal("Failed to create message request")
 	}
-	
+
 	// Set the RPG_AUTH header
 	req.Header.Set("RPG_AUTH", createTestJWT())
 
@@ -974,7 +952,7 @@ func TestAddCellHandler(t *testing.T) {
 	if ok == nil {
 		t.Fatalf("Cell was not added at position (250, 250)")
 	}
-	
+
 	fmt.Println("TestAddCellHandler: PASSED")
 }
 
@@ -1005,12 +983,11 @@ func TestDeleteCellHandler(t *testing.T) {
 		t.Fatalf("Failed to marshal payload: %v", err)
 	}
 
-
 	req, err := http.NewRequest("POST", "http://localhost:5000/api/deleteCell", bytes.NewBuffer(payloadBytes))
 	if err != nil {
 		t.Fatal("Failed to create message request")
 	}
-	
+
 	// Set the RPG_AUTH header
 	req.Header.Set("RPG_AUTH", createTestJWT())
 
@@ -1048,20 +1025,17 @@ func TestKickUsersInCellHandler(t *testing.T) {
 	}()
 	go startAPI()
 
-    // Connect two clients
-    conn1 := connectClient(t)
-    defer conn1.Close()
-    conn2 := connectClient(t)
-    defer conn2.Close()
-
+	// Connect two clients
+	conn1 := connectClient(t)
+	defer conn1.Close()
+	conn2 := connectClient(t)
+	defer conn2.Close()
 
 	loginTest(t, conn1, "testUser1")
 
 	loginTest(t, conn2, "testUser2")
 
-	
 	checkUserJoinedReceived(t, conn1, "testUser2", "joined the chat!")
-
 
 	// Give the clients some time to connect
 	time.Sleep(5 * time.Second)
@@ -1080,12 +1054,11 @@ func TestKickUsersInCellHandler(t *testing.T) {
 		t.Fatalf("Failed to marshal payload: %v", err)
 	}
 
-
 	req, err := http.NewRequest("POST", "http://localhost:5000/api/kickAllUsersInCell", bytes.NewBuffer(payloadBytes))
 	if err != nil {
 		t.Fatal("Failed to create message request")
 	}
-	
+
 	// Set the RPG_AUTH header
 	req.Header.Set("RPG_AUTH", createTestJWT())
 
@@ -1111,7 +1084,7 @@ func TestKickUsersInCellHandler(t *testing.T) {
 	if _, ok := clients.Load("testUser2"); ok {
 		t.Fatalf("Client 2 (%s) was not kicked from the server", "testUser2")
 	}
-	
+
 	fmt.Println("TestDeleteCellHandler: PASSED")
 }
 
@@ -1125,18 +1098,16 @@ func TestBroadcastSay(t *testing.T) {
 	}()
 	go startAPI()
 
-    // Connect two clients
-    conn1 := connectClient(t)
-    defer conn1.Close()
-    conn2 := connectClient(t)
-    defer conn2.Close()
-
+	// Connect two clients
+	conn1 := connectClient(t)
+	defer conn1.Close()
+	conn2 := connectClient(t)
+	defer conn2.Close()
 
 	loginTest(t, conn1, "testUser1")
 
 	loginTest(t, conn2, "testUser2")
 
-	
 	checkUserJoinedReceived(t, conn1, "testUser2", "joined the chat!")
 
 	// Give the clients some time to connect
@@ -1170,5 +1141,3 @@ func TestBroadcastSay(t *testing.T) {
 
 	fmt.Println("TestBroadcastSay: PASSED")
 }
-
-

@@ -23,36 +23,43 @@ import (
 )
 
 const (
-	Empty CellType = "Empty"
+	Empty    CellType = "Empty"
 	Mountain CellType = "Mountain"
-	Grass CellType = "Grass"
-	Water CellType = "Water"
+	Grass    CellType = "Grass"
+	Water    CellType = "Water"
 )
+
 var clients sync.Map
 var channels sync.Map
+
 const serverjwtSecret = "your_jwt_secret1"
+
 var loadedUsers = make(map[string]LoadUserRequest)
 var defaultSleepDelay = 3 * time.Second
+
 const mapFilename = "map.json"
+
 var grid [][]*Cell
 var gridHeight = 25
 var gridWidth = 25
+
 const apijwtSecret = "your_jwt_secret2"
+
 var gridMutex sync.RWMutex
 var serverName = "TestServer1"
 var stopChan chan struct{}
 
 type client struct {
-	conn     net.Conn
-	username string
-	channel    *channel
-	muted    bool
-	x        int
-	y        int
+	conn               net.Conn
+	username           string
+	channel            *channel
+	muted              bool
+	x                  int
+	y                  int
 	commandRateLimiter *rateLimiter
-	sleepDelay time.Duration
-	mutedUsernames map[string]bool
-	kicked              bool
+	sleepDelay         time.Duration
+	mutedUsernames     map[string]bool
+	kicked             bool
 }
 
 type ClientInfo struct {
@@ -76,10 +83,10 @@ type travelClaims struct {
 }
 
 type rateLimiter struct {
-	tokens           int
-	maxTokens        int
-	tokenFillRate    time.Duration
-	lastCheck        time.Time
+	tokens        int
+	maxTokens     int
+	tokenFillRate time.Duration
+	lastCheck     time.Time
 }
 
 type Cell struct {
@@ -90,15 +97,14 @@ type Cell struct {
 type CellInfo struct {
 	Type    CellType     `json:"type"`
 	Clients []ClientInfo `json:"clients"`
-	X		int			 `json:"x"`
-	Y		int			 `json:"y"`
+	X       int          `json:"x"`
+	Y       int          `json:"y"`
 }
 
 type deleteCellRequest struct {
 	X int `json:"x"`
 	Y int `json:"y"`
 }
-
 
 type sessionPayload struct {
 	ServerName string `json:"server_name"`
@@ -151,7 +157,6 @@ type priorityQueueItem struct {
 
 type priorityQueue []*priorityQueueItem
 
-
 func init() {
 	// Check if the map file exists
 	if _, err := os.Stat(mapFilename); os.IsNotExist(err) {
@@ -167,7 +172,7 @@ func init() {
 		}
 		grid = loadedGrid
 	}
-	
+
 	// Load the .env file
 	err := godotenv.Load()
 	if err != nil {
@@ -195,37 +200,35 @@ func init() {
 		serverjwtSecret = "default_server_secret"
 	}
 
-
 }
 
 func main() {
-    stopChan = make(chan struct{})
+	stopChan = make(chan struct{})
 
 	go startAPI()
 
 	os := runtime.GOOS
-    switch os {
-    case "windows":
-        fmt.Println("Windows not setting max open files limit.")
-    default:
+	switch os {
+	case "windows":
+		fmt.Println("Windows not setting max open files limit.")
+	default:
 		// Set the maximum number of open files allowed by the system
 		/*
-		err := setMaxOpenFiles(2048)
-		if err != nil {
-			fmt.Printf("Error setting max open files limit: %v\n", err)
-			return
-		}
+			err := setMaxOpenFiles(2048)
+			if err != nil {
+				fmt.Printf("Error setting max open files limit: %v\n", err)
+				return
+			}
 		*/
-    }
+	}
 
-	
 	err := startServer()
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
 
-    // Wait for a stop signal
-    <-stopChan
+	// Wait for a stop signal
+	<-stopChan
 }
 
 func startServer() error {
@@ -292,11 +295,11 @@ func handleConnection(conn net.Conn) {
 	}
 
 	cli := &client{
-		conn:     conn,
-		username: username,
+		conn:               conn,
+		username:           username,
 		commandRateLimiter: newRateLimiter(5, time.Second),
-		sleepDelay: defaultSleepDelay,
-		mutedUsernames: make(map[string]bool),
+		sleepDelay:         defaultSleepDelay,
+		mutedUsernames:     make(map[string]bool),
 	}
 	clients.Store(cli.username, cli)
 	if loadedUser, ok := loadedUsers[username]; ok {
@@ -396,51 +399,51 @@ func handleCommand(cli *client, msg string) {
 			broadcastSay(cli, message)
 		}
 		/*
-	case "msg":
-		if len(args) < 3 {
-			cli.conn.Write([]byte("Usage: /msg [username] [message]\n"))
-		} else {
-			targetUsername := args[1]
-			message := strings.Join(args[2:], " ")
-			privateMessage(cli, targetUsername, message)
-		}
-	case "list":
-		listUsers(cli)
-	case "mute":
-		if len(args) < 2 {
-			cli.conn.Write([]byte("Usage: /mute [username]\n"))
-		} else {
-			mute(cli, args)
-		}
-	case "unmute":
-		if len(args) < 2 {
-			cli.conn.Write([]byte("Usage: /unmute [username]\n"))
-		} else {
-			unmute(cli, args)
-		}
-	case "create":
-		if len(args) < 2 {
-			cli.conn.Write([]byte("Usage: /create [channel_name]\n"))
-		} else {
-			channelName := args[1]
-			createChannel(cli, channelName)
-		}
-	case "join":
-		if len(args) < 2 {
-			cli.conn.Write([]byte("Usage: /join [channel_name]\n"))
-		} else {
-			channelName := args[1]
-			joinChannel(cli, channelName)
-		}
-	case "part":
-		partChannel(cli)
-	case "setChannelTitle":
-		if len(args) < 2 {
-			cli.conn.Write([]byte("Usage: /setChannelTitle [title]\n"))
-		} else {
-			title := strings.Join(args[1:], " ")
-			setChannelTitle(cli, title)
-		}
+			case "msg":
+				if len(args) < 3 {
+					cli.conn.Write([]byte("Usage: /msg [username] [message]\n"))
+				} else {
+					targetUsername := args[1]
+					message := strings.Join(args[2:], " ")
+					privateMessage(cli, targetUsername, message)
+				}
+			case "list":
+				listUsers(cli)
+			case "mute":
+				if len(args) < 2 {
+					cli.conn.Write([]byte("Usage: /mute [username]\n"))
+				} else {
+					mute(cli, args)
+				}
+			case "unmute":
+				if len(args) < 2 {
+					cli.conn.Write([]byte("Usage: /unmute [username]\n"))
+				} else {
+					unmute(cli, args)
+				}
+			case "create":
+				if len(args) < 2 {
+					cli.conn.Write([]byte("Usage: /create [channel_name]\n"))
+				} else {
+					channelName := args[1]
+					createChannel(cli, channelName)
+				}
+			case "join":
+				if len(args) < 2 {
+					cli.conn.Write([]byte("Usage: /join [channel_name]\n"))
+				} else {
+					channelName := args[1]
+					joinChannel(cli, channelName)
+				}
+			case "part":
+				partChannel(cli)
+			case "setChannelTitle":
+				if len(args) < 2 {
+					cli.conn.Write([]byte("Usage: /setChannelTitle [title]\n"))
+				} else {
+					title := strings.Join(args[1:], " ")
+					setChannelTitle(cli, title)
+				}
 		*/
 	case "north":
 		moveClient(cli, 0, -1)
@@ -451,35 +454,35 @@ func handleCommand(cli *client, msg string) {
 	case "west":
 		moveClient(cli, -1, 0)
 		/*
-	case "travel":
-		jwt, err := generateJWT(serverName, cli.username)
-		if err != nil {
-			cli.conn.Write([]byte("Error generating travel token.\n"))
-			return
-		}
-		response := fmt.Sprintf("Travel token: %s\n", jwt)
-		cli.conn.Write([]byte(response))
-		
-	case "whisper":
-		if len(args) < 3 {
-			cli.conn.Write([]byte("Usage: /whisper [username] [message]\n"))
-		} else {
-			targetUsername := args[1]
-			message := strings.Join(args[2:], " ")
-			whisper(cli, targetUsername, message)
-		}
-	case "moveTo":
-		if len(args) < 3 {
-			cli.conn.Write([]byte("Usage: /moveTo [x] [y]\n"))
-		} else {
-			x, err1 := strconv.Atoi(args[1])
-			y, err2 := strconv.Atoi(args[2])
-			if err1 != nil || err2 != nil {
-				cli.conn.Write([]byte("Invalid coordinates. Please enter integers.\n"))
-			} else {
-				moveTo(cli, x, y, cli.sleepDelay)
-			}
-		}
+			case "travel":
+				jwt, err := generateJWT(serverName, cli.username)
+				if err != nil {
+					cli.conn.Write([]byte("Error generating travel token.\n"))
+					return
+				}
+				response := fmt.Sprintf("Travel token: %s\n", jwt)
+				cli.conn.Write([]byte(response))
+
+			case "whisper":
+				if len(args) < 3 {
+					cli.conn.Write([]byte("Usage: /whisper [username] [message]\n"))
+				} else {
+					targetUsername := args[1]
+					message := strings.Join(args[2:], " ")
+					whisper(cli, targetUsername, message)
+				}
+			case "moveTo":
+				if len(args) < 3 {
+					cli.conn.Write([]byte("Usage: /moveTo [x] [y]\n"))
+				} else {
+					x, err1 := strconv.Atoi(args[1])
+					y, err2 := strconv.Atoi(args[2])
+					if err1 != nil || err2 != nil {
+						cli.conn.Write([]byte("Invalid coordinates. Please enter integers.\n"))
+					} else {
+						moveTo(cli, x, y, cli.sleepDelay)
+					}
+				}
 		*/
 	case "help":
 		help(cli)
@@ -626,23 +629,23 @@ func moveClient(cli *client, dx, dy int) {
 		cli.x, cli.y = newX, newY
 		addToGrid(cli)
 		response := struct {
-			Action string `json:"action"`
+			Action   string `json:"action"`
 			Username string `json:"username"`
-			X      int    `json:"x"`
-			Y      int    `json:"y"`
+			X        int    `json:"x"`
+			Y        int    `json:"y"`
 		}{
-			Action: "move",
+			Action:   "move",
 			Username: cli.username,
-			X:      newX,
-			Y:      newY,
+			X:        newX,
+			Y:        newY,
 		}
-	
+
 		jsonResponse, err := json.Marshal(response)
 		if err != nil {
 			cli.conn.Write([]byte("Error generating move response.\n"))
 			return
 		}
-	
+
 		cli.conn.Write(append(jsonResponse, '\n'))
 		broadcastLocation(cli)
 	case Mountain:
@@ -712,11 +715,11 @@ func announceMap(cli *client) {
 	}
 
 	payload := struct {
-		Action       string    `json:"action"`
-		Map [][]CellInfo `json:"map"`
+		Action string       `json:"action"`
+		Map    [][]CellInfo `json:"map"`
 	}{
-		Action:       "map",
-		Map: gridInfo,
+		Action: "map",
+		Map:    gridInfo,
 	}
 
 	jsonData, err := json.Marshal(payload)
@@ -743,10 +746,10 @@ func generateJWT(serverName, username string) (string, error) {
 
 func newRateLimiter(maxTokens int, fillRate time.Duration) *rateLimiter {
 	return &rateLimiter{
-		tokens:           maxTokens,
-		maxTokens:        maxTokens,
-		tokenFillRate:    fillRate,
-		lastCheck:        time.Now(),
+		tokens:        maxTokens,
+		maxTokens:     maxTokens,
+		tokenFillRate: fillRate,
+		lastCheck:     time.Now(),
 	}
 }
 
@@ -798,11 +801,11 @@ func broadcastSay(cli *client, message string) {
 	response := struct {
 		Action   string `json:"action"`
 		Username string `json:"username"`
-		Message string `json:"message"`
+		Message  string `json:"message"`
 	}{
 		Action:   "say",
 		Username: cli.username,
-		Message: message,
+		Message:  message,
 	}
 
 	jsonResponse, err := json.Marshal(response)
@@ -919,9 +922,9 @@ func whisper(cli *client, targetUsername, message string) {
 	}
 
 	whisperMessage := map[string]interface{}{
-		"type":     "whisper",
-		"from":     cli.username,
-		"message":  message,
+		"type":    "whisper",
+		"from":    cli.username,
+		"message": message,
 	}
 	jsonData, err := json.Marshal(whisperMessage)
 	if err != nil {
@@ -978,7 +981,7 @@ func help(cli *client) {
 	}
 
 	helpData := map[string]interface{}{
-		"type":    "help",
+		"type":     "help",
 		"commands": helpMessages,
 	}
 	jsonData, err := json.Marshal(helpData)
@@ -1127,7 +1130,6 @@ func startAPI() {
 	http.HandleFunc("/api/addCell", addCellHandler)
 	http.HandleFunc("/api/deleteCell", deleteCellHandler)
 	http.HandleFunc("/api/kickAllUsersInCell", kickUsersInCellHandler)
-
 
 	fmt.Println("Starting API server on :5000")
 	http.ListenAndServe(":5000", nil)
@@ -1334,10 +1336,10 @@ func sendMessageToUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	toCli := toClient.(*client)
 	sendJSON(toCli.conn, map[string]interface{}{
-		"action":       "private_message",
+		"action":     "private_message",
 		"from":       payload.FromUsername,
 		"fromServer": payload.FromServer,
-		"to": payload.ToUsername,
+		"to":         payload.ToUsername,
 		"message":    payload.Message,
 	})
 
@@ -1871,18 +1873,18 @@ func kickUsersInCellHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func stopServer() {
-    close(stopChan)
+	close(stopChan)
 }
 
 func announceEventJSON(cli *client, username, action, message string) {
 	announcement := struct {
-		Action  string `json:"action"`
+		Action   string `json:"action"`
 		Username string `json:"username"`
-		Message string `json:"message"`
+		Message  string `json:"message"`
 	}{
-		Action:  action,
-		Username:  username,
-		Message: message,
+		Action:   action,
+		Username: username,
+		Message:  message,
 	}
 
 	clients.Range(func(_, v interface{}) bool {
@@ -1893,4 +1895,3 @@ func announceEventJSON(cli *client, username, action, message string) {
 		return true
 	})
 }
-
