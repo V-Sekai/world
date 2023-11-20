@@ -1,0 +1,73 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://WPMLoadScreen/WPMSplashScreen.jpg" type="Texture" id=1]
+[ext_resource path="res://WPMLoadScreen/WPMSplashScreen.gd" type="Script" id=2]
+
+[sub_resource type="Animation" id=1]
+resource_name = "Fade"
+length = 1.5
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 1.5 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=2]
+resource_name = "Fade"
+length = 1.5
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 1.5 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
+}
+
+[node name="WPMSplashScreen" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TextureRect" type="TextureRect" parent="."]
+margin_right = 40.0
+margin_bottom = 40.0
+texture = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ChangeSceneTimer" type="Timer" parent="."]
+wait_time = 3.0
+
+[node name="Transition" type="ColorRect" parent="."]
+modulate = Color( 1, 1, 1, 0 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0, 0, 0, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Fadeout" type="AnimationPlayer" parent="Transition"]
+anims/Fade = SubResource( 1 )
+
+[node name="FadeIn" type="AnimationPlayer" parent="Transition"]
+anims/Fade = SubResource( 2 )
+[connection signal="timeout" from="ChangeSceneTimer" to="." method="_on_ChangeSceneTimer_timeout"]
+[connection signal="animation_finished" from="Transition/Fadeout" to="." method="_on_Fadeout_animation_finished"]
+[connection signal="animation_finished" from="Transition/FadeIn" to="." method="_on_FadeIn_animation_finished"]
