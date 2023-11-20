@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai/godot_mmo_login_service.git
 	branch = main
-	commit = d00d3523c45fedf5cae39f5f43b1e6ebe5d9edde
-	parent = e2d6af76fb6fb526dfe4366e9ffb68d438af69b5
+	commit = 0209eedfd7b2c2b7eee40d041dde8598c26fd055
+	parent = 52e2da2024bbe1c7ac6dd108856c93a25a9a74a3
 	method = merge
 	cmdver = 0.4.6
