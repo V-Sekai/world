@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/V-Sekai/vsona-discord-bot.git
+	branch = main
+	commit = a3c0bd1aab3f7b57261719610b52aea375f9142f
+	parent = 812706e022e5016db7c1a7f52e9e0c948ee1e39a
+	method = merge
+	cmdver = 0.4.6
