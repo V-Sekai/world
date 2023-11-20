@@ -6,21 +6,17 @@
 ;   [section] ; section goes between []
 ;   param=value ; assign values to parameters
 
-config_version=4
-
-_global_script_classes=[  ]
-_global_script_class_icons={
-
-}
+config_version=5
 
 [application]
 
 config/name="Text Mmo Client"
+config/version="0.0.1"
 run/main_scene="res://GodotLoadScreen/GodotLoadScreenFinal/GodotStartupScreen.tscn"
+config/features=PackedStringArray("4.2", "Double Precision")
 boot_splash/image="res://GodotLoadScreen/GodotLoadScreenFinal/GodotBootSplash.png"
 config/icon="res://favicon.png"
 config/windows_native_icon="res://favicon.ico"
-config/version="0.0.1"
 
 [autoload]
 

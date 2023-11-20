@@ -72,7 +72,7 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	if !tcp_connection.is_connected_to_host():
+	if tcp_connection.get_status() != StreamPeerTCP.STATUS_CONNECTED:
 		return
 	# Check if any data is available to read
 	if tcp_connection.get_available_bytes() > 0:
@@ -86,7 +86,8 @@ func _process(delta):
 				return
 				
 			# Parse the JSON payload
-			var payload = JSON.parse(dstr)
+			var json = JSON.new()
+			var payload = json.parse(dstr)
 			if payload.error == OK:
 				# Use a match statement to check against the "action" variable
 				handle_received_message(payload, dstr)
@@ -121,9 +122,10 @@ func send_username(username: String):
 	send_json(tcp_connection, data_to_send)
 
 func send_json(tcp_connection: StreamPeerTCP, data: Dictionary) -> void:
-	var json_string = JSON.print(data).to_utf8()
+	var json: JSON = JSON.new()
+	var json_string: String = json.stringify(data)
 	# Send the length of the data followed by the JSON string itself
-	var error = tcp_connection.put_data(json_string)
+	var error = tcp_connection.put_data(json_string.to_utf8_buffer())
 	if error != OK:
 		print("Failed to send username")
 

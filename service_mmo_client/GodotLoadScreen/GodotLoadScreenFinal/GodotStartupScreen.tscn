@@ -1,156 +1,151 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=12 format=3 uid="uid://c52dx0345ostr"]
 
-[ext_resource path="res://GodotLoadScreen/GodotLoadScreenFinal/FlickeringLightSound.wav" type="AudioStream" id=2]
-[ext_resource path="res://GodotLoadScreen/GodotLoadScreenFinal/GodotLogoStartup.tscn" type="PackedScene" id=3]
-[ext_resource path="res://GodotLoadScreen/GodotLoadScreenFinal/PressStart2P-Regular.ttf" type="DynamicFontData" id=4]
-[ext_resource path="res://GodotLoadScreen/GodotLoadScreenFinal/GodotStartupScreen.gd" type="Script" id=5]
+[ext_resource type="AudioStream" uid="uid://oka427k1tpac" path="res://GodotLoadScreen/GodotLoadScreenFinal/FlickeringLightSound.wav" id="2"]
+[ext_resource type="PackedScene" path="res://GodotLoadScreen/GodotLoadScreenFinal/GodotLogoStartup.tscn" id="3"]
+[ext_resource type="Texture2D" uid="uid://bcoymcfdl1gg2" path="res://GodotLoadScreen/GodotLoadScreenFinal/Godot.png" id="3_acdqk"]
+[ext_resource type="Script" path="res://GodotLoadScreen/GodotLoadScreenFinal/GodotStartupScreen.gd" id="5"]
 
-[sub_resource type="DynamicFont" id=1]
-font_data = ExtResource( 4 )
+[sub_resource type="AtlasTexture" id="1"]
+atlas = ExtResource("3_acdqk")
+region = Rect2(0, 0, 32, 32)
 
-[sub_resource type="DynamicFont" id=2]
-font_data = ExtResource( 4 )
+[sub_resource type="AtlasTexture" id="2"]
+atlas = ExtResource("3_acdqk")
+region = Rect2(32, 0, 32, 32)
 
-[sub_resource type="DynamicFont" id=3]
-font_data = ExtResource( 4 )
+[sub_resource type="AtlasTexture" id="3"]
+atlas = ExtResource("3_acdqk")
+region = Rect2(64, 0, 32, 32)
 
-[sub_resource type="Environment" id=4]
+[sub_resource type="SpriteFrames" id="4"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("1")
+}, {
+"duration": 1.0,
+"texture": SubResource("2")
+}, {
+"duration": 1.0,
+"texture": SubResource("3")
+}],
+"loop": false,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="Environment" id="Environment_5t1h8"]
 background_mode = 4
 glow_enabled = true
 glow_strength = 0.96
 glow_blend_mode = 0
-glow_bicubic_upscale = true
 
-[sub_resource type="Animation" id=5]
+[sub_resource type="Animation" id="5"]
 resource_name = "Fade"
 length = 0.75
 tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
 tracks/0/path = NodePath(".:modulate")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
-tracks/0/imported = false
-tracks/0/enabled = true
 tracks/0/keys = {
-"times": PoolRealArray( 0, 0.7 ),
-"transitions": PoolRealArray( 1, 1 ),
+"times": PackedFloat64Array(0, 0.7),
+"transitions": PackedFloat64Array(1, 1),
 "update": 0,
-"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_vr6tc"]
+_data = {
+"Fade": SubResource("5")
 }
 
 [node name="GodotStartupScreen" type="ColorRect"]
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color( 0, 0.0156863, 0.027451, 1 )
-script = ExtResource( 5 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+color = Color(0, 0.0156863, 0.027451, 1)
+script = ExtResource("5")
 
 [node name="Control" type="Control" parent="."]
-modulate = Color( 1.1, 1.1, 1.2, 1 )
+modulate = Color(1.1, 1.1, 1.2, 1)
+anchors_preset = 0
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -159.811
-margin_top = -160.0
-margin_right = 160.189
-margin_bottom = 160.0
-rect_scale = Vector2( 1.89442, 1.89442 )
-rect_pivot_offset = Vector2( 160, 160 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Made" type="Label" parent="Control"]
+layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -67.0
-margin_top = -48.0
-margin_right = -3.0
-margin_bottom = -32.0
-custom_fonts/font = SubResource( 1 )
 text = "MADE"
-align = 1
-valign = 1
 uppercase = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="With" type="Label" parent="Control"]
+layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = 5.0
-margin_top = -48.0
-margin_right = 69.0
-margin_bottom = -32.0
-custom_fonts/font = SubResource( 2 )
 text = "With"
-align = 1
-valign = 1
 uppercase = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Godot" type="Label" parent="Control"]
+layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -39.0
-margin_top = 32.0
-margin_right = 41.0
-margin_bottom = 48.0
-custom_fonts/font = SubResource( 3 )
 text = "godot"
-align = 1
-valign = 1
 uppercase = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
-[node name="GodotAnimatedSprite" parent="Control" instance=ExtResource( 3 )]
-modulate = Color( 1, 1, 1.3, 1 )
-position = Vector2( 160, 160 )
+[node name="GodotAnimatedSprite" parent="Control" instance=ExtResource("3")]
+modulate = Color(1, 1, 1.3, 1)
+position = Vector2(160, 160)
+sprite_frames = SubResource("4")
 
 [node name="Tween" type="Tween" parent="."]
+_import_path = NodePath("")
+unique_name_in_owner = false
+process_mode = 0
+process_priority = 0
+process_physics_priority = 0
+process_thread_group = 0
+editor_description = ""
 playback_process_mode = 0
+script = null
 
 [node name="ChangeSceneTimer" type="Timer" parent="."]
-process_mode = 0
 wait_time = 1.3
 one_shot = true
 
 [node name="AnimationPlayTimer" type="Timer" parent="."]
-process_mode = 0
 wait_time = 0.4
 one_shot = true
 autostart = true
 
 [node name="LightFlickerSound" type="AudioStreamPlayer" parent="."]
-stream = ExtResource( 2 )
+stream = ExtResource("2")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource( 4 )
+environment = SubResource("Environment_5t1h8")
 
 [node name="SceneTransition" type="ColorRect" parent="."]
-modulate = Color( 1, 1, 1, 0 )
+modulate = Color(1, 1, 1, 0)
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color( 0, 0, 0, 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+color = Color(0, 0, 0, 1)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="SceneTransition"]
-anims/Fade = SubResource( 5 )
+libraries = {
+"": SubResource("AnimationLibrary_vr6tc")
+}
+
 [connection signal="animation_finished" from="Control/GodotAnimatedSprite" to="." method="_on_GodotAnimatedSprite_animation_finished"]
 [connection signal="timeout" from="ChangeSceneTimer" to="." method="_on_ChangeSceneTimer_timeout"]
 [connection signal="timeout" from="AnimationPlayTimer" to="." method="_on_AnimationPlayTimer_timeout"]
