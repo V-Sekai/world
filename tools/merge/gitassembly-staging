@@ -46,7 +46,6 @@ merge groups-staging-4.2 remotes/v-sekai-godot/blender-export-4.2
 merge groups-staging-4.2 remotes/v-sekai-godot/pinning_fix
 merge groups-staging-4.2 remotes/v-sekai-godot/vsk-renik-4.2
 merge groups-staging-4.2 remotes/v-sekai-godot/vsk-lasso-4.2
-# merge groups-staging-4.2 remotes/v-sekai-godot/vsk-realtime-retarget-4.2
 merge groups-staging-4.2 remotes/aaronfranke/basis-is-ortho
 merge groups-staging-4.2 remotes/aaronfranke/gltf-transform
 merge groups-staging-4.2 remotes/v-sekai-godot/vsk-ipad-io-4-1
@@ -58,6 +57,7 @@ merge groups-staging-4.2 remotes/v-sekai-godot/vsk-subdiv-4-0
 merge groups-staging-4.2 remotes/v-sekai-godot/vsk-pmx-4.2
 merge groups-staging-4.2 remotes/v-sekai-godot/mikktspace-optimization
 merge groups-staging-4.2 remotes/v-sekai-godot/vsk-libdatachannel-4.2
+# merge groups-staging-4.2 remotes/v-sekai-godot/vsk-realtime-retarget-4.2
 # merge groups-staging-4.2 remotes/v-sekai-godot/vsk-release-4.2
 # merge groups-staging-4.2 remotes/v-sekai-godot/resource-importer-scenecrash-fix
 # merge groups-staging-4.2 remotes/v-sekai-godot/multi_monitor_popup_fixes
