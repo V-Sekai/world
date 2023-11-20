@@ -64,13 +64,8 @@ signal connected_clients(data)
 signal error(type)
 
 
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass  # Replace with function body.
-
-
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
+func _process(_delta):
 	if tcp_connection.get_status() != StreamPeerTCP.STATUS_CONNECTED:
 		return
 	# Check if any data is available to read
@@ -101,9 +96,9 @@ func _process(delta):
 # Add this new function after the _ready function
 func connect_and_send_username(username: String):
 	# Attempt to connect to the IP address and port
-	var error = tcp_connection.connect_to_host(ip_address, port)
+	var err: Error = tcp_connection.connect_to_host(ip_address, port)
 
-	if error == OK:
+	if err == OK:
 		print("Connected to %s:%s" % [ip_address, port])
 		# Send the username to the server
 		send_username(username)
@@ -120,12 +115,11 @@ func send_username(username: String):
 	send_json(tcp_connection, data_to_send)
 
 
-func send_json(tcp_connection: StreamPeerTCP, data: Dictionary) -> void:
-	var json: JSON = JSON.new()
-	var json_string: String = json.stringify(data)
+func send_json(p_tcp_connection: StreamPeerTCP, p_data: Dictionary) -> void:
+	var json_string: String = JSON.stringify(p_data)
 	# Send the length of the data followed by the JSON string itself
-	var error = tcp_connection.put_data(json_string.to_utf8_buffer())
-	if error != OK:
+	var err: Error = p_tcp_connection.put_data(json_string.to_utf8_buffer())
+	if err != OK:
 		print("Failed to send username")
 
 

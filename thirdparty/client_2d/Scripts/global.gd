@@ -1,10 +1,5 @@
 extends Node
 
-# Declare member variables here. Examples:
-# var a = 2
-# var b = "text"
-# Set the IP address and port for the connection
-
 var discord_url = "https://discord.gg/pTGZuaf"
 
 # Define the terrain scene or resource that you want to instantiate
@@ -15,11 +10,6 @@ var player_scene = preload("res://Assets/player.tscn")
 
 # Define the map scene or resource that you want to instantiate into
 var map_scene = preload("res://Assets/map.tscn")
-
-
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass
 
 
 func process_map_event(map_data):
@@ -62,12 +52,3 @@ func process_move_event(player_id, x, y):
 func process_say_event(username, message):
 	# Trigger the global event by emitting the message_received signal
 	emit_signal("message_received", username, message)
-
-# Documentation should be something like this, inside of the chat window
-#func _ready():
-#    # Replace "TCP_Connection_Node" with the actual node name or path
-#    $TCP_Connection_Node.connect("message_received", self, "_on_message_received")
-#
-#func _on_message_received(username, message):
-#    # Handle the received message and username
-#    print("%s: %s" % [username, message])
