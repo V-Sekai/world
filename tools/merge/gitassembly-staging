@@ -56,6 +56,7 @@ merge groups-staging-4.2 remotes/v-sekai-godot/vsk-subdiv-4-0
 merge groups-staging-4.2 remotes/v-sekai-godot/vsk-pmx-4.2
 merge groups-staging-4.2 remotes/v-sekai-godot/mikktspace-optimization
 merge groups-staging-4.2 remotes/v-sekai-godot/vsk-libdatachannel-4.2
+merge groups-staging-4.2 remotes/BastiaanOlij/skip_present_if_needed
 # merge groups-staging-4.2 remotes/v-sekai-godot/vsk-realtime-retarget-4.2
 # merge groups-staging-4.2 remotes/v-sekai-godot/vsk-release-4.2
 # merge groups-staging-4.2 remotes/v-sekai-godot/resource-importer-scenecrash-fix
