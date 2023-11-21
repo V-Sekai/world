@@ -17,7 +17,6 @@ merge groups-staging-4.2 remotes/v-sekai-godot/move_pre_render
 merge groups-staging-4.2 remotes/v-sekai-godot/avoid-xr-error-spam
 merge groups-staging-4.2 remotes/v-sekai-godot/normalizing-quat-axis-angle
 merge groups-staging-4.2 remotes/v-sekai-godot/avoid-anim-crash
-merge groups-staging-4.2 remotes/v-sekai-godot/3d-audio-4.2
 merge groups-staging-4.2 remotes/v-sekai-godot/workaround_ra_as_rg
 merge groups-staging-4.2 remotes/v-sekai-godot/prevent_advanced_reimport
 merge groups-staging-4.2 remotes/v-sekai-godot/exrwav-movie
