@@ -21,12 +21,12 @@ func _on_DiscordButton_pressed():
 
 
 func _on_VerifyRegisterAccountButton_pressed():
-	if get_tree().change_scene_to(preload("res://Menus/VerifyRegisterMenu.tscn")) != OK:
+	if get_tree().change_scene_to_file("res://Menus/VerifyRegisterMenu.tscn") != OK:
 		print("Failed to Load MainMenu.")
 
 
 func _on_RegisterButton_pressed():
-	if get_tree().change_scene_to(preload("res://Menus/RegisterMenu.tscn")) != OK:
+	if get_tree().change_scene_to_file("res://Menus/RegisterMenu.tscn") != OK:
 		print("Failed to Load MainMenu.")
 
 

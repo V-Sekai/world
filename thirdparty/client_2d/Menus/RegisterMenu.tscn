@@ -101,6 +101,7 @@ placeholder_text = "Verify your Password here"
 layout_mode = 2
 
 [node name="LoginButton" type="Button" parent="ColorRect/Register"]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 size_flags_horizontal = 3
 
@@ -117,10 +118,10 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -264.0
+offset_left = -192.0
 offset_top = -520.0
-offset_right = -128.0
-offset_bottom = -440.0
+offset_right = -56.0
+offset_bottom = -336.0
 grow_horizontal = 0
 grow_vertical = 0
 size_flags_horizontal = 3
@@ -128,6 +129,7 @@ size_flags_vertical = 3
 metadata/_edit_group_ = true
 
 [node name="RegisterButton_" type="Button" parent="ColorRect/AdditionalButtons"]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 size_flags_horizontal = 3
 
@@ -142,6 +144,7 @@ text = "Create Account"
 layout_mode = 2
 
 [node name="VerifyRegisterAccountButton" type="Button" parent="ColorRect/AdditionalButtons"]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 size_flags_horizontal = 3
 
@@ -155,6 +158,7 @@ text = "Verify Account"
 layout_mode = 2
 
 [node name="DiscordButton" type="Button" parent="ColorRect/AdditionalButtons"]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 size_flags_horizontal = 3
 
@@ -169,6 +173,7 @@ text = "Official Discord"
 layout_mode = 2
 
 [node name="ExitButton" type="Button" parent="ColorRect/AdditionalButtons"]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 size_flags_horizontal = 3
 

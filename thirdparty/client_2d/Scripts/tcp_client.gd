@@ -120,6 +120,7 @@ func send_json(p_tcp_connection: StreamPeerTCP, p_data: Dictionary) -> void:
 	# Send the length of the data followed by the JSON string itself
 	var err: Error = p_tcp_connection.put_data(json_string.to_utf8_buffer())
 	if err != OK:
+		print("Error %s " % err)
 		print("Failed to send username")
 
 

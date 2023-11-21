@@ -7,12 +7,17 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("6")
 
 [node name="ColorRect" type="ColorRect" parent="."]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 color = Color(0, 0, 0, 1)
 
 [node name="Title" type="Label" parent="ColorRect"]
@@ -119,7 +124,7 @@ size_flags_vertical = 3
 metadata/_edit_group_ = true
 
 [node name="RegisterButton" type="Button" parent="ColorRect/AdditionalButtons"]
-visible = false
+custom_minimum_size = Vector2(180, 40)
 layout_mode = 2
 
 [node name="Label" type="Label" parent="ColorRect/AdditionalButtons/RegisterButton"]
@@ -133,6 +138,7 @@ layout_mode = 2
 
 [node name="VerifyRegisterAccountButton" type="Button" parent="ColorRect/AdditionalButtons"]
 visible = false
+custom_minimum_size = Vector2(180, 40)
 layout_mode = 2
 size_flags_horizontal = 3
 
@@ -146,6 +152,7 @@ text = "Verify Account"
 layout_mode = 2
 
 [node name="DiscordButton" type="Button" parent="ColorRect/AdditionalButtons"]
+custom_minimum_size = Vector2(180, 40)
 layout_mode = 2
 size_flags_horizontal = 3
 
@@ -154,12 +161,15 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 text = "Official Discord"
 
 [node name="MarginContainer3" type="MarginContainer" parent="ColorRect/AdditionalButtons"]
 layout_mode = 2
 
 [node name="ExitButton" type="Button" parent="ColorRect/AdditionalButtons"]
+custom_minimum_size = Vector2(180, 40)
 layout_mode = 2
 size_flags_horizontal = 3
 
@@ -168,6 +178,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 text = "Quit Game"
 
 [node name="BuildNumber" type="Label" parent="ColorRect"]
