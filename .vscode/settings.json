@@ -139,5 +139,26 @@
   "telemetry.enableCrashReporter": false,
   "sonarlint.pathToCompileCommands": "${workspaceFolder}\\godot\\compile_commands.json",
   "git.ignoreLimitWarning": true,
-  "cmake.sourceDirectory": "${workspaceFolder}/godot/platform/android/java/nativeSrcsConfigs"
+  "cmake.sourceDirectory": "${workspaceFolder}/godot/platform/android/java/nativeSrcsConfigs",
+  "grammarly.selectors": [
+    {
+      "language": "markdown",
+      "scheme": "untitled",
+      "pattern": "Untitled-1"
+    },
+    {
+      "language": "markdown",
+      "scheme": "file",
+      "pattern": "c:\\Users\\ernes\\Downloads\\Today's commits by 'fire' across various.md"
+    },
+    {
+      "language": "markdown",
+      "scheme": "file",
+      "pattern": "c:\\Users\\ernes\\Downloads\\Today's commits by 'fire' across various.md"
+    },
+    {
+      "language": "markdown",
+      "scheme": "file"
+    }
+  ]
 }
