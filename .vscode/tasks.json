@@ -19,7 +19,8 @@
       "group": {
         "kind": "build",
         "isDefault": true
-      }
+      },
+      "dependsOn": "Godot Engine Android"
     },
     {
       "label": "Godot Clean Engine",
