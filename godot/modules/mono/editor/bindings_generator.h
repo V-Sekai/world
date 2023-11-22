@@ -134,11 +134,6 @@ class BindingsGenerator {
 		String proxy_name;
 
 		/**
-		 * Hash of the ClassDB method
-		 */
-		uint64_t hash = 0;
-
-		/**
 		 * [TypeInterface::name] of the return type
 		 */
 		TypeReference return_type;
@@ -172,12 +167,6 @@ class BindingsGenerator {
 		 * Methods that are not meant to be exposed are those that begin with underscore and are not virtual.
 		 */
 		bool is_internal = false;
-
-		/**
-		 * Determines if the method is a compatibility method added to avoid breaking binary compatibility.
-		 * These methods will be generated but hidden and are considered deprecated.
-		 */
-		bool is_compat = false;
 
 		List<ArgumentInterface> arguments;
 
@@ -797,9 +786,6 @@ class BindingsGenerator {
 	void _populate_builtin_type_interfaces();
 
 	void _populate_global_constants();
-
-	bool _method_has_conflicting_signature(const MethodInterface &p_imethod, const TypeInterface &p_itype);
-	bool _method_has_conflicting_signature(const MethodInterface &p_imethod_left, const MethodInterface &p_imethod_right);
 
 	Error _generate_cs_type(const TypeInterface &itype, const String &p_output_file);
 

@@ -257,8 +257,8 @@ void register_editor_types() {
 	EditorPlugins::add_by_type<Cast2DEditorPlugin>();
 	EditorPlugins::add_by_type<Skeleton2DEditorPlugin>();
 	EditorPlugins::add_by_type<Sprite2DEditorPlugin>();
-	EditorPlugins::add_by_type<TileSetEditorPlugin>();
 	EditorPlugins::add_by_type<TileMapEditorPlugin>();
+	EditorPlugins::add_by_type<TileSetEditorPlugin>();
 
 	// For correct doc generation.
 	GLOBAL_DEF("editor/run/main_run_args", "");
@@ -278,9 +278,7 @@ void register_editor_types() {
 	GLOBAL_DEF("editor/version_control/autoload_on_startup", false);
 
 	EditorInterface::create();
-	Engine::Singleton ei_singleton = Engine::Singleton("EditorInterface", EditorInterface::get_singleton());
-	ei_singleton.editor_only = true;
-	Engine::get_singleton()->add_singleton(ei_singleton);
+	Engine::get_singleton()->add_singleton(Engine::Singleton("EditorInterface", EditorInterface::get_singleton()));
 
 	OS::get_singleton()->benchmark_end_measure("register_editor_types");
 }

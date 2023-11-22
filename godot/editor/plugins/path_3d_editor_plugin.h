@@ -35,8 +35,8 @@
 #include "editor/plugins/node_3d_editor_gizmos.h"
 #include "scene/3d/camera_3d.h"
 #include "scene/3d/path_3d.h"
+#include "scene/gui/separator.h"
 
-class HBoxContainer;
 class MenuButton;
 
 class Path3DGizmo : public EditorNode3DGizmo {
@@ -58,7 +58,6 @@ class Path3DGizmo : public EditorNode3DGizmo {
 	mutable Vector3 original;
 	mutable float orig_in_length;
 	mutable float orig_out_length;
-	mutable float disk_size = 0.8;
 
 	// Cache information of secondary handles.
 	Vector<HandleInfo> _secondary_handles_info;
@@ -70,13 +69,11 @@ public:
 	virtual void commit_handle(int p_id, bool p_secondary, const Variant &p_restore, bool p_cancel = false) override;
 
 	virtual void redraw() override;
-	Path3DGizmo(Path3D *p_path = nullptr, float p_disk_size = 0.8);
+	Path3DGizmo(Path3D *p_path = nullptr);
 };
 
 class Path3DGizmoPlugin : public EditorNode3DGizmoPlugin {
 	GDCLASS(Path3DGizmoPlugin, EditorNode3DGizmoPlugin);
-
-	float disk_size = 0.8;
 
 protected:
 	Ref<EditorNode3DGizmo> create_gizmo(Node3D *p_spatial) override;
@@ -84,21 +81,19 @@ protected:
 public:
 	String get_gizmo_name() const override;
 	int get_priority() const override;
-	Path3DGizmoPlugin(float p_disk_size);
+	Path3DGizmoPlugin();
 };
 
 class Path3DEditorPlugin : public EditorPlugin {
 	GDCLASS(Path3DEditorPlugin, EditorPlugin);
 
-	HBoxContainer *topmenu_bar = nullptr;
+	Separator *sep = nullptr;
 	Button *curve_create = nullptr;
 	Button *curve_edit = nullptr;
 	Button *curve_edit_curve = nullptr;
 	Button *curve_del = nullptr;
 	Button *curve_close = nullptr;
 	MenuButton *handle_menu = nullptr;
-
-	float disk_size = 0.8;
 
 	enum Mode {
 		MODE_CREATE,

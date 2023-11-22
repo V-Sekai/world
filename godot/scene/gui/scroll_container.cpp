@@ -33,7 +33,6 @@
 #include "core/config/project_settings.h"
 #include "core/os/os.h"
 #include "scene/main/window.h"
-#include "scene/theme/theme_db.h"
 
 Size2 ScrollContainer::get_minimum_size() const {
 	Size2 min_size;
@@ -79,6 +78,12 @@ Size2 ScrollContainer::get_minimum_size() const {
 
 	min_size += theme_cache.panel_style->get_minimum_size();
 	return min_size;
+}
+
+void ScrollContainer::_update_theme_item_cache() {
+	Container::_update_theme_item_cache();
+
+	theme_cache.panel_style = get_theme_stylebox(SNAME("panel"));
 }
 
 void ScrollContainer::_cancel_drag() {
@@ -351,7 +356,7 @@ void ScrollContainer::_notification(int p_what) {
 
 		case NOTIFICATION_READY: {
 			Viewport *viewport = get_viewport();
-			ERR_FAIL_NULL(viewport);
+			ERR_FAIL_COND(!viewport);
 			viewport->connect("gui_focus_changed", callable_mp(this, &ScrollContainer::_gui_focus_changed));
 			_reposition_children();
 		} break;
@@ -621,8 +626,6 @@ void ScrollContainer::_bind_methods() {
 	BIND_ENUM_CONSTANT(SCROLL_MODE_AUTO);
 	BIND_ENUM_CONSTANT(SCROLL_MODE_SHOW_ALWAYS);
 	BIND_ENUM_CONSTANT(SCROLL_MODE_SHOW_NEVER);
-
-	BIND_THEME_ITEM_CUSTOM(Theme::DATA_TYPE_STYLEBOX, ScrollContainer, panel_style, "panel");
 
 	GLOBAL_DEF("gui/common/default_scroll_deadzone", 0);
 };

@@ -1802,7 +1802,3 @@ String InputEventShortcut::to_string() {
 
 	return vformat("InputEventShortcut: shortcut=%s", shortcut->get_as_text());
 }
-
-InputEventShortcut::InputEventShortcut() {
-	pressed = true;
-}

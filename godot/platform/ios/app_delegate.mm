@@ -51,15 +51,6 @@ extern void ios_finish();
 
 @implementation AppDelegate
 
-enum {
-	SESSION_CATEGORY_AMBIENT,
-	SESSION_CATEGORY_MULTI_ROUTE,
-	SESSION_CATEGORY_PLAY_AND_RECORD,
-	SESSION_CATEGORY_PLAYBACK,
-	SESSION_CATEGORY_RECORD,
-	SESSION_CATEGORY_SOLO_AMBIENT
-};
-
 static ViewController *mainViewController = nil;
 
 + (ViewController *)viewController {
@@ -101,28 +92,8 @@ static ViewController *mainViewController = nil;
 
 	mainViewController = viewController;
 
-	int sessionCategorySetting = GLOBAL_GET("audio/general/ios/session_category");
-
-	// Initialize with default Ambient category.
-	AVAudioSessionCategory category = AVAudioSessionCategoryAmbient;
-
-	if (sessionCategorySetting == SESSION_CATEGORY_MULTI_ROUTE) {
-		category = AVAudioSessionCategoryMultiRoute;
-	} else if (sessionCategorySetting == SESSION_CATEGORY_PLAY_AND_RECORD) {
-		category = AVAudioSessionCategoryPlayAndRecord;
-	} else if (sessionCategorySetting == SESSION_CATEGORY_PLAYBACK) {
-		category = AVAudioSessionCategoryPlayback;
-	} else if (sessionCategorySetting == SESSION_CATEGORY_RECORD) {
-		category = AVAudioSessionCategoryRecord;
-	} else if (sessionCategorySetting == SESSION_CATEGORY_SOLO_AMBIENT) {
-		category = AVAudioSessionCategorySoloAmbient;
-	}
-
-	if (GLOBAL_GET("audio/general/ios/mix_with_others")) {
-		[[AVAudioSession sharedInstance] setCategory:category withOptions:AVAudioSessionCategoryOptionMixWithOthers error:nil];
-	} else {
-		[[AVAudioSession sharedInstance] setCategory:category error:nil];
-	}
+	// prevent to stop music in another background app
+	[[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryAmbient error:nil];
 
 	return YES;
 }

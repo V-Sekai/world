@@ -62,7 +62,6 @@ public:
 	float z_far = 0.0;
 
 	float lod_distance_multiplier = 0.0;
-	Plane lod_camera_plane;
 	float screen_mesh_lod_threshold = 0.0;
 
 	uint32_t directional_light_count = 0;
@@ -78,7 +77,7 @@ public:
 	float time_step;
 
 	RID create_uniform_buffer();
-	void update_ubo(RID p_uniform_buffer, RS::ViewportDebugDraw p_debug_mode, RID p_env, RID p_reflection_probe_instance, RID p_camera_attributes, bool p_flip_y, bool p_pancake_shadows, const Size2i &p_screen_size, const Color &p_default_bg_color, float p_luminance_multiplier, bool p_opaque_render_buffers, bool p_apply_alpha_multiplier);
+	void update_ubo(RID p_uniform_buffer, RS::ViewportDebugDraw p_debug_mode, RID p_env, RID p_reflection_probe_instance, RID p_camera_attributes, bool p_flip_y, bool p_pancake_shadows, const Size2i &p_screen_size, const Color &p_default_bg_color, float p_luminance_multiplier, bool p_opaque_render_buffers);
 	RID get_uniform_buffer();
 
 private:
@@ -145,7 +144,7 @@ private:
 
 		uint32_t pancake_shadows;
 		uint32_t camera_visible_layers;
-		float pass_alpha_multiplier;
+		uint32_t pad2;
 		uint32_t pad3;
 	};
 

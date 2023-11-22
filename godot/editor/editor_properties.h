@@ -40,7 +40,6 @@ class EditorFileDialog;
 class EditorLocaleDialog;
 class EditorResourcePicker;
 class EditorSpinSlider;
-class MenuButton;
 class PropertySelector;
 class SceneTreeDialog;
 class TextEdit;
@@ -400,7 +399,7 @@ class EditorPropertyFloat : public EditorProperty {
 	GDCLASS(EditorPropertyFloat, EditorProperty);
 	EditorSpinSlider *spin = nullptr;
 	bool setting = false;
-	bool radians_as_degrees = false;
+	bool angle_in_radians = false;
 	void _value_changed(double p_val);
 
 protected:
@@ -409,7 +408,7 @@ protected:
 
 public:
 	virtual void update_property() override;
-	void setup(double p_min, double p_max, double p_step, bool p_hide_slider, bool p_exp_range, bool p_greater, bool p_lesser, const String &p_suffix = String(), bool p_radians_as_degrees = false);
+	void setup(double p_min, double p_max, double p_step, bool p_hide_slider, bool p_exp_range, bool p_greater, bool p_lesser, const String &p_suffix = String(), bool p_angle_in_radians = false);
 	EditorPropertyFloat();
 };
 
@@ -650,18 +649,8 @@ public:
 
 class EditorPropertyNodePath : public EditorProperty {
 	GDCLASS(EditorPropertyNodePath, EditorProperty);
-
-	enum {
-		ACTION_CLEAR,
-		ACTION_COPY,
-		ACTION_EDIT,
-		ACTION_SELECT,
-	};
-
 	Button *assign = nullptr;
-	MenuButton *menu = nullptr;
-	LineEdit *edit = nullptr;
-
+	Button *clear = nullptr;
 	SceneTreeDialog *scene_tree = nullptr;
 	NodePath base_hint;
 	bool use_path_from_scene_root = false;
@@ -670,12 +659,8 @@ class EditorPropertyNodePath : public EditorProperty {
 	Vector<StringName> valid_types;
 	void _node_selected(const NodePath &p_path);
 	void _node_assign();
+	void _node_clear();
 	Node *get_base_node();
-	void _update_menu();
-	void _menu_option(int p_idx);
-	void _accept_text();
-	void _text_submitted(const String &p_text);
-	const NodePath _get_node_path() const;
 
 	bool can_drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) const;
 	void drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from);
@@ -685,6 +670,7 @@ class EditorPropertyNodePath : public EditorProperty {
 
 protected:
 	virtual void _set_read_only(bool p_read_only) override;
+	static void _bind_methods();
 	void _notification(int p_what);
 
 public:

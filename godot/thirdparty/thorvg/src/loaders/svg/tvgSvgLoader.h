@@ -61,7 +61,7 @@ private:
     float vh = 0;
 
     bool header();
-    void clear(bool all = true);
+    void clear();
     void run(unsigned tid) override;
 };
 

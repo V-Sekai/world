@@ -39,11 +39,10 @@
 
 ScriptLanguage *ScriptServer::_languages[MAX_LANGUAGES];
 int ScriptServer::_language_count = 0;
-bool ScriptServer::languages_ready = false;
-Mutex ScriptServer::languages_mutex;
 
 bool ScriptServer::scripting_enabled = true;
 bool ScriptServer::reload_scripts_on_save = false;
+SafeFlag ScriptServer::languages_finished; // Used until GH-76581 is fixed properly.
 ScriptEditRequestFunction ScriptServer::edit_request_func = nullptr;
 
 void Script::_notification(int p_what) {
@@ -147,7 +146,6 @@ void Script::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_property_default_value", "property"), &Script::_get_property_default_value);
 
 	ClassDB::bind_method(D_METHOD("is_tool"), &Script::is_tool);
-	ClassDB::bind_method(D_METHOD("is_abstract"), &Script::is_abstract);
 
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "source_code", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NONE), "set_source_code", "get_source_code");
 }
@@ -161,13 +159,12 @@ bool ScriptServer::is_scripting_enabled() {
 }
 
 ScriptLanguage *ScriptServer::get_language(int p_idx) {
-	MutexLock lock(languages_mutex);
 	ERR_FAIL_INDEX_V(p_idx, _language_count, nullptr);
+
 	return _languages[p_idx];
 }
 
 Error ScriptServer::register_language(ScriptLanguage *p_language) {
-	MutexLock lock(languages_mutex);
 	ERR_FAIL_NULL_V(p_language, ERR_INVALID_PARAMETER);
 	ERR_FAIL_COND_V_MSG(_language_count >= MAX_LANGUAGES, ERR_UNAVAILABLE, "Script languages limit has been reach, cannot register more.");
 	for (int i = 0; i < _language_count; i++) {
@@ -181,8 +178,6 @@ Error ScriptServer::register_language(ScriptLanguage *p_language) {
 }
 
 Error ScriptServer::unregister_language(const ScriptLanguage *p_language) {
-	MutexLock lock(languages_mutex);
-
 	for (int i = 0; i < _language_count; i++) {
 		if (_languages[i] == p_language) {
 			_language_count--;
@@ -223,53 +218,17 @@ void ScriptServer::init_languages() {
 		}
 	}
 
-	HashSet<ScriptLanguage *> langs_to_init;
-	{
-		MutexLock lock(languages_mutex);
-		for (int i = 0; i < _language_count; i++) {
-			if (_languages[i]) {
-				langs_to_init.insert(_languages[i]);
-			}
-		}
-	}
-
-	for (ScriptLanguage *E : langs_to_init) {
-		E->init();
-	}
-
-	{
-		MutexLock lock(languages_mutex);
-		languages_ready = true;
+	for (int i = 0; i < _language_count; i++) {
+		_languages[i]->init();
 	}
 }
 
 void ScriptServer::finish_languages() {
-	HashSet<ScriptLanguage *> langs_to_finish;
-
-	{
-		MutexLock lock(languages_mutex);
-		for (int i = 0; i < _language_count; i++) {
-			if (_languages[i]) {
-				langs_to_finish.insert(_languages[i]);
-			}
-		}
+	for (int i = 0; i < _language_count; i++) {
+		_languages[i]->finish();
 	}
-
-	for (ScriptLanguage *E : langs_to_finish) {
-		E->finish();
-	}
-
-	{
-		MutexLock lock(languages_mutex);
-		languages_ready = false;
-	}
-
 	global_classes_clear();
-}
-
-bool ScriptServer::are_languages_initialized() {
-	MutexLock lock(languages_mutex);
-	return languages_ready;
+	languages_finished.set();
 }
 
 void ScriptServer::set_reload_scripts_on_save(bool p_enable) {
@@ -281,8 +240,7 @@ bool ScriptServer::is_reload_scripts_on_save_enabled() {
 }
 
 void ScriptServer::thread_enter() {
-	MutexLock lock(languages_mutex);
-	if (!languages_ready) {
+	if (!languages_finished.is_set()) {
 		return;
 	}
 	for (int i = 0; i < _language_count; i++) {
@@ -291,8 +249,7 @@ void ScriptServer::thread_enter() {
 }
 
 void ScriptServer::thread_exit() {
-	MutexLock lock(languages_mutex);
-	if (!languages_ready) {
+	if (!languages_finished.is_set()) {
 		return;
 	}
 	for (int i = 0; i < _language_count; i++) {
@@ -580,6 +537,9 @@ void PlaceHolderScriptInstance::get_property_list(List<PropertyInfo> *p_properti
 	} else {
 		for (const PropertyInfo &E : properties) {
 			PropertyInfo pinfo = E;
+			if (!values.has(pinfo.name)) {
+				pinfo.usage |= PROPERTY_USAGE_SCRIPT_DEFAULT_VALUE;
+			}
 			p_properties->push_back(E);
 		}
 	}

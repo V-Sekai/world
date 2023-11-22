@@ -418,7 +418,7 @@ public:
 			case Variant::PACKED_COLOR_ARRAY:
 				return get_color_array(v);
 			case Variant::OBJECT:
-				return get_object(v);
+				return v->_get_obj().obj;
 			case Variant::VARIANT_MAX:
 				ERR_FAIL_V(nullptr);
 		}

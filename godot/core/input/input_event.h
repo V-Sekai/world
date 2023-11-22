@@ -567,8 +567,6 @@ public:
 
 	virtual String as_text() const override;
 	virtual String to_string() override;
-
-	InputEventShortcut();
 };
 
 #endif // INPUT_EVENT_H

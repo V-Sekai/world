@@ -128,20 +128,16 @@ using Godot.NativeInterop;
         if (isInnerClass)
         {
             var containingType = symbol.ContainingType;
-            AppendPartialContainingTypeDeclarations(containingType);
 
-            void AppendPartialContainingTypeDeclarations(INamedTypeSymbol? containingType)
+            while (containingType != null)
             {
-                if (containingType == null)
-                    return;
-
-                AppendPartialContainingTypeDeclarations(containingType.ContainingType);
-
                 source.Append("partial ");
                 source.Append(containingType.GetDeclarationKeyword());
                 source.Append(" ");
                 source.Append(containingType.NameWithTypeParameters());
                 source.Append("\n{\n");
+
+                containingType = containingType.ContainingType;
             }
         }
 
@@ -307,20 +303,16 @@ using Godot.NativeInterop;
         if (isInnerClass)
         {
             var containingType = symbol.ContainingType;
-            AppendPartialContainingTypeDeclarations(containingType);
 
-            void AppendPartialContainingTypeDeclarations(INamedTypeSymbol? containingType)
+            while (containingType != null)
             {
-                if (containingType == null)
-                    return;
-
-                AppendPartialContainingTypeDeclarations(containingType.ContainingType);
-
                 source.Append("partial ");
                 source.Append(containingType.GetDeclarationKeyword());
                 source.Append(" ");
                 source.Append(containingType.NameWithTypeParameters());
                 source.Append("\n{\n");
+
+                containingType = containingType.ContainingType;
             }
         }
 

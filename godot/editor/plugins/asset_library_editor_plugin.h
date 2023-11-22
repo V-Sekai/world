@@ -80,8 +80,6 @@ protected:
 public:
 	void configure(const String &p_title, int p_asset_id, const String &p_category, int p_category_id, const String &p_author, int p_author_id, const String &p_cost);
 
-	void clamp_width(int p_max_width);
-
 	EditorAssetLibraryItem();
 };
 
@@ -306,8 +304,6 @@ class EditorAssetLibrary : public PanelContainer {
 	void _support_toggled(int p_support);
 
 	void _install_external_asset(String p_zip_path, String p_title);
-
-	int asset_items_column_width = 0;
 
 	void _update_asset_items_columns();
 

@@ -62,7 +62,6 @@ name is available.
     Caner Demirer (cdemirer)
     Carl Olsson (not-surt)
     Carter Anderson (cart)
-    ChibiDenDen
     Chris Bradfield (cbscribe)
     Clay John (clayjohn)
     ConteZero
@@ -72,7 +71,6 @@ name is available.
     Daniel Zilberleyb (dzil123)
     Danil Alexeev (dalexeev)
     dankan1890
-    Darío Banini (DarioSamo)
     David Cambré (Gallilus)
     David Sichma (DavidSichma)
     David Snopek (dsnopek)
@@ -97,7 +95,6 @@ name is available.
     Fabrice Cipolla (fabriceci)
     Ferenc Arn (tagcup)
     FireForge (fire-forge)
-    Florian Kothmeier (Dragoncraft89)
     follower
     foxydevloper
     François Belair (Razoric480)
@@ -116,7 +113,6 @@ name is available.
     Hendrik Brucker (Geometror)
     hilfazer
     Hiroshi Ogawa (hi-ogawa)
-    HolonProduction
     homer666
     hoontee
     Hugo Locurcio (Calinou)
@@ -178,7 +174,6 @@ name is available.
     marynate
     Masoud BH (masoudbh3)
     Mateo Kuruk Miccino (kuruk-mm)
-    Matias N. Goldberg (darksylinc)
     Matthew (skyace65)
     Matthias Hölzl (hoelzl)
     Max Hilbrunner (mhilbrunner)
@@ -195,7 +190,6 @@ name is available.
     mrezai
     Muhammad Huri (CakHuri)
     muiroc
-    myaaaaaaaaa
     Nathan Franke (nathanfranke)
     Nathan Lovato (NathanLovato)
     Nathan Warden (NathanWarden)
@@ -209,7 +203,6 @@ name is available.
     Omar El Sheikh (The-O-King)
     Ovnuniarchos
     Pascal Richter (ShyRed)
-    Patrick Exner (FlameLizard)
     Patrick (firefly2442)
     Paul Batty (Paulb23)
     Paul Joannon (paulloz)
@@ -253,11 +246,9 @@ name is available.
     smix8
     snailrhymer
     Stijn Hinlopen (hinlopen)
-    stmSi
     Swarnim Arun (minraws)
     TC (floppyhammer)
     TechnoPorg
-    Thaddeus Crews (Repiteo)
     Thakee Nathees (ThakeeNathees)
     thebestnom
     Theo Hallenius (TheoXD)
@@ -284,5 +275,4 @@ name is available.
     Zak Stam (zaksnet)
     Zher Huei Lee (leezh)
     ZuBsPaCe
-    谢天 (jsjtxietian)
     风青山 (Rindbee)

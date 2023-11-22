@@ -74,7 +74,6 @@ private:
 	StringName property;
 	String property_path;
 	String doc_path;
-	bool has_doc_tooltip = false;
 
 	int property_usage;
 
@@ -474,7 +473,6 @@ class EditorInspector : public ScrollContainer {
 
 	void _clear(bool p_hide_plugins = true);
 	Object *object = nullptr;
-	Object *next_object = nullptr;
 
 	//
 
@@ -503,7 +501,13 @@ class EditorInspector : public ScrollContainer {
 	int property_focusable;
 	int update_scroll_request;
 
-	HashMap<StringName, HashMap<StringName, String>> doc_path_cache;
+	struct PropertyDocInfo {
+		String description;
+		String path;
+	};
+
+	HashMap<StringName, HashMap<StringName, PropertyDocInfo>> doc_info_cache;
+	HashMap<StringName, String> class_descr_cache;
 	HashSet<StringName> restart_request_props;
 
 	HashMap<ObjectID, int> scroll_cache;
@@ -578,7 +582,6 @@ public:
 	void update_property(const String &p_prop);
 	void edit(Object *p_object);
 	Object *get_edited_object();
-	Object *get_next_edited_object();
 
 	void set_keying(bool p_active);
 	void set_read_only(bool p_read_only);

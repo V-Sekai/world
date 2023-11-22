@@ -57,15 +57,14 @@ bool SkeletonModification2DJiggle::_set(const StringName &p_path, const Variant 
 			set_jiggle_joint_use_gravity(which, p_value);
 		} else if (what == "gravity") {
 			set_jiggle_joint_gravity(which, p_value);
-		} else {
-			return false;
 		}
-	} else if (path == "use_colliders") {
-		set_use_colliders(p_value);
-	} else if (path == "collision_mask") {
-		set_collision_mask(p_value);
+		return true;
 	} else {
-		return false;
+		if (path == "use_colliders") {
+			set_use_colliders(p_value);
+		} else if (path == "collision_mask") {
+			set_collision_mask(p_value);
+		}
 	}
 	return true;
 }
@@ -94,15 +93,14 @@ bool SkeletonModification2DJiggle::_get(const StringName &p_path, Variant &r_ret
 			r_ret = get_jiggle_joint_use_gravity(which);
 		} else if (what == "gravity") {
 			r_ret = get_jiggle_joint_gravity(which);
-		} else {
-			return false;
 		}
-	} else if (path == "use_colliders") {
-		r_ret = get_use_colliders();
-	} else if (path == "collision_mask") {
-		r_ret = get_collision_mask();
+		return true;
 	} else {
-		return false;
+		if (path == "use_colliders") {
+			r_ret = get_use_colliders();
+		} else if (path == "collision_mask") {
+			r_ret = get_collision_mask();
+		}
 	}
 	return true;
 }

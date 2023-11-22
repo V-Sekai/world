@@ -49,11 +49,6 @@
 #define PEM_END_CRT "-----END CERTIFICATE-----\n"
 #define PEM_MIN_SIZE 54
 
-#if MBEDTLS_VERSION_MAJOR >= 3
-static mbedtls_entropy_context rng_entropy;
-static mbedtls_ctr_drbg_context rng_drbg;
-#endif
-
 CryptoKey *CryptoKeyMbedTLS::create() {
 	return memnew(CryptoKeyMbedTLS);
 }
@@ -74,11 +69,7 @@ Error CryptoKeyMbedTLS::load(String p_path, bool p_public_only) {
 	if (p_public_only) {
 		ret = mbedtls_pk_parse_public_key(&pkey, out.ptr(), out.size());
 	} else {
-#if MBEDTLS_VERSION_MAJOR >= 3
-		ret = mbedtls_pk_parse_key(&pkey, out.ptr(), out.size(), nullptr, 0, mbedtls_ctr_drbg_random, &rng_drbg);
-#else
 		ret = mbedtls_pk_parse_key(&pkey, out.ptr(), out.size(), nullptr, 0);
-#endif
 	}
 	// We MUST zeroize the memory for safety!
 	mbedtls_platform_zeroize(out.ptrw(), out.size());
@@ -117,11 +108,7 @@ Error CryptoKeyMbedTLS::load_from_string(String p_string_key, bool p_public_only
 	if (p_public_only) {
 		ret = mbedtls_pk_parse_public_key(&pkey, (unsigned char *)p_string_key.utf8().get_data(), p_string_key.utf8().size());
 	} else {
-#if MBEDTLS_VERSION_MAJOR >= 3
-		ret = mbedtls_pk_parse_key(&pkey, (unsigned char *)p_string_key.utf8().get_data(), p_string_key.utf8().size(), nullptr, 0, mbedtls_ctr_drbg_random, &rng_drbg);
-#else
 		ret = mbedtls_pk_parse_key(&pkey, (unsigned char *)p_string_key.utf8().get_data(), p_string_key.utf8().size(), nullptr, 0);
-#endif
 	}
 	ERR_FAIL_COND_V_MSG(ret, FAILED, "Error parsing key '" + itos(ret) + "'.");
 
@@ -269,7 +256,7 @@ Error HMACContextMbedTLS::start(HashingContext::HashType p_hash_type, PackedByte
 }
 
 Error HMACContextMbedTLS::update(PackedByteArray p_data) {
-	ERR_FAIL_NULL_V_MSG(ctx, ERR_INVALID_DATA, "Start must be called before update.");
+	ERR_FAIL_COND_V_MSG(ctx == nullptr, ERR_INVALID_DATA, "Start must be called before update.");
 
 	ERR_FAIL_COND_V_MSG(p_data.is_empty(), ERR_INVALID_PARAMETER, "Src must not be empty.");
 
@@ -278,7 +265,7 @@ Error HMACContextMbedTLS::update(PackedByteArray p_data) {
 }
 
 PackedByteArray HMACContextMbedTLS::finish() {
-	ERR_FAIL_NULL_V_MSG(ctx, PackedByteArray(), "Start must be called before finish.");
+	ERR_FAIL_COND_V_MSG(ctx == nullptr, PackedByteArray(), "Start must be called before finish.");
 	ERR_FAIL_COND_V_MSG(hash_len == 0, PackedByteArray(), "Unsupported hash type.");
 
 	PackedByteArray out;
@@ -314,17 +301,6 @@ void CryptoMbedTLS::initialize_crypto() {
 
 	Crypto::_create = create;
 	Crypto::_load_default_certificates = load_default_certificates;
-
-#if MBEDTLS_VERSION_MAJOR >= 3
-	mbedtls_ctr_drbg_init(&rng_drbg);
-	mbedtls_entropy_init(&rng_entropy);
-	const char *pers = "godot personalize";
-	int ret = mbedtls_ctr_drbg_seed(&rng_drbg, mbedtls_entropy_func, &rng_entropy, (const unsigned char *)pers, strlen(pers));
-	if (ret != 0) {
-		ERR_PRINT(vformat("mbedtls_ctr_drbg_seed returned -0x%x\n", (unsigned int)-ret));
-	}
-#endif
-
 	X509CertificateMbedTLS::make_default();
 	CryptoKeyMbedTLS::make_default();
 	HMACContextMbedTLS::make_default();
@@ -340,10 +316,6 @@ void CryptoMbedTLS::finalize_crypto() {
 	X509CertificateMbedTLS::finalize();
 	CryptoKeyMbedTLS::finalize();
 	HMACContextMbedTLS::finalize();
-#if MBEDTLS_VERSION_MAJOR >= 3
-	mbedtls_ctr_drbg_free(&rng_drbg);
-	mbedtls_entropy_free(&rng_entropy);
-#endif
 }
 
 CryptoMbedTLS::CryptoMbedTLS() {
@@ -370,7 +342,7 @@ void CryptoMbedTLS::load_default_certificates(String p_path) {
 	ERR_FAIL_COND(default_certs != nullptr);
 
 	default_certs = memnew(X509CertificateMbedTLS);
-	ERR_FAIL_NULL(default_certs);
+	ERR_FAIL_COND(default_certs == nullptr);
 
 	if (!p_path.is_empty()) {
 		// Use certs defined in project settings.
@@ -447,19 +419,9 @@ Ref<X509Certificate> CryptoMbedTLS::generate_self_signed_certificate(Ref<CryptoK
 }
 
 PackedByteArray CryptoMbedTLS::generate_random_bytes(int p_bytes) {
-	ERR_FAIL_COND_V(p_bytes < 0, PackedByteArray());
 	PackedByteArray out;
 	out.resize(p_bytes);
-	int left = p_bytes;
-	int pos = 0;
-	// Ensure we generate random in chunks of no more than MBEDTLS_CTR_DRBG_MAX_REQUEST bytes or mbedtls_ctr_drbg_random will fail.
-	while (left > 0) {
-		int to_read = MIN(left, MBEDTLS_CTR_DRBG_MAX_REQUEST);
-		int ret = mbedtls_ctr_drbg_random(&ctr_drbg, out.ptrw() + pos, to_read);
-		ERR_FAIL_COND_V_MSG(ret != 0, PackedByteArray(), vformat("Failed to generate %d random bytes(s). Error: %d.", p_bytes, ret));
-		left -= to_read;
-		pos += to_read;
-	}
+	mbedtls_ctr_drbg_random(&ctr_drbg, out.ptrw(), p_bytes);
 	return out;
 }
 
@@ -489,17 +451,9 @@ Vector<uint8_t> CryptoMbedTLS::sign(HashingContext::HashType p_hash_type, Vector
 	ERR_FAIL_COND_V_MSG(!key.is_valid(), Vector<uint8_t>(), "Invalid key provided.");
 	ERR_FAIL_COND_V_MSG(key->is_public_only(), Vector<uint8_t>(), "Invalid key provided. Cannot sign with public_only keys.");
 	size_t sig_size = 0;
-#if MBEDTLS_VERSION_MAJOR >= 3
-	unsigned char buf[MBEDTLS_PK_SIGNATURE_MAX_SIZE];
-#else
 	unsigned char buf[MBEDTLS_MPI_MAX_SIZE];
-#endif
 	Vector<uint8_t> out;
-	int ret = mbedtls_pk_sign(&(key->pkey), type, p_hash.ptr(), size, buf,
-#if MBEDTLS_VERSION_MAJOR >= 3
-			sizeof(buf),
-#endif
-			&sig_size, mbedtls_ctr_drbg_random, &ctr_drbg);
+	int ret = mbedtls_pk_sign(&(key->pkey), type, p_hash.ptr(), size, buf, &sig_size, mbedtls_ctr_drbg_random, &ctr_drbg);
 	ERR_FAIL_COND_V_MSG(ret, out, "Error while signing: " + itos(ret));
 	out.resize(sig_size);
 	memcpy(out.ptrw(), buf, sig_size);

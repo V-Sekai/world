@@ -30,7 +30,6 @@ namespace GodotTools
             public const string VerbosityLevel = "dotnet/build/verbosity_level";
             public const string NoConsoleLogging = "dotnet/build/no_console_logging";
             public const string CreateBinaryLog = "dotnet/build/create_binary_log";
-            public const string ProblemsLayout = "dotnet/build/problems_layout";
         }
 
         private EditorSettings _editorSettings;
@@ -65,7 +64,6 @@ namespace GodotTools
 
         private bool CreateProjectSolution()
         {
-            string errorMessage = null;
             using (var pr = new EditorProgress("create_csharp_solution", "Generating solution...".TTR(), 2))
             {
                 pr.Step("Generating C# project...".TTR());
@@ -97,23 +95,22 @@ namespace GodotTools
                     }
                     catch (IOException e)
                     {
-                        errorMessage = "Failed to save solution. Exception message: ".TTR() + e.Message;
+                        ShowErrorDialog("Failed to save solution. Exception message: ".TTR() + e.Message);
+                        return false;
                     }
+
+                    pr.Step("Done".TTR());
+
+                    // Here, after all calls to progress_task_step
+                    CallDeferred(nameof(_ShowDotnetFeatures));
                 }
                 else
                 {
-                    errorMessage = "Failed to create C# project.".TTR();
+                    ShowErrorDialog("Failed to create C# project.".TTR());
                 }
-            }
 
-            if (!string.IsNullOrEmpty(errorMessage))
-            {
-                ShowErrorDialog(errorMessage);
-                return false;
+                return true;
             }
-
-            _ShowDotnetFeatures();
-            return true;
         }
 
         private void _ShowDotnetFeatures()
@@ -163,14 +160,14 @@ namespace GodotTools
         {
             _errorDialog.Title = title;
             _errorDialog.DialogText = message;
-            EditorInterface.Singleton.PopupDialogCentered(_errorDialog);
+            _errorDialog.PopupCentered();
         }
 
         public void ShowConfirmCreateSlnDialog()
         {
             _confirmCreateSlnDialog.Title = "C# solution already exists. This will override the existing C# project file, any manual changes will be lost.".TTR();
             _confirmCreateSlnDialog.DialogText = "Create C# solution".TTR();
-            EditorInterface.Singleton.PopupDialogCentered(_confirmCreateSlnDialog);
+            _confirmCreateSlnDialog.PopupCentered();
         }
 
         private static string _vsCodePath = string.Empty;
@@ -193,9 +190,6 @@ namespace GodotTools
                 case ExternalEditorId.CustomEditor:
                 {
                     string file = ProjectSettings.GlobalizePath(script.ResourcePath);
-                    string project = ProjectSettings.GlobalizePath("res://");
-                    // Since ProjectSettings.GlobalizePath replaces only "res:/", leaving a trailing slash, it is removed here.
-                    project = project[..^1];
                     var execCommand = _editorSettings.GetSetting(Settings.CustomExecPath).As<string>();
                     var execArgs = _editorSettings.GetSetting(Settings.CustomExecPathArgs).As<string>();
                     var args = new List<string>();
@@ -232,7 +226,6 @@ namespace GodotTools
                                 hasFileFlag = true;
                             }
 
-                            arg = arg.ReplaceN("{project}", project);
                             arg = arg.ReplaceN("{file}", file);
                             args.Add(arg);
 
@@ -440,7 +433,7 @@ namespace GodotTools
         private void BuildStateChanged()
         {
             if (_bottomPanelBtn != null)
-                _bottomPanelBtn.Icon = MSBuildPanel.GetBuildStateIcon();
+                _bottomPanelBtn.Icon = MSBuildPanel.BuildOutputView.BuildStateIcon;
         }
 
         public override void _EnablePlugin()
@@ -456,7 +449,7 @@ namespace GodotTools
             var dotNetSdkSearchVersion = Environment.Version;
 
             // First we try to find the .NET Sdk ourselves to make sure we get the
-            // correct version first, otherwise pick the latest.
+            // correct version first (`RegisterDefaults` always picks the latest).
             if (DotNetFinder.TryFindDotNetSdk(dotNetSdkSearchVersion, out var sdkVersion, out string sdkPath))
             {
                 if (Godot.OS.IsStdOutVerbose())
@@ -468,7 +461,7 @@ namespace GodotTools
             {
                 try
                 {
-                    ProjectUtils.MSBuildLocatorRegisterLatest(out sdkVersion, out sdkPath);
+                    ProjectUtils.MSBuildLocatorRegisterDefaults(out sdkVersion, out sdkPath);
                     if (Godot.OS.IsStdOutVerbose())
                         Console.WriteLine($"Found .NET Sdk version '{sdkVersion}': {sdkPath}");
                 }
@@ -485,22 +478,20 @@ namespace GodotTools
             _editorSettings = EditorInterface.Singleton.GetEditorSettings();
 
             _errorDialog = new AcceptDialog();
-            _errorDialog.SetUnparentWhenInvisible(true);
+            editorBaseControl.AddChild(_errorDialog);
 
             _confirmCreateSlnDialog = new ConfirmationDialog();
-            _confirmCreateSlnDialog.SetUnparentWhenInvisible(true);
             _confirmCreateSlnDialog.Confirmed += () => CreateProjectSolution();
+            editorBaseControl.AddChild(_confirmCreateSlnDialog);
 
             MSBuildPanel = new MSBuildPanel();
-            MSBuildPanel.BuildStateChanged += BuildStateChanged;
+            MSBuildPanel.Ready += () =>
+                MSBuildPanel.BuildOutputView.BuildStateChanged += BuildStateChanged;
             _bottomPanelBtn = AddControlToBottomPanel(MSBuildPanel, "MSBuild".TTR());
 
             AddChild(new HotReloadAssemblyWatcher { Name = "HotReloadAssemblyWatcher" });
 
-            _menuPopup = new PopupMenu
-            {
-                Name = "CSharpTools",
-            };
+            _menuPopup = new PopupMenu();
             _menuPopup.Hide();
 
             AddToolSubmenuItem("C#", _menuPopup);
@@ -508,7 +499,7 @@ namespace GodotTools
             _toolBarBuildButton = new Button
             {
                 Flat = true,
-                Icon = EditorInterface.Singleton.GetEditorTheme().GetIcon("BuildCSharp", "EditorIcons"),
+                Icon = editorBaseControl.GetThemeIcon("BuildCSharp", "EditorIcons"),
                 FocusMode = Control.FocusModeEnum.None,
                 Shortcut = EditorDefShortcut("mono/build_solution", "Build Project".TTR(), (Key)KeyModifierMask.MaskAlt | Key.B),
                 ShortcutInTooltip = true,
@@ -540,7 +531,6 @@ namespace GodotTools
             EditorDef(Settings.VerbosityLevel, Variant.From(VerbosityLevelId.Normal));
             EditorDef(Settings.NoConsoleLogging, false);
             EditorDef(Settings.CreateBinaryLog, false);
-            EditorDef(Settings.ProblemsLayout, Variant.From(BuildProblemsView.ProblemsLayout.Tree));
 
             string settingsHintStr = "Disabled";
 
@@ -599,14 +589,6 @@ namespace GodotTools
                 ["hint_string"] = string.Join(",", verbosityLevels),
             });
 
-            _editorSettings.AddPropertyInfo(new Godot.Collections.Dictionary
-            {
-                ["type"] = (int)Variant.Type.Int,
-                ["name"] = Settings.ProblemsLayout,
-                ["hint"] = (int)PropertyHint.Enum,
-                ["hint_string"] = "View as List,View as Tree",
-            });
-
             OnSettingsChanged();
             _editorSettings.SettingsChanged += OnSettingsChanged;
 
@@ -627,12 +609,6 @@ namespace GodotTools
             base._DisablePlugin();
 
             _editorSettings.SettingsChanged -= OnSettingsChanged;
-        }
-
-        public override void _ExitTree()
-        {
-            _errorDialog?.QueueFree();
-            _confirmCreateSlnDialog?.QueueFree();
         }
 
         private void OnSettingsChanged()

@@ -33,12 +33,11 @@
 
 #include "editor/plugins/node_3d_editor_gizmos.h"
 
-class Gizmo3DHelper;
-
 class CollisionShape3DGizmoPlugin : public EditorNode3DGizmoPlugin {
 	GDCLASS(CollisionShape3DGizmoPlugin, EditorNode3DGizmoPlugin);
 
-	Ref<Gizmo3DHelper> helper;
+	Transform3D initial_transform;
+	Variant initial_value;
 
 public:
 	bool has_gizmo(Node3D *p_spatial) override;
@@ -53,7 +52,6 @@ public:
 	void commit_handle(const EditorNode3DGizmo *p_gizmo, int p_id, bool p_secondary, const Variant &p_restore, bool p_cancel = false) override;
 
 	CollisionShape3DGizmoPlugin();
-	~CollisionShape3DGizmoPlugin();
 };
 
 #endif // COLLISION_SHAPE_3D_GIZMO_PLUGIN_H

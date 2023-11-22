@@ -414,7 +414,7 @@ void SkeletonIK3D::_notification(int p_what) {
 		} break;
 
 		case NOTIFICATION_EXIT_TREE: {
-			stop();
+			reload_chain();
 		} break;
 	}
 }

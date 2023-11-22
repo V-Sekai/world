@@ -711,10 +711,9 @@ public:
 		HashMap<StringName, Varying> varyings;
 		HashMap<StringName, Uniform> uniforms;
 		HashMap<StringName, Struct> structs;
-		HashMap<StringName, Function> functions;
 		Vector<StringName> render_modes;
 
-		Vector<Function> vfunctions;
+		Vector<Function> functions;
 		Vector<Constant> vconstants;
 		Vector<Struct> vstructs;
 
@@ -911,7 +910,6 @@ private:
 	int error_line = 0;
 
 	Vector<FilePosition> include_positions;
-	HashSet<String> include_markers_handled;
 
 #ifdef DEBUG_ENABLED
 	struct Usage {

@@ -38,7 +38,12 @@
 #include "core/templates/self_list.h"
 #include "servers/rendering/environment/renderer_gi.h"
 
-#include "platform_gl.h"
+#include "platform_config.h"
+#ifndef OPENGL_INCLUDE_H
+#include <GLES3/gl3.h>
+#else
+#include OPENGL_INCLUDE_H
+#endif
 
 namespace GLES3 {
 
@@ -85,8 +90,6 @@ public:
 	virtual bool voxel_gi_is_using_two_bounces(RID p_voxel_gi) const override;
 
 	virtual uint32_t voxel_gi_get_version(RID p_voxel_gi) const override;
-
-	virtual void sdfgi_reset() override;
 };
 
 }; // namespace GLES3

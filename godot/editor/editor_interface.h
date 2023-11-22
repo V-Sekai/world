@@ -49,9 +49,7 @@ class FileSystemDock;
 class Mesh;
 class Node;
 class ScriptEditor;
-class SubViewport;
 class Texture2D;
-class Theme;
 class VBoxContainer;
 class Window;
 
@@ -86,15 +84,14 @@ public:
 	void set_plugin_enabled(const String &p_plugin, bool p_enabled);
 	bool is_plugin_enabled(const String &p_plugin) const;
 
-	// Editor GUI.
+	void add_editor_plugin(EditorPlugin *p_plugin);
+	void remove_editor_plugin(EditorPlugin *p_plugin);
 
-	Ref<Theme> get_editor_theme() const;
+	// Editor GUI.
 
 	Control *get_base_control() const;
 	VBoxContainer *get_editor_main_screen() const;
 	ScriptEditor *get_script_editor() const;
-	SubViewport *get_editor_viewport_2d() const;
-	SubViewport *get_editor_viewport_3d(int p_idx = 0) const;
 
 	void set_main_screen_editor(const String &p_name);
 	void set_distraction_free_mode(bool p_enter);

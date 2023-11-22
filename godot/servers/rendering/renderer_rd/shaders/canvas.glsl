@@ -180,10 +180,6 @@ void main() {
 #ifdef USE_POINT_SIZE
 	float point_size = 1.0;
 #endif
-
-#ifdef USE_WORLD_VERTEX_COORDS
-	vertex = (model_matrix * vec4(vertex, 0.0, 1.0)).xy;
-#endif
 	{
 #CODE : VERTEX
 	}
@@ -192,7 +188,7 @@ void main() {
 	pixel_size_interp = abs(draw_data.dst_rect.zw) * vertex_base;
 #endif
 
-#if !defined(SKIP_TRANSFORM_USED) && !defined(USE_WORLD_VERTEX_COORDS)
+#if !defined(SKIP_TRANSFORM_USED)
 	vertex = (model_matrix * vec4(vertex, 0.0, 1.0)).xy;
 #endif
 

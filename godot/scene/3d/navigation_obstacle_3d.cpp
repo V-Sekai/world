@@ -148,14 +148,10 @@ void NavigationObstacle3D::_notification(int p_what) {
 				}
 #ifdef DEBUG_ENABLED
 				if (fake_agent_radius_debug_instance.is_valid() && radius > 0.0) {
-					Transform3D debug_transform;
-					debug_transform.origin = get_global_position();
-					RS::get_singleton()->instance_set_transform(fake_agent_radius_debug_instance, debug_transform);
+					RS::get_singleton()->instance_set_transform(fake_agent_radius_debug_instance, get_global_transform());
 				}
 				if (static_obstacle_debug_instance.is_valid() && get_vertices().size() > 0) {
-					Transform3D debug_transform;
-					debug_transform.origin = get_global_position();
-					RS::get_singleton()->instance_set_transform(static_obstacle_debug_instance, debug_transform);
+					RS::get_singleton()->instance_set_transform(static_obstacle_debug_instance, get_global_transform());
 				}
 #endif // DEBUG_ENABLED
 			}
@@ -165,8 +161,6 @@ void NavigationObstacle3D::_notification(int p_what) {
 
 NavigationObstacle3D::NavigationObstacle3D() {
 	obstacle = NavigationServer3D::get_singleton()->obstacle_create();
-
-	NavigationServer3D::get_singleton()->obstacle_set_height(obstacle, height);
 
 	set_radius(radius);
 	set_height(height);

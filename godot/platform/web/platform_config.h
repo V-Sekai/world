@@ -29,3 +29,5 @@
 /**************************************************************************/
 
 #include <alloca.h>
+
+#define OPENGL_INCLUDE_H "platform/web/godot_webgl2.h"

@@ -92,8 +92,7 @@ jobs:
         if: ${{ matrix.proj-test }}
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
-          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys EB8B81E14DA65431D7504EA8F63F0F2B90935439
-          sudo add-apt-repository "deb https://ppa.launchpadcontent.net/kisak/turtle/ubuntu focal main"
+          sudo add-apt-repository ppa:kisak/kisak-mesa
           sudo apt-get install -qq mesa-vulkan-drivers
 
       - name: Free disk space on runner
@@ -162,7 +161,7 @@ jobs:
         run: |
           ${{ matrix.bin }} --version
           ${{ matrix.bin }} --help
-          ${{ matrix.bin }} --headless --test --force-colors
+          ${{ matrix.bin }} --test --headless
 
       # Check class reference
       - name: Check for class reference updates

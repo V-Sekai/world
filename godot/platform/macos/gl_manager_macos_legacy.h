@@ -45,12 +45,17 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations" // OpenGL is deprecated in macOS 10.14
 
-typedef CGLError (*CGLEnablePtr)(CGLContextObj ctx, CGLContextEnable pname);
-typedef CGLError (*CGLSetParameterPtr)(CGLContextObj ctx, CGLContextParameter pname, const GLint *params);
-typedef CGLContextObj (*CGLGetCurrentContextPtr)(void);
+class GLManager_MacOS {
+public:
+	enum ContextType {
+		GLES_3_0_COMPATIBLE,
+	};
 
-class GLManagerLegacy_MacOS {
+private:
 	struct GLWindow {
+		int width = 0;
+		int height = 0;
+
 		id window_view = nullptr;
 		NSOpenGLContext *context = nullptr;
 	};
@@ -63,14 +68,15 @@ class GLManagerLegacy_MacOS {
 	Error create_context(GLWindow &win);
 
 	bool use_vsync = false;
-	CGLEnablePtr CGLEnable = nullptr;
-	CGLSetParameterPtr CGLSetParameter = nullptr;
-	CGLGetCurrentContextPtr CGLGetCurrentContext = nullptr;
+	ContextType context_type;
 
 public:
 	Error window_create(DisplayServer::WindowID p_window_id, id p_view, int p_width, int p_height);
 	void window_destroy(DisplayServer::WindowID p_window_id);
 	void window_resize(DisplayServer::WindowID p_window_id, int p_width, int p_height);
+
+	int window_get_width(DisplayServer::WindowID p_window_id = 0);
+	int window_get_height(DisplayServer::WindowID p_window_id = 0);
 
 	void release_current();
 	void make_current();
@@ -78,6 +84,7 @@ public:
 
 	void window_make_current(DisplayServer::WindowID p_window_id);
 
+	void window_update(DisplayServer::WindowID p_window_id);
 	void window_set_per_pixel_transparency_enabled(DisplayServer::WindowID p_window_id, bool p_enabled);
 
 	Error initialize();
@@ -87,8 +94,8 @@ public:
 
 	NSOpenGLContext *get_context(DisplayServer::WindowID p_window_id);
 
-	GLManagerLegacy_MacOS();
-	~GLManagerLegacy_MacOS();
+	GLManager_MacOS(ContextType p_context_type);
+	~GLManager_MacOS();
 };
 
 #pragma clang diagnostic push

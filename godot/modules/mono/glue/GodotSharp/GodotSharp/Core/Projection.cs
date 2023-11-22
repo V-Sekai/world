@@ -905,8 +905,7 @@ namespace Godot
         }
 
         /// <summary>
-        /// Returns a Vector4 transformed (multiplied) by the transpose of the projection.
-        /// For transforming by inverse of a projection <c>projection.Inverse() * vector</c> can be used instead. See <see cref="Inverse"/>.
+        /// Returns a Vector4 transformed (multiplied) by the inverse projection.
         /// </summary>
         /// <param name="proj">The projection to apply.</param>
         /// <param name="vector">A Vector4 to transform.</param>
@@ -1002,7 +1001,7 @@ namespace Godot
         /// <returns>A hash code for this projection.</returns>
         public override readonly int GetHashCode()
         {
-            return HashCode.Combine(X, Y, Z, W);
+            return Y.GetHashCode() ^ X.GetHashCode() ^ Z.GetHashCode() ^ W.GetHashCode();
         }
 
         /// <summary>

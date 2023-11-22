@@ -193,22 +193,10 @@ void OS_IOS::start() {
 
 void OS_IOS::finalize() {
 	deinitialize_modules();
-}
 
-#ifdef TOOLS_ENABLED
-Error OS_IOS::create_instance(const List<String> &p_arguments, ProcessID *r_child_id) {
-	String _cmd_path = OS::get_singleton()->get_user_data_dir().path_join("_cmd");
-	{
-		Ref<FileAccess> f = FileAccess::open(_cmd_path, FileAccess::WRITE);
-		if (f.is_valid()) {
-			for (const String &arg : p_arguments) {
-				f->store_line(arg);
-			}
-		}
-	}
-	return OK;
+	// Already gets called
+	//delete_main_loop();
 }
-#endif
 
 // MARK: Dynamic Libraries
 
@@ -269,7 +257,7 @@ Error OS_IOS::open_dynamic_library(const String p_path, void *&p_library_handle,
 	}
 
 	p_library_handle = dlopen(path.utf8().get_data(), RTLD_NOW);
-	ERR_FAIL_NULL_V_MSG(p_library_handle, ERR_CANT_OPEN, vformat("Can't open dynamic library: %s. Error: %s.", p_path, dlerror()));
+	ERR_FAIL_COND_V_MSG(!p_library_handle, ERR_CANT_OPEN, vformat("Can't open dynamic library: %s. Error: %s.", p_path, dlerror()));
 
 	if (r_resolved_path != nullptr) {
 		*r_resolved_path = path;
@@ -331,21 +319,6 @@ Error OS_IOS::shell_open(String p_uri) {
 	[[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
 
 	return OK;
-}
-
-String OS_IOS::get_config_path() const {
-	static String ret;
-	if (ret.is_empty()) {
-		NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
-		if (paths && [paths count] >= 1) {
-			ret.parse_utf8([[paths firstObject] UTF8String]);
-		}
-	}
-	return ret;
-}
-
-String OS_IOS::get_data_path() const {
-	return get_config_path();
 }
 
 String OS_IOS::get_user_data_dir() const {

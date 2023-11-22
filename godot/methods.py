@@ -96,6 +96,9 @@ def add_source_files_scu(self, sources, files, allow_gen=False):
         if section_name not in (_scu_folders):
             return False
 
+        if self["verbose"]:
+            print("SCU building " + section_name)
+
         # Add all the gen.cpp files in the SCU directory
         add_source_files_orig(self, sources, subdir + "scu/scu_*.gen.cpp", True)
         return True
@@ -999,21 +1002,9 @@ def is_vanilla_clang(env):
 
 def get_compiler_version(env):
     """
-    Returns a dictionary with various version information:
-
-    - major, minor, patch: Version following semantic versioning system
-    - metadata1, metadata2: Extra information
-    - date: Date of the build
+    Returns an array of version numbers as ints: [major, minor, patch].
+    The return array should have at least two values (major, minor).
     """
-    ret = {
-        "major": -1,
-        "minor": -1,
-        "patch": -1,
-        "metadata1": None,
-        "metadata2": None,
-        "date": None,
-    }
-
     if not env.msvc:
         # Not using -dumpversion as some GCC distros only return major, and
         # Clang used to return hardcoded 4.2.1: # https://reviews.llvm.org/D56803
@@ -1021,28 +1012,23 @@ def get_compiler_version(env):
             version = subprocess.check_output([env.subst(env["CXX"]), "--version"]).strip().decode("utf-8")
         except (subprocess.CalledProcessError, OSError):
             print("Couldn't parse CXX environment variable to infer compiler version.")
-            return ret
-    else:
-        # TODO: Implement for MSVC
-        return ret
+            return None
+    else:  # TODO: Implement for MSVC
+        return None
     match = re.search(
-        r"(?:(?<=version )|(?<=\) )|(?<=^))"
-        r"(?P<major>\d+)"
-        r"(?:\.(?P<minor>\d*))?"
-        r"(?:\.(?P<patch>\d*))?"
-        r"(?:-(?P<metadata1>[0-9a-zA-Z-]*))?"
-        r"(?:\+(?P<metadata2>[0-9a-zA-Z-]*))?"
-        r"(?: (?P<date>[0-9]{8}|[0-9]{6})(?![0-9a-zA-Z]))?",
+        "(?:(?<=version )|(?<=\) )|(?<=^))"
+        "(?P<major>\d+)"
+        "(?:\.(?P<minor>\d*))?"
+        "(?:\.(?P<patch>\d*))?"
+        "(?:-(?P<metadata1>[0-9a-zA-Z-]*))?"
+        "(?:\+(?P<metadata2>[0-9a-zA-Z-]*))?"
+        "(?: (?P<date>[0-9]{8}|[0-9]{6})(?![0-9a-zA-Z]))?",
         version,
     )
     if match is not None:
-        for key, value in match.groupdict().items():
-            if value is not None:
-                ret[key] = value
-    # Transform semantic versioning to integers
-    for key in ["major", "minor", "patch"]:
-        ret[key] = int(ret[key] or -1)
-    return ret
+        return match.groupdict()
+    else:
+        return None
 
 
 def using_gcc(env):

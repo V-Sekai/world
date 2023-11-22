@@ -42,11 +42,10 @@
  * priority of its children. The heap is stored in an array, with the
  * children of node i stored at indices 2i + 1 and 2i + 2.
  */
-template <typename K>
 struct hb_priority_queue_t
 {
  private:
-  typedef hb_pair_t<K, unsigned> item_t;
+  typedef hb_pair_t<int64_t, unsigned> item_t;
   hb_vector_t<item_t> heap;
 
  public:
@@ -58,7 +57,7 @@ struct hb_priority_queue_t
 #ifndef HB_OPTIMIZE_SIZE
   HB_ALWAYS_INLINE
 #endif
-  void insert (K priority, unsigned value)
+  void insert (int64_t priority, unsigned value)
   {
     heap.push (item_t (priority, value));
     if (unlikely (heap.in_error ())) return;

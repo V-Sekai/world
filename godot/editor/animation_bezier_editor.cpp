@@ -42,7 +42,7 @@
 
 float AnimationBezierTrackEdit::_bezier_h_to_pixel(float p_h) {
 	float h = p_h;
-	h = (h - timeline_v_scroll) / timeline_v_zoom;
+	h = (h - v_scroll) / v_zoom;
 	h = (get_size().height / 2.0) - h;
 	return h;
 }
@@ -251,9 +251,7 @@ void AnimationBezierTrackEdit::_notification(int p_what) {
 
 			int right_limit = get_size().width;
 
-			track_v_scroll_max = vsep;
-
-			int vofs = vsep + track_v_scroll;
+			int vofs = vsep;
 			int margin = 0;
 
 			RBMap<int, Color> subtrack_colors;
@@ -330,7 +328,6 @@ void AnimationBezierTrackEdit::_notification(int p_what) {
 						text_buf.draw(get_canvas_item(), string_pos, color);
 
 						vofs += h + vsep;
-						track_v_scroll_max += h + vsep;
 					}
 				}
 
@@ -442,7 +439,6 @@ void AnimationBezierTrackEdit::_notification(int p_what) {
 					subtrack_icons[current_track] = track_icons;
 
 					vofs += text_buf.get_size().y + vsep;
-					track_v_scroll_max += text_buf.get_size().y + vsep;
 				}
 			}
 
@@ -451,11 +447,11 @@ void AnimationBezierTrackEdit::_notification(int p_what) {
 			{ //guides
 				float min_left_scale = font->get_height(font_size) + vsep;
 
-				float scale = (min_left_scale * 2) * timeline_v_zoom;
+				float scale = (min_left_scale * 2) * v_zoom;
 				float step = Math::pow(10.0, Math::round(Math::log(scale / 5.0) / Math::log(10.0))) * 5.0;
 				scale = Math::snapped(scale, step);
 
-				while (scale / timeline_v_zoom < min_left_scale * 2) {
+				while (scale / v_zoom < min_left_scale * 2) {
 					scale += step;
 				}
 
@@ -463,8 +459,8 @@ void AnimationBezierTrackEdit::_notification(int p_what) {
 				int prev_iv = 0;
 				for (int i = font->get_height(font_size); i < get_size().height; i++) {
 					float ofs = get_size().height / 2.0 - i;
-					ofs *= timeline_v_zoom;
-					ofs += timeline_v_scroll;
+					ofs *= v_zoom;
+					ofs += v_scroll;
 
 					int iv = int(ofs / scale);
 					if (ofs < 0) {
@@ -912,9 +908,9 @@ void AnimationBezierTrackEdit::gui_input(const Ref<InputEvent> &p_event) {
 			}
 
 			if (Math::is_finite(minimum_value) && Math::is_finite(maximum_value)) {
-				timeline_v_scroll = (maximum_value + minimum_value) / 2.0;
+				v_scroll = (maximum_value + minimum_value) / 2.0;
 				if (maximum_value - minimum_value > CMP_EPSILON) {
-					timeline_v_zoom = (maximum_value - minimum_value) / ((get_size().height - timeline->get_size().height) * 0.9);
+					v_zoom = (maximum_value - minimum_value) / ((get_size().height - timeline->get_size().height) * 0.9);
 				}
 			}
 
@@ -1164,7 +1160,7 @@ void AnimationBezierTrackEdit::gui_input(const Ref<InputEvent> &p_event) {
 			Array new_point;
 			new_point.resize(5);
 
-			float h = (get_size().height / 2.0 - mb->get_position().y) * timeline_v_zoom + timeline_v_scroll;
+			float h = (get_size().height / 2.0 - mb->get_position().y) * v_zoom + v_scroll;
 
 			new_point[0] = h;
 			new_point[1] = -0.25;
@@ -1397,7 +1393,7 @@ void AnimationBezierTrackEdit::gui_input(const Ref<InputEvent> &p_event) {
 			select_single_attempt = IntPair(-1, -1);
 		}
 
-		float y = (get_size().height / 2.0 - mm->get_position().y) * timeline_v_zoom + timeline_v_scroll;
+		float y = (get_size().height / 2.0 - mm->get_position().y) * v_zoom + v_scroll;
 		float x = editor->snap_time(((mm->get_position().x - limit) / timeline->get_zoom_scale()) + timeline->get_value());
 
 		if (!read_only) {
@@ -1426,7 +1422,7 @@ void AnimationBezierTrackEdit::gui_input(const Ref<InputEvent> &p_event) {
 	}
 
 	if ((moving_handle == 1 || moving_handle == -1) && mm.is_valid()) {
-		float y = (get_size().height / 2.0 - mm->get_position().y) * timeline_v_zoom + timeline_v_scroll;
+		float y = (get_size().height / 2.0 - mm->get_position().y) * v_zoom + v_scroll;
 		float x = editor->snap_time((mm->get_position().x - timeline->get_name_limit()) / timeline->get_zoom_scale()) + timeline->get_value();
 
 		Vector2 key_pos = Vector2(animation->track_get_key_time(selected_track, moving_handle_key), animation->bezier_track_get_key_value(selected_track, moving_handle_key));
@@ -1442,7 +1438,7 @@ void AnimationBezierTrackEdit::gui_input(const Ref<InputEvent> &p_event) {
 			Animation::HandleMode handle_mode = animation->bezier_track_get_key_handle_mode(moving_handle_track, moving_handle_key);
 
 			if (handle_mode == Animation::HANDLE_MODE_BALANCED) {
-				real_t ratio = timeline->get_zoom_scale() * timeline_v_zoom;
+				real_t ratio = timeline->get_zoom_scale() * v_zoom;
 				Transform2D xform;
 				xform.set_scale(Vector2(1.0, 1.0 / ratio));
 
@@ -1459,7 +1455,7 @@ void AnimationBezierTrackEdit::gui_input(const Ref<InputEvent> &p_event) {
 			Animation::HandleMode handle_mode = animation->bezier_track_get_key_handle_mode(moving_handle_track, moving_handle_key);
 
 			if (handle_mode == Animation::HANDLE_MODE_BALANCED) {
-				real_t ratio = timeline->get_zoom_scale() * timeline_v_zoom;
+				real_t ratio = timeline->get_zoom_scale() * v_zoom;
 				Transform2D xform;
 				xform.set_scale(Vector2(1.0, 1.0 / ratio));
 
@@ -1479,11 +1475,11 @@ void AnimationBezierTrackEdit::gui_input(const Ref<InputEvent> &p_event) {
 			EditorUndoRedoManager *undo_redo = EditorUndoRedoManager::get_singleton();
 			undo_redo->create_action(TTR("Move Bezier Points"));
 			if (moving_handle == -1) {
-				real_t ratio = timeline->get_zoom_scale() * timeline_v_zoom;
+				real_t ratio = timeline->get_zoom_scale() * v_zoom;
 				undo_redo->add_do_method(animation.ptr(), "bezier_track_set_key_in_handle", moving_handle_track, moving_handle_key, moving_handle_left, ratio);
 				undo_redo->add_undo_method(animation.ptr(), "bezier_track_set_key_in_handle", moving_handle_track, moving_handle_key, animation->bezier_track_get_key_in_handle(moving_handle_track, moving_handle_key), ratio);
 			} else if (moving_handle == 1) {
-				real_t ratio = timeline->get_zoom_scale() * timeline_v_zoom;
+				real_t ratio = timeline->get_zoom_scale() * v_zoom;
 				undo_redo->add_do_method(animation.ptr(), "bezier_track_set_key_out_handle", moving_handle_track, moving_handle_key, moving_handle_right, ratio);
 				undo_redo->add_undo_method(animation.ptr(), "bezier_track_set_key_out_handle", moving_handle_track, moving_handle_key, animation->bezier_track_get_key_out_handle(moving_handle_track, moving_handle_key), ratio);
 			}
@@ -1495,34 +1491,22 @@ void AnimationBezierTrackEdit::gui_input(const Ref<InputEvent> &p_event) {
 }
 
 void AnimationBezierTrackEdit::_pan_callback(Vector2 p_scroll_vec, Ref<InputEvent> p_event) {
-	Ref<InputEventMouseMotion> mm = p_event;
-	if (mm.is_valid()) {
-		if (mm->get_position().x > timeline->get_name_limit()) {
-			timeline_v_scroll += p_scroll_vec.y * timeline_v_zoom;
-			timeline_v_scroll = CLAMP(timeline_v_scroll, -100000, 100000);
-			timeline->set_value(timeline->get_value() - p_scroll_vec.x / timeline->get_zoom_scale());
-		} else {
-			track_v_scroll += p_scroll_vec.y;
-			if (track_v_scroll < -track_v_scroll_max) {
-				track_v_scroll = -track_v_scroll_max;
-			} else if (track_v_scroll > 0) {
-				track_v_scroll = 0;
-			}
-		}
-		queue_redraw();
-	}
+	v_scroll += p_scroll_vec.y * v_zoom;
+	v_scroll = CLAMP(v_scroll, -100000, 100000);
+	timeline->set_value(timeline->get_value() - p_scroll_vec.x / timeline->get_zoom_scale());
+	queue_redraw();
 }
 
 void AnimationBezierTrackEdit::_zoom_callback(float p_zoom_factor, Vector2 p_origin, Ref<InputEvent> p_event) {
-	const float v_zoom_orig = timeline_v_zoom;
+	const float v_zoom_orig = v_zoom;
 	Ref<InputEventWithModifiers> iewm = p_event;
 	if (iewm.is_valid() && iewm->is_alt_pressed()) {
 		// Alternate zoom (doesn't affect timeline).
-		timeline_v_zoom = CLAMP(timeline_v_zoom * p_zoom_factor, 0.000001, 100000);
+		v_zoom = CLAMP(v_zoom * p_zoom_factor, 0.000001, 100000);
 	} else {
 		timeline->get_zoom()->set_value(timeline->get_zoom()->get_value() / p_zoom_factor);
 	}
-	timeline_v_scroll = timeline_v_scroll + (p_origin.y - get_size().y / 2.0) * (timeline_v_zoom - v_zoom_orig);
+	v_scroll = v_scroll + (p_origin.y - get_size().y / 2.0) * (v_zoom - v_zoom_orig);
 	queue_redraw();
 }
 
@@ -1533,7 +1517,7 @@ void AnimationBezierTrackEdit::_menu_selected(int p_index) {
 				Array new_point;
 				new_point.resize(5);
 
-				float h = (get_size().height / 2.0 - menu_insert_key.y) * timeline_v_zoom + timeline_v_scroll;
+				float h = (get_size().height / 2.0 - menu_insert_key.y) * v_zoom + v_scroll;
 
 				new_point[0] = h;
 				new_point[1] = -0.25;

@@ -33,11 +33,10 @@
 
 #include "editor/editor_plugin.h"
 #include "scene/animation/animation_tree.h"
+#include "scene/gui/button.h"
 #include "scene/gui/graph_edit.h"
 
-class Button;
 class EditorFileDialog;
-class ScrollContainer;
 
 class AnimationTreeNodeEditorPlugin : public VBoxContainer {
 	GDCLASS(AnimationTreeNodeEditorPlugin, VBoxContainer);
@@ -50,16 +49,8 @@ public:
 class AnimationTreeEditor : public VBoxContainer {
 	GDCLASS(AnimationTreeEditor, VBoxContainer);
 
-	HBoxContainer *hb = nullptr;
-
 	ScrollContainer *path_edit = nullptr;
 	HBoxContainer *path_hb = nullptr;
-
-	HBoxContainer *options_hb = nullptr;
-
-	Button *pin = nullptr;
-
-	AnimationTree *selected_node = nullptr;
 
 	AnimationTree *tree = nullptr;
 	MarginContainer *editor_base = nullptr;
@@ -75,8 +66,6 @@ class AnimationTreeEditor : public VBoxContainer {
 	void _path_button_pressed(int p_path);
 	void _animation_list_changed();
 
-	void _pin_pressed();
-
 	static Vector<String> get_animation_list();
 
 protected:
@@ -87,9 +76,6 @@ protected:
 	static AnimationTreeEditor *singleton;
 
 public:
-	AnimationTree *get_selected_node() { return selected_node; }
-	void set_selected_node(AnimationTree *p_selected_node) { selected_node = p_selected_node; }
-
 	AnimationTree *get_animation_tree() { return tree; }
 	void add_plugin(AnimationTreeNodeEditorPlugin *p_editor);
 	void remove_plugin(AnimationTreeNodeEditorPlugin *p_editor);
@@ -100,10 +86,6 @@ public:
 
 	void edit_path(const Vector<String> &p_path);
 	Vector<String> get_edited_path() const;
-
-	Button *get_pin();
-	bool is_pinned() const;
-	void unpin(Node *n);
 
 	void enter_editor(const String &p_path = "");
 	static AnimationTreeEditor *get_singleton() { return singleton; }
@@ -116,11 +98,6 @@ class AnimationTreeEditorPlugin : public EditorPlugin {
 
 	AnimationTreeEditor *anim_tree_editor = nullptr;
 	Button *button = nullptr;
-	ObjectID last_anim_tree;
-
-protected:
-	void _pin_toggled();
-	void _animation_tree_removed(Node *p_node);
 
 public:
 	virtual String get_name() const override { return "AnimationTree"; }
@@ -128,8 +105,6 @@ public:
 	virtual void edit(Object *p_object) override;
 	virtual bool handles(Object *p_object) const override;
 	virtual void make_visible(bool p_visible) override;
-
-	void _notification(int p_what);
 
 	AnimationTreeEditorPlugin();
 	~AnimationTreeEditorPlugin();

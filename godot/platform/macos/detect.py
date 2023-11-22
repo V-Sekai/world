@@ -1,6 +1,6 @@
 import os
 import sys
-from methods import detect_darwin_sdk_path, get_compiler_version, is_vanilla_clang
+from methods import detect_darwin_sdk_path
 from platform_methods import detect_arch
 
 from typing import TYPE_CHECKING
@@ -32,7 +32,6 @@ def get_opts():
         BoolVariable("use_asan", "Use LLVM/GCC compiler address sanitizer (ASAN)", False),
         BoolVariable("use_tsan", "Use LLVM/GCC compiler thread sanitizer (TSAN)", False),
         BoolVariable("use_coverage", "Use instrumentation codes in the binary (e.g. for code coverage)", False),
-        ("angle_libs", "Path to the ANGLE static libraries", ""),
     ]
 
 
@@ -119,15 +118,6 @@ def configure(env: "Environment"):
         env.Append(ASFLAGS=["-arch", "x86_64", "-mmacosx-version-min=10.13"])
         env.Append(CCFLAGS=["-arch", "x86_64", "-mmacosx-version-min=10.13"])
         env.Append(LINKFLAGS=["-arch", "x86_64", "-mmacosx-version-min=10.13"])
-
-    cc_version = get_compiler_version(env)
-    cc_version_major = cc_version["major"]
-    cc_version_minor = cc_version["minor"]
-    vanilla = is_vanilla_clang(env)
-
-    # Workaround for Xcode 15 linker bug.
-    if not vanilla and cc_version_major == 15 and cc_version_minor == 0:
-        env.Prepend(LINKFLAGS=["-ld_classic"])
 
     env.Append(CCFLAGS=["-fobjc-arc"])
 
@@ -249,13 +239,7 @@ def configure(env: "Environment"):
 
     if env["opengl3"]:
         env.Append(CPPDEFINES=["GLES3_ENABLED"])
-        if env["angle_libs"] != "":
-            env.AppendUnique(CPPDEFINES=["EGL_STATIC"])
-            env.Append(LINKFLAGS=["-L" + env["angle_libs"]])
-            env.Append(LINKFLAGS=["-lANGLE.macos." + env["arch"]])
-            env.Append(LINKFLAGS=["-lEGL.macos." + env["arch"]])
-            env.Append(LINKFLAGS=["-lGLES.macos." + env["arch"]])
-        env.Prepend(CPPPATH=["#thirdparty/angle/include"])
+        env.Append(LINKFLAGS=["-framework", "OpenGL"])
 
     env.Append(LINKFLAGS=["-rpath", "@executable_path/../Frameworks", "-rpath", "@executable_path"])
 

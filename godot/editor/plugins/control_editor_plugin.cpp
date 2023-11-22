@@ -33,7 +33,6 @@
 #include "editor/editor_node.h"
 #include "editor/editor_scale.h"
 #include "editor/editor_settings.h"
-#include "editor/editor_string_names.h"
 #include "editor/editor_undo_redo_manager.h"
 #include "editor/plugins/canvas_item_editor_plugin.h"
 #include "scene/gui/grid_container.h"
@@ -194,7 +193,7 @@ void EditorPropertyAnchorsPreset::setup(const Vector<String> &p_options) {
 			String preset_name = option_name.trim_prefix("Preset");
 			String humanized_name = preset_name.capitalize();
 			String icon_name = "ControlAlign" + preset_name;
-			options->add_icon_item(EditorNode::get_singleton()->get_editor_theme()->get_icon(icon_name, EditorStringName(EditorIcons)), humanized_name);
+			options->add_icon_item(EditorNode::get_singleton()->get_gui_base()->get_editor_theme_icon(icon_name), humanized_name);
 		} else {
 			options->add_item(option_name);
 		}
@@ -520,7 +519,7 @@ void ControlEditorPopupButton::_notification(int p_what) {
 }
 
 ControlEditorPopupButton::ControlEditorPopupButton() {
-	set_theme_type_variation("FlatButton");
+	set_flat(true);
 	set_toggle_mode(true);
 	set_focus_mode(FOCUS_NONE);
 
@@ -817,7 +816,7 @@ void ControlEditorToolbar::_container_flags_selected(int p_flags, bool p_vertica
 }
 
 Vector2 ControlEditorToolbar::_position_to_anchor(const Control *p_control, Vector2 position) {
-	ERR_FAIL_NULL_V(p_control, Vector2());
+	ERR_FAIL_COND_V(!p_control, Vector2());
 
 	Rect2 parent_rect = p_control->get_parent_anchorable_rect();
 
@@ -977,6 +976,8 @@ void ControlEditorToolbar::_notification(int p_what) {
 }
 
 ControlEditorToolbar::ControlEditorToolbar() {
+	add_child(memnew(VSeparator));
+
 	// Anchor and offset tools.
 	anchors_button = memnew(ControlEditorPopupButton);
 	anchors_button->set_tooltip_text(TTR("Presets for the anchor and offset values of a Control node."));
@@ -1000,7 +1001,7 @@ ControlEditorToolbar::ControlEditorToolbar() {
 	keep_ratio_button->connect("pressed", callable_mp(this, &ControlEditorToolbar::_anchors_to_current_ratio));
 
 	anchor_mode_button = memnew(Button);
-	anchor_mode_button->set_theme_type_variation("FlatButton");
+	anchor_mode_button->set_flat(true);
 	anchor_mode_button->set_toggle_mode(true);
 	anchor_mode_button->set_tooltip_text(TTR("When active, moving Control nodes changes their anchors instead of their offsets."));
 	add_child(anchor_mode_button);

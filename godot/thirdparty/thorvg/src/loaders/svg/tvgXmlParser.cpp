@@ -33,7 +33,7 @@
 #endif
 
 #include "tvgXmlParser.h"
-#include "tvgStr.h"
+#include "tvgSvgUtil.h"
 
 /************************************************************************/
 /* Internal Class Implementation                                        */
@@ -557,10 +557,10 @@ const char* simpleXmlParseCSSAttribute(const char* buf, unsigned bufLength, char
     }
 
     if (p == itr) *tag = strdup("all");
-    else *tag = strDuplicate(itr, p - itr);
+    else *tag = svgUtilStrndup(itr, p - itr);
 
     if (p == itrEnd) *name = nullptr;
-    else *name = strDuplicate(p + 1, itrEnd - p - 1);
+    else *name = svgUtilStrndup(p + 1, itrEnd - p - 1);
 
     return (nextElement ? nextElement + 1 : nullptr);
 }

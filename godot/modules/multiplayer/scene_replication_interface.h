@@ -37,7 +37,6 @@
 #include "core/object/ref_counted.h"
 
 class SceneMultiplayer;
-class SceneCacheInterface;
 
 class SceneReplicationInterface : public RefCounted {
 	GDCLASS(SceneReplicationInterface, RefCounted);
@@ -88,7 +87,6 @@ private:
 
 	// Replicator config.
 	SceneMultiplayer *multiplayer = nullptr;
-	SceneCacheInterface *multiplayer_cache = nullptr;
 	PackedByteArray packet_cache;
 	int sync_mtu = 1350; // Highly dependent on underlying protocol.
 	int delta_mtu = 65535;
@@ -97,7 +95,6 @@ private:
 	void _untrack(const ObjectID &p_id);
 	void _node_ready(const ObjectID &p_oid);
 
-	bool _has_authority(const Node *p_node);
 	bool _verify_synchronizer(int p_peer, MultiplayerSynchronizer *p_sync, uint32_t &r_net_id);
 	MultiplayerSynchronizer *_find_synchronizer(int p_peer, uint32_t p_net_ida);
 
@@ -146,9 +143,8 @@ public:
 	void set_max_delta_packet_size(int p_size);
 	int get_max_delta_packet_size() const;
 
-	SceneReplicationInterface(SceneMultiplayer *p_multiplayer, SceneCacheInterface *p_cache) {
+	SceneReplicationInterface(SceneMultiplayer *p_multiplayer) {
 		multiplayer = p_multiplayer;
-		multiplayer_cache = p_cache;
 	}
 };
 

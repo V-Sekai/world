@@ -35,7 +35,6 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.*
 import android.content.pm.PackageManager
-import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Rect
 import android.hardware.Sensor
@@ -84,7 +83,7 @@ class Godot(private val context: Context) : SensorEventListener {
 	}
 
 	private val pluginRegistry: GodotPluginRegistry by lazy {
-		GodotPluginRegistry.getPluginRegistry()
+		GodotPluginRegistry.initializePluginRegistry(this)
 	}
 	private val mSensorManager: SensorManager by lazy {
 		requireActivity().getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -190,7 +189,7 @@ class Godot(private val context: Context) : SensorEventListener {
 			val activity = requireActivity()
 			val window = activity.window
 			window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
-			GodotPluginRegistry.initializePluginRegistry(this, primaryHost.getHostPlugins(this))
+			GodotPluginRegistry.initializePluginRegistry(this)
 			if (io == null) {
 				io = GodotIO(activity)
 			}
@@ -250,7 +249,11 @@ class Godot(private val context: Context) : SensorEventListener {
 				}
 				i++
 			}
-			commandLine = if (newArgs.isEmpty()) { mutableListOf() } else { newArgs }
+			if (newArgs.isEmpty()) {
+				commandLine = mutableListOf()
+			} else {
+				commandLine = newArgs
+			}
 			if (useApkExpansion && mainPackMd5 != null && mainPackKey != null) {
 				// Build the full path to the app's expansion files
 				try {
@@ -388,7 +391,6 @@ class Godot(private val context: Context) : SensorEventListener {
 				// Fallback to openGl
 				GodotGLRenderView(host, this, xrMode, useDebugOpengl)
 			}
-
 			if (host == primaryHost) {
 				renderView!!.startRenderer()
 			}
@@ -572,19 +574,6 @@ class Godot(private val context: Context) : SensorEventListener {
 	 * Invoked on the render thread when the Godot setup is complete.
 	 */
 	private fun onGodotSetupCompleted() {
-		Log.d(TAG, "OnGodotSetupCompleted")
-
-		// These properties are defined after Godot setup completion, so we retrieve them here.
-		val longPressEnabled = java.lang.Boolean.parseBoolean(GodotLib.getGlobal("input_devices/pointing/android/enable_long_press_as_right_click"))
-		val panScaleEnabled = java.lang.Boolean.parseBoolean(GodotLib.getGlobal("input_devices/pointing/android/enable_pan_and_scale_gestures"))
-
-		runOnUiThread {
-			renderView?.inputHandler?.apply {
-				enableLongPress(longPressEnabled)
-				enablePanningAndScalingGestures(panScaleEnabled)
-			}
-		}
-
 		for (plugin in pluginRegistry.allPlugins) {
 			plugin.onGodotSetupCompleted()
 		}
@@ -595,8 +584,6 @@ class Godot(private val context: Context) : SensorEventListener {
 	 * Invoked on the render thread when the Godot main loop has started.
 	 */
 	private fun onGodotMainLoopStarted() {
-		Log.d(TAG, "OnGodotMainLoopStarted")
-
 		for (plugin in pluginRegistry.allPlugins) {
 			plugin.onGodotMainLoopStarted()
 		}
@@ -628,7 +615,7 @@ class Godot(private val context: Context) : SensorEventListener {
 
 	private fun alert(message: String, title: String, okCallback: Runnable?) {
 		val activity: Activity = getActivity() ?: return
-		runOnUiThread {
+		runOnUiThread(Runnable {
 			val builder = AlertDialog.Builder(activity)
 			builder.setMessage(message).setTitle(title)
 			builder.setPositiveButton(
@@ -639,7 +626,7 @@ class Godot(private val context: Context) : SensorEventListener {
 			}
 			val dialog = builder.create()
 			dialog.show()
-		}
+		})
 	}
 
 	/**
@@ -697,33 +684,14 @@ class Godot(private val context: Context) : SensorEventListener {
 		return false
 	}
 
-	private fun setKeepScreenOn(enabled: Boolean) {
+	private fun setKeepScreenOn(p_enabled: Boolean) {
 		runOnUiThread {
-			if (enabled) {
+			if (p_enabled) {
 				getActivity()?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 			} else {
 				getActivity()?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 			}
 		}
-	}
-
-	/**
-	 * Returns true if dark mode is supported, false otherwise.
-	 */
-	@Keep
-	private fun isDarkModeSupported(): Boolean {
-		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
-	}
-
-	/**
-	 * Returns true if dark mode is supported and enabled, false otherwise.
-	 */
-	@Keep
-	private fun isDarkMode(): Boolean {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			return context.resources?.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-		}
-		return false
 	}
 
 	fun hasClipboard(): Boolean {
@@ -847,7 +815,9 @@ class Godot(private val context: Context) : SensorEventListener {
 		}
 	}
 
-	override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+	override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+		// Do something here if sensor accuracy changes.
+	}
 
 	/**
 	 * Used by the native code (java_godot_wrapper.h) to vibrate the device.
@@ -875,7 +845,7 @@ class Godot(private val context: Context) : SensorEventListener {
 	private fun getCommandLine(): MutableList<String> {
 		val original: MutableList<String> = parseCommandLine()
 		val hostCommandLine = primaryHost?.commandLine
-		if (!hostCommandLine.isNullOrEmpty()) {
+		if (hostCommandLine != null && hostCommandLine.isNotEmpty()) {
 			original.addAll(hostCommandLine)
 		}
 		return original
@@ -906,7 +876,7 @@ class Godot(private val context: Context) : SensorEventListener {
 				val arg = ByteArray(strlen)
 				r = inputStream.read(arg)
 				if (r == strlen) {
-					cmdline.add(String(arg, StandardCharsets.UTF_8))
+					cmdline[i] = String(arg, StandardCharsets.UTF_8)
 				}
 			}
 			cmdline
@@ -935,19 +905,6 @@ class Godot(private val context: Context) : SensorEventListener {
 
 	fun getGrantedPermissions(): Array<String?>? {
 		return PermissionsUtil.getGrantedPermissions(getActivity())
-	}
-
-	/**
-	 * Return true if the given feature is supported.
-	 */
-	@Keep
-	private fun hasFeature(feature: String): Boolean {
-		for (plugin in pluginRegistry.allPlugins) {
-			if (plugin.supportsFeature(feature)) {
-				return true
-			}
-		}
-		return false
 	}
 
 	/**

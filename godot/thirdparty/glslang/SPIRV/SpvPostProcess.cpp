@@ -57,6 +57,7 @@ namespace spv {
 
 namespace spv {
 
+#ifndef GLSLANG_WEB
 // Hook to visit each operand type and result type of an instruction.
 // Will be called multiple times for one instruction, once for each typed
 // operand and the result.
@@ -333,6 +334,7 @@ void Builder::postProcess(Instruction& inst)
         }
     }
 }
+#endif
 
 // comment in header
 void Builder::postProcessCFG()
@@ -393,6 +395,7 @@ void Builder::postProcessCFG()
         decorations.end());
 }
 
+#ifndef GLSLANG_WEB
 // comment in header
 void Builder::postProcessFeatures() {
     // Add per-instruction capabilities, extensions, etc.,
@@ -480,11 +483,14 @@ void Builder::postProcessFeatures() {
         }
     }
 }
+#endif
 
 // comment in header
 void Builder::postProcess() {
   postProcessCFG();
+#ifndef GLSLANG_WEB
   postProcessFeatures();
+#endif
 }
 
 }; // end spv namespace

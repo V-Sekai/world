@@ -30,8 +30,6 @@
 
 #include "panel_container.h"
 
-#include "scene/theme/theme_db.h"
-
 Size2 PanelContainer::get_minimum_size() const {
 	Size2 ms;
 	for (int i = 0; i < get_child_count(); i++) {
@@ -72,6 +70,12 @@ Vector<int> PanelContainer::get_allowed_size_flags_vertical() const {
 	return flags;
 }
 
+void PanelContainer::_update_theme_item_cache() {
+	Container::_update_theme_item_cache();
+
+	theme_cache.panel_style = get_theme_stylebox(SNAME("panel"));
+}
+
 void PanelContainer::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_DRAW: {
@@ -100,10 +104,6 @@ void PanelContainer::_notification(int p_what) {
 			}
 		} break;
 	}
-}
-
-void PanelContainer::_bind_methods() {
-	BIND_THEME_ITEM_CUSTOM(Theme::DATA_TYPE_STYLEBOX, PanelContainer, panel_style, "panel");
 }
 
 PanelContainer::PanelContainer() {

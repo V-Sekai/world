@@ -34,8 +34,5 @@
 		<member name="rows" type="int" setter="" getter="" default="1">
 			Number of rows in the font image. See also [member columns].
 		</member>
-		<member name="scaling_mode" type="int" setter="" getter="" default="2">
-			Font scaling mode.
-		</member>
 	</members>
 </class>

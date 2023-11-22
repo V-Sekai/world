@@ -37,14 +37,12 @@ bool SkeletonModification2DStackHolder::_set(const StringName &p_path, const Var
 	if (path == "held_modification_stack") {
 		set_held_modification_stack(p_value);
 	}
+
 #ifdef TOOLS_ENABLED
-	else if (path == "editor/draw_gizmo") {
+	if (path == "editor/draw_gizmo") {
 		set_editor_draw_gizmo(p_value);
 	}
 #endif // TOOLS_ENABLED
-	else {
-		return false;
-	}
 
 	return true;
 }
@@ -55,14 +53,12 @@ bool SkeletonModification2DStackHolder::_get(const StringName &p_path, Variant &
 	if (path == "held_modification_stack") {
 		r_ret = get_held_modification_stack();
 	}
+
 #ifdef TOOLS_ENABLED
-	else if (path == "editor/draw_gizmo") {
+	if (path == "editor/draw_gizmo") {
 		r_ret = get_editor_draw_gizmo();
 	}
 #endif // TOOLS_ENABLED
-	else {
-		return false;
-	}
 
 	return true;
 }

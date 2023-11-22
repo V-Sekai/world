@@ -26,7 +26,6 @@ func test():
     if true: (v as Callable).call()
     print()
 
-    @warning_ignore("unsafe_call_argument")
     other(v)
     print()
 

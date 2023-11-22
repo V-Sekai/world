@@ -29,3 +29,5 @@
 /**************************************************************************/
 
 #include <malloc.h>
+
+#define OPENGL_INCLUDE_H "thirdparty/glad/glad/gl.h"

@@ -246,19 +246,24 @@ struct OS2
     }
 #endif
 
-    Triple *axis_range;
-    if (c->plan->user_axes_location.has (HB_TAG ('w','g','h','t'), &axis_range))
+    if (c->plan->user_axes_location.has (HB_TAG ('w','g','h','t')) &&
+        !c->plan->pinned_at_default)
     {
-      unsigned weight_class = static_cast<unsigned> (roundf (hb_clamp (axis_range->middle, 1.0f, 1000.0f)));
-      if (os2_prime->usWeightClass != weight_class)
-        os2_prime->usWeightClass = weight_class;
+      float weight_class = c->plan->user_axes_location.get (HB_TAG ('w','g','h','t')).middle;
+      if (!c->serializer->check_assign (os2_prime->usWeightClass,
+                                        roundf (hb_clamp (weight_class, 1.0f, 1000.0f)),
+                                        HB_SERIALIZE_ERROR_INT_OVERFLOW))
+        return_trace (false);
     }
 
-    if (c->plan->user_axes_location.has (HB_TAG ('w','d','t','h'), &axis_range))
+    if (c->plan->user_axes_location.has (HB_TAG ('w','d','t','h')) &&
+        !c->plan->pinned_at_default)
     {
-      unsigned width_class = static_cast<unsigned> (roundf (map_wdth_to_widthclass (axis_range->middle)));
-      if (os2_prime->usWidthClass != width_class)
-        os2_prime->usWidthClass = width_class;
+      float width = c->plan->user_axes_location.get (HB_TAG ('w','d','t','h')).middle;
+      if (!c->serializer->check_assign (os2_prime->usWidthClass,
+                                        roundf (map_wdth_to_widthclass (width)),
+                                        HB_SERIALIZE_ERROR_INT_OVERFLOW))
+        return_trace (false);
     }
 
     if (c->plan->flags & HB_SUBSET_FLAGS_NO_PRUNE_UNICODE_RANGES)

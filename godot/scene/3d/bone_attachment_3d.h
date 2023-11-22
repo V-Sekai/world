@@ -65,12 +65,11 @@ protected:
 	void _notification(int p_what);
 
 	static void _bind_methods();
-
-public:
 #ifdef TOOLS_ENABLED
-	virtual void notify_skeleton_bones_renamed(Node *p_base_scene, Skeleton3D *p_skeleton, Dictionary p_rename_map);
+	virtual void _notify_skeleton_bones_renamed(Node *p_base_scene, Skeleton3D *p_skeleton, Dictionary p_rename_map);
 #endif // TOOLS_ENABLED
 
+public:
 	virtual PackedStringArray get_configuration_warnings() const override;
 
 	void set_bone_name(const String &p_name);
@@ -88,10 +87,6 @@ public:
 	NodePath get_external_skeleton() const;
 
 	virtual void on_bone_pose_update(int p_bone_index);
-
-#ifdef TOOLS_ENABLED
-	virtual void notify_rebind_required();
-#endif
 
 	BoneAttachment3D();
 };

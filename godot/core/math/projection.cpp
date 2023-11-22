@@ -408,6 +408,7 @@ real_t Projection::get_z_far() const {
 			matrix[11] - matrix[10],
 			matrix[15] - matrix[14]);
 
+	new_plane.normal = -new_plane.normal;
 	new_plane.normalize();
 
 	return new_plane.d;

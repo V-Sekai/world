@@ -29,9 +29,14 @@
 /**************************************************************************/
 
 #include "grid_container.h"
-
 #include "core/templates/rb_set.h"
-#include "scene/theme/theme_db.h"
+
+void GridContainer::_update_theme_item_cache() {
+	Container::_update_theme_item_cache();
+
+	theme_cache.h_separation = get_theme_constant(SNAME("h_separation"));
+	theme_cache.v_separation = get_theme_constant(SNAME("v_separation"));
+}
 
 void GridContainer::_notification(int p_what) {
 	switch (p_what) {
@@ -259,18 +264,11 @@ int GridContainer::get_columns() const {
 	return columns;
 }
 
-int GridContainer::get_h_separation() const {
-	return theme_cache.h_separation;
-}
-
 void GridContainer::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_columns", "columns"), &GridContainer::set_columns);
 	ClassDB::bind_method(D_METHOD("get_columns"), &GridContainer::get_columns);
 
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "columns", PROPERTY_HINT_RANGE, "1,1024,1"), "set_columns", "get_columns");
-
-	BIND_THEME_ITEM(Theme::DATA_TYPE_CONSTANT, GridContainer, h_separation);
-	BIND_THEME_ITEM(Theme::DATA_TYPE_CONSTANT, GridContainer, v_separation);
 }
 
 Size2 GridContainer::get_minimum_size() const {

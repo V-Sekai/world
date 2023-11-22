@@ -80,7 +80,7 @@ Error AudioDriverCoreAudio::init() {
 	desc.componentManufacturer = kAudioUnitManufacturer_Apple;
 
 	AudioComponent comp = AudioComponentFindNext(nullptr, &desc);
-	ERR_FAIL_NULL_V(comp, FAILED);
+	ERR_FAIL_COND_V(comp == nullptr, FAILED);
 
 	OSStatus result = AudioComponentInstanceNew(comp, &audio_unit);
 	ERR_FAIL_COND_V(result != noErr, FAILED);
@@ -235,7 +235,7 @@ OSStatus AudioDriverCoreAudio::input_callback(void *inRefCon,
 			}
 		}
 	} else {
-		ERR_PRINT_ONCE("AudioUnitRender failed, code: " + itos(result));
+		ERR_PRINT("AudioUnitRender failed, code: " + itos(result));
 	}
 
 	ad->stop_counting_ticks();
@@ -349,7 +349,7 @@ Error AudioDriverCoreAudio::init_input_device() {
 	desc.componentManufacturer = kAudioUnitManufacturer_Apple;
 
 	AudioComponent comp = AudioComponentFindNext(nullptr, &desc);
-	ERR_FAIL_NULL_V(comp, FAILED);
+	ERR_FAIL_COND_V(comp == nullptr, FAILED);
 
 	OSStatus result = AudioComponentInstanceNew(comp, &input_unit);
 	ERR_FAIL_COND_V(result != noErr, FAILED);

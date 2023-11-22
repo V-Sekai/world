@@ -1542,32 +1542,18 @@ void EditorExportPlatformAndroid::_process_launcher_icons(const String &p_file_n
 String EditorExportPlatformAndroid::load_splash_refs(Ref<Image> &splash_image, Ref<Image> &splash_bg_color_image) {
 	bool scale_splash = GLOBAL_GET("application/boot_splash/fullsize");
 	bool apply_filter = GLOBAL_GET("application/boot_splash/use_filter");
-	bool show_splash_image = GLOBAL_GET("application/boot_splash/show_image");
 	String project_splash_path = GLOBAL_GET("application/boot_splash/image");
 
-	// Setup the splash bg color.
-	bool bg_color_valid = false;
-	Color bg_color = ProjectSettings::get_singleton()->get("application/boot_splash/bg_color", &bg_color_valid);
-	if (!bg_color_valid) {
-		bg_color = boot_splash_bg_color;
-	}
-
-	if (show_splash_image) {
-		if (!project_splash_path.is_empty()) {
-			splash_image.instantiate();
-			print_verbose("Loading splash image: " + project_splash_path);
-			const Error err = ImageLoader::load_image(project_splash_path, splash_image);
-			if (err) {
-				if (OS::get_singleton()->is_stdout_verbose()) {
-					print_error("- unable to load splash image from " + project_splash_path + " (" + itos(err) + ")");
-				}
-				splash_image.unref();
-			}
-		}
-	} else {
+	if (!project_splash_path.is_empty()) {
 		splash_image.instantiate();
-		splash_image->initialize_data(1, 1, false, Image::FORMAT_RGBA8);
-		splash_image->set_pixel(0, 0, bg_color);
+		print_verbose("Loading splash image: " + project_splash_path);
+		const Error err = ImageLoader::load_image(project_splash_path, splash_image);
+		if (err) {
+			if (OS::get_singleton()->is_stdout_verbose()) {
+				print_error("- unable to load splash image from " + project_splash_path + " (" + itos(err) + ")");
+			}
+			splash_image.unref();
+		}
 	}
 
 	if (splash_image.is_null()) {
@@ -1589,6 +1575,13 @@ String EditorExportPlatformAndroid::load_splash_refs(Ref<Image> &splash_image, R
 			height = splash_image->get_height() * screen_size.width / splash_image->get_width();
 		}
 		splash_image->resize(width, height);
+	}
+
+	// Setup the splash bg color
+	bool bg_color_valid;
+	Color bg_color = ProjectSettings::get_singleton()->get("application/boot_splash/bg_color", &bg_color_valid);
+	if (!bg_color_valid) {
+		bg_color = boot_splash_bg_color;
 	}
 
 	print_verbose("Creating splash background color image.");
@@ -1717,6 +1710,7 @@ void EditorExportPlatformAndroid::get_preset_features(const Ref<EditorExportPres
 	Vector<ABI> abis = get_enabled_abis(p_preset);
 	for (int i = 0; i < abis.size(); ++i) {
 		r_features->push_back(abis[i].arch);
+		r_features->push_back(abis[i].abi);
 	}
 }
 
@@ -1838,7 +1832,7 @@ void EditorExportPlatformAndroid::get_export_options(List<ExportOption> *r_optio
 	r_options->push_back(ExportOption(PropertyInfo(Variant::INT, "version/code", PROPERTY_HINT_RANGE, "1,4096,1,or_greater"), 1));
 	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "version/name", PROPERTY_HINT_PLACEHOLDER_TEXT, "Leave empty to use project version"), ""));
 
-	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "package/unique_name", PROPERTY_HINT_PLACEHOLDER_TEXT, "ext.domain.name"), "com.example.$genname", false, true));
+	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "package/unique_name", PROPERTY_HINT_PLACEHOLDER_TEXT, "ext.domain.name"), "org.godotengine.$genname", false, true));
 	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "package/name", PROPERTY_HINT_PLACEHOLDER_TEXT, "Game Name [default if blank]"), ""));
 	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "package/signed"), true));
 	r_options->push_back(ExportOption(PropertyInfo(Variant::INT, "package/app_category", PROPERTY_HINT_ENUM, "Accessibility,Audio,Game,Image,Maps,News,Productivity,Social,Video"), APP_CATEGORY_GAME));
@@ -2244,19 +2238,6 @@ bool EditorExportPlatformAndroid::has_valid_export_configuration(const Ref<Edito
 #ifdef MODULE_MONO_ENABLED
 	// Android export is still a work in progress, keep a message as a warning.
 	err += TTR("Exporting to Android when using C#/.NET is experimental.") + "\n";
-
-	bool unsupported_arch = false;
-	Vector<ABI> enabled_abis = get_enabled_abis(p_preset);
-	for (ABI abi : enabled_abis) {
-		if (abi.arch != "arm64" && abi.arch != "x86_64") {
-			err += vformat(TTR("Android architecture %s not supported in C# projects."), abi.arch) + "\n";
-			unsupported_arch = true;
-		}
-	}
-	if (unsupported_arch) {
-		r_error = err;
-		return false;
-	}
 #endif
 
 	// Look for export templates (first official, and if defined custom templates).
@@ -2654,8 +2635,6 @@ void EditorExportPlatformAndroid::_clear_assets_directory() {
 	if (da_res->dir_exists(APK_ASSETS_DIRECTORY)) {
 		print_verbose("Clearing APK assets directory...");
 		Ref<DirAccess> da_assets = DirAccess::open(APK_ASSETS_DIRECTORY);
-		ERR_FAIL_COND(da_assets.is_null());
-
 		da_assets->erase_contents_recursive();
 		da_res->remove(APK_ASSETS_DIRECTORY);
 	}
@@ -2664,8 +2643,6 @@ void EditorExportPlatformAndroid::_clear_assets_directory() {
 	if (da_res->dir_exists(AAB_ASSETS_DIRECTORY)) {
 		print_verbose("Clearing AAB assets directory...");
 		Ref<DirAccess> da_assets = DirAccess::open(AAB_ASSETS_DIRECTORY);
-		ERR_FAIL_COND(da_assets.is_null());
-
 		da_assets->erase_contents_recursive();
 		da_res->remove(AAB_ASSETS_DIRECTORY);
 	}
@@ -3041,13 +3018,10 @@ Error EditorExportPlatformAndroid::export_project_helper(const Ref<EditorExportP
 			}
 		}
 
-		String build_project_output;
-		int result = EditorNode::get_singleton()->execute_and_show_output(TTR("Building Android Project (gradle)"), build_command, cmdline, true, false, &build_project_output);
+		int result = EditorNode::get_singleton()->execute_and_show_output(TTR("Building Android Project (gradle)"), build_command, cmdline);
 		if (result != 0) {
-			add_message(EXPORT_MESSAGE_ERROR, TTR("Export"), TTR("Building of Android project failed, check output for the error:") + "\n\n" + build_project_output);
+			add_message(EXPORT_MESSAGE_ERROR, TTR("Export"), TTR("Building of Android project failed, check output for the error. Alternatively visit docs.godotengine.org for Android build documentation."));
 			return ERR_CANT_CREATE;
-		} else {
-			print_verbose(build_project_output);
 		}
 
 		List<String> copy_args;
@@ -3074,13 +3048,10 @@ Error EditorExportPlatformAndroid::export_project_helper(const Ref<EditorExportP
 		copy_args.push_back("-Pexport_filename=" + export_filename);
 
 		print_verbose("Copying Android binary using gradle command: " + String("\n") + build_command + " " + join_list(copy_args, String(" ")));
-		String copy_binary_output;
-		int copy_result = EditorNode::get_singleton()->execute_and_show_output(TTR("Moving output"), build_command, copy_args, true, false, &copy_binary_output);
+		int copy_result = EditorNode::get_singleton()->execute_and_show_output(TTR("Moving output"), build_command, copy_args);
 		if (copy_result != 0) {
-			add_message(EXPORT_MESSAGE_ERROR, TTR("Export"), TTR("Unable to copy and rename export file:") + "\n\n" + copy_binary_output);
+			add_message(EXPORT_MESSAGE_ERROR, TTR("Export"), TTR("Unable to copy and rename export file, check gradle project directory for outputs."));
 			return ERR_CANT_CREATE;
-		} else {
-			print_verbose(copy_binary_output);
 		}
 
 		print_verbose("Successfully completed Android gradle build.");

@@ -143,10 +143,6 @@ void AudioStreamGeneratorPlayback::clear_buffer() {
 }
 
 int AudioStreamGeneratorPlayback::_mix_internal(AudioFrame *p_buffer, int p_frames) {
-	if (!active) {
-		return 0;
-	}
-
 	int read_amount = buffer.data_left();
 	if (p_frames < read_amount) {
 		read_amount = p_frames;
@@ -155,15 +151,16 @@ int AudioStreamGeneratorPlayback::_mix_internal(AudioFrame *p_buffer, int p_fram
 	buffer.read(p_buffer, read_amount);
 
 	if (read_amount < p_frames) {
-		// Fill with zeros as fallback in case of buffer underrun.
+		//skipped, not ideal
 		for (int i = read_amount; i < p_frames; i++) {
 			p_buffer[i] = AudioFrame(0, 0);
 		}
+
 		skips++;
 	}
 
 	mixed += p_frames / generator->get_mix_rate();
-	return p_frames;
+	return read_amount < p_frames ? read_amount : p_frames;
 }
 
 float AudioStreamGeneratorPlayback::get_stream_sampling_rate() {
@@ -184,7 +181,7 @@ void AudioStreamGeneratorPlayback::stop() {
 }
 
 bool AudioStreamGeneratorPlayback::is_playing() const {
-	return active;
+	return active; //always playing, can't be stopped
 }
 
 int AudioStreamGeneratorPlayback::get_loop_count() const {

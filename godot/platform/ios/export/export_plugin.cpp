@@ -178,7 +178,7 @@ void EditorExportPlatformIOS::get_export_options(List<ExportOption> *r_options) 
 
 	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/bundle_identifier", PROPERTY_HINT_PLACEHOLDER_TEXT, "com.example.game"), "", false, true));
 	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/signature"), ""));
-	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/short_version", PROPERTY_HINT_PLACEHOLDER_TEXT, "Leave empty to use project version"), ""));
+	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/short_version"), "1.0"));
 	r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "application/version", PROPERTY_HINT_PLACEHOLDER_TEXT, "Leave empty to use project version"), ""));
 
 	r_options->push_back(ExportOption(PropertyInfo(Variant::INT, "application/icon_interpolation", PROPERTY_HINT_ENUM, "Nearest neighbor,Bilinear,Cubic,Trilinear,Lanczos"), 4));
@@ -284,7 +284,7 @@ void EditorExportPlatformIOS::_fix_config_file(const Ref<EditorExportPreset> &p_
 		} else if (lines[i].find("$bundle_identifier") != -1) {
 			strnew += lines[i].replace("$bundle_identifier", p_preset->get("application/bundle_identifier")) + "\n";
 		} else if (lines[i].find("$short_version") != -1) {
-			strnew += lines[i].replace("$short_version", p_preset->get_version("application/short_version")) + "\n";
+			strnew += lines[i].replace("$short_version", p_preset->get("application/short_version")) + "\n";
 		} else if (lines[i].find("$version") != -1) {
 			strnew += lines[i].replace("$version", p_preset->get_version("application/version")) + "\n";
 		} else if (lines[i].find("$signature") != -1) {
@@ -1077,15 +1077,14 @@ Error EditorExportPlatformIOS::_copy_asset(const String &p_out_dir, const String
 		return ERR_FILE_NOT_FOUND;
 	}
 
-	String base_dir = p_asset.get_base_dir().replace("res://", "").replace(".godot/mono/temp/bin/", "");
-	String asset = p_asset.ends_with("/") ? p_asset.left(p_asset.length() - 1) : p_asset;
+	String base_dir = p_asset.get_base_dir().replace("res://", "");
 	String destination_dir;
 	String destination;
 	String asset_path;
 
 	bool create_framework = false;
 
-	if (p_is_framework && asset.ends_with(".dylib")) {
+	if (p_is_framework && p_asset.ends_with(".dylib")) {
 		// For iOS we need to turn .dylib into .framework
 		// to be able to send application to AppStore
 		asset_path = String("dylibs").path_join(base_dir);
@@ -1104,7 +1103,7 @@ Error EditorExportPlatformIOS::_copy_asset(const String &p_out_dir, const String
 		destination_dir = p_out_dir.path_join(asset_path);
 		destination = destination_dir.path_join(file_name);
 		create_framework = true;
-	} else if (p_is_framework && (asset.ends_with(".framework") || asset.ends_with(".xcframework"))) {
+	} else if (p_is_framework && (p_asset.ends_with(".framework") || p_asset.ends_with(".xcframework"))) {
 		asset_path = String("dylibs").path_join(base_dir);
 
 		String file_name;
@@ -1147,9 +1146,6 @@ Error EditorExportPlatformIOS::_copy_asset(const String &p_out_dir, const String
 	Error err = dir_exists ? da->copy_dir(p_asset, destination) : da->copy(p_asset, destination);
 	if (err) {
 		return err;
-	}
-	if (asset_path.ends_with("/")) {
-		asset_path = asset_path.left(asset_path.length() - 1);
 	}
 	IOSExportAsset exported_asset = { binary_name.path_join(asset_path), p_is_framework, p_should_embed };
 	r_exported_assets.push_back(exported_asset);
@@ -1217,16 +1213,13 @@ Error EditorExportPlatformIOS::_copy_asset(const String &p_out_dir, const String
 Error EditorExportPlatformIOS::_export_additional_assets(const String &p_out_dir, const Vector<String> &p_assets, bool p_is_framework, bool p_should_embed, Vector<IOSExportAsset> &r_exported_assets) {
 	for (int f_idx = 0; f_idx < p_assets.size(); ++f_idx) {
 		String asset = p_assets[f_idx];
-		if (asset.begins_with("res://")) {
-			Error err = _copy_asset(p_out_dir, asset, nullptr, p_is_framework, p_should_embed, r_exported_assets);
-			ERR_FAIL_COND_V(err, err);
-		} else if (ProjectSettings::get_singleton()->localize_path(asset).begins_with("res://")) {
-			Error err = _copy_asset(p_out_dir, ProjectSettings::get_singleton()->localize_path(asset), nullptr, p_is_framework, p_should_embed, r_exported_assets);
-			ERR_FAIL_COND_V(err, err);
-		} else {
+		if (!asset.begins_with("res://")) {
 			// either SDK-builtin or already a part of the export template
 			IOSExportAsset exported_asset = { asset, p_is_framework, p_should_embed };
 			r_exported_assets.push_back(exported_asset);
+		} else {
+			Error err = _copy_asset(p_out_dir, asset, nullptr, p_is_framework, p_should_embed, r_exported_assets);
+			ERR_FAIL_COND_V(err, err);
 		}
 	}
 
@@ -1934,19 +1927,16 @@ Error EditorExportPlatformIOS::_export_project_helper(const Ref<EditorExportPres
 }
 
 bool EditorExportPlatformIOS::has_valid_export_configuration(const Ref<EditorExportPreset> &p_preset, String &r_error, bool &r_missing_templates, bool p_debug) const {
-#if defined(MODULE_MONO_ENABLED) && !defined(MACOS_ENABLED)
-	// TODO: Remove this restriction when we don't rely on macOS tools to package up the native libraries anymore.
-	r_error += TTR("Exporting to iOS when using C#/.NET is experimental and requires macOS.") + "\n";
+#ifdef MODULE_MONO_ENABLED
+	// Don't check for additional errors, as this particular error cannot be resolved.
+	r_error += TTR("Exporting to iOS is currently not supported in Godot 4 when using C#/.NET. Use Godot 3 to target iOS with C#/Mono instead.") + "\n";
+	r_error += TTR("If this project does not use C#, use a non-C# editor build to export the project.") + "\n";
 	return false;
 #else
 
 	String err;
 	bool valid = false;
 
-#if defined(MODULE_MONO_ENABLED)
-	// iOS export is still a work in progress, keep a message as a warning.
-	err += TTR("Exporting to iOS when using C#/.NET is experimental.") + "\n";
-#endif
 	// Look for export templates (first official, and if defined custom templates).
 
 	bool dvalid = exists_export_template("ios.zip", &err);
@@ -1973,7 +1963,7 @@ bool EditorExportPlatformIOS::has_valid_export_configuration(const Ref<EditorExp
 	}
 
 	return valid;
-#endif // !(MODULE_MONO_ENABLED && !MACOS_ENABLED)
+#endif // !MODULE_MONO_ENABLED
 }
 
 bool EditorExportPlatformIOS::has_valid_project_configuration(const Ref<EditorExportPreset> &p_preset, String &r_error) const {

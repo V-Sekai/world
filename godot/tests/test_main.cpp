@@ -89,7 +89,6 @@
 #include "tests/core/variant/test_array.h"
 #include "tests/core/variant/test_dictionary.h"
 #include "tests/core/variant/test_variant.h"
-#include "tests/core/variant/test_variant_utility.h"
 #include "tests/scene/test_animation.h"
 #include "tests/scene/test_arraymesh.h"
 #include "tests/scene/test_audio_stream_wav.h"
@@ -252,7 +251,7 @@ struct GodotTestCaseListener : public doctest::IReporter {
 
 			ERR_PRINT_OFF;
 			navigation_server_3d = NavigationServer3DManager::new_default_server();
-			navigation_server_2d = NavigationServer2DManager::new_default_server();
+			navigation_server_2d = memnew(NavigationServer2D);
 			ERR_PRINT_ON;
 
 			memnew(InputMap);
@@ -278,7 +277,7 @@ struct GodotTestCaseListener : public doctest::IReporter {
 		if (suite_name.find("[Navigation]") != -1 && navigation_server_2d == nullptr && navigation_server_3d == nullptr) {
 			ERR_PRINT_OFF;
 			navigation_server_3d = NavigationServer3DManager::new_default_server();
-			navigation_server_2d = NavigationServer2DManager::new_default_server();
+			navigation_server_2d = memnew(NavigationServer2D);
 			ERR_PRINT_ON;
 			return;
 		}

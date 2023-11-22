@@ -30,9 +30,7 @@
 
 #include "fog_volume_gizmo_plugin.h"
 
-#include "editor/editor_node.h"
 #include "editor/editor_settings.h"
-#include "editor/editor_string_names.h"
 #include "editor/editor_undo_redo_manager.h"
 #include "editor/plugins/node_3d_editor_plugin.h"
 #include "scene/3d/fog_volume.h"
@@ -42,8 +40,6 @@ FogVolumeGizmoPlugin::FogVolumeGizmoPlugin() {
 	create_material("shape_material", gizmo_color);
 	gizmo_color.a = 0.15;
 	create_material("shape_material_internal", gizmo_color);
-
-	create_icon_material("fog_volume_icon", EditorNode::get_singleton()->get_editor_theme()->get_icon(SNAME("GizmoFogVolume"), EditorStringName(EditorIcons)));
 
 	create_handle_material("handles");
 }
@@ -147,8 +143,6 @@ void FogVolumeGizmoPlugin::redraw(EditorNode3DGizmo *p_gizmo) {
 
 		p_gizmo->add_lines(lines, material);
 		p_gizmo->add_collision_segments(lines);
-		const Ref<Material> icon = get_material("fog_volume_icon", p_gizmo);
-		p_gizmo->add_unscaled_billboard(icon, 0.05);
 		p_gizmo->add_handles(handles, handles_material);
 	}
 }

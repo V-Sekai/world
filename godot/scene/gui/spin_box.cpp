@@ -32,7 +32,6 @@
 
 #include "core/input/input.h"
 #include "core/math/expression.h"
-#include "scene/theme/theme_db.h"
 
 Size2 SpinBox::get_minimum_size() const {
 	Size2 ms = line_edit->get_combined_minimum_size();
@@ -40,7 +39,7 @@ Size2 SpinBox::get_minimum_size() const {
 	return ms;
 }
 
-void SpinBox::_update_text(bool p_keep_line_edit) {
+void SpinBox::_update_text() {
 	String value = String::num(get_value(), Math::range_step_decimals(get_step()));
 	if (is_localizing_numeral_system()) {
 		value = TS->format_number(value);
@@ -55,36 +54,18 @@ void SpinBox::_update_text(bool p_keep_line_edit) {
 		}
 	}
 
-	if (p_keep_line_edit && value == last_updated_text && value != line_edit->get_text()) {
-		return;
-	}
-
 	line_edit->set_text_with_selection(value);
-	last_updated_text = value;
 }
 
 void SpinBox::_text_submitted(const String &p_string) {
 	Ref<Expression> expr;
 	expr.instantiate();
 
-	// Convert commas ',' to dots '.' for French/German etc. keyboard layouts.
-	String text = p_string.replace(",", ".");
-	text = text.replace(";", ",");
-	text = TS->parse_number(text);
+	String num = TS->parse_number(p_string);
 	// Ignore the prefix and suffix in the expression.
-	text = text.trim_prefix(prefix + " ").trim_suffix(" " + suffix);
-
-	Error err = expr->parse(text);
+	Error err = expr->parse(num.trim_prefix(prefix + " ").trim_suffix(" " + suffix));
 	if (err != OK) {
-		// If the expression failed try without converting commas to dots - they might have been for parameter separation.
-		text = p_string;
-		text = TS->parse_number(text);
-		text = text.trim_prefix(prefix + " ").trim_suffix(" " + suffix);
-
-		err = expr->parse(text);
-		if (err != OK) {
-			return;
-		}
+		return;
 	}
 
 	Variant value = expr->execute(Array(), nullptr, false, true);
@@ -247,10 +228,16 @@ inline void SpinBox::_adjust_width_for_icon(const Ref<Texture2D> &icon) {
 	}
 }
 
+void SpinBox::_update_theme_item_cache() {
+	Range::_update_theme_item_cache();
+
+	theme_cache.updown_icon = get_theme_icon(SNAME("updown"));
+}
+
 void SpinBox::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_DRAW: {
-			_update_text(true);
+			_update_text();
 			_adjust_width_for_icon(theme_cache.updown_icon);
 
 			RID ci = get_canvas_item();
@@ -268,9 +255,6 @@ void SpinBox::_notification(int p_what) {
 			_update_text();
 		} break;
 
-		case NOTIFICATION_VISIBILITY_CHANGED:
-			drag.allowed = false;
-			[[fallthrough]];
 		case NOTIFICATION_EXIT_TREE: {
 			_release_mouse();
 		} break;
@@ -395,8 +379,6 @@ void SpinBox::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "suffix"), "set_suffix", "get_suffix");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "custom_arrow_step", PROPERTY_HINT_RANGE, "0,10000,0.0001,or_greater"), "set_custom_arrow_step", "get_custom_arrow_step");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "select_all_on_focus"), "set_select_all_on_focus", "is_select_all_on_focus");
-
-	BIND_THEME_ITEM_CUSTOM(Theme::DATA_TYPE_ICON, SpinBox, updown_icon, "updown");
 }
 
 SpinBox::SpinBox() {

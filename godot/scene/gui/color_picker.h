@@ -67,8 +67,9 @@ class ColorPresetButton : public BaseButton {
 	} theme_cache;
 
 protected:
+	virtual void _update_theme_item_cache() override;
+
 	void _notification(int);
-	static void _bind_methods();
 
 public:
 	void set_preset_color(const Color &p_color);
@@ -80,12 +81,6 @@ public:
 
 class ColorPicker : public VBoxContainer {
 	GDCLASS(ColorPicker, VBoxContainer);
-
-	// These classes poke into theme items for their internal logic.
-	friend class ColorModeRGB;
-	friend class ColorModeHSV;
-	friend class ColorModeRAW;
-	friend class ColorModeOKHSL;
 
 public:
 	enum ColorModeType {
@@ -207,7 +202,6 @@ private:
 	bool hex_visible = true;
 	bool line_edit_mouse_release = false;
 	bool text_changed = false;
-	bool currently_dragging = false;
 
 	float h = 0.0;
 	float s = 0.0;
@@ -236,11 +230,10 @@ private:
 		Ref<Texture2D> shape_circle;
 
 		Ref<Texture2D> bar_arrow;
-		Ref<Texture2D> sample_bg;
+		Ref<Texture2D> sample_background_icon;
 		Ref<Texture2D> overbright_indicator;
 		Ref<Texture2D> picker_cursor;
-		Ref<Texture2D> color_hue;
-		Ref<Texture2D> color_okhsl_hue;
+		Ref<Texture2D> color_hue_icon;
 
 		/* Mode buttons */
 		Ref<StyleBox> mode_button_normal;
@@ -255,9 +248,7 @@ private:
 	void create_slider(GridContainer *gc, int idx);
 	void _reset_sliders_theme();
 	void _html_submitted(const String &p_html);
-	void _slider_drag_started();
-	void _slider_value_changed();
-	void _slider_drag_ended();
+	void _value_changed(double);
 	void _update_controls();
 	void _update_color(bool p_update_sliders = true);
 	void _update_text_value();
@@ -402,6 +393,8 @@ class ColorPickerButton : public Button {
 	void _update_picker();
 
 protected:
+	virtual void _update_theme_item_cache() override;
+
 	void _notification(int);
 	static void _bind_methods();
 

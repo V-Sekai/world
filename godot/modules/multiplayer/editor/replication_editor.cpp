@@ -40,21 +40,9 @@
 #include "editor/gui/scene_tree_editor.h"
 #include "editor/inspector_dock.h"
 #include "editor/property_selector.h"
-#include "editor/scene_tree_dock.h"
 #include "scene/gui/dialogs.h"
 #include "scene/gui/separator.h"
 #include "scene/gui/tree.h"
-
-ReplicationEditor *ReplicationEditor::singleton = nullptr;
-
-void ReplicationEditor::_node_removed(Node *p_node) {
-	if (p_node == current) {
-		pin->set_pressed(false);
-		current = nullptr;
-
-		emit_signal(SNAME("multiplayer_synchronizer_removed"), p_node);
-	}
-}
 
 void ReplicationEditor::_pick_node_filter_text_changed(const String &p_newtext) {
 	TreeItem *root_item = pick_node->get_scene_tree()->get_scene_tree()->get_root();
@@ -124,9 +112,9 @@ void ReplicationEditor::_pick_node_filter_input(const Ref<InputEvent> &p_ie) {
 
 void ReplicationEditor::_pick_node_selected(NodePath p_path) {
 	Node *root = current->get_node(current->get_root_path());
-	ERR_FAIL_NULL(root);
+	ERR_FAIL_COND(!root);
 	Node *node = get_node(p_path);
-	ERR_FAIL_NULL(node);
+	ERR_FAIL_COND(!node);
 	NodePath path_to = root->get_path_to(node);
 	adding_node_path = path_to;
 	prop_selector->select_property_from_instance(node);
@@ -171,12 +159,6 @@ void ReplicationEditor::_add_sync_property(String p_path) {
 	undo_redo->add_do_method(this, "_update_config");
 	undo_redo->add_undo_method(this, "_update_config");
 	undo_redo->commit_action();
-}
-
-void ReplicationEditor::_pin_pressed() {
-	emit_signal("pin_toggled");
-
-	SceneTreeDock::get_singleton()->get_tree_editor()->update_tree();
 }
 
 void ReplicationEditor::_pick_node_property_selected(String p_name) {
@@ -263,33 +245,26 @@ ReplicationEditor::ReplicationEditor() {
 	add_pick_button->connect("pressed", callable_mp(this, &ReplicationEditor::_pick_new_property));
 	add_pick_button->set_text(TTR("Add property to sync..."));
 	hb->add_child(add_pick_button);
-
 	VSeparator *vs = memnew(VSeparator);
 	vs->set_custom_minimum_size(Size2(30 * EDSCALE, 0));
 	hb->add_child(vs);
 	hb->add_child(memnew(Label(TTR("Path:"))));
-
 	np_line_edit = memnew(LineEdit);
 	np_line_edit->set_placeholder(":property");
 	np_line_edit->set_h_size_flags(SIZE_EXPAND_FILL);
 	np_line_edit->connect("text_submitted", callable_mp(this, &ReplicationEditor::_np_text_submitted));
 	hb->add_child(np_line_edit);
-
 	add_from_path_button = memnew(Button);
 	add_from_path_button->connect("pressed", callable_mp(this, &ReplicationEditor::_add_pressed));
 	add_from_path_button->set_text(TTR("Add from path"));
 	hb->add_child(add_from_path_button);
-
 	vs = memnew(VSeparator);
 	vs->set_custom_minimum_size(Size2(30 * EDSCALE, 0));
 	hb->add_child(vs);
-
 	pin = memnew(Button);
-	pin->set_theme_type_variation("FlatButton");
+	pin->set_flat(true);
 	pin->set_toggle_mode(true);
-	pin->set_tooltip_text(TTR("Pin Replication"));
 	hb->add_child(pin);
-	pin->connect(SNAME("pressed"), callable_mp(this, &ReplicationEditor::_pin_pressed));
 
 	tree = memnew(Tree);
 	tree->set_hide_root(true);
@@ -317,17 +292,12 @@ ReplicationEditor::ReplicationEditor() {
 	tree->add_child(drop_label);
 	drop_label->set_anchors_and_offsets_preset(Control::PRESET_FULL_RECT);
 
-	singleton = this;
-
 	SET_DRAG_FORWARDING_CDU(tree, ReplicationEditor);
 }
 
 void ReplicationEditor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_update_config"), &ReplicationEditor::_update_config);
 	ClassDB::bind_method(D_METHOD("_update_value", "property", "column", "value"), &ReplicationEditor::_update_value);
-
-	ADD_SIGNAL(MethodInfo("multiplayer_synchronizer_removed", PropertyInfo(Variant::OBJECT, "multiplayer_synchronizer")));
-	ADD_SIGNAL(MethodInfo("pin_toggled"));
 }
 
 bool ReplicationEditor::_can_drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) const {
@@ -388,14 +358,11 @@ void ReplicationEditor::_drop_data_fw(const Point2 &p_point, const Variant &p_da
 void ReplicationEditor::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_ENTER_TREE:
-		case NOTIFICATION_TRANSLATION_CHANGED:
-			add_theme_style_override("panel", EditorNode::get_singleton()->get_editor_theme()->get_stylebox(SNAME("panel"), SNAME("Panel")));
-			[[fallthrough]];
-		case NOTIFICATION_LAYOUT_DIRECTION_CHANGED:
-		case NOTIFICATION_THEME_CHANGED: {
+		case EditorSettings::NOTIFICATION_EDITOR_SETTINGS_CHANGED: {
+			add_theme_style_override("panel", EditorNode::get_singleton()->get_gui_base()->get_theme_stylebox(SNAME("panel"), SNAME("Panel")));
 			add_pick_button->set_icon(get_theme_icon(SNAME("Add"), EditorStringName(EditorIcons)));
 			pin->set_icon(get_theme_icon(SNAME("Pin"), EditorStringName(EditorIcons)));
-		};
+		} break;
 	}
 }
 
@@ -545,10 +512,6 @@ void ReplicationEditor::_update_config() {
 }
 
 void ReplicationEditor::edit(MultiplayerSynchronizer *p_sync) {
-	if (is_pinned()) {
-		return;
-	}
-
 	if (current == p_sync) {
 		return;
 	}

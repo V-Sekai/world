@@ -32,7 +32,6 @@
 #define AUDIO_DRIVER_WEB_H
 
 #include "godot_audio.h"
-#include "godot_js.h"
 
 #include "core/os/mutex.h"
 #include "core/os/thread.h"
@@ -56,8 +55,8 @@ private:
 	int mix_rate = 0;
 	int channel_count = 0;
 
-	WASM_EXPORT static void _state_change_callback(int p_state);
-	WASM_EXPORT static void _latency_update_callback(float p_latency);
+	static void _state_change_callback(int p_state);
+	static void _latency_update_callback(float p_latency);
 
 	static AudioDriverWeb *singleton;
 

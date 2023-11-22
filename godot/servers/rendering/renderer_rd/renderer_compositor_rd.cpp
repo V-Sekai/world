@@ -103,9 +103,8 @@ void RendererCompositorRD::begin_frame(double frame_step) {
 }
 
 void RendererCompositorRD::end_frame(bool p_swap_buffers) {
-	if (p_swap_buffers) {
-		RD::get_singleton()->swap_buffers();
-	}
+	// TODO: Likely pass a bool to swap buffers to avoid display?
+	RD::get_singleton()->swap_buffers();
 }
 
 void RendererCompositorRD::initialize() {

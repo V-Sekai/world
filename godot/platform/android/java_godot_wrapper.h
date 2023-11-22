@@ -53,8 +53,6 @@ private:
 	jmethodID _finish = nullptr;
 	jmethodID _set_keep_screen_on = nullptr;
 	jmethodID _alert = nullptr;
-	jmethodID _is_dark_mode_supported = nullptr;
-	jmethodID _is_dark_mode = nullptr;
 	jmethodID _get_clipboard = nullptr;
 	jmethodID _set_clipboard = nullptr;
 	jmethodID _has_clipboard = nullptr;
@@ -73,7 +71,6 @@ private:
 	jmethodID _begin_benchmark_measure = nullptr;
 	jmethodID _end_benchmark_measure = nullptr;
 	jmethodID _dump_benchmark = nullptr;
-	jmethodID _has_feature = nullptr;
 
 public:
 	GodotJavaWrapper(JNIEnv *p_env, jobject p_activity, jobject p_godot_instance);
@@ -89,8 +86,6 @@ public:
 	bool force_quit(JNIEnv *p_env = nullptr, int p_instance_id = 0);
 	void set_keep_screen_on(bool p_enabled);
 	void alert(const String &p_message, const String &p_title);
-	bool is_dark_mode_supported();
-	bool is_dark_mode();
 	bool has_get_clipboard();
 	String get_clipboard();
 	bool has_set_clipboard();
@@ -111,9 +106,6 @@ public:
 
 	// Return the list of gdextensions config file.
 	Vector<String> get_gdextension_list_config_file() const;
-
-	// Return true if the given feature is supported.
-	bool has_feature(const String &p_feature) const;
 };
 
 #endif // JAVA_GODOT_WRAPPER_H

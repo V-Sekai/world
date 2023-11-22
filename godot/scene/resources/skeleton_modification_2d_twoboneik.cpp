@@ -47,16 +47,14 @@ bool SkeletonModification2DTwoBoneIK::_set(const StringName &p_path, const Varia
 	} else if (path == "joint_two_bone2d_node") {
 		set_joint_two_bone2d_node(p_value);
 	}
+
 #ifdef TOOLS_ENABLED
-	else if (path.begins_with("editor/draw_gizmo")) {
+	if (path.begins_with("editor/draw_gizmo")) {
 		set_editor_draw_gizmo(p_value);
 	} else if (path.begins_with("editor/draw_min_max")) {
 		set_editor_draw_min_max(p_value);
 	}
 #endif // TOOLS_ENABLED
-	else {
-		return false;
-	}
 
 	return true;
 }
@@ -73,16 +71,14 @@ bool SkeletonModification2DTwoBoneIK::_get(const StringName &p_path, Variant &r_
 	} else if (path == "joint_two_bone2d_node") {
 		r_ret = get_joint_two_bone2d_node();
 	}
+
 #ifdef TOOLS_ENABLED
-	else if (path.begins_with("editor/draw_gizmo")) {
+	if (path.begins_with("editor/draw_gizmo")) {
 		r_ret = get_editor_draw_gizmo();
 	} else if (path.begins_with("editor/draw_min_max")) {
 		r_ret = get_editor_draw_min_max();
 	}
 #endif // TOOLS_ENABLED
-	else {
-		return false;
-	}
 
 	return true;
 }

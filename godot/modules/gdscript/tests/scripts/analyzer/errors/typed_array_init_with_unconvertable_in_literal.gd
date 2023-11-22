@@ -1,4 +1,4 @@
 func test():
-	var unconvertible := 1
-	var typed: Array[Object] = [unconvertible]
+	var unconvertable := 1
+	var typed: Array[Object] = [unconvertable]
 	print('not ok')
