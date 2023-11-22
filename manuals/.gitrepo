@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/V-Sekai/manuals.git
+	branch = master
+	commit = 76e47c0d17018de2d48933a3b8cc33dc0b509c14
+	parent = 0c24c215fa123e99d683b798b9b341037afe0bd8
+	method = merge
+	cmdver = 0.4.6
