@@ -42,7 +42,6 @@
 #include "core/io/stream_peer.h"
 #include "core/math/disjoint_set.h"
 #include "core/version.h"
-#include "drivers/png/png_driver_common.h"
 #include "scene/3d/bone_attachment_3d.h"
 #include "scene/3d/camera_3d.h"
 #include "scene/3d/importer_mesh_instance_3d.h"
@@ -67,8 +66,10 @@
 #endif // MODULE_GRIDMAP_ENABLED
 
 // FIXME: Hardcoded to avoid editor dependency.
+#define GLTF_IMPORT_GENERATE_TANGENT_ARRAYS 8
 #define GLTF_IMPORT_USE_NAMED_SKIN_BINDS 16
 #define GLTF_IMPORT_DISCARD_MESHES_AND_MATERIALS 32
+#define GLTF_IMPORT_FORCE_DISABLE_MESH_COMPRESSION 64
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -428,20 +429,19 @@ Error GLTFDocument::_serialize_nodes(Ref<GLTFState> p_state) {
 		}
 		if (gltf_node->skeleton != -1 && gltf_node->skin < 0) {
 		}
-		if (gltf_node->xform != Transform3D()) {
-			node["matrix"] = _xform_to_array(gltf_node->xform);
-		}
-
-		if (!gltf_node->rotation.is_equal_approx(Quaternion())) {
-			node["rotation"] = _quaternion_to_array(gltf_node->rotation);
-		}
-
-		if (!gltf_node->scale.is_equal_approx(Vector3(1.0f, 1.0f, 1.0f))) {
-			node["scale"] = _vec3_to_arr(gltf_node->scale);
-		}
-
-		if (!gltf_node->position.is_zero_approx()) {
-			node["translation"] = _vec3_to_arr(gltf_node->position);
+		if (gltf_node->transform.basis.is_orthogonal()) {
+			// An orthogonal transform is decomposable into TRS, so prefer that.
+			if (!gltf_node->get_position().is_zero_approx()) {
+				node["translation"] = _vec3_to_arr(gltf_node->get_position());
+			}
+			if (!gltf_node->get_rotation().is_equal_approx(Quaternion())) {
+				node["rotation"] = _quaternion_to_array(gltf_node->get_rotation());
+			}
+			if (!gltf_node->get_scale().is_equal_approx(Vector3(1.0f, 1.0f, 1.0f))) {
+				node["scale"] = _vec3_to_arr(gltf_node->get_scale());
+			}
+		} else {
+			node["matrix"] = _xform_to_array(gltf_node->transform);
 		}
 		if (gltf_node->children.size()) {
 			Array children;
@@ -572,8 +572,11 @@ Error GLTFDocument::_parse_scenes(Ref<GLTFState> p_state) {
 		// Determine what to use for the scene name.
 		if (scene_dict.has("name") && !String(scene_dict["name"]).is_empty() && !((String)scene_dict["name"]).begins_with("Scene")) {
 			p_state->scene_name = scene_dict["name"];
-		} else {
+		} else if (p_state->scene_name.is_empty()) {
 			p_state->scene_name = p_state->filename;
+		}
+		if (_naming_version == 0) {
+			p_state->scene_name = _gen_unique_name(p_state, p_state->scene_name);
 		}
 	}
 
@@ -601,20 +604,17 @@ Error GLTFDocument::_parse_nodes(Ref<GLTFState> p_state) {
 			node->skin = n["skin"];
 		}
 		if (n.has("matrix")) {
-			node->xform = _arr_to_xform(n["matrix"]);
+			node->transform = _arr_to_xform(n["matrix"]);
 		} else {
 			if (n.has("translation")) {
-				node->position = _arr_to_vec3(n["translation"]);
+				node->set_position(_arr_to_vec3(n["translation"]));
 			}
 			if (n.has("rotation")) {
-				node->rotation = _arr_to_quaternion(n["rotation"]);
+				node->set_rotation(_arr_to_quaternion(n["rotation"]));
 			}
 			if (n.has("scale")) {
-				node->scale = _arr_to_vec3(n["scale"]);
+				node->set_scale(_arr_to_vec3(n["scale"]));
 			}
-
-			node->xform.basis.set_quaternion_scale(node->rotation, node->scale);
-			node->xform.origin = node->position;
 		}
 
 		if (n.has("extensions")) {
@@ -2209,7 +2209,7 @@ Error GLTFDocument::_serialize_meshes(Ref<GLTFState> p_state) {
 			}
 
 			Array array = import_mesh->get_surface_arrays(surface_i);
-			uint32_t format = import_mesh->get_surface_format(surface_i);
+			uint64_t format = import_mesh->get_surface_format(surface_i);
 			int32_t vertex_num = 0;
 			Dictionary attributes;
 			{
@@ -2569,7 +2569,7 @@ Error GLTFDocument::_parse_meshes(Ref<GLTFState> p_state) {
 		import_mesh->set_name(_gen_unique_name(p_state, vformat("%s_%s", p_state->scene_name, mesh_name)));
 
 		for (int j = 0; j < primitives.size(); j++) {
-			uint32_t flags = 0;
+			uint64_t flags = RS::ARRAY_FLAG_COMPRESS_ATTRIBUTES;
 			Dictionary p = primitives[j];
 
 			Array array;
@@ -2796,7 +2796,28 @@ Error GLTFDocument::_parse_meshes(Ref<GLTFState> p_state) {
 				array[Mesh::ARRAY_INDEX] = indices;
 			}
 
-			bool generate_tangents = (primitive == Mesh::PRIMITIVE_TRIANGLES && !a.has("TANGENT") && a.has("TEXCOORD_0") && a.has("NORMAL"));
+			bool generate_tangents = p_state->force_generate_tangents && (primitive == Mesh::PRIMITIVE_TRIANGLES && !a.has("TANGENT") && a.has("NORMAL"));
+
+			if (generate_tangents && !a.has("TEXCOORD_0")) {
+				// If we don't have UVs we provide a dummy tangent array.
+				Vector<float> tangents;
+				tangents.resize(vertex_num * 4);
+				float *tangentsw = tangents.ptrw();
+
+				Vector<Vector3> normals = array[Mesh::ARRAY_NORMAL];
+				for (int k = 0; k < vertex_num; k++) {
+					Vector3 tan = Vector3(0.0, 1.0, 0.0).cross(normals[k]);
+					tangentsw[k * 4 + 0] = tan.x;
+					tangentsw[k * 4 + 1] = tan.y;
+					tangentsw[k * 4 + 2] = tan.z;
+					tangentsw[k * 4 + 3] = 1.0;
+				}
+				array[Mesh::ARRAY_TANGENT] = tangents;
+			}
+
+			if (p_state->force_disable_compression || !a.has("POSITION") || !a.has("NORMAL") || p.has("targets") || (a.has("JOINTS_0") || a.has("JOINTS_1"))) {
+				flags &= ~RS::ARRAY_FLAG_COMPRESS_ATTRIBUTES;
+			}
 
 			Ref<SurfaceTool> mesh_surface_tool;
 			mesh_surface_tool.instantiate();
@@ -2805,7 +2826,7 @@ Error GLTFDocument::_parse_meshes(Ref<GLTFState> p_state) {
 				mesh_surface_tool->set_skin_weight_count(SurfaceTool::SKIN_8_WEIGHTS);
 			}
 			mesh_surface_tool->index();
-			if (generate_tangents) {
+			if (generate_tangents && a.has("TEXCOORD_0")) {
 				//must generate mikktspace tangents.. ergh..
 				mesh_surface_tool->generate_tangents();
 			}
@@ -2936,7 +2957,7 @@ Error GLTFDocument::_parse_meshes(Ref<GLTFState> p_state) {
 
 					// Enforce blend shape mask array format
 					for (int l = 0; l < Mesh::ARRAY_MAX; l++) {
-						if (!(Mesh::ARRAY_FORMAT_BLEND_SHAPE_MASK & (1 << l))) {
+						if (!(Mesh::ARRAY_FORMAT_BLEND_SHAPE_MASK & (1ULL << l))) {
 							array_copy[l] = Variant();
 						}
 					}
@@ -3001,8 +3022,43 @@ Error GLTFDocument::_parse_meshes(Ref<GLTFState> p_state) {
 	return OK;
 }
 
+void GLTFDocument::set_naming_version(int p_version) {
+	_naming_version = p_version;
+}
+
+int GLTFDocument::get_naming_version() const {
+	return _naming_version;
+}
+
+void GLTFDocument::set_image_format(const String &p_image_format) {
+	_image_format = p_image_format;
+}
+
+String GLTFDocument::get_image_format() const {
+	return _image_format;
+}
+
+void GLTFDocument::set_lossy_quality(float p_lossy_quality) {
+	_lossy_quality = p_lossy_quality;
+}
+
+float GLTFDocument::get_lossy_quality() const {
+	return _lossy_quality;
+}
+
 Error GLTFDocument::_serialize_images(Ref<GLTFState> p_state) {
 	Array images;
+	// Check if any extension wants to be the image saver.
+	_image_save_extension = Ref<GLTFDocumentExtension>();
+	for (Ref<GLTFDocumentExtension> ext : document_extensions) {
+		ERR_CONTINUE(ext.is_null());
+		Vector<String> image_formats = ext->get_saveable_image_formats();
+		if (image_formats.has(_image_format)) {
+			_image_save_extension = ext;
+			break;
+		}
+	}
+	// Serialize every image in the state's images array.
 	for (int i = 0; i < p_state->images.size(); i++) {
 		Dictionary image_dict;
 
@@ -3010,6 +3066,10 @@ Error GLTFDocument::_serialize_images(Ref<GLTFState> p_state) {
 
 		Ref<Image> image = p_state->images[i]->get_image();
 		ERR_CONTINUE(image.is_null());
+		if (image->is_compressed()) {
+			image->decompress();
+			ERR_FAIL_COND_V_MSG(image->is_compressed(), ERR_INVALID_DATA, "GLTF: Image was compressed, but could not be decompressed.");
+		}
 
 		if (p_state->filename.to_lower().ends_with("gltf")) {
 			String img_name = p_state->images[i]->get_name();
@@ -3017,14 +3077,28 @@ Error GLTFDocument::_serialize_images(Ref<GLTFState> p_state) {
 				img_name = itos(i);
 			}
 			img_name = _gen_unique_name(p_state, img_name);
-			img_name = img_name.pad_zeros(3) + ".png";
+			img_name = img_name.pad_zeros(3);
 			String relative_texture_dir = "textures";
 			String full_texture_dir = p_state->base_path.path_join(relative_texture_dir);
 			Ref<DirAccess> da = DirAccess::open(p_state->base_path);
+			ERR_FAIL_COND_V(da.is_null(), FAILED);
+
 			if (!da->dir_exists(full_texture_dir)) {
 				da->make_dir(full_texture_dir);
 			}
-			image->save_png(full_texture_dir.path_join(img_name));
+			if (_image_save_extension.is_valid()) {
+				img_name = img_name + _image_save_extension->get_image_file_extension();
+				Error err = _image_save_extension->save_image_at_path(p_state, image, full_texture_dir.path_join(img_name), _image_format, _lossy_quality);
+				ERR_FAIL_COND_V_MSG(err != OK, err, "GLTF: Failed to save image in '" + _image_format + "' format as a separate file.");
+			} else if (_image_format == "PNG") {
+				img_name = img_name + ".png";
+				image->save_png(full_texture_dir.path_join(img_name));
+			} else if (_image_format == "JPEG") {
+				img_name = img_name + ".jpg";
+				image->save_jpg(full_texture_dir.path_join(img_name), _lossy_quality);
+			} else {
+				ERR_FAIL_V_MSG(ERR_UNAVAILABLE, "GLTF: Unknown image format '" + _image_format + "'.");
+			}
 			image_dict["uri"] = relative_texture_dir.path_join(img_name).uri_encode();
 		} else {
 			GLTFBufferViewIndex bvi;
@@ -3042,8 +3116,20 @@ Error GLTFDocument::_serialize_images(Ref<GLTFState> p_state) {
 			if (img_tex.is_valid()) {
 				image = img_tex->get_image();
 			}
-			Error err = PNGDriverCommon::image_to_png(image, buffer);
-			ERR_FAIL_COND_V_MSG(err, err, "Can't convert image to PNG.");
+			// Save in various image formats. Note that if the format is "None",
+			// the state's images will be empty, so this code will not be reached.
+			if (_image_save_extension.is_valid()) {
+				buffer = _image_save_extension->serialize_image_to_bytes(p_state, image, image_dict, _image_format, _lossy_quality);
+			} else if (_image_format == "PNG") {
+				buffer = image->save_png_to_buffer();
+				image_dict["mimeType"] = "image/png";
+			} else if (_image_format == "JPEG") {
+				buffer = image->save_jpg_to_buffer(_lossy_quality);
+				image_dict["mimeType"] = "image/jpeg";
+			} else {
+				ERR_FAIL_V_MSG(ERR_UNAVAILABLE, "GLTF: Unknown image format '" + _image_format + "'.");
+			}
+			ERR_FAIL_COND_V_MSG(buffer.is_empty(), ERR_INVALID_DATA, "GLTF: Failed to save image in '" + _image_format + "' format.");
 
 			bv->byte_length = buffer.size();
 			p_state->buffers.write[bi].resize(p_state->buffers[bi].size() + bv->byte_length);
@@ -3053,7 +3139,6 @@ Error GLTFDocument::_serialize_images(Ref<GLTFState> p_state) {
 			p_state->buffer_views.push_back(bv);
 			bvi = p_state->buffer_views.size() - 1;
 			image_dict["bufferView"] = bvi;
-			image_dict["mimeType"] = "image/png";
 		}
 		images.push_back(image_dict);
 	}
@@ -3332,9 +3417,13 @@ Error GLTFDocument::_serialize_textures(Ref<GLTFState> p_state) {
 	for (int32_t i = 0; i < p_state->textures.size(); i++) {
 		Dictionary texture_dict;
 		Ref<GLTFTexture> gltf_texture = p_state->textures[i];
-		ERR_CONTINUE(gltf_texture->get_src_image() == -1);
-		texture_dict["source"] = gltf_texture->get_src_image();
-
+		if (_image_save_extension.is_valid()) {
+			Error err = _image_save_extension->serialize_texture_json(p_state, texture_dict, gltf_texture, _image_format);
+			ERR_FAIL_COND_V(err != OK, err);
+		} else {
+			ERR_CONTINUE(gltf_texture->get_src_image() == -1);
+			texture_dict["source"] = gltf_texture->get_src_image();
+		}
 		GLTFTextureSamplerIndex sampler_index = gltf_texture->get_sampler();
 		if (sampler_index != -1) {
 			texture_dict["sampler"] = sampler_index;
@@ -3543,7 +3632,7 @@ Error GLTFDocument::_serialize_materials(Ref<GLTFState> p_state) {
 			arr.push_back(c.a);
 			mr["baseColorFactor"] = arr;
 		}
-		{
+		if (_image_format != "None") {
 			Dictionary bct;
 			Ref<Texture2D> albedo_texture = base_material->get_texture(BaseMaterial3D::TEXTURE_ALBEDO);
 			GLTFTextureIndex gltf_texture_index = -1;
@@ -3820,7 +3909,6 @@ Error GLTFDocument::_parse_materials(Ref<GLTFState> p_state) {
 		} else {
 			material->set_name(vformat("material_%s", itos(i)));
 		}
-		material->set_flag(BaseMaterial3D::FLAG_ALBEDO_FROM_VERTEX_COLOR, true);
 		Dictionary material_extensions;
 		if (material_dict.has("extensions")) {
 			material_extensions = material_dict["extensions"];
@@ -4276,7 +4364,7 @@ Error GLTFDocument::_expand_skin(Ref<GLTFState> p_state, Ref<GLTFSkin> p_skin) {
 }
 
 Error GLTFDocument::_verify_skin(Ref<GLTFState> p_state, Ref<GLTFSkin> p_skin) {
-	// This may seem duplicated from expand_skins, but this is really a sanity check! (so it kinda is)
+	// This may seem duplicated from expand_skins, but this is really a safety check! (so it kinda is)
 	// In case additional interpolating logic is added to the skins, this will help ensure that you
 	// do not cause it to self implode into a fiery blaze
 
@@ -4702,10 +4790,10 @@ Error GLTFDocument::_create_skeletons(Ref<GLTFState> p_state) {
 			node->set_name(_gen_unique_bone_name(p_state, skel_i, node->get_name()));
 
 			skeleton->add_bone(node->get_name());
-			skeleton->set_bone_rest(bone_index, node->xform);
-			skeleton->set_bone_pose_position(bone_index, node->position);
-			skeleton->set_bone_pose_rotation(bone_index, node->rotation.normalized());
-			skeleton->set_bone_pose_scale(bone_index, node->scale);
+			skeleton->set_bone_rest(bone_index, node->transform);
+			skeleton->set_bone_pose_position(bone_index, node->get_position());
+			skeleton->set_bone_pose_rotation(bone_index, node->get_rotation());
+			skeleton->set_bone_pose_scale(bone_index, node->get_scale());
 
 			if (node->parent >= 0 && p_state->nodes[node->parent]->skeleton == skel_i) {
 				const int bone_parent = skeleton->find_bone(p_state->nodes[node->parent]->get_name());
@@ -5277,12 +5365,22 @@ void GLTFDocument::_assign_node_names(Ref<GLTFState> p_state) {
 		}
 		String gltf_node_name = gltf_node->get_name();
 		if (gltf_node_name.is_empty()) {
-			if (gltf_node->mesh >= 0) {
-				gltf_node_name = "Mesh";
-			} else if (gltf_node->camera >= 0) {
-				gltf_node_name = "Camera3D";
+			if (_naming_version == 0) {
+				if (gltf_node->mesh >= 0) {
+					gltf_node_name = _gen_unique_name(p_state, "Mesh");
+				} else if (gltf_node->camera >= 0) {
+					gltf_node_name = _gen_unique_name(p_state, "Camera3D");
+				} else {
+					gltf_node_name = _gen_unique_name(p_state, "Node");
+				}
 			} else {
-				gltf_node_name = "Node";
+				if (gltf_node->mesh >= 0) {
+					gltf_node_name = "Mesh";
+				} else if (gltf_node->camera >= 0) {
+					gltf_node_name = "Camera";
+				} else {
+					gltf_node_name = "Node";
+				}
 			}
 		}
 		gltf_node->set_name(_gen_unique_name(p_state, gltf_node_name));
@@ -5401,10 +5499,7 @@ GLTFLightIndex GLTFDocument::_convert_light(Ref<GLTFState> p_state, Light3D *p_l
 }
 
 void GLTFDocument::_convert_spatial(Ref<GLTFState> p_state, Node3D *p_spatial, Ref<GLTFNode> p_node) {
-	Transform3D xform = p_spatial->get_transform();
-	p_node->scale = xform.basis.get_scale();
-	p_node->rotation = xform.basis.get_rotation_quaternion();
-	p_node->position = xform.origin;
+	p_node->transform = p_spatial->get_transform();
 }
 
 Node3D *GLTFDocument::_generate_spatial(Ref<GLTFState> p_state, const GLTFNodeIndex p_node_index) {
@@ -5518,7 +5613,7 @@ void GLTFDocument::_convert_csg_shape_to_gltf(CSGShape3D *p_current, GLTFNodeInd
 	GLTFMeshIndex mesh_i = p_state->meshes.size();
 	p_state->meshes.push_back(gltf_mesh);
 	p_gltf_node->mesh = mesh_i;
-	p_gltf_node->xform = csg->get_meshes()[0];
+	p_gltf_node->transform = csg->get_meshes()[0];
 	p_gltf_node->set_name(_gen_unique_name(p_state, csg->get_name()));
 }
 #endif // MODULE_CSG_ENABLED
@@ -5536,7 +5631,7 @@ void GLTFDocument::_create_gltf_node(Ref<GLTFState> p_state, Node *p_scene_paren
 }
 
 void GLTFDocument::_convert_animation_player_to_gltf(AnimationPlayer *p_animation_player, Ref<GLTFState> p_state, GLTFNodeIndex p_gltf_current, GLTFNodeIndex p_gltf_root_index, Ref<GLTFNode> p_gltf_node, Node *p_scene_parent) {
-	ERR_FAIL_COND(!p_animation_player);
+	ERR_FAIL_NULL(p_animation_player);
 	p_state->animation_players.push_back(p_animation_player);
 	print_verbose(String("glTF: Converting animation player: ") + p_animation_player->get_name());
 }
@@ -5555,7 +5650,7 @@ void GLTFDocument::_check_visibility(Node *p_node, bool &r_retflag) {
 }
 
 void GLTFDocument::_convert_camera_to_gltf(Camera3D *camera, Ref<GLTFState> p_state, Ref<GLTFNode> p_gltf_node) {
-	ERR_FAIL_COND(!camera);
+	ERR_FAIL_NULL(camera);
 	GLTFCameraIndex camera_index = _convert_camera(p_state, camera);
 	if (camera_index != -1) {
 		p_gltf_node->camera = camera_index;
@@ -5563,7 +5658,7 @@ void GLTFDocument::_convert_camera_to_gltf(Camera3D *camera, Ref<GLTFState> p_st
 }
 
 void GLTFDocument::_convert_light_to_gltf(Light3D *light, Ref<GLTFState> p_state, Ref<GLTFNode> p_gltf_node) {
-	ERR_FAIL_COND(!light);
+	ERR_FAIL_NULL(light);
 	GLTFLightIndex light_index = _convert_light(p_state, light);
 	if (light_index != -1) {
 		p_gltf_node->light = light_index;
@@ -5594,7 +5689,7 @@ void GLTFDocument::_convert_grid_map_to_gltf(GridMap *p_grid_map, GLTFNodeIndex 
 		gltf_mesh->set_mesh(_mesh_to_importer_mesh(p_grid_map->get_mesh_library()->get_item_mesh(cell)));
 		new_gltf_node->mesh = p_state->meshes.size();
 		p_state->meshes.push_back(gltf_mesh);
-		new_gltf_node->xform = cell_xform * p_grid_map->get_transform();
+		new_gltf_node->transform = cell_xform * p_grid_map->get_transform();
 		new_gltf_node->set_name(_gen_unique_name(p_state, p_grid_map->get_mesh_library()->get_item_name(cell)));
 	}
 }
@@ -5605,7 +5700,7 @@ void GLTFDocument::_convert_multi_mesh_instance_to_gltf(
 		GLTFNodeIndex p_parent_node_index,
 		GLTFNodeIndex p_root_node_index,
 		Ref<GLTFNode> p_gltf_node, Ref<GLTFState> p_state) {
-	ERR_FAIL_COND(!p_multi_mesh_instance);
+	ERR_FAIL_NULL(p_multi_mesh_instance);
 	Ref<MultiMesh> multi_mesh = p_multi_mesh_instance->get_multimesh();
 	if (multi_mesh.is_null()) {
 		return;
@@ -5662,7 +5757,7 @@ void GLTFDocument::_convert_multi_mesh_instance_to_gltf(
 		Ref<GLTFNode> new_gltf_node;
 		new_gltf_node.instantiate();
 		new_gltf_node->mesh = mesh_index;
-		new_gltf_node->xform = transform;
+		new_gltf_node->transform = transform;
 		new_gltf_node->set_name(_gen_unique_name(p_state, p_multi_mesh_instance->get_name()));
 		p_gltf_node->children.push_back(p_state->nodes.size());
 		p_state->nodes.push_back(new_gltf_node);
@@ -5687,10 +5782,7 @@ void GLTFDocument::_convert_skeleton_to_gltf(Skeleton3D *p_skeleton3d, Ref<GLTFS
 		// Note that we cannot use _gen_unique_bone_name here, because glTF spec requires all node
 		// names to be unique regardless of whether or not they are used as joints.
 		joint_node->set_name(_gen_unique_name(p_state, skeleton->get_bone_name(bone_i)));
-		Transform3D xform = skeleton->get_bone_pose(bone_i);
-		joint_node->scale = xform.basis.get_scale();
-		joint_node->rotation = xform.basis.get_rotation_quaternion();
-		joint_node->position = xform.origin;
+		joint_node->transform = skeleton->get_bone_pose(bone_i);
 		joint_node->joint = true;
 		GLTFNodeIndex current_node_i = p_state->nodes.size();
 		p_state->scene_nodes.insert(current_node_i, skeleton);
@@ -5782,6 +5874,10 @@ void GLTFDocument::_generate_scene_node(Ref<GLTFState> p_state, const GLTFNodeIn
 		BoneAttachment3D *bone_attachment = _generate_bone_attachment(p_state, active_skeleton, p_node_index, gltf_node->parent);
 
 		p_scene_parent->add_child(bone_attachment, true);
+
+		// Find the correct bone_idx so we can properly serialize it.
+		bone_attachment->set_bone_idx(active_skeleton->find_bone(gltf_node->get_name()));
+
 		bone_attachment->set_owner(p_scene_root);
 
 		// There is no gltf_node that represent this, so just directly create a unique name
@@ -5821,15 +5917,22 @@ void GLTFDocument::_generate_scene_node(Ref<GLTFState> p_state, const GLTFNodeIn
 			current_node = _generate_spatial(p_state, p_node_index);
 		}
 	}
-	// Add the node we generated and set the owner to the scene root.
-	p_scene_parent->add_child(current_node, true);
-	if (current_node != p_scene_root) {
+	String gltf_node_name = gltf_node->get_name();
+	if (!gltf_node_name.is_empty()) {
+		current_node->set_name(gltf_node_name);
+	}
+	// Note: p_scene_parent and p_scene_root must either both be null or both be valid.
+	if (p_scene_root == nullptr) {
+		// If the root node argument is null, this is the root node.
+		p_scene_root = current_node;
+	} else {
+		// Add the node we generated and set the owner to the scene root.
+		p_scene_parent->add_child(current_node, true);
 		Array args;
 		args.append(p_scene_root);
 		current_node->propagate_call(StringName("set_owner"), args);
+		current_node->set_transform(gltf_node->transform);
 	}
-	current_node->set_transform(gltf_node->xform);
-	current_node->set_name(gltf_node->get_name());
 
 	p_state->scene_nodes.insert(p_node_index, current_node);
 	for (int i = 0; i < gltf_node->children.size(); ++i) {
@@ -5878,6 +5981,10 @@ void GLTFDocument::_generate_skeleton_bone_node(Ref<GLTFState> p_state, const GL
 			BoneAttachment3D *bone_attachment = _generate_bone_attachment(p_state, active_skeleton, p_node_index, p_node_index);
 
 			p_scene_parent->add_child(bone_attachment, true);
+
+			// Find the correct bone_idx so we can properly serialize it.
+			bone_attachment->set_bone_idx(active_skeleton->find_bone(gltf_node->get_name()));
+
 			bone_attachment->set_owner(p_scene_root);
 
 			// There is no gltf_node that represent this, so just directly create a unique name
@@ -6080,7 +6187,7 @@ void GLTFDocument::_import_animation(Ref<GLTFState> p_state, AnimationPlayer *p_
 		const Ref<GLTFNode> gltf_node = p_state->nodes[track_i.key];
 
 		Node *root = p_animation_player->get_parent();
-		ERR_FAIL_COND(root == nullptr);
+		ERR_FAIL_NULL(root);
 		HashMap<GLTFNodeIndex, Node *>::Iterator node_element = p_state->scene_nodes.find(node_index);
 		ERR_CONTINUE_MSG(!node_element, vformat("Unable to find node %d for animation.", node_index));
 		node_path = root->get_path_to(node_element->value);
@@ -6093,7 +6200,7 @@ void GLTFDocument::_import_animation(Ref<GLTFState> p_state, AnimationPlayer *p_
 
 		if (gltf_node->skeleton >= 0) {
 			const Skeleton3D *sk = p_state->skeletons[gltf_node->skeleton]->godot_skeleton;
-			ERR_FAIL_COND(sk == nullptr);
+			ERR_FAIL_NULL(sk);
 
 			const String path = p_animation_player->get_parent()->get_path_to(sk);
 			const String bone = gltf_node->get_name();
@@ -6151,9 +6258,11 @@ void GLTFDocument::_import_animation(Ref<GLTFState> p_state, AnimationPlayer *p_
 			if (track.position_track.values.size()) {
 				bool is_default = true; //discard the track if all it contains is default values
 				if (p_remove_immutable_tracks) {
-					Vector3 base_pos = p_state->nodes[track_i.key]->position;
+					Vector3 base_pos = gltf_node->get_position();
 					for (int i = 0; i < track.position_track.times.size(); i++) {
-						Vector3 value = track.position_track.values[track.position_track.interpolation == GLTFAnimation::INTERP_CUBIC_SPLINE ? (1 + i * 3) : i];
+						int value_index = track.position_track.interpolation == GLTFAnimation::INTERP_CUBIC_SPLINE ? (1 + i * 3) : i;
+						ERR_FAIL_COND_MSG(value_index >= track.position_track.values.size(), "Animation sampler output accessor with 'CUBICSPLINE' interpolation doesn't have enough elements.");
+						Vector3 value = track.position_track.values[value_index];
 						if (!value.is_equal_approx(base_pos)) {
 							is_default = false;
 							break;
@@ -6171,9 +6280,11 @@ void GLTFDocument::_import_animation(Ref<GLTFState> p_state, AnimationPlayer *p_
 			if (track.rotation_track.values.size()) {
 				bool is_default = true; //discard the track if all it contains is default values
 				if (p_remove_immutable_tracks) {
-					Quaternion base_rot = p_state->nodes[track_i.key]->rotation.normalized();
+					Quaternion base_rot = gltf_node->get_rotation();
 					for (int i = 0; i < track.rotation_track.times.size(); i++) {
-						Quaternion value = track.rotation_track.values[track.rotation_track.interpolation == GLTFAnimation::INTERP_CUBIC_SPLINE ? (1 + i * 3) : i].normalized();
+						int value_index = track.rotation_track.interpolation == GLTFAnimation::INTERP_CUBIC_SPLINE ? (1 + i * 3) : i;
+						ERR_FAIL_COND_MSG(value_index >= track.rotation_track.values.size(), "Animation sampler output accessor with 'CUBICSPLINE' interpolation doesn't have enough elements.");
+						Quaternion value = track.rotation_track.values[value_index].normalized();
 						if (!value.is_equal_approx(base_rot)) {
 							is_default = false;
 							break;
@@ -6191,9 +6302,11 @@ void GLTFDocument::_import_animation(Ref<GLTFState> p_state, AnimationPlayer *p_
 			if (track.scale_track.values.size()) {
 				bool is_default = true; //discard the track if all it contains is default values
 				if (p_remove_immutable_tracks) {
-					Vector3 base_scale = p_state->nodes[track_i.key]->scale;
+					Vector3 base_scale = gltf_node->get_scale();
 					for (int i = 0; i < track.scale_track.times.size(); i++) {
-						Vector3 value = track.scale_track.values[track.scale_track.interpolation == GLTFAnimation::INTERP_CUBIC_SPLINE ? (1 + i * 3) : i];
+						int value_index = track.scale_track.interpolation == GLTFAnimation::INTERP_CUBIC_SPLINE ? (1 + i * 3) : i;
+						ERR_FAIL_COND_MSG(value_index >= track.scale_track.values.size(), "Animation sampler output accessor with 'CUBICSPLINE' interpolation doesn't have enough elements.");
+						Vector3 value = track.scale_track.values[value_index];
 						if (!value.is_equal_approx(base_scale)) {
 							is_default = false;
 							break;
@@ -6217,15 +6330,15 @@ void GLTFDocument::_import_animation(Ref<GLTFState> p_state, AnimationPlayer *p_
 			Vector3 base_scale = Vector3(1, 1, 1);
 
 			if (rotation_idx == -1) {
-				base_rot = p_state->nodes[track_i.key]->rotation.normalized();
+				base_rot = gltf_node->get_rotation();
 			}
 
 			if (position_idx == -1) {
-				base_pos = p_state->nodes[track_i.key]->position;
+				base_pos = gltf_node->get_position();
 			}
 
 			if (scale_idx == -1) {
-				base_scale = p_state->nodes[track_i.key]->scale;
+				base_scale = gltf_node->get_scale();
 			}
 
 			bool last = false;
@@ -6332,10 +6445,7 @@ void GLTFDocument::_convert_mesh_instances(Ref<GLTFState> p_state) {
 		if (!mi) {
 			continue;
 		}
-		Transform3D mi_xform = mi->get_transform();
-		node->scale = mi_xform.basis.get_scale();
-		node->rotation = mi_xform.basis.get_rotation_quaternion();
-		node->position = mi_xform.origin;
+		node->transform = mi->get_transform();
 
 		Node *skel_node = mi->get_node_or_null(mi->get_skeleton_path());
 		Skeleton3D *godot_skeleton = Object::cast_to<Skeleton3D>(skel_node);
@@ -6443,7 +6553,7 @@ float GLTFDocument::get_max_component(const Color &p_color) {
 	return MAX(MAX(r, g), b);
 }
 
-void GLTFDocument::_process_mesh_instances(Ref<GLTFState> p_state, Node *p_scene_root) {
+void GLTFDocument::_process_mesh_instances(Ref<GLTFState> p_state) {
 	for (GLTFNodeIndex node_i = 0; node_i < p_state->nodes.size(); ++node_i) {
 		Ref<GLTFNode> node = p_state->nodes[node_i];
 
@@ -7158,6 +7268,21 @@ void GLTFDocument::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("write_to_filesystem", "state", "path"),
 			&GLTFDocument::write_to_filesystem);
 
+	BIND_ENUM_CONSTANT(ROOT_NODE_MODE_SINGLE_ROOT);
+	BIND_ENUM_CONSTANT(ROOT_NODE_MODE_KEEP_ROOT);
+	BIND_ENUM_CONSTANT(ROOT_NODE_MODE_MULTI_ROOT);
+
+	ClassDB::bind_method(D_METHOD("set_image_format", "image_format"), &GLTFDocument::set_image_format);
+	ClassDB::bind_method(D_METHOD("get_image_format"), &GLTFDocument::get_image_format);
+	ClassDB::bind_method(D_METHOD("set_lossy_quality", "lossy_quality"), &GLTFDocument::set_lossy_quality);
+	ClassDB::bind_method(D_METHOD("get_lossy_quality"), &GLTFDocument::get_lossy_quality);
+	ClassDB::bind_method(D_METHOD("set_root_node_mode", "root_node_mode"), &GLTFDocument::set_root_node_mode);
+	ClassDB::bind_method(D_METHOD("get_root_node_mode"), &GLTFDocument::get_root_node_mode);
+
+	ADD_PROPERTY(PropertyInfo(Variant::STRING, "image_format"), "set_image_format", "get_image_format");
+	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "lossy_quality"), "set_lossy_quality", "get_lossy_quality");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "root_node_mode"), "set_root_node_mode", "get_root_node_mode");
+
 	ClassDB::bind_static_method("GLTFDocument", D_METHOD("register_gltf_document_extension", "extension", "first_priority"),
 			&GLTFDocument::register_gltf_document_extension, DEFVAL(false));
 	ClassDB::bind_static_method("GLTFDocument", D_METHOD("unregister_gltf_document_extension", "extension"),
@@ -7266,15 +7391,44 @@ Error GLTFDocument::write_to_filesystem(Ref<GLTFState> p_state, const String &p_
 	return OK;
 }
 
+Node *GLTFDocument::_generate_scene_node_tree(Ref<GLTFState> p_state) {
+	// Generate the skeletons and skins (if any).
+	Error err = _create_skeletons(p_state);
+	ERR_FAIL_COND_V_MSG(err != OK, nullptr, "GLTF: Failed to create skeletons.");
+	err = _create_skins(p_state);
+	ERR_FAIL_COND_V_MSG(err != OK, nullptr, "GLTF: Failed to create skins.");
+	// Generate the node tree.
+	Node *single_root;
+	if (p_state->extensions_used.has("GODOT_single_root")) {
+		_generate_scene_node(p_state, 0, nullptr, nullptr);
+		single_root = p_state->scene_nodes[0];
+	} else {
+		single_root = memnew(Node3D);
+		for (int32_t root_i = 0; root_i < p_state->root_nodes.size(); root_i++) {
+			_generate_scene_node(p_state, p_state->root_nodes[root_i], single_root, single_root);
+		}
+	}
+	// Assign the scene name and single root name to each other
+	// if one is missing, or do nothing if both are already set.
+	if (unlikely(p_state->scene_name.is_empty())) {
+		p_state->scene_name = single_root->get_name();
+	} else if (single_root->get_name() == StringName()) {
+		if (_naming_version == 0) {
+			single_root->set_name(p_state->scene_name);
+		} else {
+			single_root->set_name(_gen_unique_name(p_state, p_state->scene_name));
+		}
+	}
+	return single_root;
+}
+
 Node *GLTFDocument::generate_scene(Ref<GLTFState> p_state, float p_bake_fps, bool p_trimming, bool p_remove_immutable_tracks) {
 	ERR_FAIL_NULL_V(p_state, nullptr);
 	ERR_FAIL_INDEX_V(0, p_state->root_nodes.size(), nullptr);
 	Error err = OK;
-	GLTFNodeIndex gltf_root = p_state->root_nodes.write[0];
-	Node *gltf_root_node = p_state->get_scene_node(gltf_root);
-	Node *root = gltf_root_node->get_parent();
+	Node *root = _generate_scene_node_tree(p_state);
 	ERR_FAIL_NULL_V(root, nullptr);
-	_process_mesh_instances(p_state, root);
+	_process_mesh_instances(p_state);
 	if (p_state->get_create_animations() && p_state->animations.size()) {
 		AnimationPlayer *ap = memnew(AnimationPlayer);
 		root->add_child(ap, true);
@@ -7310,6 +7464,8 @@ Error GLTFDocument::append_from_scene(Node *p_node, Ref<GLTFState> p_state, uint
 	ERR_FAIL_COND_V(p_state.is_null(), FAILED);
 	p_state->use_named_skin_binds = p_flags & GLTF_IMPORT_USE_NAMED_SKIN_BINDS;
 	p_state->discard_meshes_and_materials = p_flags & GLTF_IMPORT_DISCARD_MESHES_AND_MATERIALS;
+	p_state->force_generate_tangents = p_flags & GLTF_IMPORT_GENERATE_TANGENT_ARRAYS;
+	p_state->force_disable_compression = p_flags & GLTF_IMPORT_FORCE_DISABLE_MESH_COMPRESSION;
 	if (!p_state->buffers.size()) {
 		p_state->buffers.push_back(Vector<uint8_t>());
 	}
@@ -7324,6 +7480,19 @@ Error GLTFDocument::append_from_scene(Node *p_node, Ref<GLTFState> p_state, uint
 		}
 	}
 	// Add the root node(s) and their descendants to the state.
+	if (_root_node_mode == RootNodeMode::ROOT_NODE_MODE_MULTI_ROOT) {
+		const int child_count = p_node->get_child_count();
+		if (child_count > 0) {
+			for (int i = 0; i < child_count; i++) {
+				_convert_scene_node(p_state, p_node->get_child(i), -1, -1);
+			}
+			p_state->scene_name = p_node->get_name();
+			return OK;
+		}
+	}
+	if (_root_node_mode == RootNodeMode::ROOT_NODE_MODE_SINGLE_ROOT) {
+		p_state->extensions_used.append("GODOT_single_root");
+	}
 	_convert_scene_node(p_state, p_node, -1, -1);
 	return OK;
 }
@@ -7334,6 +7503,8 @@ Error GLTFDocument::append_from_buffer(PackedByteArray p_bytes, String p_base_pa
 	Error err = FAILED;
 	p_state->use_named_skin_binds = p_flags & GLTF_IMPORT_USE_NAMED_SKIN_BINDS;
 	p_state->discard_meshes_and_materials = p_flags & GLTF_IMPORT_DISCARD_MESHES_AND_MATERIALS;
+	p_state->force_generate_tangents = p_flags & GLTF_IMPORT_GENERATE_TANGENT_ARRAYS;
+	p_state->force_disable_compression = p_flags & GLTF_IMPORT_FORCE_DISABLE_MESH_COMPRESSION;
 
 	Ref<FileAccessMemory> file_access;
 	file_access.instantiate();
@@ -7427,14 +7598,6 @@ Error GLTFDocument::_parse_gltf_state(Ref<GLTFState> p_state, const String &p_se
 	err = _determine_skeletons(p_state);
 	ERR_FAIL_COND_V(err != OK, ERR_PARSE_ERROR);
 
-	/* CREATE SKELETONS */
-	err = _create_skeletons(p_state);
-	ERR_FAIL_COND_V(err != OK, ERR_PARSE_ERROR);
-
-	/* CREATE SKINS */
-	err = _create_skins(p_state);
-	ERR_FAIL_COND_V(err != OK, ERR_PARSE_ERROR);
-
 	/* PARSE MESHES (we have enough info now) */
 	err = _parse_meshes(p_state);
 	ERR_FAIL_COND_V(err != OK, ERR_PARSE_ERROR);
@@ -7454,11 +7617,6 @@ Error GLTFDocument::_parse_gltf_state(Ref<GLTFState> p_state, const String &p_se
 	/* ASSIGN SCENE NAMES */
 	_assign_node_names(p_state);
 
-	Node3D *root = memnew(Node3D);
-	for (int32_t root_i = 0; root_i < p_state->root_nodes.size(); root_i++) {
-		_generate_scene_node(p_state, p_state->root_nodes[root_i], root, root);
-	}
-
 	return OK;
 }
 
@@ -7470,6 +7628,9 @@ Error GLTFDocument::append_from_file(String p_path, Ref<GLTFState> p_state, uint
 	p_state->filename = p_path.get_file().get_basename();
 	p_state->use_named_skin_binds = p_flags & GLTF_IMPORT_USE_NAMED_SKIN_BINDS;
 	p_state->discard_meshes_and_materials = p_flags & GLTF_IMPORT_DISCARD_MESHES_AND_MATERIALS;
+	p_state->force_generate_tangents = p_flags & GLTF_IMPORT_GENERATE_TANGENT_ARRAYS;
+	p_state->force_disable_compression = p_flags & GLTF_IMPORT_FORCE_DISABLE_MESH_COMPRESSION;
+
 	Error err;
 	Ref<FileAccess> file = FileAccess::open(p_path, FileAccess::READ, &err);
 	ERR_FAIL_COND_V(err != OK, ERR_FILE_CANT_OPEN);
@@ -7520,4 +7681,12 @@ Error GLTFDocument::_parse_gltf_extensions(Ref<GLTFState> p_state) {
 		}
 	}
 	return ret;
+}
+
+void GLTFDocument::set_root_node_mode(GLTFDocument::RootNodeMode p_root_node_mode) {
+	_root_node_mode = p_root_node_mode;
+}
+
+GLTFDocument::RootNodeMode GLTFDocument::get_root_node_mode() const {
+	return _root_node_mode;
 }

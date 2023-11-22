@@ -422,7 +422,7 @@ Array SurfaceTool::commit_to_arrays() {
 	a.resize(Mesh::ARRAY_MAX);
 
 	for (int i = 0; i < Mesh::ARRAY_MAX; i++) {
-		if (!(format & (1 << i))) {
+		if (!(format & (1ULL << i))) {
 			continue; //not in format
 		}
 
@@ -711,7 +711,7 @@ Array SurfaceTool::commit_to_arrays() {
 	return a;
 }
 
-Ref<ArrayMesh> SurfaceTool::commit(const Ref<ArrayMesh> &p_existing, uint32_t p_compress_flags) {
+Ref<ArrayMesh> SurfaceTool::commit(const Ref<ArrayMesh> &p_existing, uint64_t p_compress_flags) {
 	Ref<ArrayMesh> mesh;
 	if (p_existing.is_valid()) {
 		mesh = p_existing;
@@ -729,11 +729,11 @@ Ref<ArrayMesh> SurfaceTool::commit(const Ref<ArrayMesh> &p_existing, uint32_t p_
 
 	Array a = commit_to_arrays();
 
-	uint32_t compress_flags = (p_compress_flags >> RS::ARRAY_COMPRESS_FLAGS_BASE) << RS::ARRAY_COMPRESS_FLAGS_BASE;
-	static const uint32_t shift[RS::ARRAY_CUSTOM_COUNT] = { Mesh::ARRAY_FORMAT_CUSTOM0_SHIFT, Mesh::ARRAY_FORMAT_CUSTOM1_SHIFT, Mesh::ARRAY_FORMAT_CUSTOM2_SHIFT, Mesh::ARRAY_FORMAT_CUSTOM3_SHIFT };
+	uint64_t compress_flags = (p_compress_flags >> RS::ARRAY_COMPRESS_FLAGS_BASE) << RS::ARRAY_COMPRESS_FLAGS_BASE;
+	static const uint64_t shift[RS::ARRAY_CUSTOM_COUNT] = { Mesh::ARRAY_FORMAT_CUSTOM0_SHIFT, Mesh::ARRAY_FORMAT_CUSTOM1_SHIFT, Mesh::ARRAY_FORMAT_CUSTOM2_SHIFT, Mesh::ARRAY_FORMAT_CUSTOM3_SHIFT };
 	for (int i = 0; i < RS::ARRAY_CUSTOM_COUNT; i++) {
 		if (last_custom_format[i] != CUSTOM_MAX) {
-			compress_flags |= last_custom_format[i] << shift[i];
+			compress_flags |= uint64_t(last_custom_format[i]) << shift[i];
 		}
 	}
 
@@ -787,7 +787,7 @@ void SurfaceTool::deindex() {
 	index_array.clear();
 }
 
-void SurfaceTool::_create_list(const Ref<Mesh> &p_existing, int p_surface, LocalVector<Vertex> *r_vertex, LocalVector<int> *r_index, uint32_t &lformat) {
+void SurfaceTool::_create_list(const Ref<Mesh> &p_existing, int p_surface, LocalVector<Vertex> *r_vertex, LocalVector<int> *r_index, uint64_t &lformat) {
 	ERR_FAIL_NULL_MSG(p_existing, "First argument in SurfaceTool::_create_list() must be a valid object of type Mesh");
 
 	Array arr = p_existing->surface_get_arrays(p_surface);
@@ -798,7 +798,7 @@ void SurfaceTool::_create_list(const Ref<Mesh> &p_existing, int p_surface, Local
 const uint32_t SurfaceTool::custom_mask[RS::ARRAY_CUSTOM_COUNT] = { Mesh::ARRAY_FORMAT_CUSTOM0, Mesh::ARRAY_FORMAT_CUSTOM1, Mesh::ARRAY_FORMAT_CUSTOM2, Mesh::ARRAY_FORMAT_CUSTOM3 };
 const uint32_t SurfaceTool::custom_shift[RS::ARRAY_CUSTOM_COUNT] = { Mesh::ARRAY_FORMAT_CUSTOM0_SHIFT, Mesh::ARRAY_FORMAT_CUSTOM1_SHIFT, Mesh::ARRAY_FORMAT_CUSTOM2_SHIFT, Mesh::ARRAY_FORMAT_CUSTOM3_SHIFT };
 
-void SurfaceTool::create_vertex_array_from_triangle_arrays(const Array &p_arrays, LocalVector<SurfaceTool::Vertex> &ret, uint32_t *r_format) {
+void SurfaceTool::create_vertex_array_from_triangle_arrays(const Array &p_arrays, LocalVector<SurfaceTool::Vertex> &ret, uint64_t *r_format) {
 	ret.clear();
 
 	Vector<Vector3> varr = p_arrays[RS::ARRAY_VERTEX];
@@ -819,7 +819,7 @@ void SurfaceTool::create_vertex_array_from_triangle_arrays(const Array &p_arrays
 		return;
 	}
 
-	int lformat = 0;
+	uint64_t lformat = 0;
 	if (varr.size()) {
 		lformat |= RS::ARRAY_FORMAT_VERTEX;
 	}
@@ -927,7 +927,7 @@ void SurfaceTool::create_vertex_array_from_triangle_arrays(const Array &p_arrays
 	}
 }
 
-void SurfaceTool::_create_list_from_arrays(Array arr, LocalVector<Vertex> *r_vertex, LocalVector<int> *r_index, uint32_t &lformat) {
+void SurfaceTool::_create_list_from_arrays(Array arr, LocalVector<Vertex> *r_vertex, LocalVector<int> *r_index, uint64_t &lformat) {
 	create_vertex_array_from_triangle_arrays(arr, *r_vertex, &lformat);
 	ERR_FAIL_COND(r_vertex->size() == 0);
 
@@ -1020,7 +1020,7 @@ void SurfaceTool::append_from(const Ref<Mesh> &p_existing, int p_surface, const 
 		format = 0;
 	}
 
-	uint32_t nformat = 0;
+	uint64_t nformat = 0;
 	LocalVector<Vertex> nvertices;
 	LocalVector<int> nindices;
 	_create_list(p_existing, p_surface, &nvertices, &nindices, nformat);
@@ -1150,6 +1150,7 @@ void SurfaceTool::mikktSetTSpaceDefault(const SMikkTSpaceContext *pContext, cons
 void SurfaceTool::generate_tangents() {
 	ERR_FAIL_COND(!(format & Mesh::ARRAY_FORMAT_TEX_UV));
 	ERR_FAIL_COND(!(format & Mesh::ARRAY_FORMAT_NORMAL));
+	ERR_FAIL_COND(!(format & Mesh::ARRAY_FORMAT_INDEX));
 
 	SMikkTSpaceInterface mkif;
 	mkif.m_getNormal = mikktGetNormal;
@@ -1163,14 +1164,40 @@ void SurfaceTool::generate_tangents() {
 	SMikkTSpaceContext msc;
 	msc.m_pInterface = &mkif;
 
-	TangentGenerationContextUserData triangle_data;
+	TangentGenerationContextUserData triangle_data{};
 	triangle_data.vertices = &vertex_array;
+	triangle_data.indices = &index_array;
+	msc.m_pUserData = &triangle_data;
+
+	Vertex *base_ptr = vertex_array.ptr();
+
+	msc.m_FastPosition = reinterpret_cast<char *>(&base_ptr->vertex);
+	msc.m_FastPositionStride = sizeof(Vertex);
+	msc.m_FastPositionIndex = index_array.ptr();
+
+	for (unsigned int j = 0; j < index_array.size(); j += 3) {
+		const Vector3 &v0 = vertex_array[index_array[j + 0]].vertex;
+		const Vector3 &v1 = vertex_array[index_array[j + 1]].vertex;
+		const Vector3 &v2 = vertex_array[index_array[j + 2]].vertex;
+		Vector3 face_normal = vec3_cross(v0 - v2, v0 - v1);
+		float face_area = face_normal.length(); // Actually twice the face area, since it's the same error_factor on all faces, we don't care
+		if (!Math::is_finite(face_area) || face_area == 0) {
+			WARN_PRINT_ONCE("Ignoring mesh with non-finite normal in tangent generation.");
+			return;
+		}
+	}
+	msc.m_FastNormal = reinterpret_cast<char *>(&base_ptr->normal);
+	msc.m_FastNormalStride = sizeof(Vertex);
+	msc.m_FastNormalIndex = index_array.ptr();
+
+	msc.m_FastUV = reinterpret_cast<char *>(&base_ptr->uv);
+	msc.m_FastUVStride = sizeof(Vertex);
+	msc.m_FastUVIndex = index_array.ptr();
+
 	for (Vertex &vertex : vertex_array) {
 		vertex.binormal = Vector3();
 		vertex.tangent = Vector3();
 	}
-	triangle_data.indices = &index_array;
-	msc.m_pUserData = &triangle_data;
 
 	bool res = genTangSpaceDefault(&msc);
 
@@ -1279,7 +1306,7 @@ SurfaceTool::CustomFormat SurfaceTool::get_custom_format(int p_channel_index) co
 	return last_custom_format[p_channel_index];
 }
 void SurfaceTool::optimize_indices_for_cache() {
-	ERR_FAIL_COND(optimize_vertex_cache_func == nullptr);
+	ERR_FAIL_NULL(optimize_vertex_cache_func);
 	ERR_FAIL_COND(index_array.size() == 0);
 	ERR_FAIL_COND(primitive != Mesh::PRIMITIVE_TRIANGLES);
 	ERR_FAIL_COND(index_array.size() % 3 != 0);
@@ -1308,7 +1335,7 @@ Vector<int> SurfaceTool::generate_lod(float p_threshold, int p_target_index_coun
 
 	Vector<int> lod;
 
-	ERR_FAIL_COND_V(simplify_func == nullptr, lod);
+	ERR_FAIL_NULL_V(simplify_func, lod);
 	ERR_FAIL_COND_V(p_target_index_count < 0, lod);
 	ERR_FAIL_COND_V(vertex_array.size() == 0, lod);
 	ERR_FAIL_COND_V(index_array.size() == 0, lod);

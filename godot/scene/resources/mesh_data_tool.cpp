@@ -29,6 +29,7 @@
 /**************************************************************************/
 
 #include "mesh_data_tool.h"
+#include "mesh_data_tool.compat.inc"
 
 void MeshDataTool::clear() {
 	vertices.clear();
@@ -78,38 +79,39 @@ Error MeshDataTool::create_from_surface(const Ref<ArrayMesh> &p_mesh, int p_surf
 
 	const Vector3 *vr = varray.ptr();
 
-	const Vector3 *nr = nullptr;
+	Vector<Vector3> nr;
 	if (arrays[Mesh::ARRAY_NORMAL].get_type() != Variant::NIL) {
-		nr = arrays[Mesh::ARRAY_NORMAL].operator Vector<Vector3>().ptr();
+		nr = arrays[Mesh::ARRAY_NORMAL];
 	}
 
-	const real_t *ta = nullptr;
+	Vector<real_t> ta;
 	if (arrays[Mesh::ARRAY_TANGENT].get_type() != Variant::NIL) {
-		ta = arrays[Mesh::ARRAY_TANGENT].operator Vector<real_t>().ptr();
+		ta = arrays[Mesh::ARRAY_TANGENT];
 	}
 
-	const Vector2 *uv = nullptr;
+	Vector<Vector2> uv;
 	if (arrays[Mesh::ARRAY_TEX_UV].get_type() != Variant::NIL) {
-		uv = arrays[Mesh::ARRAY_TEX_UV].operator Vector<Vector2>().ptr();
+		uv = arrays[Mesh::ARRAY_TEX_UV];
 	}
-	const Vector2 *uv2 = nullptr;
+
+	Vector<Vector2> uv2;
 	if (arrays[Mesh::ARRAY_TEX_UV2].get_type() != Variant::NIL) {
-		uv2 = arrays[Mesh::ARRAY_TEX_UV2].operator Vector<Vector2>().ptr();
+		uv2 = arrays[Mesh::ARRAY_TEX_UV2];
 	}
 
-	const Color *col = nullptr;
+	Vector<Color> col;
 	if (arrays[Mesh::ARRAY_COLOR].get_type() != Variant::NIL) {
-		col = arrays[Mesh::ARRAY_COLOR].operator Vector<Color>().ptr();
+		col = arrays[Mesh::ARRAY_COLOR];
 	}
 
-	const int *bo = nullptr;
+	Vector<int> bo;
 	if (arrays[Mesh::ARRAY_BONES].get_type() != Variant::NIL) {
-		bo = arrays[Mesh::ARRAY_BONES].operator Vector<int>().ptr();
+		bo = arrays[Mesh::ARRAY_BONES];
 	}
 
-	const float *we = nullptr;
+	Vector<float> we;
 	if (arrays[Mesh::ARRAY_WEIGHTS].get_type() != Variant::NIL) {
-		we = arrays[Mesh::ARRAY_WEIGHTS].operator Vector<float>().ptr();
+		we = arrays[Mesh::ARRAY_WEIGHTS];
 	}
 
 	vertices.resize(vcount);
@@ -117,30 +119,32 @@ Error MeshDataTool::create_from_surface(const Ref<ArrayMesh> &p_mesh, int p_surf
 	for (int i = 0; i < vcount; i++) {
 		Vertex v;
 		v.vertex = vr[i];
-		if (nr) {
+		if (i < nr.size()) {
 			v.normal = nr[i];
 		}
-		if (ta) {
+		if (i < ta.size()) {
 			v.tangent = Plane(ta[i * 4 + 0], ta[i * 4 + 1], ta[i * 4 + 2], ta[i * 4 + 3]);
 		}
-		if (uv) {
+		if (i < uv.size()) {
 			v.uv = uv[i];
 		}
-		if (uv2) {
+		if (i < uv2.size()) {
 			v.uv2 = uv2[i];
 		}
-		if (col) {
+		if (i < col.size()) {
 			v.color = col[i];
 		}
 
-		if (we) {
+		// TODO: fire 2023-03-10 Handle 8 bones
+		if (i < we.size()) {
 			v.weights.push_back(we[i * 4 + 0]);
 			v.weights.push_back(we[i * 4 + 1]);
 			v.weights.push_back(we[i * 4 + 2]);
 			v.weights.push_back(we[i * 4 + 3]);
 		}
 
-		if (bo) {
+		// TODO: fire 2023-03-10 Handle 8 bone weights
+		if (i < bo.size()) {
 			v.bones.push_back(bo[i * 4 + 0]);
 			v.bones.push_back(bo[i * 4 + 1]);
 			v.bones.push_back(bo[i * 4 + 2]);
@@ -190,7 +194,7 @@ Error MeshDataTool::create_from_surface(const Ref<ArrayMesh> &p_mesh, int p_surf
 	return OK;
 }
 
-Error MeshDataTool::commit_to_surface(const Ref<ArrayMesh> &p_mesh) {
+Error MeshDataTool::commit_to_surface(const Ref<ArrayMesh> &p_mesh, uint64_t p_compression_flags) {
 	ERR_FAIL_COND_V(p_mesh.is_null(), ERR_INVALID_PARAMETER);
 	Array arr;
 	arr.resize(Mesh::ARRAY_MAX);
@@ -327,13 +331,13 @@ Error MeshDataTool::commit_to_surface(const Ref<ArrayMesh> &p_mesh) {
 
 	Ref<ArrayMesh> ncmesh = p_mesh;
 	int sc = ncmesh->get_surface_count();
-	ncmesh->add_surface_from_arrays(Mesh::PRIMITIVE_TRIANGLES, arr);
+	ncmesh->add_surface_from_arrays(Mesh::PRIMITIVE_TRIANGLES, arr, TypedArray<Array>(), Dictionary(), p_compression_flags);
 	ncmesh->surface_set_material(sc, material);
 
 	return OK;
 }
 
-int MeshDataTool::get_format() const {
+uint64_t MeshDataTool::get_format() const {
 	return format;
 }
 
@@ -521,7 +525,7 @@ void MeshDataTool::set_material(const Ref<Material> &p_material) {
 void MeshDataTool::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("clear"), &MeshDataTool::clear);
 	ClassDB::bind_method(D_METHOD("create_from_surface", "mesh", "surface"), &MeshDataTool::create_from_surface);
-	ClassDB::bind_method(D_METHOD("commit_to_surface", "mesh"), &MeshDataTool::commit_to_surface);
+	ClassDB::bind_method(D_METHOD("commit_to_surface", "mesh", "compression_flags"), &MeshDataTool::commit_to_surface, DEFVAL(0));
 
 	ClassDB::bind_method(D_METHOD("get_format"), &MeshDataTool::get_format);
 

@@ -106,7 +106,7 @@ void EditorSelectionHistory::cleanup_history() {
 
 void EditorSelectionHistory::add_object(ObjectID p_object, const String &p_property, bool p_inspector_only) {
 	Object *obj = ObjectDB::get_instance(p_object);
-	ERR_FAIL_COND(!obj);
+	ERR_FAIL_NULL(obj);
 	RefCounted *r = Object::cast_to<RefCounted>(obj);
 	_Object o;
 	if (r) {
@@ -431,7 +431,7 @@ int EditorData::get_scene_history_id_from_path(const String &p_path) const {
 }
 
 int EditorData::get_current_edited_scene_history_id() const {
-	if (current_edited_scene != -1) {
+	if (current_edited_scene != -1 && !(current_edited_scene < 0 && current_edited_scene < edited_scene.size())) {
 		return edited_scene[current_edited_scene].history_id;
 	}
 	return 0;
@@ -700,7 +700,7 @@ bool EditorData::check_and_update_scene(int p_idx) {
 		ERR_FAIL_COND_V(err != OK, false);
 		ep.step(TTR("Updating scene..."), 1);
 		Node *new_scene = pscene->instantiate(PackedScene::GEN_EDIT_STATE_MAIN);
-		ERR_FAIL_COND_V(!new_scene, false);
+		ERR_FAIL_NULL_V(new_scene, false);
 
 		// Transfer selection.
 		List<Node *> new_selection;

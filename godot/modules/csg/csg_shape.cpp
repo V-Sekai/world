@@ -31,6 +31,7 @@
 #include "csg_shape.h"
 
 #include "core/math/geometry_2d.h"
+#include "scene/resources/surface_tool.h"
 
 void CSGShape3D::set_use_collision(bool p_enable) {
 	if (use_collision == p_enable) {
@@ -300,7 +301,7 @@ void CSGShape3D::_update_shape() {
 	root_mesh.unref(); //byebye root mesh
 
 	CSGBrush *n = _get_brush();
-	ERR_FAIL_COND_MSG(!n, "Cannot get CSGBrush.");
+	ERR_FAIL_NULL_MSG(n, "Cannot get CSGBrush.");
 
 	OAHashMap<Vector3, Vector3> vec_map;
 
@@ -342,6 +343,7 @@ void CSGShape3D::_update_shape() {
 		surfaces.write[i].vertices.resize(face_count[i] * 3);
 		surfaces.write[i].normals.resize(face_count[i] * 3);
 		surfaces.write[i].uvs.resize(face_count[i] * 3);
+		surfaces.write[i].indices.resize(face_count[i] * 3);
 		if (calculate_tangents) {
 			surfaces.write[i].tans.resize(face_count[i] * 3 * 4);
 		}
@@ -353,6 +355,7 @@ void CSGShape3D::_update_shape() {
 
 		surfaces.write[i].verticesw = surfaces.write[i].vertices.ptrw();
 		surfaces.write[i].normalsw = surfaces.write[i].normals.ptrw();
+		surfaces.write[i].indexsw = surfaces.write[i].indices.ptrw();
 		surfaces.write[i].uvsw = surfaces.write[i].uvs.ptrw();
 		if (calculate_tangents) {
 			surfaces.write[i].tansw = surfaces.write[i].tans.ptrw();
@@ -393,6 +396,7 @@ void CSGShape3D::_update_shape() {
 				surfaces[idx].verticesw[k] = v;
 				surfaces[idx].uvsw[k] = n->faces[i].uvs[j];
 				surfaces[idx].normalsw[k] = normal;
+				surfaces[idx].indexsw[k] = k;
 
 				if (calculate_tangents) {
 					// zero out our tangents for now
@@ -412,38 +416,25 @@ void CSGShape3D::_update_shape() {
 	//create surfaces
 
 	for (int i = 0; i < surfaces.size(); i++) {
-		// calculate tangents for this surface
-		bool have_tangents = calculate_tangents;
-		if (have_tangents) {
-			SMikkTSpaceInterface mkif;
-			mkif.m_getNormal = mikktGetNormal;
-			mkif.m_getNumFaces = mikktGetNumFaces;
-			mkif.m_getNumVerticesOfFace = mikktGetNumVerticesOfFace;
-			mkif.m_getPosition = mikktGetPosition;
-			mkif.m_getTexCoord = mikktGetTexCoord;
-			mkif.m_setTSpace = mikktSetTSpaceDefault;
-			mkif.m_setTSpaceBasic = nullptr;
-
-			SMikkTSpaceContext msc;
-			msc.m_pInterface = &mkif;
-			msc.m_pUserData = &surfaces.write[i];
-			have_tangents = genTangSpaceDefault(&msc);
-		}
-
 		if (surfaces[i].last_added == 0) {
 			continue;
 		}
+		Ref<SurfaceTool> surface_tool;
 
-		// and convert to surface array
-		Array array;
-		array.resize(Mesh::ARRAY_MAX);
+		surface_tool.instantiate();
+		surface_tool->begin(Mesh::PRIMITIVE_TRIANGLES);
 
-		array[Mesh::ARRAY_VERTEX] = surfaces[i].vertices;
-		array[Mesh::ARRAY_NORMAL] = surfaces[i].normals;
-		array[Mesh::ARRAY_TEX_UV] = surfaces[i].uvs;
-		if (have_tangents) {
-			array[Mesh::ARRAY_TANGENT] = surfaces[i].tans;
+		for (int j = 0; j < surfaces[i].last_added; j++) {
+			surface_tool->add_vertex(surfaces[i].verticesw[j]);
+			surface_tool->set_normal(surfaces[i].normalsw[j]);
+			surface_tool->set_uv(surfaces[i].uvsw[j]);
 		}
+		for (int index_i = 0; index_i < surfaces[i].indices.size(); index_i++) {
+			surface_tool->add_index(surfaces[i].indices[index_i]);
+		}
+		surface_tool->generate_tangents();
+
+		Array array = surface_tool->commit_to_arrays();
 
 		int idx = root_mesh->get_surface_count();
 		root_mesh->add_surface_from_arrays(Mesh::PRIMITIVE_TRIANGLES, array);
@@ -458,7 +449,7 @@ void CSGShape3D::_update_shape() {
 void CSGShape3D::_update_collision_faces() {
 	if (use_collision && is_root_shape() && root_collision_shape.is_valid()) {
 		CSGBrush *n = _get_brush();
-		ERR_FAIL_COND_MSG(!n, "Cannot get CSGBrush.");
+		ERR_FAIL_NULL_MSG(n, "Cannot get CSGBrush.");
 		Vector<Vector3> physics_faces;
 		physics_faces.resize(n->faces.size() * 3);
 		Vector3 *physicsw = physics_faces.ptrw();
@@ -488,7 +479,9 @@ bool CSGShape3D::_is_debug_collision_shape_visible() {
 }
 
 void CSGShape3D::_update_debug_collision_shape() {
-	// NOTE: This is called only for the root shape with collision, when root_collision_shape is valid.
+	if (!use_collision || !is_root_shape() || !root_collision_shape.is_valid() || !_is_debug_collision_shape_visible()) {
+		return;
+	}
 
 	ERR_FAIL_NULL(RenderingServer::get_singleton());
 
@@ -572,6 +565,11 @@ void CSGShape3D::_notification(int p_what) {
 			if (!is_root_shape() && last_visible != is_visible()) {
 				// Update this node's parent only if its own visibility has changed, not the visibility of parent nodes
 				parent_shape->_make_dirty();
+			}
+			if (is_visible()) {
+				_update_debug_collision_shape();
+			} else {
+				_clear_debug_collision_shape();
 			}
 			last_visible = is_visible();
 		} break;

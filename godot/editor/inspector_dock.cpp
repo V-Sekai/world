@@ -205,7 +205,7 @@ void InspectorDock::_menu_option_confirm(int p_option, bool p_confirmed) {
 
 		default: {
 			if (p_option >= OBJECT_METHOD_BASE) {
-				ERR_FAIL_COND(!current);
+				ERR_FAIL_NULL(current);
 
 				int idx = p_option - OBJECT_METHOD_BASE;
 
@@ -373,7 +373,7 @@ void InspectorDock::_resource_created() {
 
 	ERR_FAIL_COND(!c);
 	Resource *r = Object::cast_to<Resource>(c);
-	ERR_FAIL_COND(!r);
+	ERR_FAIL_NULL(r);
 
 	EditorNode::get_singleton()->push_item(r);
 }
@@ -442,6 +442,9 @@ void InspectorDock::_notification(int p_what) {
 				backward_button->set_icon(get_editor_theme_icon(SNAME("Back")));
 				forward_button->set_icon(get_editor_theme_icon(SNAME("Forward")));
 			}
+
+			const int icon_width = get_theme_constant(SNAME("class_icon_size"), EditorStringName(Editor));
+			history_menu->get_popup()->add_theme_constant_override("icon_max_width", icon_width);
 
 			history_menu->set_icon(get_editor_theme_icon(SNAME("History")));
 			object_menu->set_icon(get_editor_theme_icon(SNAME("Tools")));

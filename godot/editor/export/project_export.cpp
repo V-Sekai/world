@@ -281,7 +281,7 @@ void ProjectExportDialog::_edit_preset(int p_index) {
 
 	export_filter->select(current->get_export_filter());
 	include_filters->set_text(current->get_include_filter());
-	include_label->set_text(current->get_export_filter() == EditorExportPreset::EXCLUDE_SELECTED_RESOURCES ? TTR("Resources to exclude:") : TTR("Resources to export:"));
+	include_label->set_text(_get_resource_export_header(current->get_export_filter()));
 	exclude_filters->set_text(current->get_exclude_filter());
 	server_strip_message->set_visible(current->get_export_filter() == EditorExportPreset::EXPORT_CUSTOMIZED);
 
@@ -750,11 +750,22 @@ void ProjectExportDialog::_export_type_changed(int p_which) {
 	if (filter_type == EditorExportPreset::EXPORT_CUSTOMIZED && current->get_customized_files_count() == 0) {
 		current->set_file_export_mode("res://", EditorExportPreset::MODE_FILE_STRIP);
 	}
-	include_label->set_text(current->get_export_filter() == EditorExportPreset::EXCLUDE_SELECTED_RESOURCES ? TTR("Resources to exclude:") : TTR("Resources to export:"));
+	include_label->set_text(_get_resource_export_header(current->get_export_filter()));
 
 	updating = true;
 	_fill_resource_tree();
 	updating = false;
+}
+
+String ProjectExportDialog::_get_resource_export_header(EditorExportPreset::ExportFilter p_filter) const {
+	switch (p_filter) {
+		case EditorExportPreset::EXCLUDE_SELECTED_RESOURCES:
+			return TTR("Resources to exclude:");
+		case EditorExportPreset::EXPORT_CUSTOMIZED:
+			return TTR("Resources to override export behavior:");
+		default:
+			return TTR("Resources to export:");
+	}
 }
 
 void ProjectExportDialog::_filter_changed(const String &p_filter) {
@@ -1065,10 +1076,12 @@ void ProjectExportDialog::_export_project_to_path(const String &p_path) {
 	EditorSettings::get_singleton()->set_project_metadata("export_options", "default_filename", default_filename);
 
 	Ref<EditorExportPreset> current = get_current_preset();
-	ERR_FAIL_COND(current.is_null());
+	ERR_FAIL_COND_MSG(current.is_null(), "Failed to start the export: current preset is invalid.");
 	Ref<EditorExportPlatform> platform = current->get_platform();
-	ERR_FAIL_COND(platform.is_null());
+	ERR_FAIL_COND_MSG(platform.is_null(), "Failed to start the export: current preset has no valid platform.");
 	current->set_export_path(p_path);
+
+	exporting = true;
 
 	platform->clear_messages();
 	Error err = platform->export_project(current, export_debug->is_pressed(), current->get_export_path(), 0);
@@ -1078,6 +1091,8 @@ void ProjectExportDialog::_export_project_to_path(const String &p_path) {
 			result_dialog->popup_centered_ratio(0.5);
 		}
 	}
+
+	exporting = false;
 }
 
 void ProjectExportDialog::_export_all_dialog() {
@@ -1097,19 +1112,29 @@ void ProjectExportDialog::_export_all(bool p_debug) {
 	String export_target = p_debug ? TTR("Debug") : TTR("Release");
 	EditorProgress ep("exportall", TTR("Exporting All") + " " + export_target, EditorExport::get_singleton()->get_export_preset_count(), true);
 
+	exporting = true;
+
 	bool show_dialog = false;
 	result_dialog_log->clear();
 	for (int i = 0; i < EditorExport::get_singleton()->get_export_preset_count(); i++) {
 		Ref<EditorExportPreset> preset = EditorExport::get_singleton()->get_export_preset(i);
-		ERR_FAIL_COND(preset.is_null());
+		if (preset.is_null()) {
+			exporting = false;
+			ERR_FAIL_MSG("Failed to start the export: one of the presets is invalid.");
+		}
+
 		Ref<EditorExportPlatform> platform = preset->get_platform();
-		ERR_FAIL_COND(platform.is_null());
+		if (platform.is_null()) {
+			exporting = false;
+			ERR_FAIL_MSG("Failed to start the export: one of the presets has no valid platform.");
+		}
 
 		ep.step(preset->get_name(), i);
 
 		platform->clear_messages();
 		Error err = platform->export_project(preset, p_debug, preset->get_export_path(), 0);
 		if (err == ERR_SKIP) {
+			exporting = false;
 			return;
 		}
 		bool has_messages = platform->fill_log_messages(result_dialog_log, err);
@@ -1118,6 +1143,8 @@ void ProjectExportDialog::_export_all(bool p_debug) {
 	if (show_dialog) {
 		result_dialog->popup_centered_ratio(0.5);
 	}
+
+	exporting = false;
 }
 
 void ProjectExportDialog::_bind_methods() {
@@ -1328,7 +1355,7 @@ ProjectExportDialog::ProjectExportDialog() {
 	script_key->connect("text_changed", callable_mp(this, &ProjectExportDialog::_script_encryption_key_changed));
 	script_key_error = memnew(Label);
 	script_key_error->set_text(String::utf8("•  ") + TTR("Invalid Encryption Key (must be 64 hexadecimal characters long)"));
-	script_key_error->add_theme_color_override("font_color", EditorNode::get_singleton()->get_gui_base()->get_theme_color(SNAME("error_color"), EditorStringName(Editor)));
+	script_key_error->add_theme_color_override("font_color", EditorNode::get_singleton()->get_editor_theme()->get_color(SNAME("error_color"), EditorStringName(Editor)));
 	sec_vb->add_margin_child(TTR("Encryption Key (256-bits as hexadecimal):"), script_key);
 	sec_vb->add_child(script_key_error);
 	sections->add_child(sec_vb);
@@ -1413,12 +1440,12 @@ ProjectExportDialog::ProjectExportDialog() {
 	export_error = memnew(Label);
 	main_vb->add_child(export_error);
 	export_error->hide();
-	export_error->add_theme_color_override("font_color", EditorNode::get_singleton()->get_gui_base()->get_theme_color(SNAME("error_color"), EditorStringName(Editor)));
+	export_error->add_theme_color_override("font_color", EditorNode::get_singleton()->get_editor_theme()->get_color(SNAME("error_color"), EditorStringName(Editor)));
 
 	export_warning = memnew(Label);
 	main_vb->add_child(export_warning);
 	export_warning->hide();
-	export_warning->add_theme_color_override("font_color", EditorNode::get_singleton()->get_gui_base()->get_theme_color(SNAME("warning_color"), EditorStringName(Editor)));
+	export_warning->add_theme_color_override("font_color", EditorNode::get_singleton()->get_editor_theme()->get_color(SNAME("warning_color"), EditorStringName(Editor)));
 
 	export_templates_error = memnew(HBoxContainer);
 	main_vb->add_child(export_templates_error);
@@ -1426,7 +1453,7 @@ ProjectExportDialog::ProjectExportDialog() {
 
 	Label *export_error2 = memnew(Label);
 	export_templates_error->add_child(export_error2);
-	export_error2->add_theme_color_override("font_color", EditorNode::get_singleton()->get_gui_base()->get_theme_color(SNAME("error_color"), EditorStringName(Editor)));
+	export_error2->add_theme_color_override("font_color", EditorNode::get_singleton()->get_editor_theme()->get_color(SNAME("error_color"), EditorStringName(Editor)));
 	export_error2->set_text(String::utf8("•  ") + TTR("Export templates for this platform are missing:") + " ");
 
 	result_dialog = memnew(AcceptDialog);
