@@ -180,51 +180,7 @@ endif()
 #===============================================================================
 find_package(ccd QUIET)
 
-# If ccd-config.cmake is not found, use pkg-config and/or find_path() and
-# find_library()
-if(NOT ccd_FOUND)
-  if(PKG_CONFIG_FOUND)
-    pkg_search_module(PC_CCD ccd libccd)
-  endif()
-
-  # The include directory returned by pkg_config is very unreliable:
-  #  1. PC_CCD_INCLUDE_DIRS cannot locate ccd.h definitively, it could be:
-  #     a) PC_CCD_INCLUDE_DIRS/ccd/ccd.h
-  #     b) PC_CCD_INCLUDE_DIRS/ccd.h
-  #  2. It may be empty due to pkg-config's de-duplication, if the path is
-  #     provided by:
-  #     a) $PKG_CONFIG_SYSTEM_INCLUDE_PATH
-  #     b) $C_INCLUDE_PATH
-  #     c) $CPLUS_INCLUDE_PATH
-  find_path(CCD_INCLUDE_DIR ccd/ccd.h
-    HINTS "${PC_CCD_INCLUDE_DIRS}"
-          "${PC_CCD_INCLUDE_DIRS}/.."
-          ENV PKG_CONFIG_SYSTEM_INCLUDE_PATH
-          ENV C_INCLUDE_PATH
-          ENV CPLUS_INCLUDE_PATH)
-
-  # Using find_library() even if pkg-config is available ensures that the full
-  # path to the ccd library is available in CCD_LIBRARIES
-  find_library(CCD_LIBRARY ccd
-    HINTS "${PC_CCD_LIBRARY_DIRS}")
-
-  # libccd links to LibM on UNIX.
-  if(CYGWIN OR NOT WIN32)
-    find_library(M_LIBRARY m)
-  endif()
-
-  if(CCD_INCLUDE_DIR AND CCD_LIBRARY)
-    set(CCD_INCLUDE_DIRS "${CCD_INCLUDE_DIR}")
-    set(CCD_LIBRARIES "${CCD_LIBRARY}" "${M_LIBRARY}")
-    set(ccd_FOUND ON)
-
-    mark_as_advanced(CCD_INCLUDE_DIR CCD_LIBRARY)
-  endif()
-endif()
-
-if(NOT ccd_FOUND)
-  message(FATAL_ERROR "CCD is required by FCL")
-endif()
+add_subdirectory("external/libccd")
 
 set(PKG_EXTERNAL_DEPS "ccd eigen3")
 
