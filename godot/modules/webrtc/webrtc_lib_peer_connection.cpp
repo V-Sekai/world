@@ -175,7 +175,7 @@ Ref<WebRTCDataChannel> WebRTCLibPeerConnection::create_data_channel(String p_cha
 
 	std::string error;
 	std::shared_ptr<rtc::DataChannel> ch = LibDataChannelExceptionWrapper::create_data_channel(peer_connection, p_channel.utf8().get_data(), config, error);
-	ERR_FAIL_COND_V_MSG(ch == nullptr, nullptr, vformat("Failed to create peer connection. %s", error.c_str()));
+	ERR_FAIL_COND_V_MSG(ch == nullptr, nullptr, vformat("Failed to create data channel. %s", error.c_str()));
 
 	Ref<WebRTCLibDataChannel> out;
 	out.instantiate();
