@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai/sample-webrtc-signaling.git
 	branch = main
-	commit = 49679b7528381e5ecf080450dd8ea84377bc571d
-	parent = b55c4f3cbc0c132c95bccee0c665e182088abfad
+	commit = a4e1d2928e4dc9fee2331b19a3946f5e138c1d0a
+	parent = e75f50e622f8c6645cf40d11ee328ffd366bfebf
 	method = merge
 	cmdver = 0.4.6
