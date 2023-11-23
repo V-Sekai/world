@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/V-Sekai/sample-webrtc-signaling.git
+	branch = main
+	commit = 49679b7528381e5ecf080450dd8ea84377bc571d
+	parent = b55c4f3cbc0c132c95bccee0c665e182088abfad
+	method = merge
+	cmdver = 0.4.6
