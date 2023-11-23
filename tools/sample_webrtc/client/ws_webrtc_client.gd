@@ -33,7 +33,7 @@ func close():
 	ws.close()
 
 
-func _process(delta):
+func _process(_delta):
 	ws.poll()
 	var state = ws.get_ready_state()
 	if state != old_state and state == WebSocketPeer.STATE_OPEN and autojoin:

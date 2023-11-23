@@ -18,9 +18,9 @@ func _ready():
 	multiplayer.peer_disconnected.connect(self._mp_peer_disconnected)
 
 
-@rpc("any_peer", "unreliable")
+@rpc("any_peer", "call_local", "reliable")
 func ping(argument):
-	_log("[Multiplayer] Ping from peer %d: arg: %s" % [get_tree().get_multiplayer().get_remote_sender_id(), argument])
+	_log("[Multiplayer] Ping from peer %d: arg: %s" % [multiplayer.get_remote_sender_id(), argument])
 
 
 func _mp_server_connected():
@@ -60,9 +60,9 @@ func _log(msg):
 	$VBoxContainer/TextEdit.text += str(msg) + "\n"
 
 
-@rpc("any_peer", "unreliable")
+@rpc("any_peer", "call_local", "reliable")
 func _on_status_pressed():
-	_log(get_tree().get_multiplayer().get_authenticating_peers())
+	_log(get_tree().get_multiplayer().get_peers())
 
 
 func _on_ping_pressed():

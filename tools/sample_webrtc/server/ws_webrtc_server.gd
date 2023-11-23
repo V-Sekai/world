@@ -98,13 +98,13 @@ class Lobby extends RefCounted:
 		return true
 
 
-func _process(delta):
+func _process(_delta):
 	poll()
 
 
 func listen(port):
 	stop()
-	rand.seed = Time.get_unix_time_from_system()
+	rand.seed = int(Time.get_unix_time_from_system())
 	tcp_server.listen(port)
 
 
