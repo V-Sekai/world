@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -30,7 +30,7 @@
 #include "input_map.h"
 #include "os/keyboard.h"
 /**
- * 
+ *
  */
 
 bool InputEvent::operator==(const InputEvent &p_event) const {
@@ -40,15 +40,15 @@ bool InputEvent::operator==(const InputEvent &p_event) const {
 InputEvent::operator String() const {
 
 	String str="Device "+itos(device)+" ID "+itos(ID)+" ";
-	
+
 	switch(type) {
-	
+
 		case NONE: {
-		
+
 			return "Event: None";
 		} break;
 		case KEY: {
-			
+
 			str+= "Event: Key ";
 			str=str+"Unicode: "+String::chr(key.unicode)+" Scan: "+itos( key.scancode )+" Echo: "+String(key.echo?"True":"False")+" Pressed"+String(key.pressed?"True":"False")+" Mod: ";
 			if (key.mod.shift)
@@ -59,15 +59,15 @@ InputEvent::operator String() const {
 				str+="A";
 			if (key.mod.meta)
 				str+="M";
-				
+
 			return str;
 		} break;
 		case MOUSE_MOTION: {
-		
+
 			str+= "Event: Motion ";
 			str=str+" Pos: " +itos(mouse_motion.x)+","+itos(mouse_motion.y)+" Rel: "+itos(mouse_motion.relative_x)+","+itos(mouse_motion.relative_y)+" Mask: ";
 			for (int i=0;i<8;i++) {
-			
+
 				if ((1<<i)&mouse_motion.button_mask)
 					str+=itos(i+1);
 			}
@@ -87,7 +87,7 @@ InputEvent::operator String() const {
 			str+= "Event: Button ";
 			str=str+"Pressed: "+itos(mouse_button.pressed)+" Pos: " +itos(mouse_button.x)+","+itos(mouse_button.y)+" Button: "+itos(mouse_button.button_index)+" Mask: ";
 			for (int i=0;i<8;i++) {
-			
+
 				if ((1<<i)&mouse_button.button_mask)
 					str+=itos(i+1);
 			}
@@ -102,18 +102,18 @@ InputEvent::operator String() const {
 				str+="M";
 
 			str+=String(" DoubleClick: ")+(mouse_button.doubleclick?"Yes":"No");
-			
+
 			return str;
-		
+
 		} break;
 		case JOYSTICK_MOTION: {
-			str+= "Event: JoyMotion ";
+			str+= "Event: JoystickMotion ";
 			str=str+"Axis: "+itos(joy_motion.axis)+" Value: " +rtos(joy_motion.axis_value);
 			return str;
 
 		} break;
 		case JOYSTICK_BUTTON: {
-			str+= "Event: JoyButton ";
+			str+= "Event: JoystickButton ";
 			str=str+"Pressed: "+itos(joy_button.pressed)+" Index: " +itos(joy_button.button_index)+" pressure "+rtos(joy_button.pressure);
 			return str;
 
@@ -137,7 +137,7 @@ InputEvent::operator String() const {
 		} break;
 
 	}
-	
+
 	return "";
 }
 
@@ -156,6 +156,7 @@ bool InputEvent::is_pressed() const {
 		case MOUSE_BUTTON: return mouse_button.pressed;
 		case JOYSTICK_BUTTON: return joy_button.pressed;
 		case SCREEN_TOUCH: return screen_touch.pressed;
+		case JOYSTICK_MOTION: return InputMap::get_singleton()->event_is_joy_motion_action_pressed(*this);
 		case ACTION: return action.pressed;
 		default: {}
 	}
@@ -173,6 +174,16 @@ bool InputEvent::is_action(const String& p_action) const {
 	return InputMap::get_singleton()->event_is_action(*this,p_action);
 }
 
+bool InputEvent::is_action_pressed(const String& p_action) const {
+
+	return is_action(p_action) && is_pressed() && !is_echo();
+}
+
+bool InputEvent::is_action_released(const String& p_action) const {
+
+	return is_action(p_action) && !is_pressed();
+}
+
 uint32_t InputEventKey::get_scancode_with_modifiers() const {
 
 	uint32_t sc=scancode;
@@ -187,4 +198,63 @@ uint32_t InputEventKey::get_scancode_with_modifiers() const {
 
 	return sc;
 
+}
+
+InputEvent InputEvent::xform_by(const Matrix32& p_xform) const {
+
+
+	InputEvent ev=*this;
+
+	switch(ev.type) {
+
+		case InputEvent::MOUSE_BUTTON: {
+
+			Vector2 g = p_xform.xform(Vector2(ev.mouse_button.global_x,ev.mouse_button.global_y));
+			Vector2 l = p_xform.xform(Vector2(ev.mouse_button.x,ev.mouse_button.y));
+			ev.mouse_button.x=l.x;
+			ev.mouse_button.y=l.y;
+			ev.mouse_button.global_x=g.x;
+			ev.mouse_button.global_y=g.y;
+
+		} break;
+		case InputEvent::MOUSE_MOTION: {
+
+			Vector2 g = p_xform.xform(Vector2(ev.mouse_motion.global_x,ev.mouse_motion.global_y));
+			Vector2 l = p_xform.xform(Vector2(ev.mouse_motion.x,ev.mouse_motion.y));
+			Vector2 r = p_xform.basis_xform(Vector2(ev.mouse_motion.relative_x,ev.mouse_motion.relative_y));
+			Vector2 s = p_xform.basis_xform(Vector2(ev.mouse_motion.speed_x,ev.mouse_motion.speed_y));
+			ev.mouse_motion.x=l.x;
+			ev.mouse_motion.y=l.y;
+			ev.mouse_motion.global_x=g.x;
+			ev.mouse_motion.global_y=g.y;
+			ev.mouse_motion.relative_x=r.x;
+			ev.mouse_motion.relative_y=r.y;
+			ev.mouse_motion.speed_x=s.x;
+			ev.mouse_motion.speed_y=s.y;
+
+		} break;
+		case InputEvent::SCREEN_TOUCH: {
+
+
+			Vector2 t = p_xform.xform(Vector2(ev.screen_touch.x,ev.screen_touch.y));
+			ev.screen_touch.x=t.x;
+			ev.screen_touch.y=t.y;
+
+		} break;
+		case InputEvent::SCREEN_DRAG: {
+
+
+			Vector2 t = p_xform.xform(Vector2(ev.screen_drag.x,ev.screen_drag.y));
+			Vector2 r = p_xform.basis_xform(Vector2(ev.screen_drag.relative_x,ev.screen_drag.relative_y));
+			Vector2 s = p_xform.basis_xform(Vector2(ev.screen_drag.speed_x,ev.screen_drag.speed_y));
+			ev.screen_drag.x=t.x;
+			ev.screen_drag.y=t.y;
+			ev.screen_drag.relative_x=r.x;
+			ev.screen_drag.relative_y=r.y;
+			ev.screen_drag.speed_x=s.x;
+			ev.screen_drag.speed_y=s.y;
+		} break;
+	}
+
+	return ev;
 }

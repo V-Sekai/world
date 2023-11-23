@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -79,9 +79,6 @@ class ShaderEditor : public Control {
 		SEARCH_REPLACE,
 		//SEARCH_LOCATE_SYMBOL,
 		SEARCH_GOTO_LINE,
-		SHADER_MATERIAL_MODE,
-		SHADER_POST_PROCESS_MODE,
-		SHADER_SHADE_MODEL_MODE,
 
 	};
 
@@ -108,7 +105,7 @@ class ShaderEditor : public Control {
 
 	void _close_callback();
 
-
+	void _editor_settings_changed();
 
 protected:
 	void _notification(int p_what);
@@ -134,6 +131,7 @@ class ShaderEditorPlugin : public EditorPlugin {
 
 	OBJ_TYPE( ShaderEditorPlugin, EditorPlugin );
 
+	bool _2d;
 	ShaderEditor *shader_editor;
 	EditorNode *editor;
 public:
@@ -152,7 +150,7 @@ public:
 	virtual void save_external_data();
 	virtual void apply_changes();
 
-	ShaderEditorPlugin(EditorNode *p_node);
+	ShaderEditorPlugin(EditorNode *p_node,bool p_2d);
 	~ShaderEditorPlugin();
 
 };

@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -62,6 +62,8 @@ class SceneTreeDock : public VBoxContainer {
 		TOOL_MOVE_DOWN,
 		TOOL_DUPLICATE,
 		TOOL_REPARENT,
+		TOOL_NEW_SCENE_FROM,
+		TOOL_MULTI_EDIT,
 		TOOL_ERASE,
 		TOOL_BUTTON_MAX
 	};
@@ -87,9 +89,11 @@ class SceneTreeDock : public VBoxContainer {
 	ConfirmationDialog *delete_dialog;
 
 	ReparentDialog *reparent_dialog;
-	FileDialog *file;
+	EditorFileDialog *file;
 	EditorSubScene *import_subscene_dialog;
+	EditorFileDialog *new_scene_from_dialog;
 
+	bool first_enter;
 
 	void _create();
 	Node *scene_root;
@@ -97,11 +101,12 @@ class SceneTreeDock : public VBoxContainer {
 	EditorNode *editor;
 
 	Node *_duplicate(Node *p_node, Map<Node*,Node*> &duplimap);
-	void _node_reparent(NodePath p_path,bool p_node_only);
+	void _node_reparent(NodePath p_path, bool p_keep_global_xform);
 	void _set_owners(Node *p_owner, const Array& p_nodes);
 	void _load_request(const String& p_path);
 	void _script_open_request(const Ref<Script>& p_script);
 
+	bool _cyclical_dependency_exists(const String& p_target_scene_path, Node* p_desired_node);
 
 	void _node_selected();
 	void _node_renamed();
@@ -116,7 +121,10 @@ class SceneTreeDock : public VBoxContainer {
 
 	void _import_subscene();
 
+	void _new_scene_from(String p_file);
+
 	bool _validate_no_foreign();
+	void _selection_changed();
 
 	void _fill_path_renames(Vector<StringName> base_path,Vector<StringName> new_base_path,Node * p_node, List<Pair<NodePath,NodePath> > *p_renames);
 
@@ -132,6 +140,7 @@ public:
 	void set_selected(Node *p_node, bool p_emit_selected=false);
 	void fill_path_renames(Node* p_node, Node *p_new_parent, List<Pair<NodePath,NodePath> > *p_renames);
 	void perform_node_renames(Node* p_base,List<Pair<NodePath,NodePath> > *p_renames, Map<Ref<Animation>, Set<int> > *r_rem_anims=NULL);
+	SceneTreeEditor *get_tree_editor() { return scene_tree; }
 
 	SceneTreeDock(EditorNode *p_editor,Node *p_scene_root,EditorSelection *p_editor_selection,EditorData &p_editor_data);
 };

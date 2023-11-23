@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -28,15 +28,6 @@
 /*************************************************************************/
 #include "gd_compiler.h"
 #include "gd_script.h"
-/* TODO:
-
-   *AND and OR need early abort
-   -Inheritance properly process (done?)
-   *create built in initializer and constructor
-   *assign operators
-   *build arrays and dictionaries
-   *call parent constructor
- */
 
 
 void GDCompiler::_set_error(const String& p_error,const GDParser::Node *p_node) {
@@ -45,8 +36,13 @@ void GDCompiler::_set_error(const String& p_error,const GDParser::Node *p_node) 
 		return;
 
 	error=p_error;
-	err_line=p_node->line;
-	err_column=p_node->column;
+	if (p_node) {
+		err_line=p_node->line;
+		err_column=p_node->column;
+	} else {
+		err_line=0;
+		err_column=0;
+	}
 }
 
 bool GDCompiler::_create_unary_operator(CodeGen& codegen,const GDParser::OperatorNode *on,Variant::Operator op, int p_stack_level) {
@@ -523,7 +519,7 @@ int GDCompiler::_parse_expression(CodeGen& codegen,const GDParser::Node *p_expre
 						int ret = _parse_expression(codegen,on->arguments[i],slevel);
 						if (ret<0)
 							return ret;
-						if (ret&GDFunction::ADDR_TYPE_STACK<<GDFunction::ADDR_BITS) {
+						if (ret&(GDFunction::ADDR_TYPE_STACK<<GDFunction::ADDR_BITS)) {
 							slevel++;
 							codegen.alloc_stack(slevel);
 						}
@@ -554,6 +550,24 @@ int GDCompiler::_parse_expression(CodeGen& codegen,const GDParser::Node *p_expre
 
 					int index;
 					if (named) {
+						if (on->arguments[0]->type==GDParser::Node::TYPE_SELF && codegen.script && codegen.function_node && !codegen.function_node->_static) {
+
+							GDParser::IdentifierNode* identifier = static_cast<GDParser::IdentifierNode*>(on->arguments[1]);
+							const Map<StringName,GDScript::MemberInfo>::Element *MI = codegen.script->member_indices.find(identifier->name);
+
+#ifdef DEBUG_ENABLED
+							if (MI && MI->get().getter==codegen.function_node->name) {
+								String n = static_cast<GDParser::IdentifierNode*>(on->arguments[1])->name;
+								_set_error("Must use '"+n+"' instead of 'self."+n+"' in getter.",on);
+								return -1;
+							}
+#endif
+
+							if (MI && MI->get().getter=="") {
+								// Faster than indexing self (as if no self. had been used)
+								return (MI->get().index)|(GDFunction::ADDR_TYPE_MEMBER<<GDFunction::ADDR_BITS);
+							}
+						}
 
 						index=codegen.get_name_map_pos(static_cast<GDParser::IdentifierNode*>(on->arguments[1])->name);
 
@@ -698,6 +712,25 @@ int GDCompiler::_parse_expression(CodeGen& codegen,const GDParser::Node *p_expre
 					if (on->arguments[0]->type==GDParser::Node::TYPE_OPERATOR && (static_cast<GDParser::OperatorNode*>(on->arguments[0])->op==GDParser::OperatorNode::OP_INDEX || static_cast<GDParser::OperatorNode*>(on->arguments[0])->op==GDParser::OperatorNode::OP_INDEX_NAMED)) {
 						//SET (chained) MODE!!
 
+
+#ifdef DEBUG_ENABLED
+						if (static_cast<GDParser::OperatorNode*>(on->arguments[0])->op==GDParser::OperatorNode::OP_INDEX_NAMED) {
+							const GDParser::OperatorNode* inon = static_cast<GDParser::OperatorNode*>(on->arguments[0]);
+
+
+							if (inon->arguments[0]->type==GDParser::Node::TYPE_SELF && codegen.script && codegen.function_node && !codegen.function_node->_static) {
+
+								const Map<StringName,GDScript::MemberInfo>::Element *MI = codegen.script->member_indices.find(static_cast<GDParser::IdentifierNode*>(inon->arguments[1])->name);
+								if (MI && MI->get().setter==codegen.function_node->name) {
+									String n = static_cast<GDParser::IdentifierNode*>(inon->arguments[1])->name;
+									_set_error("Must use '"+n+"' instead of 'self."+n+"' in setter.",inon);
+									return -1;
+								}
+							}
+						}
+#endif
+
+
 						int slevel=p_stack_level;
 
 						GDParser::OperatorNode* op = static_cast<GDParser::OperatorNode*>(on->arguments[0]);
@@ -751,7 +784,7 @@ int GDCompiler::_parse_expression(CodeGen& codegen,const GDParser::Node *p_expre
 
 							if (named) {
 
-								key_idx = codegen.get_name_map_pos(static_cast<const GDParser::IdentifierNode*>(E->get()->arguments[1])->name);								
+								key_idx = codegen.get_name_map_pos(static_cast<const GDParser::IdentifierNode*>(E->get()->arguments[1])->name);
 								//printf("named key %x\n",key_idx);
 
 							} else {
@@ -1131,6 +1164,10 @@ Error GDCompiler::_parse_block(CodeGen& codegen,const GDParser::BlockNode *p_blo
 				codegen.opcodes.push_back(GDFunction::OPCODE_ASSERT);
 				codegen.opcodes.push_back(ret);
 			} break;
+			case GDParser::Node::TYPE_BREAKPOINT: {
+				// try subblocks
+				codegen.opcodes.push_back(GDFunction::OPCODE_BREAKPOINT);
+			} break;
 			case GDParser::Node::TYPE_LOCAL_VAR: {
 
 
@@ -1156,7 +1193,7 @@ Error GDCompiler::_parse_block(CodeGen& codegen,const GDParser::BlockNode *p_blo
 }
 
 
-Error GDCompiler::_parse_function(GDScript *p_script,const GDParser::ClassNode *p_class,const GDParser::FunctionNode *p_func) {
+Error GDCompiler::_parse_function(GDScript *p_script,const GDParser::ClassNode *p_class,const GDParser::FunctionNode *p_func,bool p_for_ready) {
 
 	Vector<int> bytecode;
 	CodeGen codegen;
@@ -1168,6 +1205,7 @@ Error GDCompiler::_parse_function(GDScript *p_script,const GDParser::ClassNode *
 	codegen.current_line=0;
 	codegen.call_max=0;
 	codegen.debug_stack=ScriptDebugger::get_singleton()!=NULL;
+	Vector<StringName> argnames;
 
 	int stack_level=0;
 
@@ -1175,6 +1213,9 @@ Error GDCompiler::_parse_function(GDScript *p_script,const GDParser::ClassNode *
 		for(int i=0;i<p_func->arguments.size();i++) {
 			int idx = i;
 			codegen.add_stack_identifier(p_func->arguments[i],i);
+#ifdef TOOLS_ENABLED
+			argnames.push_back(p_func->arguments[i]);
+#endif
 		}
 		stack_level=p_func->arguments.size();
 	}
@@ -1183,9 +1224,9 @@ Error GDCompiler::_parse_function(GDScript *p_script,const GDParser::ClassNode *
 
 	/* Parse initializer -if applies- */
 
-	bool is_initializer=false || !p_func;
+	bool is_initializer=!p_for_ready && !p_func;
 
-	if (!p_func || String(p_func->name)=="_init") {
+	if (is_initializer || (p_func && String(p_func->name)=="_init")) {
 		//parse initializer for class members
 		if (!p_func && p_class->extends_used && p_script->native.is_null()){
 
@@ -1203,12 +1244,24 @@ Error GDCompiler::_parse_function(GDScript *p_script,const GDParser::ClassNode *
 
 	}
 
+	if (p_for_ready || (p_func && String(p_func->name)=="_ready")) {
+		//parse initializer for class members
+		if (p_class->ready->statements.size()) {
+			Error err = _parse_block(codegen,p_class->ready,stack_level);
+			if (err)
+				return err;
+		}
+
+	}
+
+
 	/* Parse default argument code -if applies- */
 
 	Vector<int> defarg_addr;
 	StringName func_name;
 
 	if (p_func) {
+
 		if (p_func->default_values.size()) {
 
 			codegen.opcodes.push_back(GDFunction::OPCODE_JUMP_TO_DEF_ARGUMENT);
@@ -1231,7 +1284,10 @@ Error GDCompiler::_parse_function(GDScript *p_script,const GDParser::ClassNode *
 
 		func_name=p_func->name;
 	} else {
-		func_name="_init";
+		if (p_for_ready)
+			func_name="_ready";
+		else
+			func_name="_init";
 	}
 
 	codegen.opcodes.push_back(GDFunction::OPCODE_END);
@@ -1249,6 +1305,9 @@ Error GDCompiler::_parse_function(GDScript *p_script,const GDParser::ClassNode *
 	if (p_func)
 		gdfunc->_static=p_func->_static;
 
+#ifdef TOOLS_ENABLED
+	gdfunc->arg_names=argnames;
+#endif
 	//constants
 	if (codegen.constant_map.size()) {
 		gdfunc->_constant_count=codegen.constant_map.size();
@@ -1296,7 +1355,7 @@ Error GDCompiler::_parse_function(GDScript *p_script,const GDParser::ClassNode *
 	if (defarg_addr.size()) {
 
 		gdfunc->default_arguments=defarg_addr;
-		gdfunc->_default_arg_count=defarg_addr.size();
+		gdfunc->_default_arg_count=defarg_addr.size()-1;
 		gdfunc->_default_arg_ptr=&gdfunc->default_arguments[0];
 	} else {
 		gdfunc->_default_arg_count=0;
@@ -1356,25 +1415,41 @@ Error GDCompiler::_parse_class(GDScript *p_script,GDScript *p_owner,const GDPars
 
 
 	int index_from=0;
+	Ref<GDNativeClass> native;
 
 	if (p_class->extends_used) {
 		//do inheritance
 		String path = p_class->extends_file;
 
 		Ref<GDScript> script;
-		Ref<GDNativeClass> native;
+
 
 		if (path!="") {
 			//path (and optionally subclasses)
 
 			if (path.is_rel_path()) {
 
-				String base = p_script->get_path();
+				String base;
+
+				if (p_owner) {
+					GDScript *current_class = p_owner;
+					while (current_class != NULL) {
+						base=current_class->get_path();
+						if (base=="")
+							current_class = current_class->_owner;
+						else
+							break;
+					}
+				}
+				else {
+					base = p_script->get_path();
+				}
+
 				if (base=="" || base.is_rel_path()) {
 					_set_error("Could not resolve relative path for parent class: "+path,p_class);
 					return ERR_FILE_NOT_FOUND;
 				}
-				path=base.get_base_dir().plus_file(path);
+				path=base.get_base_dir().plus_file(path).simplify_path();
 			}
 			script = ResourceLoader::load(path);
 			if (script.is_null()) {
@@ -1395,7 +1470,8 @@ Error GDCompiler::_parse_class(GDScript *p_script,GDScript *p_owner,const GDPars
 					String sub = p_class->extends_class[i];
 					if (script->subclasses.has(sub)) {
 
-						script=script->subclasses[sub];
+						Ref<Script> subclass = script->subclasses[sub]; //avoid reference from dissapearing
+						script=subclass;
 					} else {
 
 						_set_error("Could not find subclass: "+sub,p_class);
@@ -1532,7 +1608,35 @@ Error GDCompiler::_parse_class(GDScript *p_script,GDScript *p_owner,const GDPars
 		//p_script->constants[constant->value].make_const();
 	}
 
+	for(int i=0;i<p_class->_signals.size();i++) {
 
+		StringName name = p_class->_signals[i].name;
+
+		GDScript *c = p_script;
+
+		while(c) {
+
+			if (c->_signals.has(name)) {
+				_set_error("Signal '"+name+"' redefined (in current or parent class)",p_class);
+				return ERR_ALREADY_EXISTS;
+			}
+
+			if (c->base.is_valid()) {
+				c=c->base.ptr();
+			} else {
+				c=NULL;
+			}
+		}
+
+		if (native.is_valid()) {
+			if (ObjectTypeDB::has_signal(native->get_name(),name)) {
+				_set_error("Signal '"+name+"' redefined (original in native class '"+String(native->get_name())+"')",p_class);
+				return ERR_ALREADY_EXISTS;
+			}
+		}
+
+		p_script->_signals[name]=p_class->_signals[i].arguments;
+	}
 	//parse sub-classes
 
 	for(int i=0;i<p_class->subclasses.size();i++) {
@@ -1544,6 +1648,7 @@ Error GDCompiler::_parse_class(GDScript *p_script,GDScript *p_owner,const GDPars
 		if (err)
 			return err;
 
+
 		p_script->constants.insert(name,subclass); //once parsed, goes to the list of constants
 		p_script->subclasses.insert(name,subclass);
 
@@ -1553,10 +1658,14 @@ Error GDCompiler::_parse_class(GDScript *p_script,GDScript *p_owner,const GDPars
 	//parse methods
 
 	bool has_initializer=false;
+	bool has_ready=false;
+
 	for(int i=0;i<p_class->functions.size();i++) {
 
 		if (!has_initializer && p_class->functions[i]->name=="_init")
 			has_initializer=true;
+		if (!has_ready && p_class->functions[i]->name=="_ready")
+			has_ready=true;
 		Error err = _parse_function(p_script,p_class,p_class->functions[i]);
 		if (err)
 			return err;
@@ -1579,6 +1688,55 @@ Error GDCompiler::_parse_class(GDScript *p_script,GDScript *p_owner,const GDPars
 			return err;
 	}
 
+	if (!has_ready && p_class->ready->statements.size()) {
+		//create a constructor
+		Error err = _parse_function(p_script,p_class,NULL,true);
+		if (err)
+			return err;
+	}
+
+#ifdef DEBUG_ENABLED
+	//validate setters/getters if debug is enabled
+	for(int i=0;i<p_class->variables.size();i++) {
+
+		if (p_class->variables[i].setter) {
+			const Map<StringName,GDFunction>::Element *E=p_script->get_member_functions().find(p_class->variables[i].setter);
+			if (!E) {
+				_set_error("Setter function '"+String(p_class->variables[i].setter)+"' not found in class.",NULL);
+				err_line=p_class->variables[i].line;
+				err_column=0;
+				return ERR_PARSE_ERROR;
+			}
+
+			if (E->get().is_static()) {
+
+				_set_error("Setter function '"+String(p_class->variables[i].setter)+"' is static.",NULL);
+				err_line=p_class->variables[i].line;
+				err_column=0;
+				return ERR_PARSE_ERROR;
+			}
+
+		}
+		if (p_class->variables[i].getter) {
+			const Map<StringName,GDFunction>::Element *E=p_script->get_member_functions().find(p_class->variables[i].getter);
+			if (!E) {
+				_set_error("Getter function '"+String(p_class->variables[i].getter)+"' not found in class.",NULL);
+				err_line=p_class->variables[i].line;
+				err_column=0;
+				return ERR_PARSE_ERROR;
+			}
+
+			if (E->get().is_static()) {
+
+				_set_error("Getter function '"+String(p_class->variables[i].getter)+"' is static.",NULL);
+				err_line=p_class->variables[i].line;
+				err_column=0;
+				return ERR_PARSE_ERROR;
+			}
+
+		}
+	}
+#endif
 	return OK;
 }
 

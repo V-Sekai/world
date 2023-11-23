@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -593,7 +593,7 @@ void AnimationTreeEditor::_draw_node(const StringName& p_node) {
 
 		} break;
 		case AnimationTreePlayer::NODE_ONESHOT:
-		case AnimationTreePlayer::NODE_MIX:			
+		case AnimationTreePlayer::NODE_MIX:
 		case AnimationTreePlayer::NODE_BLEND2:
 		case AnimationTreePlayer::NODE_BLEND3:
 		case AnimationTreePlayer::NODE_BLEND4:
@@ -1155,7 +1155,7 @@ StringName AnimationTreeEditor::_add_node(int p_item) {
 	anim_tree->node_set_pos(name,Point2(last_x,last_y));
 	order.push_back(name);
 	last_x+=10;
-	last_y+=10;	
+	last_y+=10;
 	last_x=last_x % (int)get_size().width;
 	last_y=last_y % (int)get_size().height;
 	update();
@@ -1193,7 +1193,7 @@ void AnimationTreeEditor::_add_menu_item(int p_item) {
 	} else if (p_item == MENU_IMPORT_ANIMATIONS) {
 
 		file_op = MENU_IMPORT_ANIMATIONS;
-		file_dialog->set_mode(FileDialog::MODE_OPEN_FILE);
+		file_dialog->set_mode(EditorFileDialog::MODE_OPEN_FILE);
 		file_dialog->popup_centered_ratio();
 
 	} else {
@@ -1458,7 +1458,7 @@ AnimationTreeEditor::AnimationTreeEditor() {
 	edit_check->hide();;
 	edit_check->connect("pressed", this,"_edit_dialog_changed");
 
-	file_dialog = memnew( FileDialog );
+	file_dialog = memnew( EditorFileDialog );
 	file_dialog->set_enable_multiple_selection(true);
 	file_dialog->set_current_dir(Globals::get_singleton()->get_resource_path());
 	add_child(file_dialog);
@@ -1498,18 +1498,17 @@ bool AnimationTreeEditorPlugin::handles(Object *p_object) const {
 void AnimationTreeEditorPlugin::make_visible(bool p_visible) {
 
 	if (p_visible) {
-		editor->hide_animation_player_editors();
-		editor->animation_panel_make_visible(true);
-		anim_tree_editor->show();
+//		editor->hide_animation_player_editors();
+//		editor->animation_panel_make_visible(true);
+		button->show();
+		editor->make_bottom_panel_item_visible(anim_tree_editor);
 		anim_tree_editor->set_fixed_process(true);
-		EditorNode::get_top_split()->set_collapsed(false);
-
 	} else {
 
-		anim_tree_editor->hide();
+		if (anim_tree_editor->is_visible())
+			editor->hide_bottom_panel();
+		button->hide();
 		anim_tree_editor->set_fixed_process(false);
-		editor->animation_panel_make_visible(false);
-		EditorNode::get_top_split()->set_collapsed(true);
 	}
 }
 
@@ -1517,12 +1516,10 @@ AnimationTreeEditorPlugin::AnimationTreeEditorPlugin(EditorNode *p_node) {
 
 	editor=p_node;
 	anim_tree_editor = memnew( AnimationTreeEditor );
-	//editor->get_viewport()->add_child(anim_tree_editor);
-	//anim_tree_editor->set_area_as_parent_rect();
-	editor->get_animation_panel()->add_child(anim_tree_editor);
-	anim_tree_editor->set_v_size_flags(Control::SIZE_EXPAND_FILL);
-	anim_tree_editor->hide();
+	anim_tree_editor->set_custom_minimum_size(Size2(0,300));
 
+	button=editor->add_bottom_panel_item("AnimationTree",anim_tree_editor);
+	button->hide();
 
 
 

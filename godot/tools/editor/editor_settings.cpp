@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -165,22 +165,33 @@ void EditorSettings::create() {
 		return; //pointless
 
 	DirAccess *dir=NULL;
-	Object *object;
 	Variant meta;
 
 	String config_path;
 	String config_dir;
 	String config_file="editor_settings.xml";
+	Ref<ConfigFile> extra_config = memnew(ConfigFile);
 
-	if (OS::get_singleton()->has_environment("APPDATA")) {
-		// Most likely under windows, save here
-		config_path=OS::get_singleton()->get_environment("APPDATA");
-		config_dir=String(_MKSTR(VERSION_SHORT_NAME)).capitalize();
-	} else if (OS::get_singleton()->has_environment("HOME")) {
+	String exe_path = OS::get_singleton()->get_executable_path().get_base_dir();
+	DirAccess* d = DirAccess::create_for_path(exe_path);
+	if (d->file_exists(exe_path + "/._sc_")) {
 
-		config_path=OS::get_singleton()->get_environment("HOME");
-		config_dir="."+String(_MKSTR(VERSION_SHORT_NAME)).to_lower();
-	}
+		// editor is self contained
+		config_path = exe_path;
+		config_dir = "editor_data";
+		extra_config->load(exe_path + "/._sc_");
+	} else {
+
+		if (OS::get_singleton()->has_environment("APPDATA")) {
+			// Most likely under windows, save here
+			config_path=OS::get_singleton()->get_environment("APPDATA");
+			config_dir=String(_MKSTR(VERSION_SHORT_NAME)).capitalize();
+		} else if (OS::get_singleton()->has_environment("HOME")) {
+
+			config_path=OS::get_singleton()->get_environment("HOME");
+			config_dir="."+String(_MKSTR(VERSION_SHORT_NAME)).to_lower();
+		}
+	};
 
 	ObjectTypeDB::register_type<EditorSettings>(); //otherwise it can't be unserialized
 	String config_file_path;
@@ -224,6 +235,28 @@ void EditorSettings::create() {
 			dir->change_dir("..");
 		}
 
+		if (dir->change_dir("config")!=OK) {
+			dir->make_dir("config");
+		} else {
+
+			dir->change_dir("..");
+		}
+
+		dir->change_dir("config");
+
+		String pcp=Globals::get_singleton()->get_resource_path();
+		if (pcp.ends_with("/"))
+			pcp=config_path.substr(0,pcp.size()-1);
+		pcp=pcp.get_file()+"-"+pcp.md5_text();
+
+		if (dir->change_dir(pcp)) {
+			dir->make_dir(pcp);
+		} else {
+			dir->change_dir("..");
+		}
+
+		dir->change_dir("..");
+
 		// path at least is validated, so validate config file
 
 
@@ -244,6 +277,7 @@ void EditorSettings::create() {
 		}
 
 		singleton->config_file_path=config_file_path;
+		singleton->project_config_path=pcp;
 		singleton->settings_path=config_path+"/"+config_dir;
 
 		if (OS::get_singleton()->is_stdout_verbose()) {
@@ -251,7 +285,8 @@ void EditorSettings::create() {
 			print_line("EditorSettings: Load OK!");
 		}
 
-
+		singleton->setup_network();
+		singleton->load_favorites();
 		singleton->scan_plugins();
 
 		return;
@@ -262,9 +297,21 @@ void EditorSettings::create() {
 
 	fail:
 
+	// patch init projects
+	if (extra_config->has_section("init_projects")) {
+		Vector<String> list = extra_config->get_value("init_projects", "list");
+		for (int i=0; i<list.size(); i++) {
+
+			list[i] = exe_path + "/" + list[i];
+		};
+		extra_config->set_value("init_projects", "list", list);
+	};
+
 	singleton = Ref<EditorSettings>( memnew( EditorSettings ) );
 	singleton->config_file_path=config_file_path;
-	singleton->_load_defaults();
+	singleton->settings_path=config_path+"/"+config_dir;
+	singleton->_load_defaults(extra_config);
+	singleton->setup_network();
 	singleton->scan_plugins();
 
 
@@ -304,6 +351,35 @@ Error EditorSettings::_load_plugin(const String& p_path, Plugin &plugin) {
 		plugin.install_files=cf->get_value("plugin","install_files");
 
 	return OK;
+}
+
+void EditorSettings::setup_network() {
+
+	List<IP_Address> local_ip;
+	IP::get_singleton()->get_local_addresses(&local_ip);
+	String lip;
+	String hint;
+	String current=get("network/debug_host");
+
+	for(List<IP_Address>::Element *E=local_ip.front();E;E=E->next()) {
+
+		String ip = E->get();
+		if (ip=="127.0.0.1")
+			continue;
+
+		if (lip=="")
+			lip=ip;
+		if (ip==current)
+			lip=current; //so it saves
+		if (hint!="")
+			hint+=",";
+		hint+=ip;
+
+	}
+
+	set("network/debug_host",lip);
+	add_property_hint(PropertyInfo(Variant::STRING,"network/debug_host",PROPERTY_HINT_ENUM,hint));
+
 }
 
 void EditorSettings::scan_plugins() {
@@ -380,7 +456,7 @@ void EditorSettings::destroy() {
 	singleton=Ref<EditorSettings>();
 }
 
-void EditorSettings::_load_defaults() {
+void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 
 	_THREAD_SAFE_METHOD_
 
@@ -392,25 +468,58 @@ void EditorSettings::_load_defaults() {
 	hints["global/default_project_path"]=PropertyInfo(Variant::STRING,"global/default_project_path",PROPERTY_HINT_GLOBAL_DIR);
 	set("global/default_project_export_path","");
 	hints["global/default_project_export_path"]=PropertyInfo(Variant::STRING,"global/default_project_export_path",PROPERTY_HINT_GLOBAL_DIR);
-
+	set("global/show_script_in_scene_tabs",false);
 	set("text_editor/background_color",Color::html("3b000000"));
+	set("text_editor/caret_color",Color::html("aaaaaa"));
+	set("text_editor/line_number_color",Color::html("66aaaaaa"));
 	set("text_editor/text_color",Color::html("aaaaaa"));
 	set("text_editor/text_selected_color",Color::html("000000"));
 	set("text_editor/keyword_color",Color::html("ffffb3"));
 	set("text_editor/base_type_color",Color::html("a4ffd4"));
 	set("text_editor/engine_type_color",Color::html("83d3ff"));
-	set("text_editor/comment_color",Color::html("983d1b"));
+	set("text_editor/function_color",Color::html("66a2ce"));
+	set("text_editor/member_variable_color",Color::html("e64e59"));
+	set("text_editor/comment_color",Color::html("676767"));
 	set("text_editor/string_color",Color::html("ef6ebe"));
+	set("text_editor/number_color",Color::html("EB9532"));
 	set("text_editor/symbol_color",Color::html("badfff"));
 	set("text_editor/selection_color",Color::html("7b5dbe"));
+	set("text_editor/brace_mismatch_color",Color(1,0.2,0.2));
+	set("text_editor/current_line_color",Color(0.3,0.5,0.8,0.15));
+	set("text_editor/word_highlighted_color",Color(0.8,0.9,0.9,0.15));
 
+	set("text_editor/syntax_highlighting", true);
+
+	set("text_editor/highlight_all_occurrences", true);
+	set("text_editor/scroll_past_end_of_file", false);
+
+	set("text_editor/tab_size", 4);
+	hints["text_editor/tab_size"]=PropertyInfo(Variant::INT,"text_editor/tab_size",PROPERTY_HINT_RANGE,"1, 64, 1"); // size of 0 crashes.
+	set("text_editor/draw_tabs", true);
+
+	set("text_editor/show_line_numbers", true);
+	set("text_editor/show_breakpoint_gutter", true);
+
+	set("text_editor/trim_trailing_whitespace_on_save", false);
 	set("text_editor/idle_parse_delay",2);
 	set("text_editor/create_signal_callbacks",true);
-	set("text_editor/autosave_interval_seconds",60);
+	set("text_editor/autosave_interval_secs",0);
+
+	set("text_editor/caret_blink", false);
+	set("text_editor/caret_blink_speed", 0.65);
+	hints["text_editor/caret_blink_speed"]=PropertyInfo(Variant::REAL,"text_editor/caret_blink_speed",PROPERTY_HINT_RANGE,"0.1, 10, 0.1");
+
 	set("text_editor/font","");
 	hints["text_editor/font"]=PropertyInfo(Variant::STRING,"text_editor/font",PROPERTY_HINT_GLOBAL_FILE,"*.fnt");
 	set("text_editor/auto_brace_complete", false);
+	set("text_editor/restore_scripts_on_load",true);
 
+
+	set("scenetree_editor/duplicate_node_name_num_separator",0);
+	hints["scenetree_editor/duplicate_node_name_num_separator"]=PropertyInfo(Variant::INT,"scenetree_editor/duplicate_node_name_num_separator",PROPERTY_HINT_ENUM, "None,Space,Underscore,Dash");
+	set("scenetree_editor/start_create_dialog_fully_expanded",false);
+
+	set("gridmap_editor/pick_distance", 5000.0);
 
 	set("3d_editor/default_fov",45.0);
 	set("3d_editor/default_z_near",0.1);
@@ -418,18 +527,32 @@ void EditorSettings::_load_defaults() {
 
 	set("3d_editor/navigation_scheme",0);
 	hints["3d_editor/navigation_scheme"]=PropertyInfo(Variant::INT,"3d_editor/navigation_scheme",PROPERTY_HINT_ENUM,"Godot,Maya,Modo");
+	set("3d_editor/zoom_style",0);
+	hints["3d_editor/zoom_style"]=PropertyInfo(Variant::INT,"3d_editor/zoom_style",PROPERTY_HINT_ENUM,"Vertical, Horizontal");
 	set("3d_editor/orbit_modifier",0);
 	hints["3d_editor/orbit_modifier"]=PropertyInfo(Variant::INT,"3d_editor/orbit_modifier",PROPERTY_HINT_ENUM,"None,Shift,Alt,Meta,Ctrl");
 	set("3d_editor/pan_modifier",1);
 	hints["3d_editor/pan_modifier"]=PropertyInfo(Variant::INT,"3d_editor/pan_modifier",PROPERTY_HINT_ENUM,"None,Shift,Alt,Meta,Ctrl");
 	set("3d_editor/zoom_modifier",4);
 	hints["3d_editor/zoom_modifier"]=PropertyInfo(Variant::INT,"3d_editor/zoom_modifier",PROPERTY_HINT_ENUM,"None,Shift,Alt,Meta,Ctrl");
+	set("3d_editor/emulate_numpad",false);
+	set("3d_editor/emulate_3_button_mouse", false);
 
 	set("2d_editor/bone_width",5);
 	set("2d_editor/bone_color1",Color(1.0,1.0,1.0,0.9));
 	set("2d_editor/bone_color2",Color(0.75,0.75,0.75,0.9));
 	set("2d_editor/bone_selected_color",Color(0.9,0.45,0.45,0.9));
 	set("2d_editor/bone_ik_color",Color(0.9,0.9,0.45,0.9));
+
+	set("game_window_placement/rect",0);
+	hints["game_window_placement/rect"]=PropertyInfo(Variant::INT,"game_window_placement/rect",PROPERTY_HINT_ENUM,"Default,Centered,Custom Position,Force Maximized,Force Full Screen");
+	String screen_hints="Default (Same as Editor)";
+	for(int i=0;i<OS::get_singleton()->get_screen_count();i++) {
+		screen_hints+=",Monitor "+itos(i+1);
+	}
+	set("game_window_placement/rect_custom_position",Vector2());
+	set("game_window_placement/screen",0);
+	hints["game_window_placement/screen"]=PropertyInfo(Variant::INT,"game_window_placement/screen",PROPERTY_HINT_ENUM,screen_hints);
 
 	set("on_save/compress_binary_resources",true);
 	set("on_save/save_modified_external_resources",true);
@@ -438,11 +561,17 @@ void EditorSettings::_load_defaults() {
 
 	set("text_editor/create_signal_callbacks",true);
 
+	set("file_dialog/show_hidden_files", false);
+	set("file_dialog/display_mode", 0);
+	hints["file_dialog/display_mode"]=PropertyInfo(Variant::INT,"file_dialog/display_mode",PROPERTY_HINT_ENUM,"Thumbnails,List");
+	set("file_dialog/thumbnail_size", 64);
+	hints["file_dialog/thumbnail_size"]=PropertyInfo(Variant::INT,"file_dialog/thumbnail_size",PROPERTY_HINT_RANGE,"32,128,16");
 
 	set("animation/autorename_animation_tracks",true);
 	set("animation/confirm_insert_track",true);
 
 	set("property_editor/texture_preview_width",48);
+	set("property_editor/auto_refresh_interval",0.3);
 	set("help/doc_path","");
 
 	set("import/ask_save_before_reimport",false);
@@ -459,6 +588,33 @@ void EditorSettings::_load_defaults() {
 	set("run/auto_save_before_running",true);
 	set("resources/save_compressed_resources",true);
 	set("resources/auto_reload_modified_images",true);
+
+	if (p_extra_config.is_valid()) {
+
+		if (p_extra_config->has_section("init_projects") && p_extra_config->has_section_key("init_projects", "list")) {
+
+			Vector<String> list = p_extra_config->get_value("init_projects", "list");
+			for (int i=0; i<list.size(); i++) {
+
+				String name = list[i].replace("/", "::");
+				set("projects/"+name, list[i]);
+			};
+		};
+
+		if (p_extra_config->has_section("presets")) {
+
+			List<String> keys;
+			p_extra_config->get_section_keys("presets", &keys);
+
+			for (List<String>::Element *E=keys.front();E;E=E->next()) {
+
+				String key = E->get();
+				Variant val = p_extra_config->get_value("presets", key);
+				set(key, val);
+			};
+		};
+	};
+
 }
 
 void EditorSettings::notify_changes() {
@@ -632,6 +788,71 @@ void EditorSettings::set_plugin_enabled(const String& p_plugin, bool p_enabled) 
 		set("_plugins/enabled",Variant());
 	else
 		set("_plugins/enabled",sa);
+
+}
+
+void EditorSettings::set_favorite_dirs(const Vector<String>& p_favorites) {
+
+	favorite_dirs=p_favorites;
+	FileAccess *f = FileAccess::open(get_project_settings_path().plus_file("favorite_dirs"),FileAccess::WRITE);
+	if (f) {
+		for(int i=0;i<favorite_dirs.size();i++)
+			f->store_line(favorite_dirs[i]);
+		memdelete(f);
+	}
+
+}
+
+Vector<String> EditorSettings::get_favorite_dirs() const {
+
+	return favorite_dirs;
+}
+
+
+void EditorSettings::set_recent_dirs(const Vector<String>& p_recent) {
+
+	recent_dirs=p_recent;
+	FileAccess *f = FileAccess::open(get_project_settings_path().plus_file("recent_dirs"),FileAccess::WRITE);
+	if (f) {
+		for(int i=0;i<recent_dirs.size();i++)
+			f->store_line(recent_dirs[i]);
+		memdelete(f);
+	}
+}
+
+Vector<String> EditorSettings::get_recent_dirs() const {
+
+	return recent_dirs;
+}
+
+String EditorSettings::get_project_settings_path() const {
+
+
+	return get_settings_path().plus_file("config").plus_file(project_config_path);
+}
+
+
+void EditorSettings::load_favorites() {
+
+	FileAccess *f = FileAccess::open(get_project_settings_path().plus_file("favorite_dirs"),FileAccess::READ);
+	if (f) {
+		String line = f->get_line().strip_edges();
+		while(line!="") {
+			favorite_dirs.push_back(line);
+			line = f->get_line().strip_edges();
+		}
+		memdelete(f);
+	}
+
+	f = FileAccess::open(get_project_settings_path().plus_file("recent_dirs"),FileAccess::READ);
+	if (f) {
+		String line = f->get_line().strip_edges();
+		while(line!="") {
+			recent_dirs.push_back(line);
+			line = f->get_line().strip_edges();
+		}
+		memdelete(f);
+	}
 
 }
 

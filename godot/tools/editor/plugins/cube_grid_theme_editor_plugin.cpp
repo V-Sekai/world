@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -27,7 +27,7 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 #include "cube_grid_theme_editor_plugin.h"
- 
+
 #include "scene/3d/mesh_instance.h"
 #include "scene/3d/physics_body.h"
 #include "scene/main/viewport.h"
@@ -269,8 +269,8 @@ void MeshLibraryEditor::_bind_methods() {
 
 MeshLibraryEditor::MeshLibraryEditor(EditorNode *p_editor) {
 
-	file = memnew( FileDialog );
-	file->set_mode(FileDialog::MODE_OPEN_FILE);
+	file = memnew( EditorFileDialog );
+	file->set_mode(EditorFileDialog::MODE_OPEN_FILE);
 	//not for now?
 	List<String> extensions;
 	ResourceLoader::get_recognized_extensions_for_type("PackedScene",&extensions);
@@ -337,7 +337,7 @@ MeshLibraryEditorPlugin::MeshLibraryEditorPlugin(EditorNode *p_node) {
 	theme_editor->set_anchor( MARGIN_RIGHT, Control::ANCHOR_END );
 	theme_editor->set_anchor( MARGIN_BOTTOM, Control::ANCHOR_BEGIN );
 	theme_editor->set_end( Point2(0,22) );
-	theme_editor->hide();	
+	theme_editor->hide();
 
 }
 

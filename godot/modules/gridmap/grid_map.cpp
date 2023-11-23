@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -34,7 +34,7 @@
 #include "scene/3d/baked_light_instance.h"
 #include "io/marshalls.h"
 #include "scene/scene_string_names.h"
-
+#include "os/os.h"
 
 bool GridMap::_set(const StringName& p_name, const Variant& p_value) {
 
@@ -130,8 +130,8 @@ bool GridMap::_set(const StringName& p_name, const Variant& p_value) {
 
 
 	} else if (name.begins_with("areas/")) {
-		int which = name.get_slice("/",1).to_int();
-		String what=name.get_slice("/",2);
+		int which = name.get_slicec('/',1).to_int();
+		String what=name.get_slicec('/',2);
 		if (what=="bounds") {
 			ERR_FAIL_COND_V(area_map.has(which),false);
 			create_area(which,p_value);
@@ -215,8 +215,8 @@ bool GridMap::_get(const StringName& p_name,Variant &r_ret) const {
 
 		r_ret= d;
 	} else if (name.begins_with("areas/")) {
-		int which = name.get_slice("/",1).to_int();
-		String what=name.get_slice("/",2);
+		int which = name.get_slicec('/',1).to_int();
+		String what=name.get_slicec('/',2);
 		if (what=="bounds")
 			r_ret= area_get_bounds(which);
 		else if (what=="name")
@@ -393,6 +393,10 @@ void GridMap::set_cell_item(int p_x,int p_y,int p_z, int p_item,int p_rot){
 		if (g.items.empty()) {
 
 			PhysicsServer::get_singleton()->free(g.static_body);
+			if (g.collision_debug.is_valid()) {
+				PhysicsServer::get_singleton()->free(g.collision_debug);
+				PhysicsServer::get_singleton()->free(g.collision_debug_instance);
+			}
 
 			memdelete(&g);
 			octant_map.erase(octantkey);
@@ -418,8 +422,23 @@ void GridMap::set_cell_item(int p_x,int p_y,int p_z, int p_item,int p_rot){
 		Octant *g = memnew( Octant );
 		g->dirty=true;
 		g->static_body = PhysicsServer::get_singleton()->body_create(PhysicsServer::BODY_MODE_STATIC);
+		PhysicsServer::get_singleton()->body_attach_object_instance_ID(g->static_body,get_instance_ID());
 		if (is_inside_world())
 			PhysicsServer::get_singleton()->body_set_space(g->static_body,get_world()->get_space());
+
+		SceneTree *st=SceneTree::get_singleton();
+
+		if (st && st->is_debugging_collisions_hint()) {
+
+			g->collision_debug=VisualServer::get_singleton()->mesh_create();
+			g->collision_debug_instance=VisualServer::get_singleton()->instance_create();
+			VisualServer::get_singleton()->instance_set_base(g->collision_debug_instance,g->collision_debug);
+			if (is_inside_world()) {
+				VisualServer::get_singleton()->instance_set_scenario(g->collision_debug_instance,get_world()->get_scenario());
+				VisualServer::get_singleton()->instance_set_transform(g->collision_debug_instance,get_global_transform());
+			}
+
+		}
 
 		octant_map[octantkey]=g;
 	}
@@ -511,6 +530,13 @@ void GridMap::_octant_enter_world(const OctantKey &p_key) {
 	//print_line("BODYPOS: "+get_global_transform());
 
 
+	if (g.collision_debug_instance.is_valid()) {
+		VS::get_singleton()->instance_set_scenario(g.collision_debug_instance,get_world()->get_scenario());
+		VS::get_singleton()->instance_set_transform(g.collision_debug_instance,get_global_transform());
+		if (area_map.has(p_key.area)) {
+			VS::get_singleton()->instance_set_room(g.collision_debug_instance,area_map[p_key.area]->instance);
+		}
+	}
 	if (g.baked.is_valid()) {
 
 		Transform xf = get_global_transform();
@@ -544,6 +570,10 @@ void GridMap::_octant_transform(const OctantKey &p_key) {
 	Octant&g = *octant_map[p_key];
 	PhysicsServer::get_singleton()->body_set_state(g.static_body,PhysicsServer::BODY_STATE_TRANSFORM,get_global_transform());
 
+	if (g.collision_debug_instance.is_valid()) {
+		VS::get_singleton()->instance_set_transform(g.collision_debug_instance,get_global_transform());
+	}
+
 	if (g.baked.is_valid()) {
 
 		Transform xf = get_global_transform();
@@ -570,6 +600,13 @@ void GridMap::_octant_update(const OctantKey &p_key) {
 	Ref<Mesh> mesh;
 
 	PhysicsServer::get_singleton()->body_clear_shapes(g.static_body);
+
+	if (g.collision_debug.is_valid()) {
+
+		VS::get_singleton()->mesh_clear(g.collision_debug);
+	}
+
+	DVector<Vector3> col_debug;
 
 	for(Map<int,Octant::ItemInstances>::Element *E=g.items.front();E;E=E->next()) {
 
@@ -608,6 +645,7 @@ void GridMap::_octant_update(const OctantKey &p_key) {
 			xform.basis.scale(Vector3(cell_scale,cell_scale,cell_scale));
 
 			ii.multimesh->set_instance_transform(idx,xform);
+			//ii.multimesh->set_instance_transform(idx,Transform()	);
 			ii.multimesh->set_instance_color(idx,Color(1,1,1,1));
 			//print_line("MMINST: "+xform);
 
@@ -623,8 +661,11 @@ void GridMap::_octant_update(const OctantKey &p_key) {
 			if (ii.shape.is_valid()) {
 
 				PhysicsServer::get_singleton()->body_add_shape(g.static_body,ii.shape->get_rid(),xform);
-			//	print_line("PHIS x: "+xform);
+				if (g.collision_debug.is_valid()) {
+					ii.shape->add_vertices_to_array(col_debug,xform);
+				}
 
+			//	print_line("PHIS x: "+xform);
 			}
 
 			idx++;
@@ -633,6 +674,20 @@ void GridMap::_octant_update(const OctantKey &p_key) {
 		ii.multimesh->set_aabb(aabb);
 
 
+	}
+
+	if (col_debug.size()) {
+
+
+		Array arr;
+		arr.resize(VS::ARRAY_MAX);
+		arr[VS::ARRAY_VERTEX]=col_debug;
+
+		VS::get_singleton()->mesh_add_surface(g.collision_debug,VS::PRIMITIVE_LINES,arr);
+		SceneTree *st=SceneTree::get_singleton();
+		if (st) {
+			VS::get_singleton()->mesh_surface_set_material( g.collision_debug, 0,st->get_debug_collision_material()->get_rid() );
+		}
 	}
 
 	g.dirty=false;
@@ -653,6 +708,12 @@ void GridMap::_octant_exit_world(const OctantKey &p_key) {
 		VS::get_singleton()->instance_set_room(g.bake_instance,RID());
 		VS::get_singleton()->instance_set_scenario(g.bake_instance,RID());
 
+	}
+
+	if (g.collision_debug_instance.is_valid()) {
+
+		VS::get_singleton()->instance_set_room(g.collision_debug_instance,RID());
+		VS::get_singleton()->instance_set_scenario(g.collision_debug_instance,RID());
 	}
 
 	for(Map<int,Octant::ItemInstances>::Element *E=g.items.front();E;E=E->next()) {
@@ -923,7 +984,7 @@ void GridMap::_notification(int p_what) {
 void GridMap::_queue_dirty_map() {
 
 	if (awaiting_update)
-		return;	
+		return;
 
 	if (is_inside_world()) {
 
@@ -957,6 +1018,11 @@ void GridMap::_clear_internal(bool p_keep_areas) {
 		//unbake just in case
 		if (E->get()->bake_instance.is_valid())
 			VS::get_singleton()->free(E->get()->bake_instance);
+
+		if (E->get()->collision_debug.is_valid())
+			VS::get_singleton()->free(E->get()->collision_debug);
+		if (E->get()->collision_debug_instance.is_valid())
+			VS::get_singleton()->free(E->get()->collision_debug_instance);
 
 		PhysicsServer::get_singleton()->free(E->get()->static_body);
 		memdelete(E->get());
@@ -1030,7 +1096,7 @@ void GridMap::_bind_methods() {
 
 //	ObjectTypeDB::bind_method(_MD("_recreate_octants"),&GridMap::_recreate_octants);
 	ObjectTypeDB::bind_method(_MD("_update_dirty_map_callback"),&GridMap::_update_dirty_map_callback);
-	ObjectTypeDB::bind_method(_MD("resource_changed"),&GridMap::resource_changed);
+	ObjectTypeDB::bind_method(_MD("resource_changed","resource"),&GridMap::resource_changed);
 
 	ObjectTypeDB::bind_method(_MD("set_center_x","enable"),&GridMap::set_center_x);
 	ObjectTypeDB::bind_method(_MD("get_center_x"),&GridMap::get_center_x);

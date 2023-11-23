@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -38,7 +38,7 @@
 	@author Juan Linietsky <reduzio@gmail.com>
 */
 class SceneTreeEditor : public Control {
-	
+
 	OBJ_TYPE( SceneTreeEditor, Control );
 
 	EditorSelection *editor_selection;
@@ -52,19 +52,25 @@ class SceneTreeEditor : public Control {
 	};
 
 	enum {
-		SCENE_MENU_SHOW_CHILDREN,
+		SCENE_MENU_EDITABLE_CHILDREN,
+		SCENE_MENU_USE_PLACEHOLDER,
 		SCENE_MENU_OPEN,
+		SCENE_MENU_CLEAR_INHERITANCE,
+		SCENE_MENU_OPEN_INHERITED,
+		SCENE_MENU_CLEAR_INHERITANCE_CONFIRM,
 	};
 
 	Tree *tree;
 	Node *selected;
 	PopupMenu *instance_menu;
+	PopupMenu *inheritance_menu;
 	ObjectID instance_node;
 
 	AcceptDialog *error;
+	ConfirmationDialog *clear_inherit_confirm;
 
 	int blocked;
-	
+
 	void _compute_hash(Node *p_node,uint64_t &hash);
 
 	void _add_nodes(Node *p_node,TreeItem *p_parent);
@@ -72,7 +78,7 @@ class SceneTreeEditor : public Control {
 	void _update_tree();
 	void _tree_changed();
 	void _node_removed(Node *p_node);
-		
+
 	TreeItem* _find(TreeItem *p_node,const NodePath& p_path);
 	void _notification(int p_what);
 	void _selected_changed();
@@ -86,17 +92,17 @@ class SceneTreeEditor : public Control {
 	bool can_open_instance;
 	bool updating_tree;
 	bool show_enabled_subscene;
-	
+
 	void _renamed();
 	UndoRedo *undo_redo;
-	
+
 	Set<Node*> marked;
 	bool marked_selectable;
 	bool marked_children_selectable;
 	bool display_foreign;
 	bool tree_dirty;
 	bool pending_test_update;
-	static void _bind_methods();	
+	static void _bind_methods();
 
 	void _cell_button_pressed(Object *p_item,int p_column,int p_id);
 	void _cell_multi_selected(Object *p_object,int p_cel,bool p_selected);
@@ -113,7 +119,7 @@ public:
 	void set_undo_redo(UndoRedo *p_undo_redo) { undo_redo=p_undo_redo; };
 	void set_display_foreign_nodes(bool p_display);
 	bool get_display_foreign_nodes() const;
-	
+
 	void set_marked(const Set<Node*>& p_marked,bool p_selectable=false,bool p_children_selectable=true);
 	void set_marked(Node *p_marked,bool p_selectable=false,bool p_children_selectable=true);
 	void set_selected(Node *p_node,bool p_emit_selected=true);
@@ -124,6 +130,9 @@ public:
 	void set_show_enabled_subscene(bool p_show) { show_enabled_subscene=p_show; }
 
 	void update_tree() { _update_tree(); }
+
+
+	Tree* get_scene_tree() { return tree; }
 
 	SceneTreeEditor(bool p_label=true,bool p_can_rename=false, bool p_can_open_instance=false);
 	~SceneTreeEditor();
@@ -141,7 +150,7 @@ class SceneTreeDialog : public ConfirmationDialog {
 
 	void update_tree();
 	void _select();
-	void _cancel();	
+	void _cancel();
 
 
 protected:
@@ -150,7 +159,7 @@ protected:
 	static void _bind_methods();
 public:
 
-	SceneTreeEditor *get_tree() { return tree; }
+	SceneTreeEditor *get_scene_tree() { return tree; }
 	SceneTreeDialog();
 	~SceneTreeDialog();
 

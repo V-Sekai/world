@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -65,7 +65,7 @@ public:
 	RID get_instance() const;
 	virtual AABB get_aabb() const=0;
 	virtual DVector<Face3> get_faces(uint32_t p_usage_flags) const=0;
-	
+
 	virtual AABB get_transformed_aabb() const; // helper
 
 	void set_base(const RID& p_base);
@@ -74,7 +74,7 @@ public:
 	uint32_t get_layer_mask() const;
 
 
-	VisualInstance();	
+	VisualInstance();
 	~VisualInstance();
 
 };
@@ -108,6 +108,7 @@ private:
 	void _find_baked_light();
 	BakedLightInstance *baked_light_instance;
 	int baked_light_texture_id;
+	float extra_cull_margin;
 
 	void _baked_light_changed();
 	void _update_visibility();
@@ -131,6 +132,9 @@ public:
 
 	void set_baked_light_texture_id(int p_id);
 	int get_baked_light_texture_id() const;
+
+	void set_extra_cull_margin(float p_margin);
+	float get_extra_cull_margin() const;
 
 	GeometryInstance();
 };

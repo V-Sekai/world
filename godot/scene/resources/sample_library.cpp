@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -34,7 +34,7 @@ bool SampleLibrary::_set(const StringName& p_name, const Variant& p_value) {
 
 	if (String(p_name).begins_with("samples/")) {
 
-		String name=String(p_name).get_slice("/",1);
+		String name=String(p_name).get_slicec('/',1);
 		if (p_value.get_type()==Variant::NIL)
 			sample_map.erase(name);
 		else {
@@ -66,7 +66,7 @@ bool SampleLibrary::_get(const StringName& p_name,Variant &r_ret) const {
 
 	if (String(p_name).begins_with("samples/")) {
 
-		String name=String(p_name).get_slice("/",1);
+		String name=String(p_name).get_slicec('/',1);
 		if(sample_map.has(name)) {
 			Dictionary d;
 			d["sample"]=sample_map[name].sample;
@@ -122,9 +122,17 @@ bool SampleLibrary::has_sample(const StringName& p_name) const {
 
 void SampleLibrary::_get_property_list(List<PropertyInfo> *p_list) const {
 
+
+	List<PropertyInfo> tpl;
 	for(Map<StringName,SampleData>::Element *E=sample_map.front();E;E=E->next()) {
 
-		p_list->push_back( PropertyInfo( Variant::DICTIONARY, "samples/"+E->key(),PROPERTY_HINT_RESOURCE_TYPE,"Sample",PROPERTY_USAGE_NOEDITOR ) );
+		tpl.push_back( PropertyInfo( Variant::DICTIONARY, "samples/"+E->key(),PROPERTY_HINT_RESOURCE_TYPE,"Sample",PROPERTY_USAGE_NOEDITOR ) );
+	}
+
+	tpl.sort();
+	//sort so order is kept
+	for(List<PropertyInfo>::Element *E=tpl.front();E;E=E->next()) {
+		p_list->push_back(E->get());
 	}
 }
 

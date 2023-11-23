@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -272,24 +272,24 @@ Error Font::create_from_fnt(const String& p_string) {
 
 
 void Font::set_height(float p_height) {
-	
+
 	height=p_height;
 }
 float Font::get_height() const{
-	
+
 	return height;
 }
 
 void Font::set_ascent(float p_ascent){
-	
+
 	ascent=p_ascent;
 }
 float Font::get_ascent() const {
-	
+
 	return ascent;
 }
 float Font::get_descent() const {
-	
+
 	return height-ascent;
 }
 
@@ -349,7 +349,7 @@ void Font::add_char(CharType p_char, int p_texture_idx, const Rect2& p_rect, con
 	c.v_align=p_align.y;
 	c.advance=p_advance;
 	c.h_align=p_align.x;
-	
+
 	char_map[p_char]=c;
 }
 
@@ -398,27 +398,39 @@ int Font::get_kerning_pair(CharType p_A,CharType p_B) const {
 	return 0;
 }
 
+void Font::set_distance_field_hint(bool p_distance_field) {
+
+	distance_field_hint=p_distance_field;
+	emit_changed();
+}
+
+bool Font::is_distance_field_hint() const{
+
+	return distance_field_hint;
+}
+
 
 void Font::clear() {
-	
+
 	height=1;
 	ascent=0;
 	char_map.clear();
 	textures.clear();
 	kerning_map.clear();
+	distance_field_hint=false;
 }
 
 Size2 Font::get_string_size(const String& p_string) const {
 
 	float w=0;
-	
+
 	int l = p_string.length();
 	if (l==0)
 		return Size2(0,height);
 	const CharType *sptr = &p_string[0];
 
 	for (int i=0;i<l;i++) {
-			
+
 		w+=get_char_size(sptr[i],sptr[i+1]).width;
 	}
 
@@ -449,42 +461,30 @@ void Font::draw_halign(RID p_canvas_item, const Point2& p_pos, HAlign p_align,fl
 }
 
 void Font::draw(RID p_canvas_item, const Point2& p_pos, const String& p_text, const Color& p_modulate,int p_clip_w) const {
-		
-	Point2 pos=p_pos;
-	float ofs=0;
-	VisualServer *vs = VisualServer::get_singleton();
-	
+
+	Vector2 ofs;
+
 	for (int i=0;i<p_text.length();i++) {
 
-		const Character * c = char_map.getptr(p_text[i]);
+		int width = get_char_size(p_text[i]).width;
 
-		if (!c)
-			continue;
-			
-//		if (p_clip_w>=0 && (ofs+c->rect.size.width)>(p_clip_w))
-//			break; //width exceeded
-
-		if (p_clip_w>=0 && (ofs+c->rect.size.width)>p_clip_w)
+		if (p_clip_w>=0 && (ofs.x+width)>p_clip_w)
 			break; //clip
-		Point2 cpos=pos;
-		cpos.x+=ofs+c->h_align;
-		cpos.y-=ascent;
-		cpos.y+=c->v_align;
-		ERR_CONTINUE( c->texture_idx<-1 || c->texture_idx>=textures.size());
-		if (c->texture_idx!=-1)
-			textures[c->texture_idx]->draw_rect_region( p_canvas_item, Rect2( cpos, c->rect.size ), c->rect, p_modulate );
-		
-		ofs+=get_char_size(p_text[i],p_text[i+1]).width;
+
+		ofs.x+=draw_char(p_canvas_item,p_pos+ofs,p_text[i],p_text[i+1],p_modulate);
 	}
 }
 
 float Font::draw_char(RID p_canvas_item, const Point2& p_pos, const CharType& p_char,const CharType& p_next,const Color& p_modulate) const {
-	
+
 	const Character * c = char_map.getptr(p_char);
-	
-	if (!c)
+
+	if (!c) {
+		if (fallback.is_valid())
+			return fallback->draw_char(p_canvas_item,p_pos,p_char,p_next,p_modulate);
 		return 0;
-	
+	}
+
 	Point2 cpos=p_pos;
 	cpos.x+=c->h_align;
 	cpos.y-=ascent;
@@ -492,12 +492,23 @@ float Font::draw_char(RID p_canvas_item, const Point2& p_pos, const CharType& p_
 	ERR_FAIL_COND_V( c->texture_idx<-1 || c->texture_idx>=textures.size(),0);
 	if (c->texture_idx!=-1)
 		VisualServer::get_singleton()->canvas_item_add_texture_rect_region( p_canvas_item, Rect2( cpos, c->rect.size ), textures[c->texture_idx]->get_rid(),c->rect, p_modulate );
-	
+
 	return get_char_size(p_char,p_next).width;
+}
+
+void Font::set_fallback(const Ref<Font> &p_fallback) {
+
+	fallback=p_fallback;
+}
+
+Ref<Font> Font::get_fallback() const{
+
+	return fallback;
 }
 
 void Font::_bind_methods() {
 
+	ObjectTypeDB::bind_method(_MD("create_from_fnt","path"),&Font::create_from_fnt);
 	ObjectTypeDB::bind_method(_MD("set_height","px"),&Font::set_height);
 	ObjectTypeDB::bind_method(_MD("get_height"),&Font::get_height);
 
@@ -506,13 +517,20 @@ void Font::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("get_descent"),&Font::get_descent);
 
 	ObjectTypeDB::bind_method(_MD("add_kerning_pair","char_a","char_b","kerning"),&Font::add_kerning_pair);
-	ObjectTypeDB::bind_method(_MD("get_kerning_pair"),&Font::get_kerning_pair);
+	ObjectTypeDB::bind_method(_MD("get_kerning_pair","char_a","char_b"),&Font::get_kerning_pair);
 
 	ObjectTypeDB::bind_method(_MD("add_texture","texture:Texture"),&Font::add_texture);
 	ObjectTypeDB::bind_method(_MD("add_char","character","texture","rect","align","advance"),&Font::add_char,DEFVAL(Point2()),DEFVAL(-1));
 
+
+	ObjectTypeDB::bind_method(_MD("get_texture_count"),&Font::get_texture_count);
+	ObjectTypeDB::bind_method(_MD("get_texture:Texture","idx"),&Font::get_texture);
+
 	ObjectTypeDB::bind_method(_MD("get_char_size","char","next"),&Font::get_char_size,DEFVAL(0));
 	ObjectTypeDB::bind_method(_MD("get_string_size","string"),&Font::get_string_size);
+
+	ObjectTypeDB::bind_method(_MD("set_distance_field_hint","enable"),&Font::set_distance_field_hint);
+	ObjectTypeDB::bind_method(_MD("is_distance_field_hint"),&Font::is_distance_field_hint);
 
 	ObjectTypeDB::bind_method(_MD("clear"),&Font::clear);
 
@@ -528,6 +546,8 @@ void Font::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("_set_textures"),&Font::_set_textures);
 	ObjectTypeDB::bind_method(_MD("_get_textures"),&Font::_get_textures);
 
+	ObjectTypeDB::bind_method(_MD("set_fallback","fallback"),&Font::set_fallback);
+	ObjectTypeDB::bind_method(_MD("get_fallback"),&Font::get_fallback);
 
 	ADD_PROPERTY( PropertyInfo( Variant::ARRAY, "textures", PROPERTY_HINT_NONE,"", PROPERTY_USAGE_NOEDITOR ), _SCS("_set_textures"), _SCS("_get_textures") );
 	ADD_PROPERTY( PropertyInfo( Variant::INT_ARRAY, "chars", PROPERTY_HINT_NONE,"", PROPERTY_USAGE_NOEDITOR ), _SCS("_set_chars"), _SCS("_get_chars") );
@@ -535,19 +555,22 @@ void Font::_bind_methods() {
 
 	ADD_PROPERTY( PropertyInfo( Variant::REAL, "height", PROPERTY_HINT_RANGE,"-1024,1024,1" ), _SCS("set_height"), _SCS("get_height") );
 	ADD_PROPERTY( PropertyInfo( Variant::REAL, "ascent", PROPERTY_HINT_RANGE,"-1024,1024,1" ), _SCS("set_ascent"), _SCS("get_ascent") );
+	ADD_PROPERTY( PropertyInfo( Variant::BOOL, "distance_field" ), _SCS("set_distance_field_hint"), _SCS("is_distance_field_hint") );
+	ADD_PROPERTY( PropertyInfo( Variant::OBJECT, "fallback", PROPERTY_HINT_RESOURCE_TYPE,"Font" ), _SCS("set_fallback"), _SCS("get_fallback") );
 
 }
 
 Font::Font() {
-	
+
 	clear();
-	
+
+
 
 }
 
 
 Font::~Font() {
-	
+
 	clear();
 }
 

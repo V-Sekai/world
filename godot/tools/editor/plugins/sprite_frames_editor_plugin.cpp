@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -76,7 +76,7 @@ void SpriteFramesEditor::_file_load_request(const DVector<String>& p_path) {
 			dialog->set_title("Error!");
 			//dialog->get_cancel()->set_text("Close");
 			dialog->get_ok()->set_text("Close");
-			dialog->popup_centered(Size2(300,60));
+			dialog->popup_centered_minsize();
 			return; ///beh should show an error i guess
 		}
 
@@ -115,7 +115,7 @@ void SpriteFramesEditor::_load_pressed() {
 	for(int i=0;i<extensions.size();i++)
 		file->add_filter("*."+extensions[i]);
 
-	file->set_mode(FileDialog::MODE_OPEN_FILES);
+	file->set_mode(EditorFileDialog::MODE_OPEN_FILES);
 
 	file->popup_centered_ratio();
 
@@ -188,7 +188,7 @@ void SpriteFramesEditor::_paste_pressed() {
 		dialog->set_title("Error!");
 		//dialog->get_cancel()->set_text("Close");
 		dialog->get_ok()->set_text("Close");
-		dialog->popup_centered(Size2(300,60));
+		dialog->popup_centered_minsize();
 		return; ///beh should show an error i guess
 	}
 
@@ -223,6 +223,33 @@ void SpriteFramesEditor::_empty_pressed() {
 	undo_redo->create_action("Add Empty");
 	undo_redo->add_do_method(frames,"add_frame",r,from);
 	undo_redo->add_undo_method(frames,"remove_frame",from);
+	undo_redo->add_do_method(this,"_update_library");
+	undo_redo->add_undo_method(this,"_update_library");
+	undo_redo->commit_action();
+
+}
+
+void SpriteFramesEditor::_empty2_pressed() {
+
+
+	int from=-1;
+
+	if (tree->get_selected()) {
+
+		from = tree->get_selected()->get_metadata(0);
+		sel=from;
+
+	} else {
+		from=frames->get_frame_count();
+	}
+
+
+
+	Ref<Texture> r;
+
+	undo_redo->create_action("Add Empty");
+	undo_redo->add_do_method(frames,"add_frame",r,from+1);
+	undo_redo->add_undo_method(frames,"remove_frame",from+1);
 	undo_redo->add_do_method(this,"_update_library");
 	undo_redo->add_undo_method(this,"_update_library");
 	undo_redo->commit_action();
@@ -311,7 +338,6 @@ void SpriteFramesEditor::_update_library() {
 
 		TreeItem *ti = tree->create_item(root);
 		ti->set_cell_mode(0,TreeItem::CELL_MODE_STRING);
-		ti->set_editable(0,true);
 		ti->set_selectable(0,true);
 
 		if (frames->get_frame(i).is_null()) {
@@ -319,9 +345,11 @@ void SpriteFramesEditor::_update_library() {
 			ti->set_text(0,"Frame "+itos(i)+" (empty)");
 
 		} else {
-			ti->set_text(0,"Frame "+itos(i));
+			ti->set_text(0,"Frame "+itos(i)+" ("+frames->get_frame(i)->get_name()+")");
 			ti->set_icon(0,frames->get_frame(i));
 		}
+		if (frames->get_frame(i).is_valid())
+			ti->set_tooltip(0,frames->get_frame(i)->get_path());
 		ti->set_metadata(0,i);
 		ti->set_icon_max_width(0,96);
 		if (sel==i)
@@ -355,6 +383,7 @@ void SpriteFramesEditor::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("_input_event"),&SpriteFramesEditor::_input_event);
 	ObjectTypeDB::bind_method(_MD("_load_pressed"),&SpriteFramesEditor::_load_pressed);
 	ObjectTypeDB::bind_method(_MD("_empty_pressed"),&SpriteFramesEditor::_empty_pressed);
+	ObjectTypeDB::bind_method(_MD("_empty2_pressed"),&SpriteFramesEditor::_empty2_pressed);
 	ObjectTypeDB::bind_method(_MD("_item_edited"),&SpriteFramesEditor::_item_edited);
 	ObjectTypeDB::bind_method(_MD("_delete_pressed"),&SpriteFramesEditor::_delete_pressed);
 	ObjectTypeDB::bind_method(_MD("_paste_pressed"),&SpriteFramesEditor::_paste_pressed);
@@ -387,8 +416,12 @@ SpriteFramesEditor::SpriteFramesEditor() {
 	hbc->add_child(paste);
 
 	empty = memnew( Button );
-	empty->set_text("Insert Empty");
+	empty->set_text("Insert Empty (Before)");
 	hbc->add_child(empty);
+
+	empty2 = memnew( Button );
+	empty2->set_text("Insert Empty (After)");
+	hbc->add_child(empty2);
 
 	move_up = memnew( Button );
 	move_up->set_text("Up");
@@ -401,7 +434,7 @@ SpriteFramesEditor::SpriteFramesEditor() {
 	_delete = memnew( Button );
 	hbc->add_child(_delete);
 
-	file = memnew( FileDialog );
+	file = memnew( EditorFileDialog );
 	add_child(file);
 
 
@@ -422,6 +455,7 @@ SpriteFramesEditor::SpriteFramesEditor() {
 	_delete->connect("pressed", this,"_delete_pressed");
 	paste->connect("pressed", this,"_paste_pressed");
 	empty->connect("pressed", this,"_empty_pressed");
+	empty2->connect("pressed", this,"_empty2_pressed");
 	move_up->connect("pressed", this,"_up_pressed");
 	move_down->connect("pressed", this,"_down_pressed");
 	file->connect("files_selected", this,"_file_load_request");
@@ -451,11 +485,15 @@ bool SpriteFramesEditorPlugin::handles(Object *p_object) const {
 void SpriteFramesEditorPlugin::make_visible(bool p_visible) {
 
 	if (p_visible) {
-		frames_editor->show();
+		button->show();
+		editor->make_bottom_panel_item_visible(frames_editor);
 //		frames_editor->set_process(true);
 	} else {
 
-		frames_editor->hide();
+		button->hide();
+		if (frames_editor->is_visible())
+			editor->hide_bottom_panel();
+
 //		frames_editor->set_process(false);
 	}
 
@@ -465,11 +503,9 @@ SpriteFramesEditorPlugin::SpriteFramesEditorPlugin(EditorNode *p_node) {
 
 	editor=p_node;
 	frames_editor = memnew( SpriteFramesEditor );
-	editor->get_viewport()->add_child(frames_editor);
-	frames_editor->set_area_as_parent_rect();
-//	frames_editor->set_anchor( MARGIN_TOP, Control::ANCHOR_END);
-//	frames_editor->set_margin( MARGIN_TOP, 120 );
-	frames_editor->hide();
+	frames_editor->set_custom_minimum_size(Size2(0,300));
+	button=editor->add_bottom_panel_item("SpriteFrames",frames_editor);
+	button->hide();
 
 
 

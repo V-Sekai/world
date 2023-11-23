@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -324,7 +324,7 @@ Ref<Mesh> SurfaceTool::commit(const Ref<Mesh>& p_existing) {
 
 				w=DVector<Color>::Write();
 				a[i]=array;
-			} break;	
+			} break;
 			case Mesh::ARRAY_FORMAT_BONES:
 			case Mesh::ARRAY_FORMAT_WEIGHTS: {
 
@@ -650,8 +650,8 @@ void SurfaceTool::mikktGetTexCoord(const SMikkTSpaceContext * pContext, float fv
 	Vector<List<Vertex>::Element*> &varr = *((Vector<List<Vertex>::Element*>*)pContext->m_pUserData);
 	Vector2 v = varr[iFace*3+iVert]->get().uv;
 	fvTexcOut[0]=v.x;
-	//fvTexcOut[1]=v.y;
-	fvTexcOut[1]=1.0-v.y;
+	fvTexcOut[1]=v.y;
+	//fvTexcOut[1]=1.0-v.y;
 
 }
 void SurfaceTool::mikktSetTSpaceBasic(const SMikkTSpaceContext * pContext, const float fvTangent[], const float fSign, const int iFace, const int iVert){
@@ -831,7 +831,7 @@ void SurfaceTool::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("deindex"),&SurfaceTool::deindex);
 	///ObjectTypeDB::bind_method(_MD("generate_flat_normals"),&SurfaceTool::generate_flat_normals);
 	ObjectTypeDB::bind_method(_MD("generate_normals"),&SurfaceTool::generate_normals);
-	ObjectTypeDB::bind_method(_MD("commit:Mesh","existing:Mesh"),&SurfaceTool::commit,DEFVAL( RefPtr() ));
+	ObjectTypeDB::bind_method(_MD("commit:Mesh","existing:Mesh"),&SurfaceTool::commit,DEFVAL(Variant()));
 	ObjectTypeDB::bind_method(_MD("clear"),&SurfaceTool::clear);
 
 }

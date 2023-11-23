@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -745,7 +745,7 @@ static float _find_closest_angle_to_half_pi_arc(const Vector3& p_from, const Vec
 	}
 
 	//min_p = p_arc_xform.affine_inverse().xform(min_p);
-	float a = Vector2(min_p.x,-min_p.z).atan2();
+	float a = Vector2(min_p.x,-min_p.z).angle();
 	return a*180.0/Math_PI;
 }
 
@@ -1257,7 +1257,8 @@ void SkeletonSpatialGizmo::redraw() {
 
 			//find closest axis
 			int closest=-1;
-			float closest_d;
+			float closest_d = 0.0;
+
 			for(int j=0;j<3;j++) {
 				float dp = Math::abs(grests[parent].basis[j].normalized().dot(d));
 				if (j==0 || dp>closest_d)
@@ -2282,6 +2283,8 @@ void NavigationMeshSpatialGizmo::redraw() {
 		}
 	}
 
+	if (faces.empty())
+		return;
 
 	Map<_EdgeKey,bool> edge_map;
 	DVector<Vector3> tmeshfaces;
@@ -2329,7 +2332,7 @@ void NavigationMeshSpatialGizmo::redraw() {
 		}
 	}
 
-	Ref<TriangleMesh> tmesh = memnew( TriangleMesh);
+	Ref<TriangleMesh> tmesh = memnew( TriangleMesh );
 	tmesh->create(tmeshfaces);
 
 	if (lines.size())

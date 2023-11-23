@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -46,6 +46,9 @@ class InputMap : public Object {
 
 	List<InputEvent>::Element *_find_event(List<InputEvent> &p_list,const InputEvent& p_event) const;
 
+	Array _get_action_list(const StringName& p_action);
+	Array _get_actions();
+
 protected:
 
 	static void _bind_methods();
@@ -57,6 +60,7 @@ public:
 	bool has_action(const StringName& p_action) const;
 	int get_action_id(const StringName& p_action) const;
 	StringName get_action_from_id(int p_id) const;
+	List<StringName> get_actions() const;
 	void add_action(const StringName& p_action);
 	void erase_action(const StringName& p_action);
 
@@ -66,9 +70,11 @@ public:
 
 	const List<InputEvent> *get_action_list(const StringName& p_action);
 	bool event_is_action(const InputEvent& p_event, const StringName& p_action) const;
+	bool event_is_joy_motion_action_pressed(const InputEvent& p_event) const;
 
 
 	void load_from_globals();
+	void load_default();
 
 	InputMap();
 };

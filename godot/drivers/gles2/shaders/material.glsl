@@ -779,6 +779,7 @@ uniform highp mat4 camera_inverse_transform;
 #if defined(ENABLE_TEXSCREEN)
 
 uniform vec2 texscreen_screen_mult;
+uniform vec4 texscreen_screen_clamp;
 uniform sampler2D texscreen_tex;
 
 #endif
@@ -1174,6 +1175,10 @@ FRAGMENT_SHADER_CODE
 		vec3 mdiffuse = diffuse.rgb;
 		vec3 light;
 
+#if defined(USE_LIGHT_SHADOW_COLOR)
+		vec3 shadow_color=vec3(0.0,0.0,0.0);
+#endif
+
 #if defined(USE_LIGHT_SHADER_CODE)
 //light is written by the light shader
 {
@@ -1193,6 +1198,10 @@ LIGHT_SHADER_CODE
 		}
 #endif
 		diffuse.rgb = const_light_mult * ambient_light *diffuse.rgb + light * attenuation * shadow_attenuation;
+
+#if defined(USE_LIGHT_SHADOW_COLOR)
+		diffuse.rgb += light * shadow_color * attenuation * (1.0 - shadow_attenuation);
+#endif
 
 #ifdef USE_FOG
 

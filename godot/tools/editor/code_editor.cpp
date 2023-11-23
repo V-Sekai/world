@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -85,7 +85,7 @@ void FindReplaceDialog::popup_search() {
 	skip->hide();
 	popup_centered(Point2(300,190));
 	get_ok()->set_text("Find");
-	search_text->grab_focus();	
+	search_text->grab_focus();
 	if (text_edit->is_selection_active() && ( text_edit->get_selection_from_line() == text_edit->get_selection_to_line())) {
 
 		search_text->set_text( text_edit->get_selection_text() );
@@ -148,6 +148,7 @@ void FindReplaceDialog::_replace_skip_callback() {
 
 void FindReplaceDialog::_replace() {
 
+	text_edit->begin_complex_operation();
 	if (is_replace_all_mode()) {
 
 		//line as x so it gets priority in comparison, column as y
@@ -228,7 +229,7 @@ void FindReplaceDialog::_replace() {
 
 		_search();
 	}
-
+	text_edit->end_complex_operation();
 }
 
 
@@ -487,6 +488,7 @@ FindReplaceDialog::FindReplaceDialog() {
 
 	vb->add_child(error_label);
 
+
 	set_hide_on_ok(false);
 
 }
@@ -507,15 +509,19 @@ void CodeTextEditor::_text_changed() {
 }
 
 void CodeTextEditor::_code_complete_timer_timeout() {
+	if (!is_visible())
+		return;
 	if (enable_complete_timer)
 		text_editor->query_code_comple();
 }
 
-void CodeTextEditor::_complete_request(const String& p_request, int p_line) {
+void CodeTextEditor::_complete_request() {
 
 	List<String> entries;
-	_code_complete_script(text_editor->get_text(),p_request,p_line,&entries);
+	_code_complete_script(text_editor->get_text_for_completion(),&entries);
 	// print_line("COMPLETE: "+p_request);
+	if (entries.size()==0)
+		return;
 	Vector<String> strs;
 	strs.resize(entries.size());
 	int i=0;
@@ -539,7 +545,7 @@ void CodeTextEditor::set_error(const String& p_error) {
 }
 
 void CodeTextEditor::_on_settings_change() {
-	
+
 	// FONTS
 	String editor_font = EDITOR_DEF("text_editor/font", "");
 	bool font_overrode = false;
@@ -552,10 +558,10 @@ void CodeTextEditor::_on_settings_change() {
 	}
 	if(!font_overrode)
 		text_editor->add_font_override("font",get_font("source","Fonts"));
-	
-	// AUTO BRACE COMPLETION 
+
+	// AUTO BRACE COMPLETION
 	text_editor->set_auto_brace_completion(
-		EDITOR_DEF("text_editor/auto_brace_complete", false)
+		EDITOR_DEF("text_editor/auto_brace_complete", true)
 	);
 
 	code_complete_timer->set_wait_time(
@@ -563,6 +569,12 @@ void CodeTextEditor::_on_settings_change() {
 	);
 
 	enable_complete_timer = EDITOR_DEF("text_editor/enable_code_completion_delay",true);
+
+	// call hint settings
+	text_editor->set_callhint_settings(
+		EDITOR_DEF("text_editor/put_callhint_tooltip_below_current_line", true),
+		EDITOR_DEF("text_editor/callhint_tooltip_offset", Vector2())
+	);
 }
 
 void CodeTextEditor::_text_changed_idle_timeout() {
@@ -594,13 +606,28 @@ CodeTextEditor::CodeTextEditor() {
 	add_child(text_editor);
 	text_editor->set_area_as_parent_rect();
 	text_editor->set_margin(MARGIN_BOTTOM,20);
-	text_editor->add_font_override("font",get_font("source","Fonts"));
+
+	String editor_font = EDITOR_DEF("text_editor/font", "");
+	bool font_overrode = false;
+	if (editor_font!="") {
+		Ref<Font> fnt = ResourceLoader::load(editor_font);
+		if (fnt.is_valid()) {
+			text_editor->add_font_override("font",fnt);
+			font_overrode = true;
+		}
+	}
+
+	if (!font_overrode)
+		text_editor->add_font_override("font",get_font("source","Fonts"));
+
 	text_editor->set_show_line_numbers(true);
+	text_editor->set_brace_matching(true);
+	text_editor->set_auto_indent(true);
 
 	line_col = memnew( Label );
 	add_child(line_col);
 	line_col->set_anchor_and_margin(MARGIN_LEFT,ANCHOR_END,135);
-	line_col->set_anchor_and_margin(MARGIN_TOP,ANCHOR_END,20);
+	line_col->set_anchor_and_margin(MARGIN_TOP,ANCHOR_END,15);
 	line_col->set_anchor_and_margin(MARGIN_BOTTOM,ANCHOR_END,1);
 	line_col->set_anchor_and_margin(MARGIN_RIGHT,ANCHOR_END,5);
 	//line_col->set_align(Label::ALIGN_RIGHT);
@@ -619,7 +646,7 @@ CodeTextEditor::CodeTextEditor() {
 	error = memnew( Label );
 	add_child(error);
 	error->set_anchor_and_margin(MARGIN_LEFT,ANCHOR_BEGIN,5);
-	error->set_anchor_and_margin(MARGIN_TOP,ANCHOR_END,20);
+	error->set_anchor_and_margin(MARGIN_TOP,ANCHOR_END,15);
 	error->set_anchor_and_margin(MARGIN_BOTTOM,ANCHOR_END,1);
 	error->set_anchor_and_margin(MARGIN_RIGHT,ANCHOR_END,130);
 	error->hide();
@@ -632,6 +659,8 @@ CodeTextEditor::CodeTextEditor() {
 	text_editor->connect("request_completion", this,"_complete_request");
 	Vector<String> cs;
 	cs.push_back(".");
+	cs.push_back(",");
+	cs.push_back("(");
 	text_editor->set_completion(true,cs);
 	idle->connect("timeout", this,"_text_changed_idle_timeout");
 

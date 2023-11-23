@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -26,10 +26,11 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
+
 #include "particles_2d_editor_plugin.h"
 #include "canvas_item_editor_plugin.h"
 #include "io/image_loader.h"
-
+#include "scene/gui/separator.h"
 
 void Particles2DEditorPlugin::edit(Object *p_object) {
 
@@ -49,12 +50,10 @@ void Particles2DEditorPlugin::make_visible(bool p_visible) {
 
 	if (p_visible) {
 
-		sep->show();
-		menu->show();
+		toolbar->show();
 	} else {
 
-		menu->hide();
-		sep->hide();
+		toolbar->hide();
 	}
 
 }
@@ -146,6 +145,7 @@ void Particles2DEditorPlugin::_notification(int p_what) {
 	if (p_what==NOTIFICATION_ENTER_TREE) {
 
 		menu->get_popup()->connect("item_pressed",this,"_menu_callback");
+		menu->set_icon(menu->get_popup()->get_icon("Particles2D","EditorIcons"));
 		file->connect("file_selected",this,"_file_selected");
 	}
 }
@@ -163,34 +163,35 @@ Particles2DEditorPlugin::Particles2DEditorPlugin(EditorNode *p_node) {
 	particles=NULL;
 	editor=p_node;
 	undo_redo=editor->get_undo_redo();
-	sep = memnew( VSeparator );
-	CanvasItemEditor::get_singleton()->add_control_to_menu_panel(sep);
-	sep->hide();
+
+	toolbar = memnew( HBoxContainer );
+	CanvasItemEditor::get_singleton()->add_control_to_menu_panel(toolbar);
+	toolbar->hide();
+
+	toolbar->add_child( memnew( VSeparator ) );
 
 	menu = memnew( MenuButton );
 	menu->get_popup()->add_item("Load Emission Mask",MENU_LOAD_EMISSION_MASK);
 	menu->get_popup()->add_item("Clear Emission Mask",MENU_CLEAR_EMISSION_MASK);
 	menu->set_text("Particles");
+	toolbar->add_child(menu);
 
-	file = memnew(FileDialog);
-	add_child(file);
+	file = memnew( EditorFileDialog );
 	List<String> ext;
 	ImageLoader::get_recognized_extensions(&ext);
 	for(List<String>::Element *E=ext.front();E;E=E->next()) {
 		file->add_filter("*."+E->get()+"; "+E->get().to_upper());
 	}
-	file->set_mode(FileDialog::MODE_OPEN_FILE);
-	CanvasItemEditor::get_singleton()->add_control_to_menu_panel(menu);
+	file->set_mode(EditorFileDialog::MODE_OPEN_FILE);
+	toolbar->add_child(file);
+
 	epoints = memnew( SpinBox );
 	epoints->set_min(1);
 	epoints->set_max(8192);
 	epoints->set_step(1);
 	epoints->set_val(512);
 	file->get_vbox()->add_margin_child("Generated Point Count:",epoints);
-	menu->hide();
-
 }
-
 
 Particles2DEditorPlugin::~Particles2DEditorPlugin()
 {

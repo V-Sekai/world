@@ -7,7 +7,7 @@
          Modifications for Zip64 support
          Copyright (C) 2009-2010 Mathias Svensson ( http://result42.com )
 
-         For more info read MiniZip_info.txt
+         For more info read LICENSE-MiniZip.txt
 
          Changes
    Oct-2009 - Mathias Svensson - Remove old C style function prototypes
@@ -1114,9 +1114,9 @@ extern int ZEXPORT zipOpenNewFileInZip4_64 (zipFile file, const char* filename, 
     zi->ci.flag = flagBase;
     if ((level==8) || (level==9))
       zi->ci.flag |= 2;
-    if ((level==2))
+    if (level==2)
       zi->ci.flag |= 4;
-    if ((level==1))
+    if (level==1)
       zi->ci.flag |= 6;
     if (password != NULL)
       zi->ci.flag |= 1;

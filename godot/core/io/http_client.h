@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -40,7 +40,7 @@ class HTTPClient : public Reference {
 	OBJ_TYPE(HTTPClient,Reference);
 public:
 
-	enum RespondeCode {
+	enum ResponseCode {
 
 		// 1xx informational
 		RESPONSE_CONTINUE = 100,
@@ -157,7 +157,10 @@ private:
 	static void _bind_methods();
 	StringArray _get_response_headers();
 	Dictionary _get_response_headers_as_dictionary();
-	ByteArray tmp_read;
+	int read_chunk_size;
+
+	Error _get_http_data(uint8_t* p_buffer, int p_bytes,int &r_received);
+
 public:
 
 
@@ -185,8 +188,11 @@ public:
 	void set_blocking_mode(bool p_enable); //useful mostly if running in a thread
 	bool is_blocking_mode_enabled() const;
 
+	void set_read_chunk_size(int p_size);
 
 	Error poll();
+
+    String query_string_from_dict(const Dictionary& p_dict);
 
 	HTTPClient();
 	~HTTPClient();

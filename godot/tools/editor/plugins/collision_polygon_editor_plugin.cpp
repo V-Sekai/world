@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -31,6 +31,8 @@
 #include "os/file_access.h"
 #include "tools/editor/editor_settings.h"
 #include "scene/3d/camera.h"
+#include "canvas_item_editor_plugin.h"
+
 void CollisionPolygonEditor::_notification(int p_what) {
 
 	switch(p_what) {
@@ -38,7 +40,7 @@ void CollisionPolygonEditor::_notification(int p_what) {
 		case NOTIFICATION_READY: {
 
 			button_create->set_icon( get_icon("Edit","EditorIcons"));
-			button_edit->set_icon( get_icon("MovePoint","EditorIcons"));			
+			button_edit->set_icon( get_icon("MovePoint","EditorIcons"));
 			button_edit->set_pressed(true);
 			get_tree()->connect("node_removed",this,"_node_removed");
 
@@ -67,19 +69,6 @@ void CollisionPolygonEditor::_node_removed(Node *p_node) {
 
 }
 
-
-Vector2 CollisionPolygonEditor::snap_point(const Vector2& p_point) const {
-
-	return p_point;
-	/*
-	if (canvas_item_editor->is_snap_active()) {
-
-		return p_point.snapped(Vector2(1,1)*canvas_item_editor->get_snap());
-
-	} else {
-		return p_point;
-	} ??? */
-}
 
 void CollisionPolygonEditor::_menu_option(int p_option) {
 
@@ -120,8 +109,11 @@ void CollisionPolygonEditor::_wip_close() {
 
 bool CollisionPolygonEditor::forward_spatial_input_event(Camera* p_camera,const InputEvent& p_event) {
 
+	if (!node)
+		return false;
 
 	Transform gt = node->get_global_transform();
+	Transform gi = gt.affine_inverse();
 	float depth = node->get_depth()*0.5;
 	Vector3 n = gt.basis.get_axis(2).normalized();
 	Plane p(gt.origin+n*depth,n);
@@ -144,9 +136,11 @@ bool CollisionPolygonEditor::forward_spatial_input_event(Camera* p_camera,const 
 			if (!p.intersects_ray(ray_from,ray_dir,&spoint))
 				break;
 
+			spoint = gi.xform(spoint);
+
 			Vector2 cpoint(spoint.x,spoint.y);
 
-			//cpoint=snap_point(cpoint); snap?
+			cpoint=CanvasItemEditor::get_singleton()->snap_point(cpoint);
 
 			Vector<Vector2> poly = node->get_polygon();
 
@@ -358,9 +352,11 @@ bool CollisionPolygonEditor::forward_spatial_input_event(Camera* p_camera,const 
 				if (!p.intersects_ray(ray_from,ray_dir,&spoint))
 					break;
 
+				spoint = gi.xform(spoint);
+
 				Vector2 cpoint(spoint.x,spoint.y);
 
-				//cpoint=snap_point(cpoint);
+				cpoint=CanvasItemEditor::get_singleton()->snap_point(cpoint);
 				edited_point_pos = cpoint;
 
 				_polygon_draw();
@@ -542,6 +538,7 @@ void CollisionPolygonEditor::_bind_methods() {
 CollisionPolygonEditor::CollisionPolygonEditor(EditorNode *p_editor) {
 
 
+	node=NULL;
 	editor=p_editor;
 	undo_redo = editor->get_undo_redo();
 

@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -81,6 +81,7 @@ void HTTPClient::set_connection(const Ref<StreamPeer>& p_connection){
 
 	close();
 	connection=p_connection;
+	status=STATUS_CONNECTED;
 
 }
 
@@ -248,7 +249,7 @@ Error HTTPClient::poll(){
 							status=STATUS_SSL_HANDSHAKE_ERROR;
 							return ERR_CANT_CONNECT;
 						}
-						print_line("SSL! TURNED ON!");
+						//print_line("SSL! TURNED ON!");
 						connection=ssl;
 					}
 					status=STATUS_CONNECTED;
@@ -273,7 +274,7 @@ Error HTTPClient::poll(){
 			while(true) {
 				uint8_t byte;
 				int rec=0;
-				Error err = connection->get_partial_data(&byte,1,rec);
+				Error err = _get_http_data(&byte,1,rec);
 				if (err!=OK) {
 					close();
 					status=STATUS_CONNECTION_ERROR;
@@ -295,28 +296,30 @@ Error HTTPClient::poll(){
 					response_str.push_back(0);
 					String response;
 					response.parse_utf8((const char*)response_str.ptr());
-					print_line("END OF RESPONSE? :\n"+response+"\n------");
+					//print_line("END OF RESPONSE? :\n"+response+"\n------");
 					Vector<String> responses = response.split("\n");
 					body_size=0;
 					chunked=false;
 					body_left=0;
 					chunk_left=0;
+					response_str.clear();
 					response_headers.clear();
 					response_num = RESPONSE_OK;
 
 					for(int i=0;i<responses.size();i++) {
 
-						String s = responses[i].strip_edges();
+						String header = responses[i].strip_edges();
+						String s = header.to_lower();
 						if (s.length()==0)
-							continue;						
-						if (s.begins_with("Content-Length:")) {
+							continue;
+						if (s.begins_with("content-length:")) {
 							body_size = s.substr(s.find(":")+1,s.length()).strip_edges().to_int();
 							body_left=body_size;
 						}
 
-						if (s.begins_with("Transfer-Encoding:")) {
-							String encoding = s.substr(s.find(":")+1,s.length()).strip_edges();
-							print_line("TRANSFER ENCODING: "+encoding);
+						if (s.begins_with("transfer-encoding:")) {
+							String encoding = header.substr(header.find(":")+1,header.length()).strip_edges();
+							//print_line("TRANSFER ENCODING: "+encoding);
 							if (encoding=="chunked") {
 								chunked=true;
 							}
@@ -325,11 +328,11 @@ Error HTTPClient::poll(){
 
 						if (i==0 && responses[i].begins_with("HTTP")) {
 
-							String num = responses[i].get_slice(" ",1);
+							String num = responses[i].get_slicec(' ',1);
 							response_num=num.to_int();
 						} else {
 
-							response_headers.push_back(s);
+							response_headers.push_back(header);
 						}
 
 					}
@@ -417,7 +420,7 @@ ByteArray HTTPClient::read_response_body_chunk() {
 				//reading len
 				uint8_t b;
 				int rec=0;
-				err = connection->get_partial_data(&b,1,rec);
+				err = _get_http_data(&b,1,rec);
 
 				if (rec==0)
 					break;
@@ -471,7 +474,7 @@ ByteArray HTTPClient::read_response_body_chunk() {
 			} else {
 
 				int rec=0;
-				err = connection->get_partial_data(&chunk[chunk.size()-chunk_left],chunk_left,rec);
+				err = _get_http_data(&chunk[chunk.size()-chunk_left],chunk_left,rec);
 				if (rec==0) {
 					break;
 				}
@@ -502,18 +505,23 @@ ByteArray HTTPClient::read_response_body_chunk() {
 		}
 
 	} else {
+
+		int to_read = MIN(body_left,read_chunk_size);
 		ByteArray ret;
-		ret.resize(MAX(body_left,tmp_read.size()));
+		ret.resize(to_read);
 		ByteArray::Write w = ret.write();
 		int _offset = 0;
-		while (body_left > 0) {
-			ByteArray::Write r = tmp_read.write();
+		while (to_read > 0) {
 			int rec=0;
-			err = connection->get_partial_data(r.ptr(),MIN(body_left,tmp_read.size()),rec);
+			err = _get_http_data(w.ptr()+_offset,to_read,rec);
 			if (rec>0) {
-				copymem(w.ptr()+_offset,r.ptr(),rec);
 				body_left-=rec;
+				to_read-=rec;
 				_offset += rec;
+			} else {
+				if (to_read>0) //ended up reading less
+					ret.resize(_offset);
+				break;
 			}
 		}
 		if (body_left==0) {
@@ -557,10 +565,24 @@ bool HTTPClient::is_blocking_mode_enabled() const{
 	return blocking;
 }
 
+Error HTTPClient::_get_http_data(uint8_t* p_buffer, int p_bytes,int &r_received) {
+
+	if (blocking) {
+
+		Error err = connection->get_data(p_buffer,p_bytes);
+		if (err==OK)
+			r_received=p_bytes;
+		else
+			r_received=0;
+		return err;
+	} else {
+		return connection->get_partial_data(p_buffer,p_bytes,r_received);
+	}
+}
 
 void HTTPClient::_bind_methods() {
 
-	ObjectTypeDB::bind_method(_MD("connect:Error","host","port","use_ssl"),&HTTPClient::connect,DEFVAL(false),DEFVAL(true));
+	ObjectTypeDB::bind_method(_MD("connect:Error","host","port","use_ssl","verify_host"),&HTTPClient::connect,DEFVAL(false),DEFVAL(true));
 	ObjectTypeDB::bind_method(_MD("set_connection","connection:StreamPeer"),&HTTPClient::set_connection);
 	ObjectTypeDB::bind_method(_MD("request","method","url","headers","body"),&HTTPClient::request,DEFVAL(String()));
 	ObjectTypeDB::bind_method(_MD("send_body_text","body"),&HTTPClient::send_body_text);
@@ -574,12 +596,15 @@ void HTTPClient::_bind_methods() {
 	ObjectTypeDB::bind_method(_MD("get_response_headers_as_dictionary"),&HTTPClient::_get_response_headers_as_dictionary);
 	ObjectTypeDB::bind_method(_MD("get_response_body_length"),&HTTPClient::get_response_body_length);
 	ObjectTypeDB::bind_method(_MD("read_response_body_chunk"),&HTTPClient::read_response_body_chunk);
+	ObjectTypeDB::bind_method(_MD("set_read_chunk_size","bytes"),&HTTPClient::set_read_chunk_size);
 
 	ObjectTypeDB::bind_method(_MD("set_blocking_mode","enabled"),&HTTPClient::set_blocking_mode);
 	ObjectTypeDB::bind_method(_MD("is_blocking_mode_enabled"),&HTTPClient::is_blocking_mode_enabled);
 
 	ObjectTypeDB::bind_method(_MD("get_status"),&HTTPClient::get_status);
 	ObjectTypeDB::bind_method(_MD("poll:Error"),&HTTPClient::poll);
+
+    ObjectTypeDB::bind_method(_MD("query_string_from_dict:String","fields"),&HTTPClient::query_string_from_dict);
 
 
 	BIND_CONSTANT( METHOD_GET );
@@ -664,6 +689,21 @@ void HTTPClient::_bind_methods() {
 
 }
 
+void HTTPClient::set_read_chunk_size(int p_size) {
+	ERR_FAIL_COND(p_size<256 || p_size>(1<<24));
+	read_chunk_size=p_size;
+}
+
+String HTTPClient::query_string_from_dict(const Dictionary& p_dict) {
+    String query = "";
+    Array keys = p_dict.keys();
+    for (int i = 0; i < keys.size(); ++i) {
+        query += "&" + String(keys[i]).http_escape() + "=" + String(p_dict[keys[i]]).http_escape();
+    }
+    query.erase(0, 1);
+    return query;
+}
+
 HTTPClient::HTTPClient(){
 
 	tcp_connection = StreamPeerTCP::create_ref();
@@ -677,12 +717,11 @@ HTTPClient::HTTPClient(){
 	response_num=0;
 	ssl=false;
 	blocking=false;
-	tmp_read.resize(4096);
+	read_chunk_size=4096;
 }
 
 HTTPClient::~HTTPClient(){
 
 
 }
-
 

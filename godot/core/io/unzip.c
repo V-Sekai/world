@@ -10,7 +10,7 @@
          Modifications for Zip64 support on both zip and unzip
          Copyright (C) 2009-2010 Mathias Svensson ( http://result42.com )
 
-         For more info read MiniZip_info.txt
+         For more info read LICENSE-MiniZip.txt
 
 
   ------------------------------------------------------------------------------------
@@ -1788,7 +1788,7 @@ extern int ZEXPORT unzReadCurrentFile  (unzFile file, voidp buf, unsigned len)
         return UNZ_PARAMERROR;
 
 
-    if ((pfile_in_zip_read_info->read_buffer == NULL))
+    if (pfile_in_zip_read_info->read_buffer==NULL)
         return UNZ_END_OF_LIST_OF_FILE;
     if (len==0)
         return 0;

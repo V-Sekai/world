@@ -5,7 +5,7 @@
 /*                           GODOT ENGINE                                */
 /*                    http://www.godotengine.org                         */
 /*************************************************************************/
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2007-2016 Juan Linietsky, Ariel Manzur.                 */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -59,6 +59,11 @@ void ParallaxLayer::_update_mirroring() {
 void ParallaxLayer::set_mirroring(const Size2& p_mirroring) {
 
 	mirroring=p_mirroring;
+	if (mirroring.x<0)
+		mirroring.x=0;
+	if (mirroring.y<0)
+		mirroring.y=0;
+
 	_update_mirroring();
 
 }
