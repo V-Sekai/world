@@ -1,679 +1,518 @@
-/**************************************************************************/
-/*  os.cpp                                                                */
-/**************************************************************************/
-/*                         This file is part of:                          */
-/*                             GODOT ENGINE                               */
-/*                        https://godotengine.org                         */
-/**************************************************************************/
-/* Copyright (c) 2014-present Godot Engine contributors (see AUTHORS.md). */
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                  */
-/*                                                                        */
-/* Permission is hereby granted, free of charge, to any person obtaining  */
-/* a copy of this software and associated documentation files (the        */
-/* "Software"), to deal in the Software without restriction, including    */
-/* without limitation the rights to use, copy, modify, merge, publish,    */
-/* distribute, sublicense, and/or sell copies of the Software, and to     */
-/* permit persons to whom the Software is furnished to do so, subject to  */
-/* the following conditions:                                              */
-/*                                                                        */
-/* The above copyright notice and this permission notice shall be         */
-/* included in all copies or substantial portions of the Software.        */
-/*                                                                        */
-/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,        */
-/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF     */
-/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. */
-/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY   */
-/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,   */
-/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
-/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
-/**************************************************************************/
-
+/*************************************************************************/
+/*  os.cpp                                                               */
+/*************************************************************************/
+/*                       This file is part of:                           */
+/*                           GODOT ENGINE                                */
+/*                    http://www.godotengine.org                         */
+/*************************************************************************/
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/*                                                                       */
+/* Permission is hereby granted, free of charge, to any person obtaining */
+/* a copy of this software and associated documentation files (the       */
+/* "Software"), to deal in the Software without restriction, including   */
+/* without limitation the rights to use, copy, modify, merge, publish,   */
+/* distribute, sublicense, and/or sell copies of the Software, and to    */
+/* permit persons to whom the Software is furnished to do so, subject to */
+/* the following conditions:                                             */
+/*                                                                       */
+/* The above copyright notice and this permission notice shall be        */
+/* included in all copies or substantial portions of the Software.       */
+/*                                                                       */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
+/*************************************************************************/
 #include "os.h"
-
-#include "core/config/project_settings.h"
-#include "core/input/input.h"
-#include "core/io/dir_access.h"
-#include "core/io/file_access.h"
-#include "core/io/json.h"
-#include "core/os/midi_driver.h"
-#include "core/version_generated.gen.h"
-
+#include "os/file_access.h"
 #include <stdarg.h>
+#include "dir_access.h"
+#include "globals.h"
 
-#ifdef MINGW_ENABLED
-#define MINGW_STDTHREAD_REDUNDANCY_WARNING
-#include "thirdparty/mingw-std-threads/mingw.thread.h"
-#define THREADING_NAMESPACE mingw_stdthread
-#else
-#include <thread>
-#define THREADING_NAMESPACE std
-#endif
 
-OS *OS::singleton = nullptr;
-uint64_t OS::target_ticks = 0;
+OS* OS::singleton=NULL;
 
-OS *OS::get_singleton() {
+OS* OS::get_singleton() {
+
 	return singleton;
 }
 
-uint64_t OS::get_ticks_msec() const {
-	return get_ticks_usec() / 1000ULL;
-}
+uint32_t OS::get_ticks_msec() const
+{ return get_ticks_usec()/1000; }
 
-double OS::get_unix_time() const {
+uint64_t OS::get_unix_time() const {
+
 	return 0;
+};
+
+void OS::debug_break() {
+
+	// something
+};
+
+
+void OS::print_error(const char* p_function,const char* p_file,int p_line,const char *p_code,const char*p_rationale,ErrorType p_type) {
+
+	if (p_rationale && *p_rationale)
+		print("**ERROR**: %s\n ",p_rationale);
+	print("**ERROR**: At: %s:%i:%s() - %s\n",p_file,p_line,p_function,p_code);
 }
 
-void OS::_set_logger(CompositeLogger *p_logger) {
-	if (_logger) {
-		memdelete(_logger);
-	}
-	_logger = p_logger;
-}
+void OS::print(const char* p_format, ...) {
 
-void OS::add_logger(Logger *p_logger) {
-	if (!_logger) {
-		Vector<Logger *> loggers;
-		loggers.push_back(p_logger);
-		_logger = memnew(CompositeLogger(loggers));
-	} else {
-		_logger->add_logger(p_logger);
-	}
-}
-
-String OS::get_identifier() const {
-	return get_name().to_lower();
-}
-
-void OS::print_error(const char *p_function, const char *p_file, int p_line, const char *p_code, const char *p_rationale, bool p_editor_notify, Logger::ErrorType p_type) {
-	if (!_stderr_enabled) {
-		return;
-	}
-
-	if (_logger) {
-		_logger->log_error(p_function, p_file, p_line, p_code, p_rationale, p_editor_notify, p_type);
-	}
-}
-
-void OS::print(const char *p_format, ...) {
-	if (!_stdout_enabled) {
-		return;
-	}
 
 	va_list argp;
 	va_start(argp, p_format);
 
-	if (_logger) {
-		_logger->logv(p_format, argp, false);
-	}
+	vprint(p_format, argp);
 
 	va_end(argp);
-}
+};
 
-void OS::print_rich(const char *p_format, ...) {
-	if (!_stdout_enabled) {
-		return;
-	}
+void OS::printerr(const char* p_format, ...) {
 
 	va_list argp;
 	va_start(argp, p_format);
 
-	if (_logger) {
-		_logger->logv(p_format, argp, false);
-	}
+	vprint(p_format, argp, true);
 
 	va_end(argp);
+};
+
+
+void OS::set_iterations_per_second(int p_ips) {
+
+	ips=p_ips;
+}
+int OS::get_iterations_per_second() const {
+
+	return ips;
 }
 
-void OS::printerr(const char *p_format, ...) {
-	if (!_stderr_enabled) {
-		return;
-	}
-
-	va_list argp;
-	va_start(argp, p_format);
-
-	if (_logger) {
-		_logger->logv(p_format, argp, true);
-	}
-
-	va_end(argp);
+void OS::set_target_fps(int p_fps) {
+	_target_fps=p_fps>0? p_fps : 0;
 }
 
-void OS::alert(const String &p_alert, const String &p_title) {
-	fprintf(stderr, "%s: %s\n", p_title.utf8().get_data(), p_alert.utf8().get_data());
+float OS::get_target_fps() const {
+	return _target_fps;
 }
 
 void OS::set_low_processor_usage_mode(bool p_enabled) {
-	low_processor_usage_mode = p_enabled;
+
+	low_processor_usage_mode=p_enabled;
 }
 
 bool OS::is_in_low_processor_usage_mode() const {
+
 	return low_processor_usage_mode;
 }
 
-void OS::set_low_processor_usage_mode_sleep_usec(int p_usec) {
-	low_processor_usage_mode_sleep_usec = p_usec;
-}
+void OS::set_clipboard(const String& p_text) {
 
-int OS::get_low_processor_usage_mode_sleep_usec() const {
-	return low_processor_usage_mode_sleep_usec;
+	_local_clipboard=p_text;
 }
+String OS::get_clipboard() const {
 
-void OS::set_delta_smoothing(bool p_enabled) {
-	_delta_smoothing_enabled = p_enabled;
-}
-
-bool OS::is_delta_smoothing_enabled() const {
-	return _delta_smoothing_enabled;
+	return _local_clipboard;
 }
 
 String OS::get_executable_path() const {
+
 	return _execpath;
 }
 
-int OS::get_process_id() const {
+int OS::get_process_ID() const {
+
 	return -1;
+};
+
+uint64_t OS::get_frames_drawn() {
+
+	return frames_drawn;
 }
 
 bool OS::is_stdout_verbose() const {
+
 	return _verbose_stdout;
 }
 
-bool OS::is_stdout_debug_enabled() const {
-	return _debug_stdout;
+void OS::set_last_error(const char* p_error) {
+
+	GLOBAL_LOCK_FUNCTION
+	if (p_error==NULL)
+		p_error="Unknown Error";
+
+	if (last_error)
+		memfree(last_error);
+	last_error=NULL;
+	int len =0;
+	while(p_error[len++]);
+
+	last_error=(char*)memalloc(len);
+	for(int i=0;i<len;i++)
+		last_error[i]=p_error[i];
+
 }
 
-bool OS::is_stdout_enabled() const {
-	return _stdout_enabled;
+const char *OS::get_last_error() const {
+	GLOBAL_LOCK_FUNCTION
+	return last_error?last_error:"";
 }
 
-bool OS::is_stderr_enabled() const {
-	return _stderr_enabled;
+void OS::dump_memory_to_file(const char* p_file) {
+
+	Memory::dump_static_mem_to_file(p_file);
 }
 
-void OS::set_stdout_enabled(bool p_enabled) {
-	_stdout_enabled = p_enabled;
+static FileAccess *_OSPRF=NULL;
+
+static void _OS_printres(Object *p_obj) {
+
+	Resource *res = p_obj->cast_to<Resource>();
+	if (!res)
+		return;
+
+	String str = itos(res->get_instance_ID())+String(res->get_type())+":"+String(res->get_name())+" - "+res->get_path();
+	if (_OSPRF)
+		_OSPRF->store_line(str);
+	else
+		print_line(str);
+
 }
 
-void OS::set_stderr_enabled(bool p_enabled) {
-	_stderr_enabled = p_enabled;
+bool OS::has_virtual_keyboard() const {
+
+	return false;
+}
+void OS::show_virtual_keyboard(const String& p_existing_text,const Rect2& p_screen_rect) {
+
+
+
+}
+
+void OS::hide_virtual_keyboard(){
+
+
+}
+
+
+void OS::print_all_resources(String p_to_file) {
+
+	ERR_FAIL_COND(p_to_file!="" && _OSPRF);
+	if (p_to_file!="") {
+
+		Error err;
+		_OSPRF=FileAccess::open(p_to_file,FileAccess::WRITE,&err);
+		if (err!=OK) {
+			_OSPRF=NULL;
+			ERR_FAIL_COND(err!=OK);
+		}
+	}
+
+	ObjectDB::debug_objects(_OS_printres);
+
+	if (p_to_file!="") {
+
+		if (_OSPRF)
+			memdelete(_OSPRF);
+		_OSPRF=NULL;
+	}
+}
+
+void OS::print_resources_in_use(bool p_short) {
+
+
+	ResourceCache::dump(NULL,p_short);
+}
+
+void OS::dump_resources_to_file(const char* p_file) {
+
+	ResourceCache::dump(p_file);
+}
+
+
+void OS::clear_last_error() {
+
+	GLOBAL_LOCK_FUNCTION
+	if (last_error)
+		memfree(last_error);
+	last_error=NULL;
+}
+void OS::set_frame_delay(uint32_t p_msec) {
+
+	_frame_delay=p_msec;
+}
+
+uint32_t OS::get_frame_delay() const {
+
+	return _frame_delay;
+}
+
+void OS::set_no_window_mode(bool p_enable) {
+
+	_no_window=p_enable;
+}
+
+bool OS::is_no_window_mode_enabled() const {
+
+	return _no_window;
 }
 
 int OS::get_exit_code() const {
+
 	return _exit_code;
 }
-
 void OS::set_exit_code(int p_code) {
-	_exit_code = p_code;
+
+	_exit_code=p_code;
 }
 
 String OS::get_locale() const {
+
 	return "en";
 }
 
-// Non-virtual helper to extract the 2 or 3-letter language code from
-// `get_locale()` in a way that's consistent for all platforms.
-String OS::get_locale_language() const {
-	return get_locale().left(3).replace("_", "");
-}
-
-// Embedded PCK offset.
-uint64_t OS::get_embedded_pck_offset() const {
-	return 0;
-}
-
-// Helper function to ensure that a dir name/path will be valid on the OS
-String OS::get_safe_dir_name(const String &p_dir_name, bool p_allow_paths) const {
-	String safe_dir_name = p_dir_name;
-	Vector<String> invalid_chars = String(": * ? \" < > |").split(" ");
-	if (p_allow_paths) {
-		// Dir separators are allowed, but disallow ".." to avoid going up the filesystem
-		invalid_chars.push_back("..");
-		safe_dir_name = safe_dir_name.replace("\\", "/").strip_edges();
-	} else {
-		invalid_chars.push_back("/");
-		invalid_chars.push_back("\\");
-		safe_dir_name = safe_dir_name.strip_edges();
-
-		// These directory names are invalid.
-		if (safe_dir_name == ".") {
-			safe_dir_name = "dot";
-		} else if (safe_dir_name == "..") {
-			safe_dir_name = "twodots";
-		}
-	}
-
-	for (int i = 0; i < invalid_chars.size(); i++) {
-		safe_dir_name = safe_dir_name.replace(invalid_chars[i], "-");
-	}
-	return safe_dir_name;
-}
-
-// Path to data, config, cache, etc. OS-specific folders
-
-// Get properly capitalized engine name for system paths
-String OS::get_godot_dir_name() const {
-	// Default to lowercase, so only override when different case is needed
-	return String(VERSION_SHORT_NAME).to_lower();
-}
-
-// OS equivalent of XDG_DATA_HOME
-String OS::get_data_path() const {
-	return ".";
-}
-
-// OS equivalent of XDG_CONFIG_HOME
-String OS::get_config_path() const {
-	return ".";
-}
-
-// OS equivalent of XDG_CACHE_HOME
-String OS::get_cache_path() const {
-	return ".";
-}
-
-// Path to macOS .app bundle resources
-String OS::get_bundle_resource_dir() const {
-	return ".";
-}
-
-// Path to macOS .app bundle embedded icon
-String OS::get_bundle_icon_path() const {
-	return String();
-}
-
-// OS specific path for user://
-String OS::get_user_data_dir() const {
-	return ".";
-}
-
-// Absolute path to res://
 String OS::get_resource_dir() const {
-	return ProjectSettings::get_singleton()->get_resource_path();
+
+	return Globals::get_singleton()->get_resource_path();
 }
 
-// Access system-specific dirs like Documents, Downloads, etc.
-String OS::get_system_dir(SystemDir p_dir, bool p_shared_storage) const {
+
+String OS::get_system_dir(SystemDir p_dir) const {
+
 	return ".";
 }
+
+String OS::get_data_dir() const {
+
+	return ".";
+};
 
 Error OS::shell_open(String p_uri) {
 	return ERR_UNAVAILABLE;
-}
+};
 
-Error OS::shell_show_in_file_manager(String p_path, bool p_open_folder) {
-	p_path = p_path.trim_prefix("file://");
-
-	if (!DirAccess::dir_exists_absolute(p_path)) {
-		p_path = p_path.get_base_dir();
-	}
-
-	p_path = String("file://") + p_path;
-
-	return shell_open(p_path);
-}
 // implement these with the canvas?
+Error OS::dialog_show(String p_title, String p_description, Vector<String> p_buttons, Object* p_obj, String p_callback) {
 
-uint64_t OS::get_static_memory_usage() const {
-	return Memory::get_mem_usage();
+	while (true) {
+
+		print("%ls\n--------\n%ls\n", p_title.c_str(), p_description.c_str());
+		for (int i=0; i<p_buttons.size(); i++) {
+			if (i>0) print(", ");
+			print("%i=%ls", i+1, p_buttons[i].c_str());
+		};
+		print("\n");
+		String res = get_stdin_string().strip_edges();
+		if (!res.is_numeric())
+			continue;
+		int n = res.to_int();
+		if (n < 0 || n >= p_buttons.size())
+			continue;
+		if (p_obj && p_callback != "")
+			p_obj->call_deferred(p_callback, n);
+		break;
+	};
+	return OK;
+};
+
+Error OS::dialog_input_text(String p_title, String p_description, String p_partial, Object* p_obj, String p_callback)  {
+
+	ERR_FAIL_COND_V(!p_obj, FAILED);
+	ERR_FAIL_COND_V(p_callback == "", FAILED);
+	print("%ls\n---------\n%ls\n[%ls]:\n", p_title.c_str(), p_description.c_str(), p_partial.c_str());
+
+	String res = get_stdin_string().strip_edges();
+	bool success = true;
+	if (res == "") {
+		res = p_partial;
+	};
+
+	p_obj->call_deferred(p_callback, success, res);
+
+	return OK;
+};
+
+int OS::get_static_memory_usage() const {
+
+	return Memory::get_static_mem_usage();
+}
+int OS::get_dynamic_memory_usage() const{
+
+	return Memory::get_dynamic_mem_usage();
 }
 
-uint64_t OS::get_static_memory_peak_usage() const {
-	return Memory::get_mem_max_usage();
+int OS::get_static_memory_peak_usage() const {
+
+	return Memory::get_static_mem_max_usage();
 }
 
-Error OS::set_cwd(const String &p_cwd) {
+Error OS::set_cwd(const String& p_cwd) {
+
 	return ERR_CANT_OPEN;
 }
 
-Dictionary OS::get_memory_info() const {
-	Dictionary meminfo;
+bool OS::has_touchscreen_ui_hint() const {
 
-	meminfo["physical"] = -1;
-	meminfo["free"] = -1;
-	meminfo["available"] = -1;
-	meminfo["stack"] = -1;
+	//return false;
+	return GLOBAL_DEF("display/emulate_touchscreen",false);
+}
 
-	return meminfo;
+int OS::get_free_static_memory() const {
+
+	return Memory::get_static_mem_available();
 }
 
 void OS::yield() {
+
+
 }
 
-void OS::ensure_user_data_dir() {
-	String dd = get_user_data_dir();
-	if (DirAccess::exists(dd)) {
+void OS::set_screen_orientation(ScreenOrientation p_orientation) {
+
+	_orientation=p_orientation;
+}
+
+OS::ScreenOrientation OS::get_screen_orientation() const {
+
+	return (OS::ScreenOrientation)_orientation;
+}
+
+
+void OS::_ensure_data_dir() {
+
+	String dd = get_data_dir();
+	DirAccess *da = DirAccess::open(dd);
+	if (da) {
+		memdelete(da);
 		return;
 	}
 
-	Ref<DirAccess> da = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
+	da = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
 	Error err = da->make_dir_recursive(dd);
-	ERR_FAIL_COND_MSG(err != OK, "Error attempting to create data dir: " + dd + ".");
+	if (err!=OK) {
+		ERR_EXPLAIN("Error attempting to create data dir: "+dd);
+	}
+	ERR_FAIL_COND(err!=OK);
+
+	memdelete(da);
+
+
+}
+
+void OS::set_icon(const Image& p_icon) {
+
+
 }
 
 String OS::get_model_name() const {
-	return "GenericDevice";
+
+    return "GenericDevice";
 }
 
-void OS::set_cmdline(const char *p_execpath, const List<String> &p_args, const List<String> &p_user_args) {
-	_execpath = String::utf8(p_execpath);
+
+void OS::set_cmdline(const char* p_execpath, const List<String>& p_args) {
+
+	_execpath = p_execpath;
 	_cmdline = p_args;
-	_user_args = p_user_args;
+};
+
+void OS::release_rendering_thread() {
+
+
 }
 
-String OS::get_unique_id() const {
-	return "";
+void OS::make_rendering_thread() {
+
+
+}
+
+void OS::swap_buffers() {
+
+}
+
+String OS::get_unique_ID() const {
+
+	ERR_FAIL_V("");
 }
 
 int OS::get_processor_count() const {
-	return THREADING_NAMESPACE::thread::hardware_concurrency();
+
+	return 1;
 }
 
-String OS::get_processor_name() const {
-	return "";
-}
+Error OS::native_video_play(String p_path, float p_volume, String p_audio_track, String p_subtitle_track) {
 
-void OS::set_has_server_feature_callback(HasServerFeatureCallback p_callback) {
-	has_server_feature_callback = p_callback;
-}
+	return FAILED;
+};
 
-bool OS::has_feature(const String &p_feature) {
-	// Feature tags are always lowercase for consistency.
-	if (p_feature == get_identifier()) {
-		return true;
-	}
-
-	if (p_feature == "movie") {
-		return _writing_movie;
-	}
-
-#ifdef DEBUG_ENABLED
-	if (p_feature == "debug") {
-		return true;
-	}
-#endif // DEBUG_ENABLED
-
-#ifdef TOOLS_ENABLED
-	if (p_feature == "editor") {
-		return true;
-	}
-#else
-	if (p_feature == "template") {
-		return true;
-	}
-#ifdef DEBUG_ENABLED
-	if (p_feature == "template_debug") {
-		return true;
-	}
-#else
-	if (p_feature == "template_release" || p_feature == "release") {
-		return true;
-	}
-#endif // DEBUG_ENABLED
-#endif // TOOLS_ENABLED
-
-#ifdef REAL_T_IS_DOUBLE
-	if (p_feature == "double") {
-		return true;
-	}
-#else
-	if (p_feature == "single") {
-		return true;
-	}
-#endif // REAL_T_IS_DOUBLE
-
-	if (sizeof(void *) == 8 && p_feature == "64") {
-		return true;
-	}
-	if (sizeof(void *) == 4 && p_feature == "32") {
-		return true;
-	}
-#if defined(__x86_64) || defined(__x86_64__) || defined(__amd64__) || defined(__i386) || defined(__i386__) || defined(_M_IX86) || defined(_M_X64)
-#if defined(__x86_64) || defined(__x86_64__) || defined(__amd64__) || defined(_M_X64)
-	if (p_feature == "x86_64") {
-		return true;
-	}
-#elif defined(__i386) || defined(__i386__) || defined(_M_IX86)
-	if (p_feature == "x86_32") {
-		return true;
-	}
-#endif
-	if (p_feature == "x86") {
-		return true;
-	}
-#elif defined(__arm__) || defined(__aarch64__) || defined(_M_ARM) || defined(_M_ARM64)
-#if defined(__aarch64__) || defined(_M_ARM64)
-	if (p_feature == "arm64") {
-		return true;
-	}
-#elif defined(__arm__) || defined(_M_ARM)
-	if (p_feature == "arm32") {
-		return true;
-	}
-#endif
-#if defined(__ARM_ARCH_7A__)
-	if (p_feature == "armv7a" || p_feature == "armv7") {
-		return true;
-	}
-#endif
-#if defined(__ARM_ARCH_7S__)
-	if (p_feature == "armv7s" || p_feature == "armv7") {
-		return true;
-	}
-#endif
-	if (p_feature == "arm") {
-		return true;
-	}
-#elif defined(__riscv)
-#if __riscv_xlen == 8
-	if (p_feature == "rv64") {
-		return true;
-	}
-#endif
-	if (p_feature == "riscv") {
-		return true;
-	}
-#elif defined(__powerpc__)
-#if defined(__powerpc64__)
-	if (p_feature == "ppc64") {
-		return true;
-	}
-#endif
-	if (p_feature == "ppc") {
-		return true;
-	}
-#elif defined(__wasm__)
-#if defined(__wasm64__)
-	if (p_feature == "wasm64") {
-		return true;
-	}
-#elif defined(__wasm32__)
-	if (p_feature == "wasm32") {
-		return true;
-	}
-#endif
-	if (p_feature == "wasm") {
-		return true;
-	}
-#endif
-
-#if defined(IOS_SIMULATOR)
-	if (p_feature == "simulator") {
-		return true;
-	}
-#endif
-
-	if (_check_internal_feature_support(p_feature)) {
-		return true;
-	}
-
-	if (has_server_feature_callback && has_server_feature_callback(p_feature)) {
-		return true;
-	}
-
-	if (ProjectSettings::get_singleton()->has_custom_feature(p_feature)) {
-		return true;
-	}
+bool OS::native_video_is_playing() const {
 
 	return false;
+};
+
+void OS::native_video_pause() {
+
+};
+
+void OS::native_video_stop() {
+
+};
+
+void OS::set_mouse_mode(MouseMode p_mode) {
+
 }
 
-bool OS::is_sandboxed() const {
+bool OS::can_use_threads() const {
+
+#ifdef NO_THREADS
 	return false;
-}
-
-void OS::set_restart_on_exit(bool p_restart, const List<String> &p_restart_arguments) {
-	restart_on_exit = p_restart;
-	restart_commandline = p_restart_arguments;
-}
-
-bool OS::is_restart_on_exit_set() const {
-	return restart_on_exit;
-}
-
-List<String> OS::get_restart_on_exit_arguments() const {
-	return restart_commandline;
-}
-
-PackedStringArray OS::get_connected_midi_inputs() {
-	if (MIDIDriver::get_singleton()) {
-		return MIDIDriver::get_singleton()->get_connected_inputs();
-	}
-
-	PackedStringArray list;
-	ERR_FAIL_V_MSG(list, vformat("MIDI input isn't supported on %s.", OS::get_singleton()->get_name()));
-}
-
-void OS::open_midi_inputs() {
-	if (MIDIDriver::get_singleton()) {
-		MIDIDriver::get_singleton()->open();
-	} else {
-		ERR_PRINT(vformat("MIDI input isn't supported on %s.", OS::get_singleton()->get_name()));
-	}
-}
-
-void OS::close_midi_inputs() {
-	if (MIDIDriver::get_singleton()) {
-		MIDIDriver::get_singleton()->close();
-	} else {
-		ERR_PRINT(vformat("MIDI input isn't supported on %s.", OS::get_singleton()->get_name()));
-	}
-}
-
-void OS::add_frame_delay(bool p_can_draw) {
-	const uint32_t frame_delay = Engine::get_singleton()->get_frame_delay();
-	if (frame_delay) {
-		// Add fixed frame delay to decrease CPU/GPU usage. This doesn't take
-		// the actual frame time into account.
-		// Due to the high fluctuation of the actual sleep duration, it's not recommended
-		// to use this as a FPS limiter.
-		delay_usec(frame_delay * 1000);
-	}
-
-	// Add a dynamic frame delay to decrease CPU/GPU usage. This takes the
-	// previous frame time into account for a smoother result.
-	uint64_t dynamic_delay = 0;
-	if (is_in_low_processor_usage_mode() || !p_can_draw) {
-		dynamic_delay = get_low_processor_usage_mode_sleep_usec();
-	}
-	const int max_fps = Engine::get_singleton()->get_max_fps();
-	if (max_fps > 0 && !Engine::get_singleton()->is_editor_hint()) {
-		// Override the low processor usage mode sleep delay if the target FPS is lower.
-		dynamic_delay = MAX(dynamic_delay, (uint64_t)(1000000 / max_fps));
-	}
-
-	if (dynamic_delay > 0) {
-		target_ticks += dynamic_delay;
-		uint64_t current_ticks = get_ticks_usec();
-
-		if (current_ticks < target_ticks) {
-			delay_usec(target_ticks - current_ticks);
-		}
-
-		current_ticks = get_ticks_usec();
-		target_ticks = MIN(MAX(target_ticks, current_ticks - dynamic_delay), current_ticks + dynamic_delay);
-	}
-}
-
-Error OS::setup_remote_filesystem(const String &p_server_host, int p_port, const String &p_password, String &r_project_path) {
-	return default_rfs.synchronize_with_server(p_server_host, p_port, p_password, r_project_path);
-}
-
-OS::PreferredTextureFormat OS::get_preferred_texture_format() const {
-#if defined(__arm__) || defined(__aarch64__) || defined(_M_ARM) || defined(_M_ARM64)
-	return PREFERRED_TEXTURE_FORMAT_ETC2_ASTC; // By rule, ARM hardware uses ETC texture compression.
-#elif defined(__x86_64__) || defined(_M_X64) || defined(i386) || defined(__i386__) || defined(__i386) || defined(_M_IX86)
-	return PREFERRED_TEXTURE_FORMAT_S3TC_BPTC; // By rule, X86 hardware prefers S3TC and derivatives.
 #else
-	return PREFERRED_TEXTURE_FORMAT_S3TC_BPTC; // Override in platform if needed.
+	return true;
 #endif
 }
 
-void OS::set_use_benchmark(bool p_use_benchmark) {
-	use_benchmark = p_use_benchmark;
+OS::MouseMode OS::get_mouse_mode() const{
+
+	return MOUSE_MODE_VISIBLE;
 }
 
-bool OS::is_use_benchmark_set() {
-	return use_benchmark;
+void OS::set_time_scale(float p_scale) {
+
+	_time_scale=p_scale;
 }
 
-void OS::set_benchmark_file(const String &p_benchmark_file) {
-	benchmark_file = p_benchmark_file;
+float OS::get_time_scale() const {
+
+	return _time_scale;
 }
 
-String OS::get_benchmark_file() {
-	return benchmark_file;
-}
-
-void OS::benchmark_begin_measure(const String &p_what) {
-#ifdef TOOLS_ENABLED
-	start_benchmark_from[p_what] = OS::get_singleton()->get_ticks_usec();
-#endif
-}
-void OS::benchmark_end_measure(const String &p_what) {
-#ifdef TOOLS_ENABLED
-	uint64_t total = OS::get_singleton()->get_ticks_usec() - start_benchmark_from[p_what];
-	double total_f = double(total) / double(1000000);
-
-	startup_benchmark_json[p_what] = total_f;
-#endif
-}
-
-void OS::benchmark_dump() {
-#ifdef TOOLS_ENABLED
-	if (!use_benchmark) {
-		return;
-	}
-	if (!benchmark_file.is_empty()) {
-		Ref<FileAccess> f = FileAccess::open(benchmark_file, FileAccess::WRITE);
-		if (f.is_valid()) {
-			Ref<JSON> json;
-			json.instantiate();
-			f->store_string(json->stringify(startup_benchmark_json, "\t", false, true));
-		}
-	} else {
-		List<Variant> keys;
-		startup_benchmark_json.get_key_list(&keys);
-		print_line("BENCHMARK:");
-		for (const Variant &K : keys) {
-			print_line("\t-", K, ": ", startup_benchmark_json[K], +" sec.");
-		}
-	}
-#endif
-}
 
 OS::OS() {
-	singleton = this;
-
-	Vector<Logger *> loggers;
-	loggers.push_back(memnew(StdLogger));
-	_set_logger(memnew(CompositeLogger(loggers)));
+	last_error=NULL;
+	frames_drawn=0;
+	singleton=this;
+	ips=60;
+	low_processor_usage_mode=false;
+	_verbose_stdout=false;
+	_frame_delay=0;
+	_no_window=false;
+	_exit_code=0;
+	_orientation=SCREEN_LANDSCAPE;
+	_fps=1;
+	_target_fps=0;
+	_render_thread_mode=RENDER_THREAD_SAFE;
+	_time_scale=1.0;
+	Math::seed(1234567);
 }
+
 
 OS::~OS() {
-	if (_logger) {
-		memdelete(_logger);
-	}
-	singleton = nullptr;
+
+	singleton=NULL;
 }
+
+

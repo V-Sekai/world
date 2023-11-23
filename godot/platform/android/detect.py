@@ -1,209 +1,187 @@
 import os
 import sys
+import string
 import platform
-import subprocess
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from SCons import Environment
-
-
+def is_active():
+	return True
+	
 def get_name():
-    return "Android"
-
+	return "Android"
 
 def can_build():
-    return os.path.exists(get_env_android_sdk_root())
 
+        import os
+        if (not os.environ.has_key("ANDROID_NDK_ROOT")):
+        	return False
+
+	return True
 
 def get_opts():
-    from SCons.Variables import BoolVariable
 
-    return [
-        ("ANDROID_HOME", "Path to the Android SDK", get_env_android_sdk_root()),
-        (
-            "ndk_platform",
-            'Target platform (android-<api>, e.g. "android-' + str(get_min_target_api()) + '")',
-            "android-" + str(get_min_target_api()),
-        ),
-        BoolVariable("store_release", "Editor build for Google Play Store (for official builds only)", False),
-    ]
+	return [
+	     ('ANDROID_NDK_ROOT', 'the path to Android NDK', os.environ.get("ANDROID_NDK_ROOT", 0)), 
+             ('NDK_TOOLCHAIN', 'toolchain to use for the NDK',"arm-eabi-4.4.0"), 	                      
+             #android 2.3       
+		 ('ndk_platform', 'compile for platform: (2.2,2.3)',"2.2"),
+		 ('NDK_TARGET', 'toolchain to use for the NDK',"arm-linux-androideabi-4.8"),
+		('android_stl','enable STL support in android port (for modules)','no'),
+		('armv6','compile for older phones running arm v6 (instead of v7+neon+smp)','no'),
+		 ('x86','Xompile for Android-x86','no')
 
-
-def get_doc_classes():
-    return [
-        "EditorExportPlatformAndroid",
-    ]
-
-
-def get_doc_path():
-    return "doc_classes"
-
-
-# Return the ANDROID_HOME environment variable.
-def get_env_android_sdk_root():
-    return os.environ.get("ANDROID_HOME", os.environ.get("ANDROID_SDK_ROOT", ""))
-
-
-def get_min_sdk_version(platform):
-    return int(platform.split("-")[1])
-
-
-def get_android_ndk_root(env):
-    return env["ANDROID_HOME"] + "/ndk/" + get_ndk_version()
-
-
-# This is kept in sync with the value in 'platform/android/java/app/config.gradle'.
-def get_ndk_version():
-    return "23.2.8568313"
-
-
-# This is kept in sync with the value in 'platform/android/java/app/config.gradle'.
-def get_min_target_api():
-    return 21
-
+	]
 
 def get_flags():
-    return [
-        ("arch", "arm64"),  # Default for convenience.
-        ("target", "template_debug"),
-    ]
+
+	return [
+		('tools', 'no'),
+		('nedmalloc', 'no'),
+		('builtin_zlib', 'no'),
+                ('openssl','builtin'), #use builtin openssl
+		('theora','no'), #use builtin openssl
+
+        ]
 
 
-# Check if Android NDK version is installed
-# If not, install it.
-def install_ndk_if_needed(env):
-    print("Checking for Android NDK...")
-    sdk_root = env["ANDROID_HOME"]
-    if not os.path.exists(get_android_ndk_root(env)):
-        extension = ".bat" if os.name == "nt" else ""
-        sdkmanager = sdk_root + "/cmdline-tools/latest/bin/sdkmanager" + extension
-        if os.path.exists(sdkmanager):
-            # Install the Android NDK
-            print("Installing Android NDK...")
-            ndk_download_args = "ndk;" + get_ndk_version()
-            subprocess.check_call([sdkmanager, ndk_download_args])
-        else:
-            print("Cannot find " + sdkmanager)
-            print(
-                "Please ensure ANDROID_HOME is correct and cmdline-tools are installed, or install NDK version "
-                + get_ndk_version()
-                + " manually."
-            )
-            sys.exit()
-    env["ANDROID_NDK_ROOT"] = get_android_ndk_root(env)
+def create(env):
+	tools = env['TOOLS']
+	if "mingw" in tools:
+		tools.remove('mingw')
+	if "applelink" in tools:
+		tools.remove("applelink")
+		env.Tool('gcc')
+	return env.Clone(tools=tools);
 
+def configure(env):
 
-def configure(env: "Environment"):
-    # Validate arch.
-    supported_arches = ["x86_32", "x86_64", "arm32", "arm64"]
-    if env["arch"] not in supported_arches:
-        print(
-            'Unsupported CPU architecture "%s" for Android. Supported architectures are: %s.'
-            % (env["arch"], ", ".join(supported_arches))
-        )
-        sys.exit()
+	if env['x86']=='yes':
+		env['NDK_TARGET']='x86-4.8'
 
-    if get_min_sdk_version(env["ndk_platform"]) < get_min_target_api():
-        print(
-            "WARNING: minimum supported Android target api is %d. Forcing target api %d."
-            % (get_min_target_api(), get_min_target_api())
-        )
-        env["ndk_platform"] = "android-" + str(get_min_target_api())
+	if env['PLATFORM'] == 'win32':
+		import methods
+		env.Tool('gcc')
+		env['SPAWN'] = methods.win32_spawn
+		env['SHLIBSUFFIX'] = '.so'
 
-    install_ndk_if_needed(env)
-    ndk_root = env["ANDROID_NDK_ROOT"]
+#	env.android_source_modules.append("../libs/apk_expansion")	
+	env.android_source_modules.append("../libs/google_play_services")	
+	env.android_source_modules.append("../libs/downloader_library")	
+	env.android_source_modules.append("../libs/play_licensing")	
+	
+	ndk_platform=""
 
-    # Architecture
+	ndk_platform="android-15"
 
-    if env["arch"] == "arm32":
-        target_triple = "armv7a-linux-androideabi"
-    elif env["arch"] == "arm64":
-        target_triple = "aarch64-linux-android"
-    elif env["arch"] == "x86_32":
-        target_triple = "i686-linux-android"
-    elif env["arch"] == "x86_64":
-        target_triple = "x86_64-linux-android"
+	print("Godot Android!!!!!")
 
-    target_option = ["-target", target_triple + str(get_min_sdk_version(env["ndk_platform"]))]
-    env.Append(ASFLAGS=[target_option, "-c"])
-    env.Append(CCFLAGS=target_option)
-    env.Append(LINKFLAGS=target_option)
+	env.Append(CPPPATH=['#platform/android'])
+	
+	if env['x86']=='yes':
+		env.extra_suffix=".x86"
+	
+	gcc_path=env["ANDROID_NDK_ROOT"]+"/toolchains/"+env["NDK_TARGET"]+"/prebuilt/";
+	
+	import os
+	if (sys.platform.find("linux")==0):
+		if (platform.architecture()[0]=='64bit' or os.path.isdir(gcc_path+"linux-x86_64/bin")): # check was not working
+			gcc_path=gcc_path+"/linux-x86_64/bin"
+		else:
+			gcc_path=gcc_path+"/linux-x86/bin"
+	elif (sys.platform=="darwin"):
+		gcc_path=gcc_path+"/darwin-x86_64/bin" #this may be wrong
+		env['SHLINKFLAGS'][1] = '-shared'
+	elif (os.name=="nt"):
+		gcc_path=gcc_path+"/windows/bin" #this may be wrong
+	
+	
 
-    # LTO
+	env['ENV']['PATH'] = gcc_path+":"+env['ENV']['PATH']
+	if env['x86']=='yes':
+		env['CC'] = gcc_path+'/i686-linux-android-gcc'
+		env['CXX'] = gcc_path+'/i686-linux-android-g++'
+		env['AR'] = gcc_path+"/i686-linux-android-ar"
+		env['RANLIB'] = gcc_path+"/i686-linux-android-ranlib"
+		env['AS'] = gcc_path+"/i686-linux-android-as"
+	else:
+		env['CC'] = gcc_path+'/arm-linux-androideabi-gcc'
+		env['CXX'] = gcc_path+'/arm-linux-androideabi-g++'
+		env['AR'] = gcc_path+"/arm-linux-androideabi-ar"
+		env['RANLIB'] = gcc_path+"/arm-linux-androideabi-ranlib"
+		env['AS'] = gcc_path+"/arm-linux-androideabi-as"
 
-    if env["lto"] == "auto":  # LTO benefits for Android (size, performance) haven't been clearly established yet.
-        env["lto"] = "none"
+	if env['x86']=='yes':
+		env['ARCH'] = 'arch-x86'
+	else:
+		env['ARCH'] = 'arch-arm'
 
-    if env["lto"] != "none":
-        if env["lto"] == "thin":
-            env.Append(CCFLAGS=["-flto=thin"])
-            env.Append(LINKFLAGS=["-flto=thin"])
-        else:
-            env.Append(CCFLAGS=["-flto"])
-            env.Append(LINKFLAGS=["-flto"])
+	import string
+	#include path
+	gcc_include=env["ANDROID_NDK_ROOT"]+"/platforms/"+ndk_platform+"/"+env['ARCH'] +"/usr/include"
+	ld_sysroot=env["ANDROID_NDK_ROOT"]+"/platforms/"+ndk_platform+"/"+env['ARCH']
+	#glue_include=env["ANDROID_NDK_ROOT"]+"/sources/android/native_app_glue"
+	ld_path=env["ANDROID_NDK_ROOT"]+"/platforms/"+ndk_platform+"/"+env['ARCH']+"/usr/lib"
+	env.Append(CPPPATH=[gcc_include])
+#	env['CCFLAGS'] = string.split('-DNO_THREADS -MMD -MP -MF -fpic -ffunction-sections -funwind-tables -fstack-protector -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__  -Wno-psabi -march=armv5te -mtune=xscale -msoft-float  -fno-exceptions -mthumb -fno-strict-aliasing -DANDROID -Wa,--noexecstack -DGLES2_ENABLED ')
 
-    # Compiler configuration
+	if env['x86']=='yes':
+		env['CCFLAGS'] = string.split('-DNO_STATVFS -MMD -MP -MF -fpic -ffunction-sections -funwind-tables -fstack-protector -D__GLIBC__  -Wno-psabi -ftree-vectorize -funsafe-math-optimizations -fno-strict-aliasing -DANDROID -Wa,--noexecstack -DGLES2_ENABLED -DGLES1_ENABLED')
+	elif env["armv6"]!="no":
+		env['CCFLAGS'] = string.split('-DNO_STATVFS -MMD -MP -MF -fpic -ffunction-sections -funwind-tables -fstack-protector -D__ARM_ARCH_6__ -D__GLIBC__  -Wno-psabi -march=armv6 -mfpu=vfp -mfloat-abi=softfp -funsafe-math-optimizations -fno-strict-aliasing -DANDROID -Wa,--noexecstack -DGLES2_ENABLED -DGLES1_ENABLED')
+	else:
+		env['CCFLAGS'] = string.split('-DNO_STATVFS -MMD -MP -MF -fpic -ffunction-sections -funwind-tables -fstack-protector -D__ARM_ARCH_7__ -D__GLIBC__  -Wno-psabi -march=armv6 -mfpu=neon -mfloat-abi=softfp -ftree-vectorize -funsafe-math-optimizations -fno-strict-aliasing -DANDROID -Wa,--noexecstack -DGLES2_ENABLED -DGLES1_ENABLED')
 
-    env["SHLIBSUFFIX"] = ".so"
+	env.Append(LDPATH=[ld_path])
+	env.Append(LIBS=['OpenSLES'])
+#	env.Append(LIBS=['c','m','stdc++','log','EGL','GLESv1_CM','GLESv2','OpenSLES','supc++','android'])
+	if (env["ndk_platform"]!="2.2"):
+		env.Append(LIBS=['EGL','OpenSLES','android'])
+	env.Append(LIBS=['c','m','stdc++','log','GLESv1_CM','GLESv2', 'z'])
 
-    if env["PLATFORM"] == "win32":
-        env.use_windows_spawn_fix()
+	env["LINKFLAGS"]= string.split(" -g --sysroot="+ld_sysroot+" -Wl,--no-undefined -Wl,-z,noexecstack ")
+	env.Append(LINKFLAGS=["-Wl,-soname,libgodot_android.so"])
 
-    if sys.platform.startswith("linux"):
-        host_subpath = "linux-x86_64"
-    elif sys.platform.startswith("darwin"):
-        host_subpath = "darwin-x86_64"
-    elif sys.platform.startswith("win"):
-        if platform.machine().endswith("64"):
-            host_subpath = "windows-x86_64"
-        else:
-            host_subpath = "windows"
+	if (env["target"]=="release"):
 
-    toolchain_path = ndk_root + "/toolchains/llvm/prebuilt/" + host_subpath
-    compiler_path = toolchain_path + "/bin"
+		env.Append(CCFLAGS=['-O2', '-ffast-math','-fomit-frame-pointer'])
 
-    env["CC"] = compiler_path + "/clang"
-    env["CXX"] = compiler_path + "/clang++"
-    env["AR"] = compiler_path + "/llvm-ar"
-    env["RANLIB"] = compiler_path + "/llvm-ranlib"
-    env["AS"] = compiler_path + "/clang"
+	elif (env["target"]=="release_debug"):
 
-    env.Append(
-        CCFLAGS=(
-            "-fpic -ffunction-sections -funwind-tables -fstack-protector-strong -fvisibility=hidden -fno-strict-aliasing".split()
-        )
-    )
+		env.Append(CCFLAGS=['-O2', '-ffast-math','-DDEBUG_ENABLED'])
 
-    if get_min_sdk_version(env["ndk_platform"]) >= 24:
-        env.Append(CPPDEFINES=[("_FILE_OFFSET_BITS", 64)])
+	elif (env["target"]=="debug"):
 
-    if env["arch"] == "x86_32":
-        # The NDK adds this if targeting API < 24, so we can drop it when Godot targets it at least
-        env.Append(CCFLAGS=["-mstackrealign"])
-    elif env["arch"] == "arm32":
-        env.Append(CCFLAGS="-march=armv7-a -mfloat-abi=softfp".split())
-        env.Append(CPPDEFINES=["__ARM_ARCH_7__", "__ARM_ARCH_7A__"])
-        env.Append(CPPDEFINES=["__ARM_NEON__"])
-    elif env["arch"] == "arm64":
-        env.Append(CCFLAGS=["-mfix-cortex-a53-835769"])
-        env.Append(CPPDEFINES=["__ARM_ARCH_8A__"])
+		env.Append(CCFLAGS=['-D_DEBUG', '-g1', '-Wall', '-O0', '-DDEBUG_ENABLED'])
+		env.Append(CPPFLAGS=['-DDEBUG_MEMORY_ALLOC'])
 
-    # Link flags
+	if env["armv6"] == "no" and env['x86'] != 'yes':
+		env['neon_enabled']=True
 
-    env.Append(LINKFLAGS="-Wl,--gc-sections -Wl,--no-undefined -Wl,-z,now".split())
-    env.Append(LINKFLAGS="-Wl,-soname,libgodot_android.so")
+	env.Append(CPPFLAGS=['-DANDROID_ENABLED', '-DUNIX_ENABLED', '-DNO_FCNTL','-DMPC_FIXED_POINT'])
+#	env.Append(CPPFLAGS=['-DANDROID_ENABLED', '-DUNIX_ENABLED','-DMPC_FIXED_POINT'])
 
-    env.Prepend(CPPPATH=["#platform/android"])
-    env.Append(CPPDEFINES=["ANDROID_ENABLED", "UNIX_ENABLED"])
-    env.Append(LIBS=["OpenSLES", "EGL", "android", "log", "z", "dl"])
+	if (env['android_stl']=='yes'):
+		#env.Append(CCFLAGS=[env["ANDROID_NDK_ROOT"]+"/sources/cxx-stl/system/include"])
+		env.Append(CPPPATH=[env["ANDROID_NDK_ROOT"]+"/sources/cxx-stl/gnu-libstdc++/4.4.3/include"])
+		env.Append(CPPPATH=[env["ANDROID_NDK_ROOT"]+"/sources/cxx-stl/gnu-libstdc++/4.4.3/libs/armeabi/include"])
+		env.Append(LIBPATH=[env["ANDROID_NDK_ROOT"]+"/sources/cxx-stl/gnu-libstdc++/4.4.3/libs/armeabi"])
+		env.Append(LIBS=["gnustl_static","supc++"])
+		env.Append(CPPPATH=[env["ANDROID_NDK_ROOT"]+"/sources/cpufeatures"])
 
-    if env["vulkan"]:
-        env.Append(CPPDEFINES=["VULKAN_ENABLED"])
-        if not env["use_volk"]:
-            env.Append(LIBS=["vulkan"])
+		#env.Append(CCFLAGS=["-I"+env["ANDROID_NDK_ROOT"]+"/sources/cxx-stl/stlport/stlport"])
+		#env.Append(CCFLAGS=["-I"+env["ANDROID_NDK_ROOT"]+"/sources/cxx-stl/gnu-libstdc++/libs/armeabi/include"])
+		#env.Append(LINKFLAGS=[env["ANDROID_NDK_ROOT"]+"/sources/cxx-stl/gnu-libstdc++/libs/armeabi/libstdc++.a"])
+	else:
 
-    if env["opengl3"]:
-        env.Append(CPPDEFINES=["GLES3_ENABLED"])
-        env.Append(LIBS=["GLESv3"])
+		env.Append(CPPPATH=[env["ANDROID_NDK_ROOT"]+"/sources/cxx-stl/gabi++/include"])
+		env.Append(CPPPATH=[env["ANDROID_NDK_ROOT"]+"/sources/cpufeatures"])
+		if env['x86']=='yes':
+			env.Append(LIBPATH=[env["ANDROID_NDK_ROOT"]+"/sources/cxx-stl/gabi++/libs/x86"])
+		else:
+			env.Append(LIBPATH=[env["ANDROID_NDK_ROOT"]+"/sources/cxx-stl/gabi++/libs/armeabi"])
+		env.Append(LIBS=['gabi++_static'])
+		env.Append(CCFLAGS=["-fno-exceptions",'-DNO_SAFE_CAST'])
+
+	import methods
+	env.Append( BUILDERS = { 'GLSL120' : env.Builder(action = methods.build_legacygl_headers, suffix = 'glsl.h',src_suffix = '.glsl') } )
+	env.Append( BUILDERS = { 'GLSL' : env.Builder(action = methods.build_glsl_headers, suffix = 'glsl.h',src_suffix = '.glsl') } )
+	env.Append( BUILDERS = { 'GLSL120GLES' : env.Builder(action = methods.build_gles2_headers, suffix = 'glsl.h',src_suffix = '.glsl') } )

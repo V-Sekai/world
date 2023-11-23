@@ -1,79 +1,71 @@
-#!/usr/bin/env python
+import shutil
 
-Import("env")
+Import('env')
 
 android_files = [
-    "os_android.cpp",
-    "android_input_handler.cpp",
-    "file_access_android.cpp",
-    "file_access_filesystem_jandroid.cpp",
-    "audio_driver_opensl.cpp",
-    "dir_access_jandroid.cpp",
-    "tts_android.cpp",
-    "thread_jandroid.cpp",
-    "net_socket_android.cpp",
-    "java_godot_lib_jni.cpp",
-    "java_class_wrapper.cpp",
-    "java_godot_wrapper.cpp",
-    "java_godot_view_wrapper.cpp",
-    "java_godot_io_wrapper.cpp",
-    "jni_utils.cpp",
-    "android_keys_utils.cpp",
-    "display_server_android.cpp",
-    "plugin/godot_plugin_jni.cpp",
-    "vulkan_context_android.cpp",
+
+	'os_android.cpp',
+	'godot_android.cpp',
+	'file_access_android.cpp',
+	'dir_access_android.cpp',
+	'audio_driver_opensl.cpp',
+	'file_access_jandroid.cpp',
+	'dir_access_jandroid.cpp',
+	'thread_jandroid.cpp',
+	'audio_driver_jandroid.cpp',
+	'ifaddrs_android.cpp',
+	'android_native_app_glue.c',
+	'java_glue.cpp',
+	'cpu-features.c',
+	'java_class_wrapper.cpp'
 ]
 
+#env.Depends('#core/math/vector3.h', 'vector3_psp.h')
+
+#obj = env.SharedObject('godot_android.cpp')
+
 env_android = env.Clone()
+if env['target'] == "profile":
+	env_android.Append(CPPFLAGS=['-DPROFILER_ENABLED'])
 
-android_objects = []
+android_objects=[]
 for x in android_files:
-    android_objects.append(env_android.SharedObject(x))
+	android_objects.append( env_android.SharedObject( x ) )
 
-env_thirdparty = env_android.Clone()
-env_thirdparty.disable_warnings()
-thirdparty_obj = env_thirdparty.SharedObject("#thirdparty/misc/ifaddrs-android.cc")
-android_objects.append(thirdparty_obj)
+prog = None
 
-lib = env_android.add_shared_library("#bin/libgodot", [android_objects], SHLIBSUFFIX=env["SHLIBSUFFIX"])
+abspath=env.Dir(".").abspath
 
-# Needed to force rebuilding the platform files when the thirdparty code is updated.
-env.Depends(lib, thirdparty_obj)
 
-lib_arch_dir = ""
-if env["arch"] == "arm32":
-    lib_arch_dir = "armeabi-v7a"
-elif env["arch"] == "arm64":
-    lib_arch_dir = "arm64-v8a"
-elif env["arch"] == "x86_32":
-    lib_arch_dir = "x86"
-elif env["arch"] == "x86_64":
-    lib_arch_dir = "x86_64"
-else:
-    print("WARN: Architecture not suitable for embedding into APK; keeping .so at \\bin")
+pp_basein = open(abspath+"/project.properties.template","rb")
+pp_baseout = open(abspath+"/java/project.properties","wb")
+pp_baseout.write( pp_basein.read() )
 
-if lib_arch_dir != "":
-    if env.dev_build:
-        lib_type_dir = "dev"
-    elif env.debug_features:
-        if env.editor_build and env["store_release"]:
-            lib_type_dir = "release"
-        else:
-            lib_type_dir = "debug"
-    else:  # Release
-        lib_type_dir = "release"
+refcount=1
 
-    if env.editor_build:
-        lib_tools_dir = "tools/"
-    else:
-        lib_tools_dir = ""
+for x in env.android_source_modules:
+	pp_baseout.write("android.library.reference."+str(refcount)+"="+x+"\n")
+	refcount+=1
 
-    out_dir = "#platform/android/java/lib/libs/" + lib_tools_dir + lib_type_dir + "/" + lib_arch_dir
-    env_android.Command(
-        out_dir + "/libgodot_android.so", "#bin/libgodot" + env["SHLIBSUFFIX"], Move("$TARGET", "$SOURCE")
-    )
 
-    stl_lib_path = (
-        str(env["ANDROID_NDK_ROOT"]) + "/sources/cxx-stl/llvm-libc++/libs/" + lib_arch_dir + "/libc++_shared.so"
-    )
-    env_android.Command(out_dir + "/libc++_shared.so", stl_lib_path, Copy("$TARGET", "$SOURCE"))
+
+pp_baseout.close()
+
+
+pp_basein = open(abspath+"/AndroidManifest.xml.template","rb")
+pp_baseout = open(abspath+"/java/AndroidManifest.xml","wb")
+manifest = pp_basein.read()
+manifest = manifest.replace("$$ADD_APPLICATION_CHUNKS$$",env.android_manifest_chunk)
+pp_baseout.write( manifest )
+
+
+for x in env.android_source_files:
+	shutil.copy(x,abspath+"/java/src/com/android/godot")	
+
+for x in env.android_module_libraries:
+	shutil.copy(x,abspath+"/java/libs")	
+
+
+env_android.SharedLibrary("#bin/libgodot",[android_objects],SHLIBSUFFIX=env["SHLIBSUFFIX"])
+
+#env.Command('#bin/libgodot_android.so', '#platform/android/libgodot_android.so', Copy('bin/libgodot_android.so', 'platform/android/libgodot_android.so'))

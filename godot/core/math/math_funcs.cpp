@@ -1,131 +1,275 @@
-/**************************************************************************/
-/*  math_funcs.cpp                                                        */
-/**************************************************************************/
-/*                         This file is part of:                          */
-/*                             GODOT ENGINE                               */
-/*                        https://godotengine.org                         */
-/**************************************************************************/
-/* Copyright (c) 2014-present Godot Engine contributors (see AUTHORS.md). */
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                  */
-/*                                                                        */
-/* Permission is hereby granted, free of charge, to any person obtaining  */
-/* a copy of this software and associated documentation files (the        */
-/* "Software"), to deal in the Software without restriction, including    */
-/* without limitation the rights to use, copy, modify, merge, publish,    */
-/* distribute, sublicense, and/or sell copies of the Software, and to     */
-/* permit persons to whom the Software is furnished to do so, subject to  */
-/* the following conditions:                                              */
-/*                                                                        */
-/* The above copyright notice and this permission notice shall be         */
-/* included in all copies or substantial portions of the Software.        */
-/*                                                                        */
-/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,        */
-/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF     */
-/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. */
-/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY   */
-/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,   */
-/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
-/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
-/**************************************************************************/
-
+/*************************************************************************/
+/*  math_funcs.cpp                                                       */
+/*************************************************************************/
+/*                       This file is part of:                           */
+/*                           GODOT ENGINE                                */
+/*                    http://www.godotengine.org                         */
+/*************************************************************************/
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/*                                                                       */
+/* Permission is hereby granted, free of charge, to any person obtaining */
+/* a copy of this software and associated documentation files (the       */
+/* "Software"), to deal in the Software without restriction, including   */
+/* without limitation the rights to use, copy, modify, merge, publish,   */
+/* distribute, sublicense, and/or sell copies of the Software, and to    */
+/* permit persons to whom the Software is furnished to do so, subject to */
+/* the following conditions:                                             */
+/*                                                                       */
+/* The above copyright notice and this permission notice shall be        */
+/* included in all copies or substantial portions of the Software.       */
+/*                                                                       */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
+/*************************************************************************/
 #include "math_funcs.h"
 
-#include "core/error/error_macros.h"
+#include "core/os/os.h"
+#include <math.h>
+#include "float.h"
+uint32_t Math::default_seed=1;
 
-RandomPCG Math::default_rand(RandomPCG::DEFAULT_SEED, RandomPCG::DEFAULT_INC);
 
-uint32_t Math::rand_from_seed(uint64_t *seed) {
-	RandomPCG rng = RandomPCG(*seed, RandomPCG::DEFAULT_INC);
-	uint32_t r = rng.rand();
-	*seed = rng.get_seed();
-	return r;
+#define PHI 0x9e3779b9
+
+static uint32_t Q[4096], c = 362436;
+
+
+uint32_t Math::rand_from_seed(uint32_t *seed) {
+
+#if 1
+	uint32_t k;
+	uint32_t s = (*seed);
+	if (s == 0)
+		s = 0x12345987;
+	k = s / 127773;
+	s = 16807 * (s - k * 127773) - 2836 * k;
+	if (s < 0)
+		s += 2147483647;
+	(*seed) = s;
+	return (s & Math::RANDOM_MAX);
+#else
+	*seed = *seed * 1103515245 + 12345;
+	return (*seed % ((unsigned int)RANDOM_MAX + 1));
+#endif
 }
 
-void Math::seed(uint64_t x) {
-	default_rand.seed(x);
+void Math::seed(uint32_t x) {
+#if 0
+	int i;
+
+	Q[0] = x;
+	Q[1] = x + PHI;
+	Q[2] = x + PHI + PHI;
+
+	for (i = 3; i < 4096; i++)
+		Q[i] = Q[i - 3] ^ Q[i - 2] ^ PHI ^ i;
+#else
+	default_seed=x;
+#endif
 }
 
 void Math::randomize() {
-	default_rand.randomize();
+
+	OS::Time time = OS::get_singleton()->get_time();
+	seed(OS::get_singleton()->get_ticks_usec()*(time.hour+1)*(time.min+1)*(time.sec+1)*rand()); /* *OS::get_singleton()->get_time().sec); // windows doesn't have get_time(), returns always 0 */
 }
 
 uint32_t Math::rand() {
-	return default_rand.rand();
+
+	return rand_from_seed(&default_seed)&0x7FFFFFFF;
 }
 
-double Math::randfn(double mean, double deviation) {
-	return default_rand.randfn(mean, deviation);
+double Math::randf() {
+
+	return (double)rand() / (double)RANDOM_MAX;
 }
 
-int Math::step_decimals(double p_step) {
-	static const int maxn = 10;
-	static const double sd[maxn] = {
-		0.9999, // somehow compensate for floating point error
-		0.09999,
-		0.009999,
-		0.0009999,
-		0.00009999,
-		0.000009999,
-		0.0000009999,
-		0.00000009999,
-		0.000000009999,
-		0.0000000009999
-	};
+double Math::sin(double p_x) {
 
-	double abs = Math::abs(p_step);
-	double decs = abs - (int)abs; // Strip away integer part
-	for (int i = 0; i < maxn; i++) {
-		if (decs >= sd[i]) {
-			return i;
-		}
+	return ::sin(p_x);
+
+}
+
+double Math::cos(double p_x) {
+
+	return ::cos(p_x);
+
+}
+
+double Math::tan(double p_x) {
+
+	return ::tan(p_x);
+
+}
+double Math::sinh(double p_x) {
+
+	return ::sinh(p_x);
+}
+
+double Math::cosh(double p_x) {
+
+	return ::cosh(p_x);
+}
+
+double Math::tanh(double p_x) {
+
+	return ::tanh(p_x);
+}
+
+
+double Math::deg2rad(double p_y) {
+
+	return p_y*Math_PI/180.0;
+}
+
+double Math::rad2deg(double p_y) {
+
+	return p_y*180.0/Math_PI;
+}
+
+double Math::round(double p_val) {
+
+	if (p_val>0) {
+		return ::floor(p_val+0.5);
+	} else {
+		p_val=-p_val;
+		return -::floor(p_val+0.5);
+	}
+}
+double Math::asin(double p_x) {
+
+	return ::asin(p_x);
+
+}
+double Math::acos(double p_x) {
+
+	return ::acos(p_x);
+}
+
+double Math::atan(double p_x) {
+
+	return ::atan(p_x);
+}
+
+double Math::dectime(double p_value,double p_amount, double p_step) {
+
+	float sgn = p_value < 0 ? -1.0 : 1.0;
+	float val = absf(p_value);
+	val-=p_amount*p_step;
+	if (val<0.0)
+		val=0.0;
+	return val*sgn;
+}
+
+double Math::atan2(double p_y, double p_x) {
+
+	return ::atan2(p_y,p_x);
+
+}
+double Math::sqrt(double p_x) {
+
+	return ::sqrt(p_x);
+}
+
+double Math::fmod(double p_x,double p_y) {
+
+	return ::fmod(p_x,p_y);
+}
+
+double Math::fposmod(double p_x,double p_y) {
+
+	if (p_x>=0) {
+	
+		return Math::fmod(p_x,p_y);
+		
+	} else {
+	
+		return p_y-Math::fmod(-p_x,p_y); 
 	}
 
-	return 0;
+}
+double Math::floor(double p_x) {
+
+	return ::floor(p_x);
 }
 
-// Only meant for editor usage in float ranges, where a step of 0
-// means that decimal digits should not be limited in String::num.
-int Math::range_step_decimals(double p_step) {
-	if (p_step < 0.0000000000001) {
-		return 16; // Max value hardcoded in String::num
+double Math::ceil(double p_x) {
+
+	return ::ceil(p_x);
+}
+
+int Math::decimals(double p_step) {
+	
+	int max=4;
+	int i=0;
+	while( (p_step - Math::floor(p_step)) != 0.0 && max) {
+		
+		p_step*=10.0;
+		max--;
+		i++;
 	}
-	return step_decimals(p_step);
+	
+	return i;
+
 }
 
 double Math::ease(double p_x, double p_c) {
-	if (p_x < 0) {
-		p_x = 0;
-	} else if (p_x > 1.0) {
-		p_x = 1.0;
-	}
-	if (p_c > 0) {
-		if (p_c < 1.0) {
-			return 1.0 - Math::pow(1.0 - p_x, 1.0 / p_c);
+
+	if (p_x<0)
+		p_x=0;
+	else if (p_x>1.0)
+		p_x=1.0;
+	if (p_c>0) {
+		if (p_c<1.0) {
+			return 1.0-Math::pow(1.0-p_x,1.0/p_c);
 		} else {
-			return Math::pow(p_x, p_c);
+			return Math::pow(p_x,p_c);
 		}
-	} else if (p_c < 0) {
+	} else  if (p_c<0) {
 		//inout ease
 
-		if (p_x < 0.5) {
-			return Math::pow(p_x * 2.0, -p_c) * 0.5;
+		if (p_x<0.5) {
+			return Math::pow(p_x*2.0,-p_c)*0.5;
 		} else {
-			return (1.0 - Math::pow(1.0 - (p_x - 0.5) * 2.0, -p_c)) * 0.5 + 0.5;
+			return (1.0-Math::pow(1.0-(p_x-0.5)*2.0,-p_c))*0.5+0.5;
 		}
-	} else {
+	} else
 		return 0; // no ease (raw)
-	}
+
 }
 
-double Math::snapped(double p_value, double p_step) {
-	if (p_step != 0) {
-		p_value = Math::floor(p_value / p_step + 0.5) * p_step;
-	}
+double Math::stepify(double p_value,double p_step) {
+	
+	if (p_step!=0) {
+		
+		p_value=floor( p_value / p_step + 0.5 ) * p_step;		
+	}	
 	return p_value;
 }
 
+bool Math::is_nan(double p_val) {
+
+	return (p_val!=p_val);
+}
+
+bool Math::is_inf(double p_val) {
+
+#ifdef _MSC_VER
+	return !_finite(p_val);
+#else
+	return isinf(p_val);
+#endif
+
+}
+
 uint32_t Math::larger_prime(uint32_t p_val) {
-	static const uint32_t primes[] = {
+
+	static const int primes[] = {
 		5,
 		13,
 		23,
@@ -158,24 +302,35 @@ uint32_t Math::larger_prime(uint32_t p_val) {
 		0,
 	};
 
-	int idx = 0;
+	int idx=0;
 	while (true) {
-		ERR_FAIL_COND_V(primes[idx] == 0, 0);
-		if (primes[idx] > p_val) {
+
+		ERR_FAIL_COND_V(primes[idx]==0,0);
+		if (primes[idx]>p_val)
 			return primes[idx];
-		}
 		idx++;
 	}
+
+	return 0;
 }
 
 double Math::random(double from, double to) {
-	return default_rand.random(from, to);
+
+	unsigned int r = Math::rand();
+	double ret = (double)r/(double)RANDOM_MAX;
+	return (ret)*(to-from) + from;
 }
 
-float Math::random(float from, float to) {
-	return default_rand.random(from, to);
+double Math::pow(double x, double y) {
+
+	return ::pow(x,y);
 }
 
-int Math::random(int from, int to) {
-	return default_rand.random(from, to);
+double Math::log(double x) {
+
+	return ::log(x);
+}
+double Math::exp(double x) {
+
+	return ::exp(x);
 }

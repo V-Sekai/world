@@ -1,305 +1,430 @@
-/**************************************************************************/
-/*  shader.cpp                                                            */
-/**************************************************************************/
-/*                         This file is part of:                          */
-/*                             GODOT ENGINE                               */
-/*                        https://godotengine.org                         */
-/**************************************************************************/
-/* Copyright (c) 2014-present Godot Engine contributors (see AUTHORS.md). */
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                  */
-/*                                                                        */
-/* Permission is hereby granted, free of charge, to any person obtaining  */
-/* a copy of this software and associated documentation files (the        */
-/* "Software"), to deal in the Software without restriction, including    */
-/* without limitation the rights to use, copy, modify, merge, publish,    */
-/* distribute, sublicense, and/or sell copies of the Software, and to     */
-/* permit persons to whom the Software is furnished to do so, subject to  */
-/* the following conditions:                                              */
-/*                                                                        */
-/* The above copyright notice and this permission notice shall be         */
-/* included in all copies or substantial portions of the Software.        */
-/*                                                                        */
-/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,        */
-/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF     */
-/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. */
-/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY   */
-/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,   */
-/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
-/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
-/**************************************************************************/
-
+/*************************************************************************/
+/*  shader.cpp                                                           */
+/*************************************************************************/
+/*                       This file is part of:                           */
+/*                           GODOT ENGINE                                */
+/*                    http://www.godotengine.org                         */
+/*************************************************************************/
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/*                                                                       */
+/* Permission is hereby granted, free of charge, to any person obtaining */
+/* a copy of this software and associated documentation files (the       */
+/* "Software"), to deal in the Software without restriction, including   */
+/* without limitation the rights to use, copy, modify, merge, publish,   */
+/* distribute, sublicense, and/or sell copies of the Software, and to    */
+/* permit persons to whom the Software is furnished to do so, subject to */
+/* the following conditions:                                             */
+/*                                                                       */
+/* The above copyright notice and this permission notice shall be        */
+/* included in all copies or substantial portions of the Software.       */
+/*                                                                       */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
+/*************************************************************************/
 #include "shader.h"
-
-#include "core/io/file_access.h"
-#include "scene/scene_string_names.h"
-#include "servers/rendering/shader_language.h"
-#include "servers/rendering/shader_preprocessor.h"
-#include "servers/rendering_server.h"
+#include "servers/visual_server.h"
 #include "texture.h"
+#include "os/file_access.h"
+#include "scene/scene_string_names.h"
+
+
+void Shader::set_mode(Mode p_mode) {
+
+	ERR_FAIL_INDEX(p_mode,2);
+	VisualServer::get_singleton()->shader_set_mode(shader,VisualServer::ShaderMode(p_mode));
+	emit_signal(SceneStringNames::get_singleton()->changed);
+}
 
 Shader::Mode Shader::get_mode() const {
-	return mode;
+
+	return (Mode)VisualServer::get_singleton()->shader_get_mode(shader);
 }
 
-void Shader::_dependency_changed() {
-	// Preprocess and compile the code again because a dependency has changed. It also calls emit_changed() for us.
-	_recompile();
+void Shader::set_code( const String& p_vertex, const String& p_fragment, const String& p_light,int p_fragment_ofs,int p_light_ofs) {
+
+	VisualServer::get_singleton()->shader_set_code(shader,p_vertex,p_fragment,p_light,0,p_fragment_ofs,p_light_ofs);
+	params_cache_dirty=true;
+	emit_signal(SceneStringNames::get_singleton()->changed);
 }
 
-void Shader::_recompile() {
-	set_code(get_code());
+
+String Shader::get_vertex_code() const {
+
+	return VisualServer::get_singleton()->shader_get_vertex_code(shader);
 }
 
-void Shader::set_path(const String &p_path, bool p_take_over) {
-	Resource::set_path(p_path, p_take_over);
-	RS::get_singleton()->shader_set_path_hint(shader, p_path);
+String Shader::get_fragment_code() const {
+
+	return VisualServer::get_singleton()->shader_get_fragment_code(shader);
+
 }
 
-void Shader::set_include_path(const String &p_path) {
-	// Used only if the shader does not have a resource path set,
-	// for example during loading stage or when created by code.
-	include_path = p_path;
+String Shader::get_light_code() const {
+
+	return VisualServer::get_singleton()->shader_get_light_code(shader);
+
 }
 
-void Shader::set_code(const String &p_code) {
-	for (const Ref<ShaderInclude> &E : include_dependencies) {
-		E->disconnect_changed(callable_mp(this, &Shader::_dependency_changed));
-	}
+bool Shader::has_param(const StringName& p_param) const {
 
-	code = p_code;
-	String pp_code = p_code;
+	if (params_cache_dirty)
+		get_param_list(NULL);
 
-	{
-		String path = get_path();
-		if (path.is_empty()) {
-			path = include_path;
-		}
-		// Preprocessor must run here and not in the server because:
-		// 1) Need to keep track of include dependencies at resource level
-		// 2) Server does not do interaction with Resource filetypes, this is a scene level feature.
-		HashSet<Ref<ShaderInclude>> new_include_dependencies;
-		ShaderPreprocessor preprocessor;
-		Error result = preprocessor.preprocess(p_code, path, pp_code, nullptr, nullptr, nullptr, &new_include_dependencies);
-		if (result == OK) {
-			// This ensures previous include resources are not freed and then re-loaded during parse (which would make compiling slower)
-			include_dependencies = new_include_dependencies;
-		}
-	}
-
-	// Try to get the shader type from the final, fully preprocessed shader code.
-	String type = ShaderLanguage::get_shader_type(pp_code);
-
-	if (type == "canvas_item") {
-		mode = MODE_CANVAS_ITEM;
-	} else if (type == "particles") {
-		mode = MODE_PARTICLES;
-	} else if (type == "sky") {
-		mode = MODE_SKY;
-	} else if (type == "fog") {
-		mode = MODE_FOG;
-	} else {
-		mode = MODE_SPATIAL;
-	}
-
-	for (const Ref<ShaderInclude> &E : include_dependencies) {
-		E->connect_changed(callable_mp(this, &Shader::_dependency_changed));
-	}
-
-	RenderingServer::get_singleton()->shader_set_code(shader, pp_code);
-
-	emit_changed();
+	return (params_cache.has(p_param));
 }
 
-String Shader::get_code() const {
-	_update_shader();
-	return code;
-}
 
-void Shader::get_shader_uniform_list(List<PropertyInfo> *p_params, bool p_get_groups) const {
-	_update_shader();
+void Shader::get_param_list(List<PropertyInfo> *p_params) const {
+
 
 	List<PropertyInfo> local;
-	RenderingServer::get_singleton()->get_shader_parameter_list(shader, &local);
+	VisualServer::get_singleton()->shader_get_param_list(shader,&local);
+	params_cache.clear();
+	params_cache_dirty=false;
 
-	for (PropertyInfo &pi : local) {
-		bool is_group = pi.usage == PROPERTY_USAGE_GROUP || pi.usage == PROPERTY_USAGE_SUBGROUP;
-		if (!p_get_groups && is_group) {
-			continue;
-		}
-		if (!is_group) {
-			if (default_textures.has(pi.name)) { //do not show default textures
-				continue;
-			}
-		}
+	for(List<PropertyInfo>::Element *E=local.front();E;E=E->next()) {
+
+		PropertyInfo pi=E->get();
+		pi.name="param/"+pi.name;
+		params_cache[pi.name]=E->get().name;
 		if (p_params) {
+
 			//small little hack
-			if (pi.type == Variant::RID) {
-				pi.type = Variant::OBJECT;
-			}
+			if (pi.type==Variant::_RID)
+				pi.type=Variant::OBJECT;
 			p_params->push_back(pi);
 		}
 	}
 }
 
 RID Shader::get_rid() const {
-	_update_shader();
 
 	return shader;
 }
 
-void Shader::set_default_texture_parameter(const StringName &p_name, const Ref<Texture2D> &p_texture, int p_index) {
-	if (p_texture.is_valid()) {
-		if (!default_textures.has(p_name)) {
-			default_textures[p_name] = HashMap<int, Ref<Texture2D>>();
-		}
-		default_textures[p_name][p_index] = p_texture;
-		RS::get_singleton()->shader_set_default_texture_parameter(shader, p_name, p_texture->get_rid(), p_index);
-	} else {
-		if (default_textures.has(p_name) && default_textures[p_name].has(p_index)) {
-			default_textures[p_name].erase(p_index);
+Dictionary Shader::_get_code() {
 
-			if (default_textures[p_name].is_empty()) {
-				default_textures.erase(p_name);
-			}
-		}
-		RS::get_singleton()->shader_set_default_texture_parameter(shader, p_name, RID(), p_index);
-	}
+	String fs = VisualServer::get_singleton()->shader_get_fragment_code(shader);
+	String vs = VisualServer::get_singleton()->shader_get_vertex_code(shader);
+	String ls = VisualServer::get_singleton()->shader_get_light_code(shader);
 
-	emit_changed();
+	Dictionary c;
+	c["fragment"]=fs;
+	c["fragment_ofs"]=0;
+	c["vertex"]=vs;
+	c["vertex_ofs"]=0;
+	c["light"]=ls;
+	c["light_ofs"]=0;
+	return c;
 }
 
-Ref<Texture2D> Shader::get_default_texture_parameter(const StringName &p_name, int p_index) const {
-	if (default_textures.has(p_name) && default_textures[p_name].has(p_index)) {
-		return default_textures[p_name][p_index];
-	}
-	return Ref<Texture2D>();
-}
+void Shader::_set_code(const Dictionary& p_string) {
 
-void Shader::get_default_texture_parameter_list(List<StringName> *r_textures) const {
-	for (const KeyValue<StringName, HashMap<int, Ref<Texture2D>>> &E : default_textures) {
-		r_textures->push_back(E.key);
-	}
-}
+	ERR_FAIL_COND(!p_string.has("fragment"));
+	ERR_FAIL_COND(!p_string.has("vertex"));
+	String light;
+	if (p_string.has("light"))
+		light=p_string["light"];
 
-bool Shader::is_text_shader() const {
-	return true;
-}
-
-void Shader::_update_shader() const {
-}
-
-Array Shader::_get_shader_uniform_list(bool p_get_groups) {
-	List<PropertyInfo> uniform_list;
-	get_shader_uniform_list(&uniform_list, p_get_groups);
-	Array ret;
-	for (const PropertyInfo &pi : uniform_list) {
-		ret.push_back(pi.operator Dictionary());
-	}
-	return ret;
+	set_code(p_string["vertex"],p_string["fragment"],light);
 }
 
 void Shader::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("get_mode"), &Shader::get_mode);
 
-	ClassDB::bind_method(D_METHOD("set_code", "code"), &Shader::set_code);
-	ClassDB::bind_method(D_METHOD("get_code"), &Shader::get_code);
+	ObjectTypeDB::bind_method(_MD("set_mode","mode"),&Shader::set_mode);
+	ObjectTypeDB::bind_method(_MD("get_mode"),&Shader::get_mode);
 
-	ClassDB::bind_method(D_METHOD("set_default_texture_parameter", "name", "texture", "index"), &Shader::set_default_texture_parameter, DEFVAL(0));
-	ClassDB::bind_method(D_METHOD("get_default_texture_parameter", "name", "index"), &Shader::get_default_texture_parameter, DEFVAL(0));
+	ObjectTypeDB::bind_method(_MD("set_code","vcode","fcode","lcode","fofs","lofs"),&Shader::set_code,DEFVAL(0),DEFVAL(0));
+	ObjectTypeDB::bind_method(_MD("get_vertex_code"),&Shader::get_vertex_code);
+	ObjectTypeDB::bind_method(_MD("get_fragment_code"),&Shader::get_fragment_code);
+	ObjectTypeDB::bind_method(_MD("get_light_code"),&Shader::get_light_code);
 
-	ClassDB::bind_method(D_METHOD("get_shader_uniform_list", "get_groups"), &Shader::_get_shader_uniform_list, DEFVAL(false));
+	ObjectTypeDB::bind_method(_MD("has_param","name"),&Shader::has_param);
 
-	ADD_PROPERTY(PropertyInfo(Variant::STRING, "code", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR), "set_code", "get_code");
+	ObjectTypeDB::bind_method(_MD("_set_code","code"),&Shader::_set_code);
+	ObjectTypeDB::bind_method(_MD("_get_code"),&Shader::_get_code);
 
-	BIND_ENUM_CONSTANT(MODE_SPATIAL);
-	BIND_ENUM_CONSTANT(MODE_CANVAS_ITEM);
-	BIND_ENUM_CONSTANT(MODE_PARTICLES);
-	BIND_ENUM_CONSTANT(MODE_SKY);
-	BIND_ENUM_CONSTANT(MODE_FOG);
+	//ObjectTypeDB::bind_method(_MD("get_param_list"),&Shader::get_fragment_code);
+
+
+	ADD_PROPERTY( PropertyInfo(Variant::STRING, "_code",PROPERTY_HINT_NONE,"",PROPERTY_USAGE_NOEDITOR), _SCS("_set_code"), _SCS("_get_code") );
+
+	BIND_CONSTANT( MODE_MATERIAL );
+	BIND_CONSTANT( MODE_CANVAS_ITEM );
+	BIND_CONSTANT( MODE_POST_PROCESS );
+
 }
 
 Shader::Shader() {
-	shader = RenderingServer::get_singleton()->shader_create();
+
+	shader = VisualServer::get_singleton()->shader_create();
+	params_cache_dirty=true;
 }
 
 Shader::~Shader() {
-	ERR_FAIL_NULL(RenderingServer::get_singleton());
-	RenderingServer::get_singleton()->free(shader);
+
+	VisualServer::get_singleton()->free(shader);
 }
 
-////////////
 
-Ref<Resource> ResourceFormatLoaderShader::load(const String &p_path, const String &p_original_path, Error *r_error, bool p_use_sub_threads, float *r_progress, CacheMode p_cache_mode) {
-	if (r_error) {
-		*r_error = ERR_FILE_CANT_OPEN;
+
+/************ Loader from text ***************/
+
+
+
+RES ResourceFormatLoaderShader::load(const String &p_path,const String& p_original_path) {
+
+	String fragment_code;
+	String vertex_code;
+	String light_code;
+
+	int mode=-1;
+
+	Error err;
+	FileAccess *f = FileAccess::open(p_path,FileAccess::READ,&err);
+
+
+	ERR_EXPLAIN("Unable to open shader file: "+p_path);
+	ERR_FAIL_COND_V(err,RES());
+	String base_path = p_path.get_base_dir();
+
+
+	Ref<Shader> shader( memnew( Shader ) );
+
+	int line=0;
+
+	while(!f->eof_reached()) {
+
+		String l = f->get_line();
+		line++;
+
+		if (mode<=0) {
+			l = l.strip_edges();
+			int comment = l.find(";");
+			if (comment!=-1)
+				l=l.substr(0,comment);
+		}
+
+		if (mode<1)
+			vertex_code+="\n";
+		if (mode<2)
+			fragment_code+="\n";
+
+		if (mode < 1 && l=="")
+			continue;
+
+		if (l.begins_with("[")) {
+			l=l.strip_edges();
+			if (l=="[params]") {
+				if (mode>=0) {
+					memdelete(f);
+					ERR_EXPLAIN(p_path+":"+itos(line)+": Misplaced [params] section.");
+					ERR_FAIL_V(RES());
+				}
+				mode=0;
+			}  else if (l=="[vertex]") {
+				if (mode>=1) {
+					memdelete(f);
+					ERR_EXPLAIN(p_path+":"+itos(line)+": Misplaced [vertex] section.");
+					ERR_FAIL_V(RES());
+				}
+				mode=1;
+			}  else if (l=="[fragment]") {
+				if (mode>=2) {
+					memdelete(f);
+					ERR_EXPLAIN(p_path+":"+itos(line)+": Misplaced [fragment] section.");
+					ERR_FAIL_V(RES());
+				}
+				mode=1;
+			} else {
+				memdelete(f);
+				ERR_EXPLAIN(p_path+":"+itos(line)+": Unknown section type: '"+l+"'.");
+				ERR_FAIL_V(RES());
+			}
+			continue;
+		}
+
+		if (mode==0) {
+
+			int eqpos = l.find("=");
+			if (eqpos==-1) {
+				memdelete(f);
+				ERR_EXPLAIN(p_path+":"+itos(line)+": Expected '='.");
+				ERR_FAIL_V(RES());
+			}
+
+
+			String right=l.substr(eqpos+1,l.length()).strip_edges();
+			if (right=="") {
+				memdelete(f);
+				ERR_EXPLAIN(p_path+":"+itos(line)+": Expected value after '='.");
+				ERR_FAIL_V(RES());
+			}
+
+			Variant value;
+
+			if (right=="true") {
+				value = true;
+			} else if (right=="false") {
+				value = false;
+			} else if (right.is_valid_float()) {
+				//is number
+				value = right.to_double();
+			} else if (right.is_valid_html_color()) {
+				//is html color
+				value = Color::html(right);
+			} else {
+				//attempt to parse a constructor
+				int popenpos = right.find("(");
+
+				if (popenpos==-1) {
+					memdelete(f);
+					ERR_EXPLAIN(p_path+":"+itos(line)+": Invalid constructor syntax: "+right);
+					ERR_FAIL_V(RES());
+				}
+
+				int pclosepos = right.find_last(")");
+
+				if (pclosepos==-1) {
+					ERR_EXPLAIN(p_path+":"+itos(line)+": Invalid constructor parameter syntax: "+right);
+					ERR_FAIL_V(RES());
+
+				}
+
+				String type = right.substr(0,popenpos);
+				String param = right.substr(popenpos+1,pclosepos-popenpos-1).strip_edges();
+
+				print_line("type: "+type+" param: "+param);
+
+				if (type=="tex") {
+
+					if (param=="") {
+
+						value=RID();
+					} else {
+
+						String path;
+
+						if (param.is_abs_path())
+							path=param;
+						else
+							path=base_path+"/"+param;
+
+						Ref<Texture> texture = ResourceLoader::load(path);
+						if (!texture.is_valid()) {
+							memdelete(f);
+							ERR_EXPLAIN(p_path+":"+itos(line)+": Couldn't find icon at path: "+path);
+							ERR_FAIL_V(RES());
+						}
+
+						value=texture;
+					}
+
+				} else if (type=="vec3") {
+
+					if (param=="") {
+						value=Vector3();
+					} else {
+						Vector<String> params = param.split(",");
+						if (params.size()!=3) {
+							memdelete(f);
+							ERR_EXPLAIN(p_path+":"+itos(line)+": Invalid param count for vec3(): '"+right+"'.");
+							ERR_FAIL_V(RES());
+
+						}
+
+						Vector3 v;
+						for(int i=0;i<3;i++)
+							v[i]=params[i].to_double();
+						value=v;
+					}
+
+
+				} else if (type=="xform") {
+
+					if (param=="") {
+						value=Transform();
+					} else {
+
+						Vector<String> params = param.split(",");
+						if (params.size()!=12) {
+							memdelete(f);
+							ERR_EXPLAIN(p_path+":"+itos(line)+": Invalid param count for xform(): '"+right+"'.");
+							ERR_FAIL_V(RES());
+
+						}
+
+						Transform t;
+						for(int i=0;i<9;i++)
+							t.basis[i%3][i/3]=params[i].to_double();
+						for(int i=0;i<3;i++)
+							t.origin[i]=params[i-9].to_double();
+
+						value=t;
+					}
+
+				} else {
+					memdelete(f);
+					ERR_EXPLAIN(p_path+":"+itos(line)+": Invalid constructor type: '"+type+"'.");
+					ERR_FAIL_V(RES());
+
+				}
+
+			}
+
+			String left= l.substr(0,eqpos);
+
+//			shader->set_param(left,value);
+		} else if (mode==1) {
+
+			vertex_code+=l;
+
+		} else if (mode==2) {
+
+			fragment_code+=l;
+		}
 	}
 
-	Error error = OK;
-	Vector<uint8_t> buffer = FileAccess::get_file_as_bytes(p_path, &error);
-	ERR_FAIL_COND_V_MSG(error, nullptr, "Cannot load shader: " + p_path);
+	shader->set_code(vertex_code,fragment_code,light_code);
 
-	String str;
-	if (buffer.size() > 0) {
-		error = str.parse_utf8((const char *)buffer.ptr(), buffer.size());
-		ERR_FAIL_COND_V_MSG(error, nullptr, "Cannot parse shader: " + p_path);
-	}
-
-	Ref<Shader> shader;
-	shader.instantiate();
-
-	shader->set_include_path(p_path);
-	shader->set_code(str);
-
-	if (r_error) {
-		*r_error = OK;
-	}
+	f->close();
+	memdelete(f);
 
 	return shader;
 }
 
 void ResourceFormatLoaderShader::get_recognized_extensions(List<String> *p_extensions) const {
-	p_extensions->push_back("gdshader");
+
+	p_extensions->push_back("shader");
+}
+bool ResourceFormatLoaderShader::handles_type(const String& p_type) const {
+
+	return p_type=="Shader";
 }
 
-bool ResourceFormatLoaderShader::handles_type(const String &p_type) const {
-	return (p_type == "Shader");
-}
 
 String ResourceFormatLoaderShader::get_resource_type(const String &p_path) const {
-	String el = p_path.get_extension().to_lower();
-	if (el == "gdshader") {
+
+	if (p_path.extension().to_lower()=="shader")
 		return "Shader";
-	}
 	return "";
 }
 
-Error ResourceFormatSaverShader::save(const Ref<Resource> &p_resource, const String &p_path, uint32_t p_flags) {
-	Ref<Shader> shader = p_resource;
-	ERR_FAIL_COND_V(shader.is_null(), ERR_INVALID_PARAMETER);
 
-	String source = shader->get_code();
 
-	Error err;
-	Ref<FileAccess> file = FileAccess::open(p_path, FileAccess::WRITE, &err);
 
-	ERR_FAIL_COND_V_MSG(err, err, "Cannot save shader '" + p_path + "'.");
 
-	file->store_string(source);
-	if (file->get_error() != OK && file->get_error() != ERR_FILE_EOF) {
-		return ERR_CANT_CREATE;
-	}
 
-	return OK;
-}
 
-void ResourceFormatSaverShader::get_recognized_extensions(const Ref<Resource> &p_resource, List<String> *p_extensions) const {
-	if (const Shader *shader = Object::cast_to<Shader>(*p_resource)) {
-		if (shader->is_text_shader()) {
-			p_extensions->push_back("gdshader");
-		}
-	}
-}
 
-bool ResourceFormatSaverShader::recognize(const Ref<Resource> &p_resource) const {
-	return p_resource->get_class_name() == "Shader"; //only shader, not inherited
-}
+
+
+
+
+
+

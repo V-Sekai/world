@@ -1,400 +1,250 @@
-/**************************************************************************/
-/*  slider.cpp                                                            */
-/**************************************************************************/
-/*                         This file is part of:                          */
-/*                             GODOT ENGINE                               */
-/*                        https://godotengine.org                         */
-/**************************************************************************/
-/* Copyright (c) 2014-present Godot Engine contributors (see AUTHORS.md). */
-/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                  */
-/*                                                                        */
-/* Permission is hereby granted, free of charge, to any person obtaining  */
-/* a copy of this software and associated documentation files (the        */
-/* "Software"), to deal in the Software without restriction, including    */
-/* without limitation the rights to use, copy, modify, merge, publish,    */
-/* distribute, sublicense, and/or sell copies of the Software, and to     */
-/* permit persons to whom the Software is furnished to do so, subject to  */
-/* the following conditions:                                              */
-/*                                                                        */
-/* The above copyright notice and this permission notice shall be         */
-/* included in all copies or substantial portions of the Software.        */
-/*                                                                        */
-/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,        */
-/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF     */
-/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. */
-/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY   */
-/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,   */
-/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
-/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
-/**************************************************************************/
-
+/*************************************************************************/
+/*  slider.cpp                                                           */
+/*************************************************************************/
+/*                       This file is part of:                           */
+/*                           GODOT ENGINE                                */
+/*                    http://www.godotengine.org                         */
+/*************************************************************************/
+/* Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.                 */
+/*                                                                       */
+/* Permission is hereby granted, free of charge, to any person obtaining */
+/* a copy of this software and associated documentation files (the       */
+/* "Software"), to deal in the Software without restriction, including   */
+/* without limitation the rights to use, copy, modify, merge, publish,   */
+/* distribute, sublicense, and/or sell copies of the Software, and to    */
+/* permit persons to whom the Software is furnished to do so, subject to */
+/* the following conditions:                                             */
+/*                                                                       */
+/* The above copyright notice and this permission notice shall be        */
+/* included in all copies or substantial portions of the Software.       */
+/*                                                                       */
+/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,       */
+/* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF    */
+/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.*/
+/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY  */
+/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,  */
+/* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE     */
+/* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
+/*************************************************************************/
 #include "slider.h"
+#include "os/keyboard.h"
 
-#include "core/os/keyboard.h"
-#include "scene/theme/theme_db.h"
 
 Size2 Slider::get_minimum_size() const {
-	Size2i ss = theme_cache.slider_style->get_minimum_size();
-	Size2i rs = theme_cache.grabber_icon->get_size();
 
-	if (orientation == HORIZONTAL) {
-		return Size2i(ss.width, MAX(ss.height, rs.height));
-	} else {
-		return Size2i(MAX(ss.width, rs.width), ss.height);
-	}
+	Ref<StyleBox> style = get_stylebox("slider");
+	Size2i ms = style->get_minimum_size()+style->get_center_size();
+	return ms;
 }
 
-void Slider::gui_input(const Ref<InputEvent> &p_event) {
-	ERR_FAIL_COND(p_event.is_null());
+void Slider::_input_event(InputEvent p_event) {
 
-	if (!editable) {
-		return;
-	}
 
-	Ref<InputEventMouseButton> mb = p_event;
 
-	if (mb.is_valid()) {
-		if (mb->get_button_index() == MouseButton::LEFT) {
-			if (mb->is_pressed()) {
-				Ref<Texture2D> grabber;
-				if (mouse_inside || has_focus()) {
-					grabber = theme_cache.grabber_hl_icon;
-				} else {
-					grabber = theme_cache.grabber_icon;
-				}
+	if (p_event.type==InputEvent::MOUSE_BUTTON) {
 
-				grab.pos = orientation == VERTICAL ? mb->get_position().y : mb->get_position().x;
+		InputEventMouseButton &mb = p_event.mouse_button;
+		if (mb.button_index==BUTTON_LEFT) {
 
-				double grab_width = (double)grabber->get_width();
-				double grab_height = (double)grabber->get_height();
-				double max = orientation == VERTICAL ? get_size().height - grab_height : get_size().width - grab_width;
-				set_block_signals(true);
-				if (orientation == VERTICAL) {
-					set_as_ratio(1 - (((double)grab.pos - (grab_height / 2.0)) / max));
-				} else {
-					set_as_ratio(((double)grab.pos - (grab_width / 2.0)) / max);
-				}
-				set_block_signals(false);
-				grab.active = true;
-				grab.uvalue = get_as_ratio();
-
-				emit_signal(SNAME("drag_started"));
-				_notify_shared_value_changed();
+			if (mb.pressed)	{
+				grab.pos=orientation==VERTICAL?mb.y:mb.x;
+				double max = orientation==VERTICAL ? get_size().height : get_size().width ;
+				if (orientation==VERTICAL)
+					set_val( ( ( -(double)grab.pos / max) * ( get_max() - get_min() ) ) + get_max() );
+				else
+					set_val( ( ( (double)grab.pos / max) * ( get_max() - get_min() ) ) + get_min() );
+				grab.active=true;
+				grab.uvalue=get_unit_value();
 			} else {
-				grab.active = false;
+				grab.active=false;
+			}
+		} else if (mb.pressed && mb.button_index==BUTTON_WHEEL_UP) {
 
-				const bool value_changed = !Math::is_equal_approx((double)grab.uvalue, get_as_ratio());
-				emit_signal(SNAME("drag_ended"), value_changed);
-			}
-		} else if (scrollable) {
-			if (mb->is_pressed() && mb->get_button_index() == MouseButton::WHEEL_UP) {
-				grab_focus();
-				set_value(get_value() + get_step());
-			} else if (mb->is_pressed() && mb->get_button_index() == MouseButton::WHEEL_DOWN) {
-				grab_focus();
-				set_value(get_value() - get_step());
-			}
+			set_val( get_val() + get_step());
+		} else if (mb.pressed && mb.button_index==BUTTON_WHEEL_DOWN) {
+			set_val( get_val() - get_step());
 		}
-	}
 
-	Ref<InputEventMouseMotion> mm = p_event;
+	} else if (p_event.type==InputEvent::MOUSE_MOTION) {
 
-	if (mm.is_valid()) {
 		if (grab.active) {
+
 			Size2i size = get_size();
-			Ref<Texture2D> grabber = theme_cache.grabber_icon;
-			double motion = (orientation == VERTICAL ? mm->get_position().y : mm->get_position().x) - grab.pos;
-			if (orientation == VERTICAL) {
-				motion = -motion;
-			}
-			double areasize = orientation == VERTICAL ? size.height - grabber->get_height() : size.width - grabber->get_width();
-			if (areasize <= 0) {
+			Ref<Texture> grabber = get_icon("grabber");
+			float motion =  (orientation==VERTICAL?p_event.mouse_motion.y:p_event.mouse_motion.x) - grab.pos;
+			if (orientation==VERTICAL)
+				motion=-motion;
+			float areasize = orientation==VERTICAL?size.height - grabber->get_size().height:size.width - grabber->get_size().width;
+			if (areasize<=0)
 				return;
-			}
-			double umotion = motion / double(areasize);
-			set_as_ratio(grab.uvalue + umotion);
+			float umotion = motion / float(areasize);
+			set_unit_value( grab.uvalue + umotion );
+		}
+	} else {
+
+		if (p_event.is_action("ui_left") && p_event.is_pressed()) {
+
+			if (orientation!=HORIZONTAL)
+				return;
+			set_val( get_val() - (custom_step>=0?custom_step:get_step()) );
+			accept_event();
+		} else if (p_event.is_action("ui_right") && p_event.is_pressed()) {
+
+			if (orientation!=HORIZONTAL)
+				return;
+			set_val( get_val() + (custom_step>=0?custom_step:get_step()) );
+			accept_event();
+		} else if (p_event.is_action("ui_up") && p_event.is_pressed()) {
+
+			if (orientation!=VERTICAL)
+				return;
+
+			set_val( get_val() + (custom_step>=0?custom_step:get_step()) );
+			accept_event();
+		} else if (p_event.is_action("ui_down") && p_event.is_pressed()) {
+
+			if (orientation!=VERTICAL)
+				return;
+			set_val( get_val() - (custom_step>=0?custom_step:get_step()) );
+			accept_event();
+
+		} else if (p_event.type==InputEvent::KEY) {
+
+			const InputEventKey &k=p_event.key;
+
+			if (!k.pressed)
+				return;
+
+			switch (k.scancode) {
+
+				case KEY_HOME: {
+
+					set_val( get_min() );
+					accept_event();
+				} break;
+				case KEY_END: {
+
+					set_val( get_max() );
+					accept_event();
+
+				} break;
+
+			} ;
 		}
 	}
 
-	Input *input = Input::get_singleton();
-	Ref<InputEventJoypadMotion> joypadmotion_event = p_event;
-	Ref<InputEventJoypadButton> joypadbutton_event = p_event;
-	bool is_joypad_event = (joypadmotion_event.is_valid() || joypadbutton_event.is_valid());
-
-	if (!mm.is_valid() && !mb.is_valid()) {
-		if (p_event->is_action_pressed("ui_left", true)) {
-			if (orientation != HORIZONTAL) {
-				return;
-			}
-			if (is_joypad_event) {
-				if (!input->is_action_just_pressed("ui_left", true)) {
-					return;
-				}
-				set_process_internal(true);
-			}
-			set_value(get_value() - (custom_step >= 0 ? custom_step : get_step()));
-			accept_event();
-		} else if (p_event->is_action_pressed("ui_right", true)) {
-			if (orientation != HORIZONTAL) {
-				return;
-			}
-			if (is_joypad_event) {
-				if (!input->is_action_just_pressed("ui_right", true)) {
-					return;
-				}
-				set_process_internal(true);
-			}
-			set_value(get_value() + (custom_step >= 0 ? custom_step : get_step()));
-			accept_event();
-		} else if (p_event->is_action_pressed("ui_up", true)) {
-			if (orientation != VERTICAL) {
-				return;
-			}
-			if (is_joypad_event) {
-				if (!input->is_action_just_pressed("ui_up", true)) {
-					return;
-				}
-				set_process_internal(true);
-			}
-			set_value(get_value() + (custom_step >= 0 ? custom_step : get_step()));
-			accept_event();
-		} else if (p_event->is_action_pressed("ui_down", true)) {
-			if (orientation != VERTICAL) {
-				return;
-			}
-			if (is_joypad_event) {
-				if (!input->is_action_just_pressed("ui_down", true)) {
-					return;
-				}
-				set_process_internal(true);
-			}
-			set_value(get_value() - (custom_step >= 0 ? custom_step : get_step()));
-			accept_event();
-		} else if (p_event->is_action("ui_home", true) && p_event->is_pressed()) {
-			set_value(get_min());
-			accept_event();
-		} else if (p_event->is_action("ui_end", true) && p_event->is_pressed()) {
-			set_value(get_max());
-			accept_event();
-		}
-	}
 }
 
 void Slider::_notification(int p_what) {
-	switch (p_what) {
-		case NOTIFICATION_INTERNAL_PROCESS: {
-			Input *input = Input::get_singleton();
 
-			if (input->is_action_just_released("ui_left") || input->is_action_just_released("ui_right") || input->is_action_just_released("ui_up") || input->is_action_just_released("ui_down")) {
-				gamepad_event_delay_ms = DEFAULT_GAMEPAD_EVENT_DELAY_MS;
-				set_process_internal(false);
-				return;
-			}
 
-			gamepad_event_delay_ms -= get_process_delta_time();
-			if (gamepad_event_delay_ms <= 0) {
-				gamepad_event_delay_ms = GAMEPAD_EVENT_REPEAT_RATE_MS + gamepad_event_delay_ms;
-				if (orientation == HORIZONTAL) {
-					if (input->is_action_pressed("ui_left")) {
-						set_value(get_value() - (custom_step >= 0 ? custom_step : get_step()));
-					}
-
-					if (input->is_action_pressed("ui_right")) {
-						set_value(get_value() + (custom_step >= 0 ? custom_step : get_step()));
-					}
-				} else if (orientation == VERTICAL) {
-					if (input->is_action_pressed("ui_down")) {
-						set_value(get_value() - (custom_step >= 0 ? custom_step : get_step()));
-					}
-
-					if (input->is_action_pressed("ui_up")) {
-						set_value(get_value() + (custom_step >= 0 ? custom_step : get_step()));
-					}
-				}
-			}
-
-		} break;
-
-		case NOTIFICATION_THEME_CHANGED: {
-			update_minimum_size();
-			queue_redraw();
-		} break;
+	switch(p_what) {
 
 		case NOTIFICATION_MOUSE_ENTER: {
-			mouse_inside = true;
-			queue_redraw();
-		} break;
 
+			mouse_inside=true;
+			update();
+		} break;
 		case NOTIFICATION_MOUSE_EXIT: {
-			mouse_inside = false;
-			queue_redraw();
-		} break;
 
-		case NOTIFICATION_VISIBILITY_CHANGED:
-		case NOTIFICATION_EXIT_TREE: {
-			mouse_inside = false;
-			grab.active = false;
+			mouse_inside=false;
+			update();
 		} break;
-
 		case NOTIFICATION_DRAW: {
 			RID ci = get_canvas_item();
 			Size2i size = get_size();
-			double ratio = Math::is_nan(get_as_ratio()) ? 0 : get_as_ratio();
+			Ref<StyleBox> style = get_stylebox("slider");
+			Ref<StyleBox> focus = get_stylebox("focus");
+			Ref<Texture> grabber = get_icon(mouse_inside||has_focus()?"grabber_hilite":"grabber");
+			Ref<Texture> tick = get_icon("tick");
 
-			Ref<StyleBox> style = theme_cache.slider_style;
-			Ref<Texture2D> tick = theme_cache.tick_icon;
+			if (orientation==VERTICAL) {
 
-			bool highlighted = editable && (mouse_inside || has_focus());
-			Ref<Texture2D> grabber;
-			if (editable) {
-				if (highlighted) {
-					grabber = theme_cache.grabber_hl_icon;
-				} else {
-					grabber = theme_cache.grabber_icon;
-				}
-			} else {
-				grabber = theme_cache.grabber_disabled_icon;
-			}
-
-			Ref<StyleBox> grabber_area;
-			if (highlighted) {
-				grabber_area = theme_cache.grabber_area_hl_style;
-			} else {
-				grabber_area = theme_cache.grabber_area_style;
-			}
-
-			if (orientation == VERTICAL) {
-				int widget_width = style->get_minimum_size().width;
-				double areasize = size.height - (theme_cache.center_grabber ? 0 : grabber->get_height());
-				int grabber_shift = theme_cache.center_grabber ? grabber->get_height() / 2 : 0;
-				style->draw(ci, Rect2i(Point2i(size.width / 2 - widget_width / 2, 0), Size2i(widget_width, size.height)));
-				grabber_area->draw(ci, Rect2i(Point2i((size.width - widget_width) / 2, size.height - areasize * ratio - grabber->get_height() / 2 + grabber_shift), Size2i(widget_width, areasize * ratio + grabber->get_height() / 2 - grabber_shift)));
-
-				if (ticks > 1) {
-					int grabber_offset = (grabber->get_height() / 2 - tick->get_height() / 2);
-					for (int i = 0; i < ticks; i++) {
-						if (!ticks_on_borders && (i == 0 || i + 1 == ticks)) {
-							continue;
-						}
-						int ofs = (i * areasize / (ticks - 1)) + grabber_offset - grabber_shift;
-						tick->draw(ci, Point2i((size.width - widget_width) / 2, ofs));
+				style->draw(ci,Rect2i(Point2i(),Size2i(style->get_minimum_size().width+style->get_center_size().width,size.height)));
+				//if (mouse_inside||has_focus())
+				//	focus->draw(ci,Rect2i(Point2i(),Size2i(style->get_minimum_size().width+style->get_center_size().width,size.height)));
+				float areasize = size.height - grabber->get_size().height;
+				if (ticks>1) {
+					int tickarea = size.height - tick->get_height();
+					for(int i=0;i<ticks;i++) {
+					        if( ! ticks_on_borders && (i == 0 || i + 1 == ticks) ) continue;
+						int ofs = i*tickarea/(ticks-1);
+						tick->draw(ci,Point2(0,ofs));
 					}
+
 				}
-				grabber->draw(ci, Point2i(size.width / 2 - grabber->get_width() / 2 + theme_cache.grabber_offset, size.height - ratio * areasize - grabber->get_height() + grabber_shift));
+				grabber->draw(ci,Point2i(size.width/2-grabber->get_size().width/2,size.height - get_unit_value()*areasize - grabber->get_size().height));
 			} else {
-				int widget_height = style->get_minimum_size().height;
-				double areasize = size.width - (theme_cache.center_grabber ? 0 : grabber->get_size().width);
-				int grabber_shift = theme_cache.center_grabber ? -grabber->get_width() / 2 : 0;
+				style->draw(ci,Rect2i(Point2i(),Size2i(size.width,style->get_minimum_size().height+style->get_center_size().height)));
+				//if (mouse_inside||has_focus())
+				//	focus->draw(ci,Rect2i(Point2i(),Size2i(size.width,style->get_minimum_size().height+style->get_center_size().height)));
 
-				style->draw(ci, Rect2i(Point2i(0, (size.height - widget_height) / 2), Size2i(size.width, widget_height)));
-				grabber_area->draw(ci, Rect2i(Point2i(0, (size.height - widget_height) / 2), Size2i(areasize * ratio + grabber->get_width() / 2 + grabber_shift, widget_height)));
-
-				if (ticks > 1) {
-					int grabber_offset = (grabber->get_width() / 2 - tick->get_width() / 2);
-					for (int i = 0; i < ticks; i++) {
-						if ((!ticks_on_borders) && ((i == 0) || ((i + 1) == ticks))) {
-							continue;
-						}
-						int ofs = (i * areasize / (ticks - 1)) + grabber_offset + grabber_shift;
-						tick->draw(ci, Point2i(ofs, (size.height - widget_height) / 2));
+				float areasize = size.width - grabber->get_size().width;
+				if (ticks>1) {
+					int tickarea = size.width - tick->get_width();
+					for(int i=0;i<ticks;i++) {
+					        if( (! ticks_on_borders) && ( (i == 0) || ((i + 1) == ticks)) ) continue;
+						int ofs = i*tickarea/(ticks-1);
+						tick->draw(ci,Point2(ofs,0));
 					}
+
 				}
-				grabber->draw(ci, Point2i(ratio * areasize + grabber_shift, size.height / 2 - grabber->get_height() / 2 + theme_cache.grabber_offset));
+				grabber->draw(ci,Point2i(get_unit_value()*areasize,size.height/2-grabber->get_size().height/2));
 			}
+
 		} break;
 	}
 }
 
-void Slider::set_custom_step(double p_custom_step) {
-	custom_step = p_custom_step;
+void Slider::set_custom_step(float p_custom_step) {
+
+	custom_step=p_custom_step;
 }
 
-double Slider::get_custom_step() const {
+float Slider::get_custom_step() const {
+
 	return custom_step;
 }
 
 void Slider::set_ticks(int p_count) {
-	if (ticks == p_count) {
-		return;
-	}
 
-	ticks = p_count;
-	queue_redraw();
+	ticks=p_count;
+	update();
 }
 
 int Slider::get_ticks() const {
+
 	return ticks;
 }
 
-bool Slider::get_ticks_on_borders() const {
+bool Slider::get_ticks_on_borders() const{
 	return ticks_on_borders;
 }
 
-void Slider::set_ticks_on_borders(bool _tob) {
-	if (ticks_on_borders == _tob) {
-		return;
-	}
-
+void Slider::set_ticks_on_borders(bool _tob){
 	ticks_on_borders = _tob;
-	queue_redraw();
-}
-
-void Slider::set_editable(bool p_editable) {
-	if (editable == p_editable) {
-		return;
-	}
-	grab.active = false;
-
-	editable = p_editable;
-	queue_redraw();
-}
-
-bool Slider::is_editable() const {
-	return editable;
-}
-
-void Slider::set_scrollable(bool p_scrollable) {
-	scrollable = p_scrollable;
-}
-
-bool Slider::is_scrollable() const {
-	return scrollable;
+	update();
 }
 
 void Slider::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("set_ticks", "count"), &Slider::set_ticks);
-	ClassDB::bind_method(D_METHOD("get_ticks"), &Slider::get_ticks);
 
-	ClassDB::bind_method(D_METHOD("get_ticks_on_borders"), &Slider::get_ticks_on_borders);
-	ClassDB::bind_method(D_METHOD("set_ticks_on_borders", "ticks_on_border"), &Slider::set_ticks_on_borders);
-
-	ClassDB::bind_method(D_METHOD("set_editable", "editable"), &Slider::set_editable);
-	ClassDB::bind_method(D_METHOD("is_editable"), &Slider::is_editable);
-	ClassDB::bind_method(D_METHOD("set_scrollable", "scrollable"), &Slider::set_scrollable);
-	ClassDB::bind_method(D_METHOD("is_scrollable"), &Slider::is_scrollable);
-
-	ADD_SIGNAL(MethodInfo("drag_started"));
-	ADD_SIGNAL(MethodInfo("drag_ended", PropertyInfo(Variant::BOOL, "value_changed")));
-
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "editable"), "set_editable", "is_editable");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "scrollable"), "set_scrollable", "is_scrollable");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "tick_count", PROPERTY_HINT_RANGE, "0,4096,1"), "set_ticks", "get_ticks");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "ticks_on_borders"), "set_ticks_on_borders", "get_ticks_on_borders");
-
-	BIND_THEME_ITEM_CUSTOM(Theme::DATA_TYPE_STYLEBOX, Slider, slider_style, "slider");
-	BIND_THEME_ITEM_CUSTOM(Theme::DATA_TYPE_STYLEBOX, Slider, grabber_area_style, "grabber_area");
-	BIND_THEME_ITEM_CUSTOM(Theme::DATA_TYPE_STYLEBOX, Slider, grabber_area_hl_style, "grabber_area_highlight");
-
-	BIND_THEME_ITEM_CUSTOM(Theme::DATA_TYPE_ICON, Slider, grabber_icon, "grabber");
-	BIND_THEME_ITEM_CUSTOM(Theme::DATA_TYPE_ICON, Slider, grabber_hl_icon, "grabber_highlight");
-	BIND_THEME_ITEM_CUSTOM(Theme::DATA_TYPE_ICON, Slider, grabber_disabled_icon, "grabber_disabled");
-	BIND_THEME_ITEM_CUSTOM(Theme::DATA_TYPE_ICON, Slider, tick_icon, "tick");
-
-	BIND_THEME_ITEM(Theme::DATA_TYPE_CONSTANT, Slider, center_grabber);
-	BIND_THEME_ITEM(Theme::DATA_TYPE_CONSTANT, Slider, grabber_offset);
+	ObjectTypeDB::bind_method(_MD("_input_event"),&Slider::_input_event);
+	ObjectTypeDB::bind_method(_MD("set_ticks","count"),&Slider::set_ticks);
+	ObjectTypeDB::bind_method(_MD("get_ticks"),&Slider::get_ticks);
+	
+	ObjectTypeDB::bind_method(_MD("get_ticks_on_borders"),&Slider::get_ticks_on_borders);          
+	ObjectTypeDB::bind_method(_MD("set_ticks_on_borders","ticks_on_border"),&Slider::set_ticks_on_borders);
+	
+	ADD_PROPERTY( PropertyInfo( Variant::INT, "tick_count", PROPERTY_HINT_RANGE,"0,4096,1"), _SCS("set_ticks"), _SCS("get_ticks") );
+        ADD_PROPERTY( PropertyInfo( Variant::BOOL, "ticks_on_borders" ), _SCS("set_ticks_on_borders"), _SCS("get_ticks_on_borders") );
+        
 }
 
 Slider::Slider(Orientation p_orientation) {
-	orientation = p_orientation;
+	orientation=p_orientation;
+	mouse_inside=false;
+	grab.active=false;
+	ticks=0;
+	custom_step=-1;
 	set_focus_mode(FOCUS_ALL);
 }
