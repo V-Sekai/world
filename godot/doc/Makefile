@@ -1,47 +1,31 @@
-BASEDIR = $(CURDIR)
-CLASSES = $(BASEDIR)/base/classes.xml
+BASEDIR = .
+CLASSES = "$(BASEDIR)/classes/" "$(BASEDIR)/../modules/" "$(BASEDIR)/../platform/"
 OUTPUTDIR = $(BASEDIR)/_build
 TOOLSDIR = $(BASEDIR)/tools
+JSDIR = "$(BASEDIR)/../platform/web"
+LANGARG ?= en
+TOOLSOPT ?=
 
 .ONESHELL:
 
 clean:
-	rm -rf $(OUTPUTDIR)
-
-doku:
-	rm -rf $(OUTPUTDIR)/doku
-	mkdir -p $(OUTPUTDIR)/doku
-	pushd $(OUTPUTDIR)/doku
-	python2 $(TOOLSDIR)/makedoku.py $(CLASSES)
-	popd
+	rm -rf "$(OUTPUTDIR)"
 
 doxygen:
-	rm -rf $(OUTPUTDIR)/doxygen
-	mkdir -p $(OUTPUTDIR)/doxygen
+	rm -rf "$(OUTPUTDIR)/doxygen"
+	mkdir -p "$(OUTPUTDIR)/doxygen"
 	doxygen Doxyfile
 
-html:
-	rm -rf $(OUTPUTDIR)/html
-	mkdir -p  $(OUTPUTDIR)/html
-	pushd $(OUTPUTDIR)/html
-	python2 $(TOOLSDIR)/makehtml.py -multipage $(CLASSES)
-	popd
-
-markdown:
-	rm -rf $(OUTPUTDIR)/markdown
-	mkdir -p $(OUTPUTDIR)/markdown
-	pushd $(OUTPUTDIR)/markdown
-	python2 $(TOOLSDIR)/makemd.py $(CLASSES)
-	popd
-
 rst:
-	rm -rf $(OUTPUTDIR)/rst
-	mkdir -p $(OUTPUTDIR)/rst
-	pushd $(OUTPUTDIR)/rst
-	python2 $(TOOLSDIR)/makerst.py $(CLASSES)
-	popd
+	rm -rf "$(OUTPUTDIR)/rst"
+	mkdir -p "$(OUTPUTDIR)/rst"
+	python3 "$(TOOLSDIR)/make_rst.py" -o "$(OUTPUTDIR)/rst" -l "$(LANGARG)" $(TOOLSOPT) $(CLASSES)
 
-textile:
-	rm -rf $(OUTPUTDIR)/textile
-	mkdir -p $(OUTPUTDIR)/textile
-	python3 $(TOOLSDIR)/makedocs.py --input $(CLASSES) --output $(OUTPUTDIR)/textile
+xml-check:
+	python3 "$(TOOLSDIR)/make_rst.py" --dry-run -l "$(LANGARG)" $(TOOLSOPT) $(CLASSES)
+
+rstjs:
+	rm -rf "$(OUTPUTDIR)/rstjs"
+	mkdir -p "$(OUTPUTDIR)/rstjs"
+	npm --prefix "$(JSDIR)" ci
+	npm --prefix "$(JSDIR)" run docs -- --destination "$(OUTPUTDIR)/rstjs/html5_shell_classref.rst"

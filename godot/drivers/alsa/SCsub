@@ -1,5 +1,9 @@
-Import('env')
+#!/usr/bin/env python
 
-env.add_source_files(env.drivers_sources,"*.cpp")
+Import("env")
 
-Export('env')
+if "alsa" in env and env["alsa"]:
+    if env["use_sowrap"]:
+        env.add_source_files(env.drivers_sources, "asound-so_wrap.c")
+
+env.add_source_files(env.drivers_sources, "*.cpp")

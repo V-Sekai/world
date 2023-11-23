@@ -1,3 +1,11 @@
-Import('env')
+#!/usr/bin/env python
 
-env.add_source_files(env.modules_sources,"*.cpp")
+Import("env")
+Import("env_modules")
+
+env_gridmap = env_modules.Clone()
+
+# Godot source files
+env_gridmap.add_source_files(env.modules_sources, "*.cpp")
+if env.editor_build:
+    env_gridmap.add_source_files(env.modules_sources, "editor/*.cpp")

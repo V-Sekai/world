@@ -1,5 +1,7 @@
-Import('env')
+#!/usr/bin/env python
 
-env.add_source_files(env.core_sources,"*.cpp")
+Import("env")
 
-Export('env')
+env_math = env.Clone()
+
+env_math.add_source_files(env.core_sources, "*.cpp")

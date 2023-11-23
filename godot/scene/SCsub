@@ -1,20 +1,24 @@
-Import('env')
+#!/usr/bin/env python
 
-env.scene_sources=[]
-env.add_source_files(env.scene_sources,"*.cpp")
+Import("env")
 
-Export('env')
+env.scene_sources = []
 
-SConscript('main/SCsub');
-SConscript('gui/SCsub');
-SConscript('3d/SCsub');
-SConscript('2d/SCsub');
-SConscript('animation/SCsub');
-SConscript('audio/SCsub');
-SConscript('resources/SCsub');
-SConscript('io/SCsub');
+# Godot source files
+env.add_source_files(env.scene_sources, "*.cpp")
 
+# Chain load SCsubs
+SConscript("main/SCsub")
+SConscript("gui/SCsub")
+if not env["disable_3d"]:
+    SConscript("3d/SCsub")
+SConscript("2d/SCsub")
+SConscript("animation/SCsub")
+SConscript("audio/SCsub")
+SConscript("resources/SCsub")
+SConscript("debugger/SCsub")
+SConscript("theme/SCsub")
 
-lib = env.Library("scene",env.scene_sources)
-
+# Build it all as a library
+lib = env.add_library("scene", env.scene_sources)
 env.Prepend(LIBS=[lib])

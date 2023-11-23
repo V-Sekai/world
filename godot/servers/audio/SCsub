@@ -1,5 +1,7 @@
-Import('env')
+#!/usr/bin/env python
 
-env.add_source_files(env.servers_sources,"*.cpp")
+Import("env")
 
-Export('env')
+env.add_source_files(env.servers_sources, "*.cpp")
+
+SConscript("effects/SCsub")
