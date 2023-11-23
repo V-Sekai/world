@@ -4,12 +4,16 @@ import subprocess
 
 def can_build(env, platform):
     if platform == "windows":
+        if not env["use_mingw"]:
+            return False
         try:
+            import subprocess
             mingw_version = subprocess.check_output(["gcc", "--version"])
             print("MinGW is installed: ", mingw_version)
         except Exception as e:
             print("MinGW is not installed or not found in PATH")
             return False
+        return True
     return platform in ["macos", "linux", "windows"]
 
 

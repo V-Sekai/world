@@ -122,7 +122,7 @@ static bool default_output_device_changed = false;
 static bool default_input_device_changed = false;
 
 // Silence warning due to a COM API weirdness (GH-35194).
-#if defined(__GNUC__) && !defined(__clang__)
+#if defined(__GNUC__) && !defined(__clang__) || defined(__MINGW32__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
 #endif
