@@ -11,13 +11,22 @@
   },
   "configurations": [
     {
-      "name": "Build the editor",
+      "name": "Run the Macos editor",
       "type": "lldb",
       "request": "launch",
       "args": ["--path", "tools/sample_webrtc", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
-    }
+    },
+    {
+      "name": "Run the Windows editor",
+      "type": "lldb",
+      "request": "launch",
+      "args": ["--path", "tools/sample_webrtc", "-e"],
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/godot/bin/godot.windows.editor.double.arm64",
+      "preLaunchTask": "Godot Engine"
+    },
   ]
 }
