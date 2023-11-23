@@ -25,6 +25,7 @@ subprocess.run(
         ".",
     ],
     check=True,
+    cwd=current_dir,
 )
 # https://github.com/ashtonmeuser/godot-wasm/blob/master/SCsub#L44C58-L48C1
 os.chdir(current_dir)
