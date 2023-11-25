@@ -29,7 +29,7 @@
         "cwd": "${workspaceFolder}/godot"
       },
       "command": [
-        "scons -c verbose=no warnings=no werror=yes dev_build=yes precision=double compiledb=yes optimize=speed_trace use_static_cpp=true target=editor"
+        "scons -c warnings=no werror=yes dev_build=no precision=double compiledb=yes target=editor"
       ],
       "problemMatcher": [],
       "group": {
