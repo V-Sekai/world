@@ -1175,17 +1175,6 @@ void SurfaceTool::generate_tangents() {
 	msc.m_FastPositionStride = sizeof(Vertex);
 	msc.m_FastPositionIndex = index_array.ptr();
 
-	for (unsigned int j = 0; j < index_array.size(); j += 3) {
-		const Vector3 &v0 = vertex_array[index_array[j + 0]].vertex;
-		const Vector3 &v1 = vertex_array[index_array[j + 1]].vertex;
-		const Vector3 &v2 = vertex_array[index_array[j + 2]].vertex;
-		Vector3 face_normal = vec3_cross(v0 - v2, v0 - v1);
-		float face_area = face_normal.length(); // Actually twice the face area, since it's the same error_factor on all faces, we don't care
-		if (!Math::is_finite(face_area) || face_area == 0) {
-			WARN_PRINT_ONCE("Ignoring mesh with non-finite normal in tangent generation.");
-			return;
-		}
-	}
 	msc.m_FastNormal = reinterpret_cast<char *>(&base_ptr->normal);
 	msc.m_FastNormalStride = sizeof(Vertex);
 	msc.m_FastNormalIndex = index_array.ptr();

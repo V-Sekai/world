@@ -425,9 +425,9 @@ void CSGShape3D::_update_shape() {
 		surface_tool->begin(Mesh::PRIMITIVE_TRIANGLES);
 
 		for (int j = 0; j < surfaces[i].last_added; j++) {
-			surface_tool->add_vertex(surfaces[i].verticesw[j]);
 			surface_tool->set_normal(surfaces[i].normalsw[j]);
 			surface_tool->set_uv(surfaces[i].uvsw[j]);
+			surface_tool->add_vertex(surfaces[i].verticesw[j]);
 		}
 		for (int index_i = 0; index_i < surfaces[i].indices.size(); index_i++) {
 			surface_tool->add_index(surfaces[i].indices[index_i]);
