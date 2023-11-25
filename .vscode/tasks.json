@@ -13,7 +13,7 @@
         "cwd": "${workspaceFolder}/godot"
       },
       "command": [
-        "scons verbose=no use_mingw=yes use_llvm=yes warnings=no werror=yes -j 12 dev_build=no precision=double compiledb=yes optimize=speed_trace use_static_cpp=true target=editor"
+        "scons warnings=no werror=yes dev_build=no precision=double compiledb=yes target=editor"
       ],
       "problemMatcher": [],
       "group": {
