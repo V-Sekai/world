@@ -552,17 +552,6 @@ func _setup_input_manager() -> void:
 
 
 ##
-## Assigns callbacks to the GraphicsManager singleton.
-##
-func _setup_graphics_manager() -> void:
-	GraphicsManager.assign_get_settings_value_funcref(VSKUserPreferencesManager, "get_value")
-	GraphicsManager.assign_set_settings_value_funcref(VSKUserPreferencesManager, "set_value")
-	GraphicsManager.assign_save_settings_funcref(VSKUserPreferencesManager, "save_settings")
-
-	GraphicsManager.get_settings_values()
-
-
-##
 ## Assigns callbacks to the VRManager singleton.
 ##
 func _setup_vr_manager() -> void:
@@ -595,17 +584,12 @@ func _spatial_game_viewport_updated(p_viewport: SubViewport):
 	if p_viewport == game_viewport:
 		FlatViewport.texture_rect_ingame.texture = game_viewport.get_texture()
 
-
 func set_viewport(new_viewport: SubViewport) -> void:
 	game_viewport = new_viewport
 	if game_viewport.get_parent() != null:
 		game_viewport.get_parent().remove_child(game_viewport)
 	add_child(game_viewport, true)
 	game_viewport.owner = self
-	FlatViewport.texture_rect_ingame.texture = game_viewport.get_texture()
-	var viewport_path = game_viewport.owner.get_path_to(game_viewport)
-	FlatViewport.texture_rect_ingame.texture.viewport_path = viewport_path
-
 
 ##
 ## Runs setup phase on EntityManager
@@ -633,8 +617,6 @@ func _connect_pre_quitting_signals() -> void:
 		printerr("Could not connect is_quitting InputManager")
 	if connect("is_pre_quitting", VRManager.is_quitting) != OK:
 		printerr("Could not connect is_quitting VRManager")
-	if connect("is_pre_quitting", GraphicsManager.is_quitting) != OK:
-		printerr("Could not connect is_quitting GraphicsManager")
 	if not mocap_manager:
 		return
 	if connect("is_pre_quitting", mocap_manager.is_quitting) != OK:
@@ -687,7 +669,6 @@ func setup() -> void:
 	VSKAccountManager.call("start_session")
 
 	_setup_input_manager()
-	_setup_graphics_manager()
 	_setup_vr_manager()
 	_setup_mocap_manager()
 	connection_util_const.connect_signal_table(signal_table, self)
@@ -696,10 +677,7 @@ func setup() -> void:
 		game_viewport = SpatialGameViewportManager.create_spatial_game_viewport()
 		add_child(game_viewport, true)
 		game_viewport.owner = self
-	FlatViewport.texture_rect_ingame.texture = game_viewport.get_texture()
-	var viewport_path = game_viewport.owner.get_path_to(game_viewport)
-	FlatViewport.texture_rect_ingame.texture.viewport_path = viewport_path
-
+		
 	if !gameroot:
 		gameroot = Node3D.new()
 		gameroot.set_name("Gameroot")
