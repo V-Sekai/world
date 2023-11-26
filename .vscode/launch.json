@@ -34,8 +34,8 @@
       "request": "launch",
       "args": ["--path", "tools/sample_webrtc", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/godot/bin/godot.windows.editor.double.arm64",
-      "preLaunchTask": "Godot Engine"
+      "program": "${workspaceFolder}/godot/bin/godot.windows.editor.double.x86_64.exe",
+      "preLaunchTask": "Godot Engine Windows Clang"
     },
   ]
 }
