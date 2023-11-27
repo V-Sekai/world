@@ -32,9 +32,9 @@
       "name": "Run the Windows editor",
       "type": "cppvsdbg",
       "request": "launch",
-      "args": ["--path", "game"],
+      "args": ["--path", "game", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/godot/bin/godot.windows.editor.double.x86_64.exe",
+      "program": "${workspaceFolder}/godot/bin/godot.windows.editor.double.x86_64.llvm.exe",
       "preLaunchTask": "Godot Engine Windows Clang"
     },
   ]
