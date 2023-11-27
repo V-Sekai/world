@@ -4,9 +4,9 @@
 ; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
 ;
 [subrepo]
-	remote = https://github.com/V-Sekai/v-sekai-game.git
-	branch = main
-	commit = f5b373cf0a4993ebf43a819e28f69624d5e39484
-	parent = 28461b9f5ba896e83e11403999ac76c9c3e8c9d1
+	remote = https://github.com/EnthWyrr/v-sekai-game.git
+	branch = pop-menu-on-esc
+	commit = 355279ebccadf5c353f00caeb7868dfdb8c1614a
+	parent = dab0eb9beb982726982c3cff82cf430c5e9b7944
 	method = merge
 	cmdver = 0.4.6
