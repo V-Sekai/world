@@ -83,9 +83,9 @@ func regenerate_mesh():
 	multimesh.mesh = arr_mesh
 
 	for i in range(0, multimesh.instance_count):
-		var grid_transform:= Transform3D()
-		grid_transform.origin = Vector3(i%points_per_dimension, i/points_per_dimension%points_per_dimension, i/(points_per_dimension*points_per_dimension))
-		grid_transform.origin -= Vector3(1,1,1) * (points_per_dimension/2-1)
+		var grid_transform := Transform3D()
+		grid_transform.origin = Vector3(i % points_per_dimension, i / points_per_dimension % points_per_dimension, i / (points_per_dimension * points_per_dimension))
+		grid_transform.origin -= Vector3(1, 1, 1) * (points_per_dimension / 2 - 1)
 
 		multimesh.set_instance_transform(i, grid_transform)
 

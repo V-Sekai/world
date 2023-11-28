@@ -21,7 +21,7 @@ var prev_hand_left_pressed: float
 var prev_hand_right_pressed: float
 
 
-func _process(delta: float) -> void: 
+func _process(delta: float) -> void:
 	var hand_left_pressed: float = hand_left.get_float("trigger") > 0.05
 	var hand_right_pressed: float = hand_right.get_float("trigger") > 0.05
 	var max_size: float = 0.01
