@@ -37,6 +37,9 @@ var right_hand_just_grabbed := BoolTimer.new()
 var left_hand_just_ungrabbed := BoolTimer.new()
 var right_hand_just_ungrabbed := BoolTimer.new()
 
+var linear_velocity: Vector3 = Vector3.ZERO
+var angular_velocity: Vector3 = Vector3.ZERO
+
 
 func _process(delta_time: float) -> void:
 	var hand_left_grab: float = hand_left.get_float("grip")
@@ -55,6 +58,7 @@ func _process(delta_time: float) -> void:
 	if not (hand_left_grab or hand_right_grab):
 		state = Mode.NONE
 		delta_transform = Transform3D()  # Reset delta_transform when not grabbing
+		apply_velocity(delta_time)  # Apply stored velocities when not grabbing
 
 	match state:
 		Mode.NONE:
@@ -69,18 +73,23 @@ func _process(delta_time: float) -> void:
 
 			set_pivot_and_transform(hand_left_grab, prev_hand_left_transform, hand_left.transform)
 			set_pivot_and_transform(hand_right_grab, prev_hand_right_transform, hand_right.transform)
+			store_velocity(prev_hand_left_transform, hand_left.transform, delta_time)
 
 		Mode.PINCH:
 			if not (hand_left_grab and hand_right_grab) and both_hands_just_ungrabbed:
 				state = Mode.GRAB
 
 			set_pinch_pivot_and_transform(prev_hand_left_transform.origin, prev_hand_right_transform.origin, hand_left.transform.origin, hand_right.transform.origin)
+			store_velocity(prev_hand_left_transform, hand_left.transform, delta_time)
+			store_velocity(prev_hand_right_transform, hand_right.transform, delta_time)
 
 		Mode.ORBIT:
 			if not (hand_left_grab and hand_right_grab):
 				state = Mode.GRAB
 
 			set_orbit_pivot_and_transform(prev_hand_left_transform.origin, prev_hand_right_transform.origin, hand_left.transform.origin, hand_right.transform.origin)
+			store_velocity(prev_hand_left_transform, hand_left.transform, delta_time)
+			store_velocity(prev_hand_right_transform, hand_right.transform, delta_time)
 
 	# Integrate motion
 	target_transform = delta_transform * target_transform
@@ -93,6 +102,51 @@ func _process(delta_time: float) -> void:
 	prev_hand_right_transform = hand_right.transform
 	prev_hand_left_grab = hand_left_grab
 	prev_hand_right_grab = hand_right_grab
+
+
+var gravity_m_per_s2: float = 0.0981
+var linear_dampening: float = 0.45
+var angular_dampening: float = 0.1
+
+
+func apply_velocity(delta_time: float) -> void:
+	# Apply gravity directly to the velocity
+	linear_velocity += Vector3(0, -gravity_m_per_s2, 0) * delta_time
+
+	# Apply linear damping, reducing the velocity by the damping factor each frame
+	linear_velocity *= (1.0 - linear_dampening)
+
+	# Update the position based on the new velocity
+	target_transform.origin += linear_velocity * delta_time
+
+	# Handle the angular movement
+	var angular_speed = angular_velocity.length()
+	if angular_speed != 0:
+		var rotation_axis = angular_velocity.normalized()
+		# Rotate the target transform based on angular velocity
+		target_transform = target_transform.rotated(rotation_axis, angular_speed * delta_time)
+
+		# Apply angular damping to reduce angular speed over time
+		angular_velocity *= (1.0 - angular_dampening)
+
+
+func store_velocity(prev_hand_transform: Transform3D, hand_transform: Transform3D, delta_time: float) -> void:
+	if delta_time > 0:
+		var displacement = hand_transform.origin - prev_hand_transform.origin
+		linear_velocity = displacement / delta_time
+
+		# Use quaternions to avoid gimbal lock
+		var prev_quat = Quaternion(prev_hand_transform.basis)
+		var current_quat = Quaternion(hand_transform.basis)
+		var quat_difference = current_quat * prev_quat.inverse()
+
+		# Get the axis and the amount of rotation (radians).
+		# Note that `get_axis()` returns a normalized vector.
+		var rotation_axis = quat_difference.get_axis()
+		var rotation_amount = quat_difference.get_angle()
+
+		# Here the angular velocity will be the rotation axis scaled by the amount of rotation over time.
+		angular_velocity = rotation_axis * (rotation_amount / delta_time)
 
 
 func both_hands_just_grabbed() -> bool:
