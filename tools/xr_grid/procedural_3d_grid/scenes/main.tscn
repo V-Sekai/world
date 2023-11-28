@@ -306,6 +306,7 @@ billboard = true
 _defaults_have_been_set = true
 
 [node name="Node3D" type="Node3D" parent="XROrigin3D/hand_right"]
+visible = false
 script = ExtResource("8_uwiqs")
 
 [node name="sophia" parent="XROrigin3D/hand_right/Node3D" instance=ExtResource("11_6yesq")]
