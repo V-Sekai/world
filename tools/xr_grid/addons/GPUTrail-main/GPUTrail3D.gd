@@ -74,11 +74,13 @@ var _defaults_have_been_set: bool = false
 func _get_property_list() -> Array:
 	return [{"name": "_defaults_have_been_set", "type": TYPE_BOOL, "usage": PROPERTY_USAGE_NO_EDITOR}]
 
+
 func _enter_tree():
 	if OS.get_name() == "Web":
 		visible = false
 
-func _ready() -> void:	
+
+func _ready() -> void:
 	if not _defaults_have_been_set:
 		_defaults_have_been_set = true
 
