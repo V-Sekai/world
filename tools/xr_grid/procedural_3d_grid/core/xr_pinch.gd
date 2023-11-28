@@ -40,16 +40,25 @@ var right_hand_just_ungrabbed := BoolTimer.new()
 var linear_velocity: Vector3 = Vector3.ZERO
 var angular_velocity: Vector3 = Vector3.ZERO
 
+@export var debounce_duration: float = 0.4
+var hand_left_grab_debounce_timer: float = 0.0
+var hand_right_grab_debounce_timer: float = 0.0
+var last_hand_left_grab_state: bool = false
+var last_hand_right_grab_state: bool = false
+
 
 func _process(delta_time: float) -> void:
 	var hand_left_grab: float = hand_left.get_float("grip")
 	var hand_right_grab: float = hand_right.get_float("grip")
 
+	handle_debounce(hand_left_grab, delta_time, true)
+	handle_debounce(hand_right_grab, delta_time, false)
+
 	# Dampening
 	delta_transform = delta_transform.interpolate_with(Transform3D(), damping * delta_time)
 
-	update_hand_grab_status(hand_left_grab, prev_hand_left_grab, left_hand_just_grabbed, left_hand_just_ungrabbed)
-	update_hand_grab_status(hand_right_grab, prev_hand_right_grab, right_hand_just_grabbed, right_hand_just_ungrabbed)
+	update_hand_grab_status(last_hand_left_grab_state, prev_hand_left_grab, left_hand_just_grabbed, left_hand_just_ungrabbed)
+	update_hand_grab_status(last_hand_right_grab_state, prev_hand_right_grab, right_hand_just_grabbed, right_hand_just_ungrabbed)
 
 	var both_hands_just_ungrabbed: bool = left_hand_just_ungrabbed.value and right_hand_just_ungrabbed.value
 
@@ -104,9 +113,42 @@ func _process(delta_time: float) -> void:
 	prev_hand_right_grab = hand_right_grab
 
 
-var gravity_m_per_s2: float = 0.0981
-var linear_dampening: float = 0.45
-var angular_dampening: float = 0.1
+func handle_debounce(current_grab_value: float, delta_time: float, is_left_hand: bool) -> void:
+	var grab_debounce_timer: float = hand_right_grab_debounce_timer
+
+	if is_left_hand:
+		grab_debounce_timer = hand_left_grab_debounce_timer
+
+	var last_grab_state = last_hand_right_grab_state
+	if is_left_hand:
+		last_grab_state = last_hand_left_grab_state
+
+	var is_currently_grabbing = current_grab_value > 0
+	if is_currently_grabbing != last_grab_state:
+		grab_debounce_timer += delta_time
+		if grab_debounce_timer >= debounce_duration:
+			if is_left_hand:
+				last_hand_left_grab_state = is_currently_grabbing
+				hand_left_grab_debounce_timer = 0
+			else:
+				last_hand_right_grab_state = is_currently_grabbing
+				hand_right_grab_debounce_timer = 0
+	else:
+		if is_left_hand:
+			hand_left_grab_debounce_timer = 0
+		else:
+			hand_right_grab_debounce_timer = 0
+
+	# Assign back the values to the class properties
+	if is_left_hand:
+		hand_left_grab_debounce_timer = grab_debounce_timer
+	else:
+		hand_right_grab_debounce_timer = grab_debounce_timer
+
+
+@export var gravity_m_per_s2: float = 0.0981
+@export var linear_dampening: float = 0.45
+@export var angular_dampening: float = 0.45
 
 
 func apply_velocity(delta_time: float) -> void:
