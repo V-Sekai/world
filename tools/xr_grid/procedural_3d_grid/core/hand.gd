@@ -41,5 +41,6 @@ func _load_mesh(mesh: ArrayMesh):
 	var result_mesh: ArrayMesh = ResourceLoader.load("res://test_save.mesh", "ArrayMesh")
 
 	mesh.clear_surfaces()
-	for i in range(0, result_mesh.get_surface_count()):
-		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, result_mesh.surface_get_arrays(i))
+	if result_mesh:
+		for i in range(0, result_mesh.get_surface_count()):
+			mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, result_mesh.surface_get_arrays(i))
