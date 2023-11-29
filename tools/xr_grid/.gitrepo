@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/V-Sekai/V-Sekai.xr-grid.git
+	branch = main
+	commit = 0ba5a58b641df0503f65d045eca5445887592e31
+	parent = 36be9725a22a5e6de24d8d707ea296a40beb0027
+	method = merge
+	cmdver = 0.4.6
