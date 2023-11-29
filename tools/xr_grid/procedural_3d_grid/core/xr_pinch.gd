@@ -146,11 +146,15 @@ func handle_debounce(current_grab_value: float, delta_time: float, is_left_hand:
 		hand_right_grab_debounce_timer = grab_debounce_timer
 
 
+@export var gravity_m_per_s2: float = 0.0981
 @export var linear_dampening: float = 0.45
 @export var angular_dampening: float = 0.45
 
 
 func apply_velocity(delta_time: float) -> void:
+	# Apply gravity directly to the velocity
+	linear_velocity += Vector3(0, -gravity_m_per_s2, 0) * delta_time
+
 	# Apply linear damping, reducing the velocity by the damping factor each frame
 	linear_velocity *= (1.0 - linear_dampening)
 
