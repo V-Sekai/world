@@ -5,8 +5,8 @@
 ;
 [subrepo]
 	remote = https://github.com/V-Sekai/V-Sekai.xr-grid.git
-	branch = other
-	commit = f7c2a81a49e8d48df884a493a876266f3e294188
-	parent = b87a53172c7cb564718eebcc232ccebde150a207
+	branch = main
+	commit = 2da059af2c809ee0fa682997e240dc65e8ece39a
+	parent = 763854852da403d42a5d30363ae89f072a781304
 	method = merge
 	cmdver = 0.4.6
