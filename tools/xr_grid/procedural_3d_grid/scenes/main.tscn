@@ -342,7 +342,6 @@ mesh = SubResource("ArrayMesh_dpjv4")
 skeleton = NodePath("../..")
 
 [node name="ProceduralGrid3D" parent="canvas" instance=ExtResource("6_yejl2")]
-visible = false
 level_color = SubResource("GradientTexture1D_nbrpf")
 FOCUS_NODE = NodePath("../../XROrigin3D/hand_right/focus")
 
