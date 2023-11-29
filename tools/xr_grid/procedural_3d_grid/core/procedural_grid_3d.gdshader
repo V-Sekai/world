@@ -3,6 +3,9 @@ shader_type spatial;
 render_mode unshaded;
 render_mode skip_vertex_transform;
 
+// Fix for double precision
+#define INV_VIEW_MATRIX inverse(VIEW_MATRIX)
+
 uniform uint _DisplayGridLines;
 
 uniform float _PointRadius = .02;
