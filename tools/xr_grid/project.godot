@@ -37,6 +37,7 @@ textures/vram_compression/import_s3tc_bptc=true
 textures/vram_compression/import_etc2_astc=true
 anti_aliasing/screen_space_roughness_limiter/enabled=false
 anti_aliasing/quality/use_debanding=true
+mesh_lod/lod_change/threshold_pixels=0.2
 
 [xr]
 
