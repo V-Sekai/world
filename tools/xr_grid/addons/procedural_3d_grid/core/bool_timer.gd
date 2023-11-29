@@ -1,3 +1,8 @@
+# Copyright (c) 2023-present. This file is part of V-Sekai https://v-sekai.org/.
+# K. S. Ernest (Fire) Lee & Contributors (see .all-contributorsrc).
+# bool_timer.gd
+# SPDX-License-Identifier: MIT
+
 class_name BoolTimer extends Object
 
 ## Sets a bool to true for a certain amount of time, then resets

@@ -1,3 +1,8 @@
+# Copyright (c) 2023-present. This file is part of V-Sekai https://v-sekai.org/.
+# K. S. Ernest (Fire) Lee & Contributors (see .all-contributorsrc).
+# world_grab.gd
+# SPDX-License-Identifier: MIT
+
 class_name WorldGrab extends RefCounted
 
 ## The WorldGrab utility makes it easy to add world-grab navigation to your XR project!

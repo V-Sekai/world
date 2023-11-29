@@ -1,6 +1,6 @@
-# Copyright (c) 2018-present. This file is part of V-Sekai https://v-sekai.org/.
-# SaracenOne & K. S. Ernest (Fire) Lee & Lyuma & MMMaellon & Contributors
-# hand.gd
+# Copyright (c) 2023-present. This file is part of V-Sekai https://v-sekai.org/.
+# K. S. Ernest (Fire) Lee & Contributors (see .all-contributorsrc).
+# hand.gd  
 # SPDX-License-Identifier: MIT
 
 extends XRController3D
