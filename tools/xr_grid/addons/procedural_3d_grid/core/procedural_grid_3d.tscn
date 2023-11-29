@@ -1,8 +1,8 @@
 [gd_scene load_steps=6 format=3 uid="uid://ye52hc0t6bue"]
 
-[ext_resource type="Script" path="res://procedural_3d_grid/core/procedural_grid_3d.gd" id="1_4uxcc"]
-[ext_resource type="PackedScene" uid="uid://rs0j50y8n0gn" path="res://procedural_3d_grid/core/base_procedural_grid_3d.tscn" id="1_hr8ny"]
-[ext_resource type="Shader" path="res://procedural_3d_grid/core/procedural_grid_3d.gdshader" id="3_h18ko"]
+[ext_resource type="Script" path="res://addons/procedural_3d_grid/core/procedural_grid_3d.gd" id="1_4uxcc"]
+[ext_resource type="PackedScene" uid="uid://rs0j50y8n0gn" path="res://addons/procedural_3d_grid/core/base_procedural_grid_3d.tscn" id="1_hr8ny"]
+[ext_resource type="Shader" path="res://addons/procedural_3d_grid/core/procedural_grid_3d.gdshader" id="3_h18ko"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_qwywq"]
 resource_local_to_scene = true

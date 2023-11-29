@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://nljj5luofaj5"
-path="res://.godot/imported/sophia_roughness.png-5f0778f69b3d76e3e0355cd866e8aea2.ctex"
+uid="uid://bxytqsfdkmd2w"
+path="res://.godot/imported/sophia_eye_open_normal.png-93d38ecd767bc6a2119abbc978e5b9c9.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,8 +11,8 @@ generator_parameters={}
 
 [deps]
 
-source_file="res://procedural_3d_grid/art/sophia/sophia_roughness.png"
-dest_files=["res://.godot/imported/sophia_roughness.png-5f0778f69b3d76e3e0355cd866e8aea2.ctex"]
+source_file="res://procedural_3d_grid_sample/art/sophia/sophia_eye_open_normal.png"
+dest_files=["res://.godot/imported/sophia_eye_open_normal.png-93d38ecd767bc6a2119abbc978e5b9c9.ctex"]
 
 [params]
 
@@ -20,12 +20,12 @@ compress/mode=4
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=1
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1
-roughness/mode=0
-roughness/src_normal=""
+roughness/mode=1
+roughness/src_normal="res://procedural_3d_grid/art/sophia/sophia_eye_open_normal.png"
 process/fix_alpha_border=true
 process/premult_alpha=false
 process/normal_map_invert_y=false

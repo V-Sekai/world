@@ -4,12 +4,12 @@ importer="scene"
 importer_version=1
 type="PackedScene"
 uid="uid://cccdflexw520e"
-path="res://.godot/imported/sophia.glb-1ed7866f6d357dfac3ce6e8721e3fc8f.scn"
+path="res://.godot/imported/sophia.glb-a3cfdf3828e17b690bb3d43ea1f749fb.scn"
 
 [deps]
 
-source_file="res://procedural_3d_grid/art/sophia/sophia.glb"
-dest_files=["res://.godot/imported/sophia.glb-1ed7866f6d357dfac3ce6e8721e3fc8f.scn"]
+source_file="res://procedural_3d_grid_sample/art/sophia/sophia.glb"
+dest_files=["res://.godot/imported/sophia.glb-a3cfdf3828e17b690bb3d43ea1f749fb.scn"]
 
 [params]
 
