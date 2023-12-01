@@ -82,15 +82,10 @@ protected:
 	static void _bind_methods();
 
 public:
-	~IKKusudama3D() {
-	}
-
-	IKKusudama3D() {}
-
+	~IKKusudama3D();
+	IKKusudama3D();
 	IKKusudama3D(Ref<IKNode3D> to_set, Ref<IKNode3D> bone_direction, Ref<IKNode3D> limiting_axes, real_t cos_half_angle_dampen);
-
 	void _update_constraint();
-
 	void update_tangent_radii();
 
 	Ref<IKRay3D> bone_ray = Ref<IKRay3D>(memnew(IKRay3D()));
@@ -113,8 +108,6 @@ public:
 			Vector3 p_axis,
 			Quaternion &r_swing,
 			Quaternion &r_twist);
-
-public:
 	double angle_to_twist_center(Ref<IKNode3D> bone_direction, Ref<IKNode3D> limiting_axes);
 	/**
 	 * Presumes the input axes are the bone's localAxes, and rotates
@@ -211,7 +204,7 @@ public:
 	float get_resistance();
 	void set_resistance(float p_resistance);
 	static Quaternion clamp_to_quadrance_angle(Quaternion p_rotation, double p_cos_half_angle);
-	void set_axes_to_returnfulled(Ref<IKNode3D> bone_direction, Ref<IKNode3D> to_set, Ref<IKNode3D> limiting_axes, float cos_half_returnfullness, float angle_returnfullness);
+	void set_axes_to_returnfulled(Ref<IKNode3D> p_bone_direction, Ref<IKNode3D> p_to_set, Ref<IKNode3D> p_limiting_axes, float p_cos_half_returnfullness, float p_angle_returnfullness);
 };
 
 #endif // IK_KUSUDAMA_3D_H

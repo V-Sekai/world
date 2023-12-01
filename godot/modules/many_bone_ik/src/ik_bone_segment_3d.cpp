@@ -106,11 +106,11 @@ void IKBoneSegment3D::update_pinned_list(Vector<Vector<double>> &r_weights) {
 	}
 }
 
-void IKBoneSegment3D::update_optimal_rotation(Ref<IKBone3D> p_for_bone, double p_damp, bool p_translate, bool p_constraint_mode, int32_t current_iteration, int32_t total_iterations) {
+void IKBoneSegment3D::update_optimal_rotation(Ref<IKBone3D> p_for_bone, double p_damp, bool p_translate, bool p_constraint_mode, int32_t p_current_iteration, int32_t p_total_iterations) {
 	ERR_FAIL_NULL(p_for_bone);
 	update_target_headings(p_for_bone, &heading_weights, &target_headings);
 	update_tip_headings(p_for_bone, &tip_headings);
-	set_optimal_rotation(p_for_bone, &tip_headings, &target_headings, &heading_weights, p_damp, p_translate, p_constraint_mode, current_iteration, total_iterations);
+	set_optimal_rotation(p_for_bone, &tip_headings, &target_headings, &heading_weights, p_damp, p_translate, p_constraint_mode, p_current_iteration, p_total_iterations);
 }
 
 Quaternion IKBoneSegment3D::clamp_to_quadrance_angle(Quaternion p_rotation, double p_cos_half_angle) {
@@ -151,10 +151,10 @@ float IKBoneSegment3D::get_manual_msd(const PackedVector3Array &r_htip, const Pa
 	return manual_RMSD;
 }
 
-void IKBoneSegment3D::set_optimal_rotation(Ref<IKBone3D> p_for_bone, PackedVector3Array *r_htip, PackedVector3Array *r_htarget, Vector<double> *r_weights, float p_dampening, bool p_translate, bool p_constraint_mode, int32_t current_iteration, int32_t total_iterations) {
+void IKBoneSegment3D::set_optimal_rotation(Ref<IKBone3D> p_for_bone, PackedVector3Array *r_htip, PackedVector3Array *r_heading_tip, Vector<double> *r_weights, float p_dampening /*= -1*/, bool p_translate /*= false*/, bool p_constraint_mode /*= false*/, int32_t p_current_iteration /*= 0*/, int32_t total_iterations /*= 1*/) {
 	ERR_FAIL_NULL(p_for_bone);
 	ERR_FAIL_NULL(r_htip);
-	ERR_FAIL_NULL(r_htarget);
+	ERR_FAIL_NULL(r_heading_tip);
 	ERR_FAIL_NULL(r_weights);
 	ERR_FAIL_COND(!total_iterations);
 
@@ -169,7 +169,7 @@ void IKBoneSegment3D::set_optimal_rotation(Ref<IKBone3D> p_for_bone, PackedVecto
 		if (!p_constraint_mode) {
 			// Solved the ik transform and apply it.
 			QCP qcp = QCP(evec_prec);
-			Quaternion rot = qcp.weighted_superpose(*r_htip, *r_htarget, *r_weights, p_translate);
+			Quaternion rot = qcp.weighted_superpose(*r_htip, *r_heading_tip, *r_weights, p_translate);
 			Vector3 translation = qcp.get_translation();
 			double dampening = (p_dampening != -1.0) ? p_dampening : bone_damp;
 			rot = clamp_to_quadrance_angle(rot, cos(dampening / 2.0)).normalized();
@@ -195,11 +195,11 @@ void IKBoneSegment3D::set_optimal_rotation(Ref<IKBone3D> p_for_bone, PackedVecto
 						float returnfulness = p_for_bone->get_constraint()->get_resistance();
 						float dampened_angle = p_for_bone->get_stiffness() * bone_damp * returnfulness;
 						float total_iterations_square = total_iterations * total_iterations;
-						float scaled_dampened_angle = dampened_angle * ((total_iterations_square - (current_iteration * current_iteration)) / total_iterations_square);
+						float scaled_dampened_angle = dampened_angle * ((total_iterations_square - (p_current_iteration * p_current_iteration)) / total_iterations_square);
 						float cos_half_angle = Math::cos(0.5f * scaled_dampened_angle);
 						p_for_bone->get_constraint()->set_axes_to_returnfulled(p_for_bone->get_bone_direction_transform(), p_for_bone->get_ik_transform(), p_for_bone->get_constraint_orientation_transform(), cos_half_angle, scaled_dampened_angle);
 					} else {
-						p_for_bone->get_constraint()->set_axes_to_returnfulled(p_for_bone->get_bone_direction_transform(), p_for_bone->get_ik_transform(), p_for_bone->get_constraint_orientation_transform(), p_for_bone->getCosHalfReturnfullnessDampened()[current_iteration], p_for_bone->getCosHalfReturnfullnessDampened()[current_iteration]);
+						p_for_bone->get_constraint()->set_axes_to_returnfulled(p_for_bone->get_bone_direction_transform(), p_for_bone->get_ik_transform(), p_for_bone->get_constraint_orientation_transform(), p_for_bone->get_cos_half_returnfullness_dampened()[p_current_iteration], p_for_bone->get_cos_half_returnfullness_dampened()[p_current_iteration]);
 					}
 					update_tip_headings(p_for_bone, &tip_headings);
 					current_msd = get_manual_msd(tip_headings, target_headings, heading_weights);

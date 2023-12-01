@@ -519,10 +519,10 @@ void ManyBoneIK3D::set_kusudama_twist(int32_t p_index, Vector2 p_to) {
 	set_dirty();
 }
 
-void ManyBoneIK3D::set_kusudama_twist_from_range(int32_t p_index, float from, float range) {
+void ManyBoneIK3D::set_kusudama_twist_from_range(int32_t p_index, float p_from, float p_range) {
 	ERR_FAIL_INDEX(p_index, constraint_count);
 
-	Vector2 p_to = Vector2(from, range);
+	Vector2 p_to = Vector2(p_from, p_range);
 
 	kusudama_twist.write[p_index] = p_to;
 	set_dirty();
@@ -693,7 +693,7 @@ NodePath ManyBoneIK3D::get_pin_nodepath(int32_t p_effector_index) const {
 	return effector_template->get_target_node();
 }
 
-void ManyBoneIK3D::execute(real_t delta) {
+void ManyBoneIK3D::execute(real_t p_delta) {
 	if (!get_skeleton()) {
 		return;
 	}

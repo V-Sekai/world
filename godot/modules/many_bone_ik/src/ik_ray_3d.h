@@ -119,7 +119,7 @@ public:
 	int intersects_sphere(Vector3 p_rp1, Vector3 p_rp2, real_t p_radius, Vector3 *r_first_intersection, Vector3 *r_second_intersection);
 	real_t triangle_area_2d(real_t p_x1, real_t p_y1, real_t p_x2, real_t p_y2, real_t p_x3, real_t p_y3);
 	void barycentric(Vector3 p_a, Vector3 p_b, Vector3 p_c, Vector3 p_p, Vector3 *r_uvw);
-	Vector3 plane_intersect_test(Vector3 p_vertex_a, Vector3 p_vertex_b, Vector3 p_vertex_c, Vector3 *uvw);
+	Vector3 plane_intersect_test(Vector3 p_vertex_a, Vector3 p_vertex_b, Vector3 p_vertex_c, Vector3 *r_uvw);
 	operator String() const {
 		return String(L"(") + point_1.x + L" ->  " + point_2.x + L") \n " + L"(" + point_1.y + L" ->  " + point_2.y + L") \n " + L"(" + point_1.z + L" ->  " + point_2.z + L") \n ";
 	}

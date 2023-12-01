@@ -75,28 +75,12 @@ protected:
 	static void _bind_methods();
 
 public:
-	Vector<float> &getCosHalfReturnfullnessDampened() {
-		return cos_half_returnfulness_dampened;
-	}
-
-	void setCosHalfReturnfullnessDampened(const Vector<float> &value) {
-		cos_half_returnfulness_dampened = value;
-	}
-
-	Vector<float> &getHalfReturnfullnessDampened() {
-		return half_returnfulness_dampened;
-	}
-
-	void setHalfReturnfullnessDampened(const Vector<float> &value) {
-		half_returnfulness_dampened = value;
-	}
-	void set_stiffness(double p_stiffness) {
-		stiffness = p_stiffness;
-	}
-
-	double get_stiffness() const {
-		return stiffness;
-	}
+	Vector<float> &get_cos_half_returnfullness_dampened();
+	void set_cos_half_returnfullness_dampened(const Vector<float> &p_cos_half_returnfulness_damp);
+	Vector<float> &get_half_returnfullness_dampened();
+	void set_half_returnfullness_dampened(const Vector<float> &p_half_returnfullness_damp);
+	void set_stiffness(double p_stiffness);
+	double get_stiffness() const;
 	void pull_back_toward_allowable_region();
 	bool is_axially_constrained();
 	bool is_orientationally_constrained();
@@ -125,9 +109,9 @@ public:
 	void create_pin();
 	bool is_pinned() const;
 	Ref<IKNode3D> get_ik_transform();
-	IKBone3D() {}
+	IKBone3D();
 	IKBone3D(StringName p_bone, Skeleton3D *p_skeleton, const Ref<IKBone3D> &p_parent, Vector<Ref<IKEffectorTemplate3D>> &p_pins, float p_default_dampening = Math_PI, ManyBoneIK3D *p_many_bone_ik = nullptr);
-	~IKBone3D() {}
+	~IKBone3D();
 	float get_cos_half_dampen() const;
 	void set_cos_half_dampen(float p_cos_half_dampen);
 };
