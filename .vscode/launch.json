@@ -35,7 +35,7 @@
       "args": ["--path", "game", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/godot/bin/godot.windows.editor.double.x86_64.exe",
-      "preLaunchTask": "Godot Engine Windows Clang"
+      "preLaunchTask": "Godot Engine Windows MSVC"
     },
   ]
 }

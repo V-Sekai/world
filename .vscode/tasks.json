@@ -44,7 +44,18 @@
         "cwd": "${workspaceFolder}/godot"
       },
       "command": [
-        "scons warnings=no werror=yes dev_build=no precision=double vsporj=yes compiledb=yes target=editor"
+        "scons warnings=no werror=yes dev_build=no precision=double use_llvm=yes use_mingw=yes LINKFLAGS='-Wl,-pdb=' CCFLAGS='-g -gcodeview' compiledb=yes target=editor"
+      ],
+      "problemMatcher": [],
+    },
+    {
+      "label": "Godot Engine Windows MSVC",
+      "type": "shell",
+      "options": {
+        "cwd": "${workspaceFolder}/godot"
+      },
+      "command": [
+        "scons warnings=no werror=yes dev_build=yes precision=double vsproj=yes compiledb=yes target=editor"
         // "scons warnings=no werror=yes dev_build=no precision=double use_llvm=yes use_mingw=yes LINKFLAGS='-Wl,-pdb=' CCFLAGS='-g -gcodeview' compiledb=yes target=editor"
       ],
       "problemMatcher": [],
