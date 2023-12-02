@@ -77,7 +77,6 @@ class ManyBoneIK3D : public Node3D {
 	NodePath skeleton_node_path = NodePath("..");
 	int32_t ui_selected_bone = -1, stabilize_passes = 4;
 	bool is_gizmo_dirty = false;
-	Ref<SceneTreeTimer> timer = memnew(SceneTreeTimer);
 	void _on_timer_timeout();
 	void update_ik_bones_transform();
 	void update_skeleton_bones_transform();
@@ -93,12 +92,14 @@ protected:
 	bool _get(const StringName &p_name, Variant &r_ret) const;
 	void _get_property_list(List<PropertyInfo> *p_list) const;
 	static void _bind_methods();
-	virtual void skeleton_changed(Skeleton3D *p_skeleton);
-	virtual void execute(real_t p_delta);
+	virtual void skeleton_changed(Skeleton3D *skeleton);
+	virtual void execute(real_t delta);
 	void _notification(int p_what);
 
 public:
 	void set_pin_bone_name(int32_t p_effector_index, StringName p_name) const;
+	void set_state(Ref<ManyBoneIK3DState> p_state);
+	Ref<ManyBoneIK3DState> get_state() const;
 	void add_constraint();
 	void set_stabilization_passes(int32_t p_passes);
 	int32_t get_stabilization_passes();
@@ -154,11 +155,13 @@ public:
 	float get_kusudama_limit_cone_radius(int32_t p_constraint_index, int32_t p_index) const;
 	int32_t get_kusudama_limit_cone_count(int32_t p_constraint_index) const;
 	int32_t get_bone_count() const;
-	void set_kusudama_twist_from_range(int32_t p_index, float p_from, float p_range);
+	void set_kusudama_twist_from_range(int32_t p_index, float from, float range);
 	void set_kusudama_twist(int32_t p_index, Vector2 p_limit);
 	void set_kusudama_limit_cone_count(int32_t p_constraint_index, int32_t p_count);
 	void set_kusudama_limit_cone_center(int32_t p_constraint_index, int32_t p_index, Vector3 p_center);
 	void set_kusudama_limit_cone_radius(int32_t p_constraint_index, int32_t p_index, float p_radius);
+	real_t get_kusudama_twist_current(int32_t p_index) const;
+	void set_kusudama_twist_current(int32_t p_index, real_t p_rotation);
 	ManyBoneIK3D();
 	~ManyBoneIK3D();
 	void set_dirty();

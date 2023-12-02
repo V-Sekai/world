@@ -143,25 +143,25 @@ int IKRay3D::intersects_sphere(Vector3 rp1, Vector3 rp2, real_t radius, Vector3 
 	return result;
 }
 
-Vector3 IKRay3D::plane_intersect_test(Vector3 p_vertex_a, Vector3 p_vertex_b, Vector3 p_vertex_c, Vector3 *r_uvw) {
-	u = p_vertex_b;
-	v = p_vertex_c;
+Vector3 IKRay3D::plane_intersect_test(Vector3 ta, Vector3 tb, Vector3 tc, Vector3 *uvw) {
+	u = tb;
+	v = tc;
 	n = Vector3(0, 0, 0);
 	dir = get_heading();
 	w0 = Vector3(0, 0, 0);
 	real_t r, a, b;
-	u -= p_vertex_a;
-	v -= p_vertex_a;
+	u -= ta;
+	v -= ta;
 
 	n = u.cross(v).normalized();
 
-	w0 -= p_vertex_a;
+	w0 -= ta;
 	a = -(n.dot(w0));
 	b = n.dot(dir);
 	r = a / b;
 	I = dir;
 	I *= r;
-	barycentric(p_vertex_a, p_vertex_b, p_vertex_c, I, r_uvw);
+	barycentric(ta, tb, tc, I, uvw);
 	return I;
 }
 

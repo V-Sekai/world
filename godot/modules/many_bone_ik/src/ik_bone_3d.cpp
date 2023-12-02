@@ -134,7 +134,7 @@ void IKBone3D::update_default_constraint_transform() {
 		direction -= constraint_orientation_transform->get_global_transform().origin;
 	}
 
-	Vector3 twist_axis = constraint_twist_transform->get_global_transform().basis.get_column(Vector3::AXIS_Y).normalized();
+	Vector3 twist_axis = constraint_twist_transform->get_global_transform().basis.get_column(Vector3::AXIS_Y);
 	Quaternion align_dir = Quaternion(twist_axis, direction);
 	constraint_twist_transform->rotate_local_with_global(align_dir);
 }
@@ -262,13 +262,6 @@ IKBone3D::IKBone3D(StringName p_bone, Skeleton3D *p_skeleton, const Ref<IKBone3D
 	}
 }
 
-
- IKBone3D::IKBone3D() {
-}
-
-IKBone3D::~IKBone3D() {
-}
-
 float IKBone3D::get_cos_half_dampen() const {
 	return cos_half_dampen;
 }
@@ -321,30 +314,6 @@ bool IKBone3D::is_axially_constrained() {
 		return false;
 	}
 	return get_constraint()->is_axially_constrained();
-}
-
-Vector<float> &IKBone3D::get_cos_half_returnfullness_dampened() {
-	return cos_half_returnfulness_dampened;
-}
-
-void IKBone3D::set_cos_half_returnfullness_dampened(const Vector<float> &p_cos_half_returnfulness_damp) {
-	cos_half_returnfulness_dampened = p_cos_half_returnfulness_damp;
-}
-
-Vector<float> &IKBone3D::get_half_returnfullness_dampened() {
-	return half_returnfulness_dampened;
-}
-
-void IKBone3D::set_half_returnfullness_dampened(const Vector<float> &p_half_returnfullness_damp) {
-	half_returnfulness_dampened = p_half_returnfullness_damp;
-}
-
-void IKBone3D::set_stiffness(double p_stiffness) {
-	stiffness = p_stiffness;
-}
-
-double IKBone3D::get_stiffness() const {
-	return stiffness;
 }
 
 void IKBone3D::pull_back_toward_allowable_region() {
