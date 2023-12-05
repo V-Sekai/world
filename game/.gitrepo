@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/v-sekai/v-sekai-game
 	branch = main
-	commit = 8e84788bb83a0b543ae47ecebb7a3c4ce964a8c0
+	commit = cae7cc7d8f1881a687638db347f5684c83bbc147
 	parent = 7064832df8342b69d8f0e21459b370136fac96ff
 	method = merge
 	cmdver = 0.4.6
