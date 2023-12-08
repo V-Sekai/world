@@ -71,6 +71,7 @@ SpatialGameViewportManager="*res://addons/spatial_game_viewport_manager/spatial_
 SnappingSingleton="*res://addons/sar1_vr_manager/components/lasso_snapping/snapping_singleton.gd"
 VRManager="*res://addons/sar1_vr_manager/vr_manager.gd"
 VSKNetworkManager="*res://addons/vsk_manager/vsk_network_manager.gd"
+VSKMultiplayerManager="*res://addons/vsk_manager/vsk_multiplayer_manager.gd"
 VSKAccountManager="*res://addons/vsk_manager/vsk_account_manager.gd"
 NetworkLogger="*res://addons/network_manager/network_logger.gd"
 EntityManager="*res://addons/entity_manager/entity_manager.gd"
@@ -513,6 +514,10 @@ locale/include_text_server_data=true
 [locale]
 
 translations=PackedStringArray("res://addons/vsk_menu/localisation/menu_strings.en.translation", "res://addons/sar1_vr_manager/localisation/vr_manager_strings.en.translation")
+
+[multiplayer]
+
+config/use_multiplayer_manager=false
 
 [network]
 
