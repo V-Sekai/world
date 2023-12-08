@@ -23,7 +23,7 @@
       "name": "Run the Macos editor",
       "type": "lldb",
       "request": "launch",
-      "args": ["--path", "tools/sample_webrtc", "-e"],
+      "args": ["--path", "game", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
