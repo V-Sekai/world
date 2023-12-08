@@ -32,7 +32,7 @@
 
 #ifdef TOOLS_ENABLED
 
-#include "../fbx_document.h"
+#include "modules/fbx/fbx_document.h"
 
 #include "core/config/project_settings.h"
 #include "editor/editor_settings.h"

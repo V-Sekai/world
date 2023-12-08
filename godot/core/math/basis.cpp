@@ -89,8 +89,8 @@ Basis Basis::orthogonalized() const {
 	return c;
 }
 
-// Returns true of the basis vectors are orthogonal (perpendicular), so it has no skew or shear.
-// See https://en.wikipedia.org/wiki/Orthogonality
+// Returns true if the basis vectors are orthogonal (perpendicular), so it has no skew or shear, and can be decomposed into rotation and scale.
+// See https://en.wikipedia.org/wiki/Orthogonal_basis
 bool Basis::is_orthogonal() const {
 	const Vector3 x = get_column(0);
 	const Vector3 y = get_column(1);

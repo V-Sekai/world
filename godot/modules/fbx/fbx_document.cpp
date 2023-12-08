@@ -231,28 +231,6 @@ static uint32_t _decode_vertex_index(const Vector3 &p_vertex) {
 	return uint32_t(p_vertex.x) | uint32_t(p_vertex.y) << 16;
 }
 
-// static Vector3 _arr_to_vec3(const Array &p_array) {
-// 	ERR_FAIL_COND_V(p_array.size() != 3, Vector3());
-// 	return Vector3(p_array[0], p_array[1], p_array[2]);
-// }
-
-// static Quaternion _arr_to_quaternion(const Array &p_array) {
-// 	ERR_FAIL_COND_V(p_array.size() != 4, Quaternion());
-// 	return Quaternion(p_array[0], p_array[1], p_array[2], p_array[3]);
-// }
-
-// static Transform3D _arr_to_xform(const Array &p_array) {
-// 	ERR_FAIL_COND_V(p_array.size() != 16, Transform3D());
-
-// 	Transform3D xform;
-// 	xform.basis.set_column(Vector3::AXIS_X, Vector3(p_array[0], p_array[1], p_array[2]));
-// 	xform.basis.set_column(Vector3::AXIS_Y, Vector3(p_array[4], p_array[5], p_array[6]));
-// 	xform.basis.set_column(Vector3::AXIS_Z, Vector3(p_array[8], p_array[9], p_array[10]));
-// 	xform.set_origin(Vector3(p_array[12], p_array[13], p_array[14]));
-
-// 	return xform;
-// }
-
 String FBXDocument::_gen_unique_name(Ref<FBXState> p_state, const String &p_name) {
 	const String s_name = p_name.validate_node_name();
 
@@ -405,25 +383,6 @@ Error FBXDocument::_parse_nodes(Ref<FBXState> p_state) {
 
 	return OK;
 }
-
-// static Vector<uint8_t> _parse_base64_uri(const String &p_uri) {
-// 	int start = p_uri.find(",");
-// 	ERR_FAIL_COND_V(start == -1, Vector<uint8_t>());
-
-// 	CharString substr = p_uri.substr(start + 1).ascii();
-
-// 	int strlen = substr.length();
-
-// 	Vector<uint8_t> buf;
-// 	buf.resize(strlen / 4 * 3 + 1 + 1);
-
-// 	size_t len = 0;
-// 	ERR_FAIL_COND_V(CryptoCore::b64_decode(buf.ptrw(), buf.size(), &len, (unsigned char *)substr.get_data(), strlen) != OK, Vector<uint8_t>());
-
-// 	buf.resize(len);
-
-// 	return buf;
-// }
 
 Error FBXDocument::_parse_meshes(Ref<FBXState> p_state) {
 	ufbx_scene *fbx_scene = p_state->scene.get();
@@ -2583,9 +2542,9 @@ Error FBXDocument::_parse(Ref<FBXState> p_state, String p_path, Ref<FileAccess> 
 	opts.space_conversion = UFBX_SPACE_CONVERSION_MODIFY_GEOMETRY;
 	opts.geometry_transform_handling = UFBX_GEOMETRY_TRANSFORM_HANDLING_HELPER_NODES;
 	opts.inherit_mode_handling = UFBX_INHERIT_MODE_HANDLING_COMPENSATE;
-	opts.geometry_transform_helper_name.data = "_GeometryTransformHelper";
+	opts.geometry_transform_helper_name.data = "GeometryTransformHelper";
 	opts.geometry_transform_helper_name.length = SIZE_MAX;
-	opts.scale_helper_name.data = "_ScaleHelper";
+	opts.scale_helper_name.data = "ScaleHelper";
 	opts.scale_helper_name.length = SIZE_MAX;
 	opts.target_camera_axes = ufbx_axes_right_handed_y_up;
 	opts.target_light_axes = ufbx_axes_right_handed_y_up;

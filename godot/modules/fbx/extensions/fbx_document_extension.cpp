@@ -34,12 +34,8 @@ void FBXDocumentExtension::_bind_methods() {
 	// Import process.
 	GDVIRTUAL_BIND(_import_preflight, "state", "extensions");
 	GDVIRTUAL_BIND(_get_supported_extensions);
-	GDVIRTUAL_BIND(_parse_node_extensions, "state", "fbx_node", "extensions");
-	GDVIRTUAL_BIND(_parse_image_data, "state", "image_data", "mime_type", "ret_image");
-	GDVIRTUAL_BIND(_get_image_file_extension);
 	GDVIRTUAL_BIND(_generate_scene_node, "state", "fbx_node", "scene_parent");
 	GDVIRTUAL_BIND(_import_post_parse, "state");
-	GDVIRTUAL_BIND(_import_node, "state", "fbx_node", "json", "node");
 	GDVIRTUAL_BIND(_import_post, "state", "root");
 }
 
@@ -57,28 +53,6 @@ Vector<String> FBXDocumentExtension::get_supported_extensions() {
 	return ret;
 }
 
-Error FBXDocumentExtension::parse_node_extensions(Ref<FBXState> p_state, Ref<FBXNode> p_gltf_node, Dictionary &p_extensions) {
-	ERR_FAIL_NULL_V(p_state, ERR_INVALID_PARAMETER);
-	ERR_FAIL_NULL_V(p_gltf_node, ERR_INVALID_PARAMETER);
-	Error err = OK;
-	GDVIRTUAL_CALL(_parse_node_extensions, p_state, p_gltf_node, p_extensions, err);
-	return err;
-}
-
-Error FBXDocumentExtension::parse_image_data(Ref<FBXState> p_state, const PackedByteArray &p_image_data, const String &p_mime_type, Ref<Image> r_image) {
-	ERR_FAIL_NULL_V(p_state, ERR_INVALID_PARAMETER);
-	ERR_FAIL_NULL_V(r_image, ERR_INVALID_PARAMETER);
-	Error err = OK;
-	GDVIRTUAL_CALL(_parse_image_data, p_state, p_image_data, p_mime_type, r_image, err);
-	return err;
-}
-
-String FBXDocumentExtension::get_image_file_extension() {
-	String ret;
-	GDVIRTUAL_CALL(_get_image_file_extension, ret);
-	return ret;
-}
-
 Node3D *FBXDocumentExtension::generate_scene_node(Ref<FBXState> p_state, Ref<FBXNode> p_gltf_node, Node *p_scene_parent) {
 	ERR_FAIL_NULL_V(p_state, nullptr);
 	ERR_FAIL_NULL_V(p_gltf_node, nullptr);
@@ -92,15 +66,6 @@ Error FBXDocumentExtension::import_post_parse(Ref<FBXState> p_state) {
 	ERR_FAIL_NULL_V(p_state, ERR_INVALID_PARAMETER);
 	Error err = OK;
 	GDVIRTUAL_CALL(_import_post_parse, p_state, err);
-	return err;
-}
-
-Error FBXDocumentExtension::import_node(Ref<FBXState> p_state, Ref<FBXNode> p_gltf_node, Dictionary &r_dict, Node *p_node) {
-	ERR_FAIL_NULL_V(p_state, ERR_INVALID_PARAMETER);
-	ERR_FAIL_NULL_V(p_gltf_node, ERR_INVALID_PARAMETER);
-	ERR_FAIL_NULL_V(p_node, ERR_INVALID_PARAMETER);
-	Error err = OK;
-	GDVIRTUAL_CALL(_import_node, p_state, p_gltf_node, r_dict, p_node, err);
 	return err;
 }
 

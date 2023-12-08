@@ -1771,7 +1771,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 #endif
 
 		String default_driver = driver_hints.get_slice(",", 0);
-		String default_driver_macos = driver_hints_angle.get_slice(",", 1);
 
 		GLOBAL_DEF_RST_NOVAL("rendering/gl_compatibility/driver", default_driver);
 		GLOBAL_DEF_RST_NOVAL(PropertyInfo(Variant::STRING, "rendering/gl_compatibility/driver.windows", PROPERTY_HINT_ENUM, driver_hints_angle), default_driver);
@@ -1779,7 +1778,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 		GLOBAL_DEF_RST_NOVAL(PropertyInfo(Variant::STRING, "rendering/gl_compatibility/driver.web", PROPERTY_HINT_ENUM, driver_hints), default_driver);
 		GLOBAL_DEF_RST_NOVAL(PropertyInfo(Variant::STRING, "rendering/gl_compatibility/driver.android", PROPERTY_HINT_ENUM, driver_hints), default_driver);
 		GLOBAL_DEF_RST_NOVAL(PropertyInfo(Variant::STRING, "rendering/gl_compatibility/driver.ios", PROPERTY_HINT_ENUM, driver_hints), default_driver);
-		GLOBAL_DEF_RST_NOVAL(PropertyInfo(Variant::STRING, "rendering/gl_compatibility/driver.macos", PROPERTY_HINT_ENUM, driver_hints_angle), default_driver_macos);
+		GLOBAL_DEF_RST_NOVAL(PropertyInfo(Variant::STRING, "rendering/gl_compatibility/driver.macos", PROPERTY_HINT_ENUM, driver_hints_angle), default_driver);
 
 		GLOBAL_DEF_RST("rendering/gl_compatibility/nvidia_disable_threaded_optimization", true);
 		GLOBAL_DEF_RST("rendering/gl_compatibility/fallback_to_angle", true);
@@ -3012,24 +3011,28 @@ bool Main::start() {
 		return false;
 	}
 
-	if (dump_gdextension_interface) {
-		GDExtensionInterfaceDump::generate_gdextension_interface_file("gdextension_interface.h");
-	}
+	// GDExtension API and interface.
+	{
+		if (dump_gdextension_interface) {
+			GDExtensionInterfaceDump::generate_gdextension_interface_file("gdextension_interface.h");
+		}
 
-	if (dump_extension_api) {
-		Engine::get_singleton()->set_editor_hint(true); // "extension_api.json" should always contains editor singletons.
-		GDExtensionAPIDump::generate_extension_json_file("extension_api.json", include_docs_in_extension_api_dump);
-	}
+		if (dump_extension_api) {
+			Engine::get_singleton()->set_editor_hint(true); // "extension_api.json" should always contains editor singletons.
+			GDExtensionAPIDump::generate_extension_json_file("extension_api.json", include_docs_in_extension_api_dump);
+		}
 
-	if (dump_gdextension_interface || dump_extension_api) {
-		OS::get_singleton()->set_exit_code(EXIT_SUCCESS);
-		return false;
-	}
+		if (dump_gdextension_interface || dump_extension_api) {
+			OS::get_singleton()->set_exit_code(EXIT_SUCCESS);
+			return false;
+		}
 
-	if (validate_extension_api) {
-		bool valid = GDExtensionAPIDump::validate_extension_json_file(validate_extension_api_file) == OK;
-		OS::get_singleton()->set_exit_code(valid ? EXIT_SUCCESS : EXIT_FAILURE);
-		return false;
+		if (validate_extension_api) {
+			Engine::get_singleton()->set_editor_hint(true); // "extension_api.json" should always contains editor singletons.
+			bool valid = GDExtensionAPIDump::validate_extension_json_file(validate_extension_api_file) == OK;
+			OS::get_singleton()->set_exit_code(valid ? EXIT_SUCCESS : EXIT_FAILURE);
+			return false;
+		}
 	}
 
 #ifndef DISABLE_DEPRECATED
@@ -3216,31 +3219,30 @@ bool Main::start() {
 						scn.instantiate();
 						scn->set_path(info.path);
 						scn->reload_from_file();
-						ERR_CONTINUE_MSG(!scn.is_valid(), vformat("Can't autoload: %s.", info.path));
+						ERR_CONTINUE_MSG(!scn.is_valid(), vformat("Failed to instantiate an autoload, can't load from path: %s.", info.path));
 
 						if (scn.is_valid()) {
 							n = scn->instantiate();
 						}
 					} else {
 						Ref<Resource> res = ResourceLoader::load(info.path);
-						ERR_CONTINUE_MSG(res.is_null(), vformat("Can't autoload: %s.", info.path));
+						ERR_CONTINUE_MSG(res.is_null(), vformat("Failed to instantiate an autoload, can't load from path: %s.", info.path));
 
 						Ref<Script> script_res = res;
 						if (script_res.is_valid()) {
 							StringName ibt = script_res->get_instance_base_type();
 							bool valid_type = ClassDB::is_parent_class(ibt, "Node");
-							ERR_CONTINUE_MSG(!valid_type, vformat("Script does not inherit from Node: %s.", info.path));
+							ERR_CONTINUE_MSG(!valid_type, vformat("Failed to instantiate an autoload, script '%s' does not inherit from 'Node'.", info.path));
 
 							Object *obj = ClassDB::instantiate(ibt);
-
-							ERR_CONTINUE_MSG(!obj, vformat("Cannot instance script for autoload, expected 'Node' inheritance, got: %s."));
+							ERR_CONTINUE_MSG(!obj, vformat("Failed to instantiate an autoload, cannot instantiate '%s'.", ibt));
 
 							n = Object::cast_to<Node>(obj);
 							n->set_script(script_res);
 						}
 					}
 
-					ERR_CONTINUE_MSG(!n, vformat("Path in autoload not a node or script: %s.", info.path));
+					ERR_CONTINUE_MSG(!n, vformat("Failed to instantiate an autoload, path is not pointing to a scene or a script: %s.", info.path));
 					n->set_name(info.name);
 
 					//defer so references are all valid on _ready()
