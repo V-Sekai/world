@@ -429,19 +429,20 @@ Error GLTFDocument::_serialize_nodes(Ref<GLTFState> p_state) {
 		}
 		if (gltf_node->skeleton != -1 && gltf_node->skin < 0) {
 		}
-		if (gltf_node->transform.basis.is_orthogonal()) {
-			// An orthogonal transform is decomposable into TRS, so prefer that.
-			if (!gltf_node->get_position().is_zero_approx()) {
-				node["translation"] = _vec3_to_arr(gltf_node->get_position());
-			}
-			if (!gltf_node->get_rotation().is_equal_approx(Quaternion())) {
-				node["rotation"] = _quaternion_to_array(gltf_node->get_rotation());
-			}
-			if (!gltf_node->get_scale().is_equal_approx(Vector3(1.0f, 1.0f, 1.0f))) {
-				node["scale"] = _vec3_to_arr(gltf_node->get_scale());
-			}
-		} else {
-			node["matrix"] = _xform_to_array(gltf_node->transform);
+		if (gltf_node->xform != Transform3D()) {
+			node["matrix"] = _xform_to_array(gltf_node->xform);
+		}
+
+		if (!gltf_node->rotation.is_equal_approx(Quaternion())) {
+			node["rotation"] = _quaternion_to_array(gltf_node->rotation);
+		}
+
+		if (!gltf_node->scale.is_equal_approx(Vector3(1.0f, 1.0f, 1.0f))) {
+			node["scale"] = _vec3_to_arr(gltf_node->scale);
+		}
+
+		if (!gltf_node->position.is_zero_approx()) {
+			node["translation"] = _vec3_to_arr(gltf_node->position);
 		}
 		if (gltf_node->children.size()) {
 			Array children;
@@ -604,17 +605,20 @@ Error GLTFDocument::_parse_nodes(Ref<GLTFState> p_state) {
 			node->skin = n["skin"];
 		}
 		if (n.has("matrix")) {
-			node->transform = _arr_to_xform(n["matrix"]);
+			node->xform = _arr_to_xform(n["matrix"]);
 		} else {
 			if (n.has("translation")) {
-				node->set_position(_arr_to_vec3(n["translation"]));
+				node->position = _arr_to_vec3(n["translation"]);
 			}
 			if (n.has("rotation")) {
-				node->set_rotation(_arr_to_quaternion(n["rotation"]));
+				node->rotation = _arr_to_quaternion(n["rotation"]);
 			}
 			if (n.has("scale")) {
-				node->set_scale(_arr_to_vec3(n["scale"]));
+				node->scale = _arr_to_vec3(n["scale"]);
 			}
+
+			node->xform.basis.set_quaternion_scale(node->rotation, node->scale);
+			node->xform.origin = node->position;
 		}
 
 		if (n.has("extensions")) {
@@ -4790,10 +4794,10 @@ Error GLTFDocument::_create_skeletons(Ref<GLTFState> p_state) {
 			node->set_name(_gen_unique_bone_name(p_state, skel_i, node->get_name()));
 
 			skeleton->add_bone(node->get_name());
-			skeleton->set_bone_rest(bone_index, node->transform);
-			skeleton->set_bone_pose_position(bone_index, node->get_position());
-			skeleton->set_bone_pose_rotation(bone_index, node->get_rotation());
-			skeleton->set_bone_pose_scale(bone_index, node->get_scale());
+			skeleton->set_bone_rest(bone_index, node->xform);
+			skeleton->set_bone_pose_position(bone_index, node->position);
+			skeleton->set_bone_pose_rotation(bone_index, node->rotation.normalized());
+			skeleton->set_bone_pose_scale(bone_index, node->scale);
 
 			if (node->parent >= 0 && p_state->nodes[node->parent]->skeleton == skel_i) {
 				const int bone_parent = skeleton->find_bone(p_state->nodes[node->parent]->get_name());
@@ -5499,7 +5503,10 @@ GLTFLightIndex GLTFDocument::_convert_light(Ref<GLTFState> p_state, Light3D *p_l
 }
 
 void GLTFDocument::_convert_spatial(Ref<GLTFState> p_state, Node3D *p_spatial, Ref<GLTFNode> p_node) {
-	p_node->transform = p_spatial->get_transform();
+	Transform3D xform = p_spatial->get_transform();
+	p_node->scale = xform.basis.get_scale();
+	p_node->rotation = xform.basis.get_rotation_quaternion();
+	p_node->position = xform.origin;
 }
 
 Node3D *GLTFDocument::_generate_spatial(Ref<GLTFState> p_state, const GLTFNodeIndex p_node_index) {
@@ -5613,7 +5620,7 @@ void GLTFDocument::_convert_csg_shape_to_gltf(CSGShape3D *p_current, GLTFNodeInd
 	GLTFMeshIndex mesh_i = p_state->meshes.size();
 	p_state->meshes.push_back(gltf_mesh);
 	p_gltf_node->mesh = mesh_i;
-	p_gltf_node->transform = csg->get_meshes()[0];
+	p_gltf_node->xform = csg->get_meshes()[0];
 	p_gltf_node->set_name(_gen_unique_name(p_state, csg->get_name()));
 }
 #endif // MODULE_CSG_ENABLED
@@ -5689,7 +5696,7 @@ void GLTFDocument::_convert_grid_map_to_gltf(GridMap *p_grid_map, GLTFNodeIndex 
 		gltf_mesh->set_mesh(_mesh_to_importer_mesh(p_grid_map->get_mesh_library()->get_item_mesh(cell)));
 		new_gltf_node->mesh = p_state->meshes.size();
 		p_state->meshes.push_back(gltf_mesh);
-		new_gltf_node->transform = cell_xform * p_grid_map->get_transform();
+		new_gltf_node->xform = cell_xform * p_grid_map->get_transform();
 		new_gltf_node->set_name(_gen_unique_name(p_state, p_grid_map->get_mesh_library()->get_item_name(cell)));
 	}
 }
@@ -5757,7 +5764,7 @@ void GLTFDocument::_convert_multi_mesh_instance_to_gltf(
 		Ref<GLTFNode> new_gltf_node;
 		new_gltf_node.instantiate();
 		new_gltf_node->mesh = mesh_index;
-		new_gltf_node->transform = transform;
+		new_gltf_node->xform = transform;
 		new_gltf_node->set_name(_gen_unique_name(p_state, p_multi_mesh_instance->get_name()));
 		p_gltf_node->children.push_back(p_state->nodes.size());
 		p_state->nodes.push_back(new_gltf_node);
@@ -5782,7 +5789,10 @@ void GLTFDocument::_convert_skeleton_to_gltf(Skeleton3D *p_skeleton3d, Ref<GLTFS
 		// Note that we cannot use _gen_unique_bone_name here, because glTF spec requires all node
 		// names to be unique regardless of whether or not they are used as joints.
 		joint_node->set_name(_gen_unique_name(p_state, skeleton->get_bone_name(bone_i)));
-		joint_node->transform = skeleton->get_bone_pose(bone_i);
+		Transform3D xform = skeleton->get_bone_pose(bone_i);
+		joint_node->scale = xform.basis.get_scale();
+		joint_node->rotation = xform.basis.get_rotation_quaternion();
+		joint_node->position = xform.origin;
 		joint_node->joint = true;
 		GLTFNodeIndex current_node_i = p_state->nodes.size();
 		p_state->scene_nodes.insert(current_node_i, skeleton);
@@ -5931,7 +5941,7 @@ void GLTFDocument::_generate_scene_node(Ref<GLTFState> p_state, const GLTFNodeIn
 		Array args;
 		args.append(p_scene_root);
 		current_node->propagate_call(StringName("set_owner"), args);
-		current_node->set_transform(gltf_node->transform);
+		current_node->set_transform(gltf_node->xform);
 	}
 
 	p_state->scene_nodes.insert(p_node_index, current_node);
@@ -6258,7 +6268,7 @@ void GLTFDocument::_import_animation(Ref<GLTFState> p_state, AnimationPlayer *p_
 			if (track.position_track.values.size()) {
 				bool is_default = true; //discard the track if all it contains is default values
 				if (p_remove_immutable_tracks) {
-					Vector3 base_pos = gltf_node->get_position();
+					Vector3 base_pos = p_state->nodes[track_i.key]->position;
 					for (int i = 0; i < track.position_track.times.size(); i++) {
 						int value_index = track.position_track.interpolation == GLTFAnimation::INTERP_CUBIC_SPLINE ? (1 + i * 3) : i;
 						ERR_FAIL_COND_MSG(value_index >= track.position_track.values.size(), "Animation sampler output accessor with 'CUBICSPLINE' interpolation doesn't have enough elements.");
@@ -6280,7 +6290,7 @@ void GLTFDocument::_import_animation(Ref<GLTFState> p_state, AnimationPlayer *p_
 			if (track.rotation_track.values.size()) {
 				bool is_default = true; //discard the track if all it contains is default values
 				if (p_remove_immutable_tracks) {
-					Quaternion base_rot = gltf_node->get_rotation();
+					Quaternion base_rot = p_state->nodes[track_i.key]->rotation.normalized();
 					for (int i = 0; i < track.rotation_track.times.size(); i++) {
 						int value_index = track.rotation_track.interpolation == GLTFAnimation::INTERP_CUBIC_SPLINE ? (1 + i * 3) : i;
 						ERR_FAIL_COND_MSG(value_index >= track.rotation_track.values.size(), "Animation sampler output accessor with 'CUBICSPLINE' interpolation doesn't have enough elements.");
@@ -6302,7 +6312,7 @@ void GLTFDocument::_import_animation(Ref<GLTFState> p_state, AnimationPlayer *p_
 			if (track.scale_track.values.size()) {
 				bool is_default = true; //discard the track if all it contains is default values
 				if (p_remove_immutable_tracks) {
-					Vector3 base_scale = gltf_node->get_scale();
+					Vector3 base_scale = p_state->nodes[track_i.key]->scale;
 					for (int i = 0; i < track.scale_track.times.size(); i++) {
 						int value_index = track.scale_track.interpolation == GLTFAnimation::INTERP_CUBIC_SPLINE ? (1 + i * 3) : i;
 						ERR_FAIL_COND_MSG(value_index >= track.scale_track.values.size(), "Animation sampler output accessor with 'CUBICSPLINE' interpolation doesn't have enough elements.");
@@ -6330,15 +6340,15 @@ void GLTFDocument::_import_animation(Ref<GLTFState> p_state, AnimationPlayer *p_
 			Vector3 base_scale = Vector3(1, 1, 1);
 
 			if (rotation_idx == -1) {
-				base_rot = gltf_node->get_rotation();
+				base_rot = p_state->nodes[track_i.key]->rotation.normalized();
 			}
 
 			if (position_idx == -1) {
-				base_pos = gltf_node->get_position();
+				base_pos = p_state->nodes[track_i.key]->position;
 			}
 
 			if (scale_idx == -1) {
-				base_scale = gltf_node->get_scale();
+				base_scale = p_state->nodes[track_i.key]->scale;
 			}
 
 			bool last = false;
@@ -6445,7 +6455,10 @@ void GLTFDocument::_convert_mesh_instances(Ref<GLTFState> p_state) {
 		if (!mi) {
 			continue;
 		}
-		node->transform = mi->get_transform();
+		Transform3D mi_xform = mi->get_transform();
+		node->scale = mi_xform.basis.get_scale();
+		node->rotation = mi_xform.basis.get_rotation_quaternion();
+		node->position = mi_xform.origin;
 
 		Node *skel_node = mi->get_node_or_null(mi->get_skeleton_path());
 		Skeleton3D *godot_skeleton = Object::cast_to<Skeleton3D>(skel_node);
