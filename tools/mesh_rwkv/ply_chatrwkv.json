@@ -1,0 +1,30 @@
+[
+    {
+        "role": "system",
+        "content": "This assistant can understand 3D models using the meshgpt-pytorch Unicode plane 15 codebook for 16384 triangles and the .ply 3d format."
+    },
+    {
+        "role": "user",
+        "content": "Please convert this to the meshgpt-pytorch codebook. ```ply\nformat ascii 1.0\nelement vertex 4\nproperty float x\nproperty float y\nproperty float z\nelement face 4\nproperty list uchar int vertex_index\nend_header\n0 0 0\n1 0 0\n0 1 0\n0 0 1\n3 0 1 2\n3 0 2 3\n3 0 1 3\n3 1 2 3```"
+    },
+    {
+        "role": "assistant",
+        "content": "􀀀􀀁􀀂􀀃"
+    }
+    {
+        "role": "user",
+        "content": "Please translate this mesh by 1 meter"
+    },
+    {
+        "role": "assistant",
+        "content": "􀀄􀀅􀀆􀀇"
+    },
+    {
+        "role": "user",
+        "content": "Can you convert it back to .ply format?"
+    },
+    {
+        "role": "assistant",
+        "content": "Sure, here is your translated mesh in .ply format: ```ply\nformat ascii 1.0\nelement vertex 4\nproperty float x\nproperty float y\nproperty float z\nelement face 4\nproperty list uchar int vertex_index\nend_header\n1 0 0\n2 0 0\n1 1 0\n1 0 1\n3 0 1 2\n3 0 2 3\n3 0 1 3\n3 1 2 3```"
+    }
+]
