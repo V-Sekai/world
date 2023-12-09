@@ -1,9 +1,0 @@
-[post_import]
-
-steps=[{
-"parameters": {},
-"position": Vector2(860, 480),
-"step": &"ImportPipelineStepRemoveNodes",
-"type": "step"
-}]
-connections=[]

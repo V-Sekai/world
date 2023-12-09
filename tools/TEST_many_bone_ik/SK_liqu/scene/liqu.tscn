@@ -1,5 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://cun8fkajussqm"]
-
-[ext_resource type="PackedScene" uid="uid://bg15qvgshgovd" path="res://SK_liqu/art/SK_liqu/Liqu.vrm" id="1_qgnjm"]
-
-[node name="Liqu" instance=ExtResource("1_qgnjm")]
