@@ -1,0 +1,57 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="Test ManyBoneIK3D Game Project"
+config/features=PackedStringArray("4.0", "Double Precision")
+config/icon="res://icon.png"
+
+[debug]
+
+file_logging/enable_file_logging=true
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/resizable=false
+window/size/borderless=true
+window/size/always_on_top=true
+window/size/transparent=true
+window/size/extend_to_title=true
+window/per_pixel_transparency/allowed=true
+window/stretch/aspect="keep_height"
+
+[editor]
+
+movie_writer/fps=20
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/Godot-MToon-Shader/plugin.cfg", "res://addons/vrm/plugin.cfg")
+
+[filesystem]
+
+import/fbx/enabled=false
+
+[gui]
+
+theme/default_font_multichannel_signed_distance_field=true
+theme/default_font_generate_mipmaps=true
+
+[rendering]
+
+textures/default_filters/anisotropic_filtering_level=4
+anti_aliasing/quality/msaa_2d=1
+anti_aliasing/quality/msaa_3d=1
+viewport/transparent_background=true
+occlusion_culling/use_occlusion_culling=true
+environment/default_environment="res://default_env.tres"
