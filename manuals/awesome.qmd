@@ -1,0 +1,3 @@
+# Awesome V-Sekai
+
+{{< include awesome/readme.md >}}
