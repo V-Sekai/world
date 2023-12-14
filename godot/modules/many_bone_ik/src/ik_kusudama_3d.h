@@ -86,7 +86,7 @@ protected:
 public:
 	~IKKusudama3D() {
 		for (int i = 0; i < limit_cones.size(); i++) {
-			limit_cones[i].unref();
+			Ref<IKLimitCone3D>(limit_cones[i]).unref();
 		}
 		limit_cones.clear();
 	}
