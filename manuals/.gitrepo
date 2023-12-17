@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai/manuals.git
 	branch = main
-	commit = 016c1893c347776f69c4221ee1e77cdfb5074733
-	parent = 693c2bd78d72e64d926b6a9a14f979f08bee06b7
+	commit = 06522bf7ab8530c10648a8aee00579d4de291415
+	parent = 8876dcfd00d468a980798b7a3d6a02e42b97357d
 	method = rebase
 	cmdver = 0.4.6
