@@ -61,6 +61,9 @@ func _run():
 	if nodes.is_empty():
 		return
 	var many_bone_ik: ManyBoneIK3D = nodes[0]
+	var markers: Array[Node] = many_bone_ik.find_children("*", "Marker3D")
+	for marker in markers:
+		marker.free()
 	# Rotation Twist and Swing descriptions omitted for brevity
 
 	many_bone_ik.set_process_thread_group(Node.PROCESS_THREAD_GROUP_SUB_THREAD)
@@ -91,29 +94,10 @@ func _run():
 			twist_range = deg_to_rad(1)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(3.0)))
 			resistance = 0.5
-		elif bone_name in ["LeftFoot", "RightFoot"]:
-			# up down 2.5
-			# left 23
-			# right 24
-			# MODEL_REAR is front
-			# MODEL_FRONT is back
-			# MODEL_BOTTOM is up
-			# MODEL_TOP is down
-			# MODEL_LEFT is right
-			# MODEL_RIGHT is left
-			swing_limit_cones.append(LimitCone.new(((Vector3.MODEL_BOTTOM + Vector3.MODEL_REAR) / 2.0).normalized(), deg_to_rad(2.5)))
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0)))
-			swing_limit_cones.append(LimitCone.new(((Vector3.MODEL_TOP + Vector3.MODEL_REAR) / 2.0).normalized(), deg_to_rad(2.5)))
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0)))
-			#
-			swing_limit_cones.append(LimitCone.new(((Vector3.MODEL_RIGHT + Vector3.MODEL_REAR) / 2.0).normalized(), deg_to_rad(23.0)))
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0.0)))
-			swing_limit_cones.append(LimitCone.new(((Vector3.MODEL_LEFT + Vector3.MODEL_REAR) / 2.0).normalized(), deg_to_rad(24.0)))
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0.0)))
 		elif bone_name == "Spine":
 			twist_from = deg_to_rad(4.0)
 			twist_range = deg_to_rad(360)
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(3.0)))
+			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(3.0)))
 			resistance = 0.5
 		elif bone_name == "Chest":
 			twist_from = deg_to_rad(5.0)
@@ -140,7 +124,7 @@ func _run():
 		elif bone_name == "LeftUpperLeg":
 			twist_from = deg_to_rad(300.0)
 			twist_range = deg_to_rad(10.0)
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(25.0)))
+			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(25.0)))
 			resistance = 0.8
 		elif bone_name == "LeftLowerLeg":
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)))
@@ -149,7 +133,7 @@ func _run():
 		elif bone_name == "RightUpperLeg":
 			twist_from = deg_to_rad(300.0)
 			twist_range = deg_to_rad(10.0)
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(25.0)))
+			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(25.0)))
 			resistance = 0.8
 		elif bone_name == "RightLowerLeg":
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)))
@@ -187,6 +171,25 @@ func _run():
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)))
 		#elif bone_name in ["LeftThumb", "RightThumb"]:
 			#swing_limit_cones.append(LimitCone.new(y_up, deg_to_rad(90.0)))
+		elif bone_name in ["LeftFoot", "RightFoot"]:
+			# up down 2.5
+			# left 23
+			# right 24
+			# MODEL_REAR is front
+			# MODEL_FRONT is back
+			# MODEL_BOTTOM is up
+			# MODEL_TOP is down
+			# MODEL_LEFT is right
+			# MODEL_RIGHT is left
+			swing_limit_cones.append(LimitCone.new(((Vector3.MODEL_BOTTOM + Vector3.MODEL_REAR) / 2.0).normalized(), deg_to_rad(2.5)))
+			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0)))
+			swing_limit_cones.append(LimitCone.new(((Vector3.MODEL_TOP + Vector3.MODEL_REAR) / 2.0).normalized(), deg_to_rad(2.5)))
+			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0)))
+			#
+			swing_limit_cones.append(LimitCone.new(((Vector3.MODEL_RIGHT + Vector3.MODEL_REAR) / 2.0).normalized(), deg_to_rad(23.0)))
+			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0.0)))
+			swing_limit_cones.append(LimitCone.new(((Vector3.MODEL_LEFT + Vector3.MODEL_REAR) / 2.0).normalized(), deg_to_rad(24.0)))
+			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0.0)))
 		else:
 			continue
 		set_bone_constraint(many_bone_ik, bone_name, twist_from, twist_range, swing_limit_cones, resistance)
