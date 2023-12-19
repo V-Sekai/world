@@ -25,7 +25,7 @@
       "request": "launch",
       "args": ["--path", "client", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/godot/bin/godot.macos.editor.double.arm64",
+      "program": "${workspaceFolder}/godot/bin/godot.macos.editor.double.arm64.san",
       "preLaunchTask": "Godot Engine"
     },
     {
