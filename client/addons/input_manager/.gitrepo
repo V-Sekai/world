@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/V-Sekai/input_manager
+	branch = main
+	commit = 1fcbb3f3d6add57b0ae52fc429b6abc551532ac2
+	parent = 52f1fa77d9e58adb2600415d3cff6971226b7ca3
+	method = merge
+	cmdver = 0.4.6

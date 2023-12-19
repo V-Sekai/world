@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/V-Sekai/unidot_importer.git
+	branch = main
+	commit = 1c70548ec84bc5b07d75b4a97eba6c83c6b4f244
+	parent = be3f25114d0ee772bfb600d9527a073c2b5392e4
+	method = merge
+	cmdver = 0.4.6

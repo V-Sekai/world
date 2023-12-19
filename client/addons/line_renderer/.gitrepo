@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/V-Sekai/line_renderer
+	branch = main
+	commit = bf26c1a92234b969a49106a1684f82165e625e3d
+	parent = 89344a414faad0eb86d3452187055288deb1025b
+	method = merge
+	cmdver = 0.4.6
