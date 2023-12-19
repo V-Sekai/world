@@ -14,7 +14,7 @@
       "name": "Run the Linux editor",
       "type": "lldb",
       "request": "launch",
-      "args": ["--path", "game", "-e"],
+      "args": ["--path", "client", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/godot/bin/godot.linuxbsd.editor.double.x86_64",
       "preLaunchTask": "Godot Engine"
@@ -23,7 +23,7 @@
       "name": "Run the Macos editor",
       "type": "lldb",
       "request": "launch",
-      "args": ["--path", "game", "-e"],
+      "args": ["--path", "client", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
@@ -32,7 +32,7 @@
       "name": "Run the Windows editor",
       "type": "cppvsdbg",
       "request": "launch",
-      "args": ["--path", "game", "-e"],
+      "args": ["--path", "client", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/godot/bin/godot.windows.editor.double.x86_64.exe",
       "preLaunchTask": "Godot Engine Windows MSVC"
