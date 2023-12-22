@@ -687,6 +687,8 @@ void Speech::attempt_to_feed_stream(int p_skip_count, Ref<SpeechDecoder> p_decod
 		to_fill -= SpeechProcessor::SPEECH_SETTING_BUFFER_FRAME_COUNT;
 		required_packets += 1;
 	}
+	int64_t current_update = p_player_dict["last_update"];
+	current_update -= SpeechProcessor::SPEECH_SETTING_MILLISECONDS_PER_PACKET;
 
 	for (int32_t packet_i = 0; packet_i < required_packets; packet_i++) {
 		Array result;
@@ -694,7 +696,6 @@ void Speech::attempt_to_feed_stream(int p_skip_count, Ref<SpeechDecoder> p_decod
 		Ref<JitterBufferPacket> packet;
 		packet.instantiate();
 
-		int64_t current_update = p_player_dict["last_update"];
 		current_update += packet_i * SpeechProcessor::SPEECH_SETTING_MILLISECONDS_PER_PACKET;
 		result = VoipJitterBuffer::jitter_buffer_get(jitter, packet, current_update);
 
