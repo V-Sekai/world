@@ -23,8 +23,8 @@
       "name": "Run the Macos editor",
       "type": "lldb",
       "request": "launch",
-      "args": ["--path", "IK Game Project", "-e"],
-      "cwd": "${workspaceFolder}",
+      "args": ["--quit", "--test"],
+      "cwd": "${workspaceFolder}/godot",
       "program": "${workspaceFolder}/godot/bin/godot.macos.editor.dev.double.arm64",
       "preLaunchTask": "Godot Engine"
     },
