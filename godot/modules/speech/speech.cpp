@@ -524,7 +524,7 @@ Dictionary Speech::get_stats() {
 Speech::Speech() {
 	speech_processor = memnew(SpeechProcessor);
 	preallocate_buffers();
-	jitter = VoipJitterBuffer::jitter_buffer_init(SpeechProcessor::SPEECH_SETTING_VOICE_BUFFER_FRAME_COUNT / 16000 * SpeechProcessor::SPEECH_SETTING_MILLISECONDS_PER_SECOND);
+	jitter->instantiate();
 	jitter->set_auto_adjust(1);
 }
 
