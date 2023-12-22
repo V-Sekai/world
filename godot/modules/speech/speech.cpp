@@ -680,13 +680,6 @@ void Speech::attempt_to_feed_stream(int p_skip_count, Ref<SpeechDecoder> p_decod
 		p_player_dict["playback_prev_time"] = double(p_player_dict["playback_prev_time"]) - SpeechProcessor::SPEECH_SETTING_MILLISECONDS_PER_PACKET;
 		p_player_dict["playback_last_skips"] = playback->get_skips();
 	}
-	int64_t to_fill = playback->get_frames_available();
-
-	int64_t required_packets = 0;
-	while (to_fill >= SpeechProcessor::SPEECH_SETTING_BUFFER_FRAME_COUNT) {
-		to_fill -= SpeechProcessor::SPEECH_SETTING_BUFFER_FRAME_COUNT;
-		required_packets += 1;
-	}
 	int64_t current_update = p_player_dict["last_update"];
 	Array result;
 	result.resize(2);
