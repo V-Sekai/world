@@ -23,7 +23,7 @@
       "name": "Run the Macos editor",
       "type": "lldb",
       "request": "launch",
-      "args": ["--quit", "--test"],
+      "args": ["--path", "modules/speech/demo"],
       "cwd": "${workspaceFolder}/godot",
       "program": "${workspaceFolder}/godot/bin/godot.macos.editor.dev.double.arm64",
       "preLaunchTask": "Godot Engine"
