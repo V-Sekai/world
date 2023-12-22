@@ -599,7 +599,6 @@ void Speech::on_received_audio_packet(int p_peer_id, int p_sequence_id, PackedBy
 	jitter_buffer_packet->set_user_data(p_peer_id);
 	jitter_buffer_packet->set_timestamp(current_last_update);
 	VoipJitterBuffer::jitter_buffer_put(jitter, jitter_buffer_packet);
-	VoipJitterBuffer::jitter_buffer_tick(jitter);
 	elem["packets_received_this_frame"] = int64_t(elem["packets_received_this_frame"]) + 1;
 	player_audio[p_peer_id] = elem;
 }
@@ -693,7 +692,7 @@ void Speech::attempt_to_feed_stream(int p_skip_count, Ref<SpeechDecoder> p_decod
 	Ref<JitterBufferPacket> packet;
 	packet.instantiate();
 	result = VoipJitterBuffer::jitter_buffer_get(jitter, packet, current_update);
-
+	VoipJitterBuffer::jitter_buffer_tick(jitter);
 	if (int32_t(result[0]) == OK) {
 		PackedByteArray buffer = packet->get_data();
 		uncompressed_audio = decompress_buffer(p_decoder, buffer, buffer.size(), uncompressed_audio);
