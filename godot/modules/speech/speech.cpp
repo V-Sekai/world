@@ -699,6 +699,7 @@ void Speech::attempt_to_feed_stream(int p_skip_count, Ref<SpeechDecoder> p_decod
 		if (uncompressed_audio.size() && uncompressed_audio.size() == SpeechProcessor::SPEECH_SETTING_BUFFER_FRAME_COUNT) {
 			playback->push_buffer(uncompressed_audio);
 		}
+		VoipJitterBuffer::jitter_buffer_tick(jitter);
 	} else {
 		playback->push_buffer(blank_packet);
 	}
@@ -709,5 +710,4 @@ void Speech::attempt_to_feed_stream(int p_skip_count, Ref<SpeechDecoder> p_decod
 		// p_playback_stats->jitter_buffer_max_size = jitter.packets.size() ? jitter.packets.size() > p_playback_stats->jitter_buffer_max_size : p_playback_stats->jitter_buffer_max_size;
 		// p_playback_stats->jitter_buffer_current_size = jitter.packets.size();
 	}
-	VoipJitterBuffer::jitter_buffer_tick(jitter);
 }
