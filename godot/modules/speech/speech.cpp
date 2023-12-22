@@ -525,6 +525,7 @@ Speech::Speech() {
 	speech_processor = memnew(SpeechProcessor);
 	preallocate_buffers();
 	jitter.instantiate();
+	jitter->set_auto_adjust(1);
 }
 
 Speech::~Speech() {
