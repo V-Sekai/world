@@ -25,7 +25,7 @@
       "request": "launch",
       "args": ["--path", "IK Game Project", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/godot/bin/godot.macos.editor.double.arm64",
+      "program": "${workspaceFolder}/godot/bin/godot.macos.editor.dev.double.arm64",
       "preLaunchTask": "Godot Engine"
     },
     {
