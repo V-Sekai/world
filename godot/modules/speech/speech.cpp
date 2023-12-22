@@ -690,21 +690,17 @@ void Speech::attempt_to_feed_stream(int p_skip_count, Ref<SpeechDecoder> p_decod
 	int64_t current_update = p_player_dict["last_update"];
 	current_update -= SpeechProcessor::SPEECH_SETTING_MILLISECONDS_PER_PACKET;
 
-	for (int32_t packet_i = 0; packet_i < required_packets; packet_i++) {
-		Array result;
-		result.resize(2);
-		Ref<JitterBufferPacket> packet;
-		packet.instantiate();
+	Array result;
+	result.resize(2);
+	Ref<JitterBufferPacket> packet;
+	packet.instantiate();
+	result = VoipJitterBuffer::jitter_buffer_get(jitter, packet, current_update);
 
-		current_update += packet_i * SpeechProcessor::SPEECH_SETTING_MILLISECONDS_PER_PACKET;
-		result = VoipJitterBuffer::jitter_buffer_get(jitter, packet, current_update);
-
-		if (int32_t(result[0]) == OK) {
-			PackedByteArray buffer = packet->get_data();
-			uncompressed_audio = decompress_buffer(p_decoder, buffer, buffer.size(), uncompressed_audio);
-			if (uncompressed_audio.size() && uncompressed_audio.size() == SpeechProcessor::SPEECH_SETTING_BUFFER_FRAME_COUNT) {
-				playback->push_buffer(uncompressed_audio);
-			}
+	if (int32_t(result[0]) == OK) {
+		PackedByteArray buffer = packet->get_data();
+		uncompressed_audio = decompress_buffer(p_decoder, buffer, buffer.size(), uncompressed_audio);
+		if (uncompressed_audio.size() && uncompressed_audio.size() == SpeechProcessor::SPEECH_SETTING_BUFFER_FRAME_COUNT) {
+			playback->push_buffer(uncompressed_audio);
 		}
 	}
 
