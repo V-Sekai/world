@@ -32,9 +32,9 @@
       "name": "Run the Windows editor",
       "type": "cppvsdbg",
       "request": "launch",
-      "args": ["--path", "client", "-e"],
+      "args": ["--path", "godot/modules/speech/demo"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/godot/bin/godot.windows.editor.double.x86_64.exe",
+      "program": "${workspaceFolder}/godot/bin/godot.windows.editor.dev.double.x86_64.exe",
       "preLaunchTask": "Godot Engine Windows MSVC"
     },
   ]
