@@ -700,8 +700,6 @@ void Speech::attempt_to_feed_stream(int p_skip_count, Ref<SpeechDecoder> p_decod
 			playback->push_buffer(uncompressed_audio);
 		}
 		VoipJitterBuffer::jitter_buffer_tick(jitter);
-	} else {
-		playback->push_buffer(blank_packet);
 	}
 
 	if (p_playback_stats.is_valid()) {
