@@ -599,7 +599,6 @@ void Speech::on_received_audio_packet(int p_peer_id, int p_sequence_id, PackedBy
 	jitter_buffer_packet->set_user_data(p_peer_id);
 	jitter_buffer_packet->set_timestamp(current_last_update);
 	VoipJitterBuffer::jitter_buffer_put(jitter, jitter_buffer_packet);
-	VoipJitterBuffer::jitter_buffer_tick(jitter);
 	elem["packets_received_this_frame"] = int64_t(elem["packets_received_this_frame"]) + 1;
 	player_audio[p_peer_id] = elem;
 }
