@@ -699,6 +699,8 @@ void Speech::attempt_to_feed_stream(int p_skip_count, Ref<SpeechDecoder> p_decod
 		if (uncompressed_audio.size() && uncompressed_audio.size() == SpeechProcessor::SPEECH_SETTING_BUFFER_FRAME_COUNT) {
 			playback->push_buffer(uncompressed_audio);
 		}
+	} else {
+		playback->push_buffer(blank_packet);
 	}
 
 	if (p_playback_stats.is_valid()) {
