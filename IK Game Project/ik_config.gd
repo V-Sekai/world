@@ -86,12 +86,12 @@ func _run():
 		var resistance = 0
 		if bone_name == "Root":
 			twist_from = deg_to_rad(0.0)
-			twist_range = deg_to_rad(1)
+			#twist_range = deg_to_rad(1)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(3.0)))
 			resistance = 0.5
 		elif bone_name == "Hips":
 			twist_from = deg_to_rad(0.0)
-			twist_range = deg_to_rad(1)
+			#twist_range = deg_to_rad(1)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(3.0)))
 			resistance = 0.5
 		elif bone_name == "Spine":
@@ -101,17 +101,17 @@ func _run():
 			resistance = 0.5
 		elif bone_name == "Chest":
 			twist_from = deg_to_rad(5.0)
-			twist_range = deg_to_rad(-10.0)
+			#twist_range = deg_to_rad(-10.0)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(3.0)))
 			resistance = 0.5
 		elif bone_name == "UpperChest":
 			twist_from = deg_to_rad(10.0)
-			twist_range = deg_to_rad(40.0)
+			#twist_range = deg_to_rad(40.0)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(10.0)))
 			resistance = 0.6
 		elif bone_name == "Neck":
 			twist_from = deg_to_rad(15.0)
-			twist_range = deg_to_rad(15.0)
+			#twist_range = deg_to_rad(15.0)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(10.0)))
 			resistance = 0.6
 		elif bone_name == "Head":
