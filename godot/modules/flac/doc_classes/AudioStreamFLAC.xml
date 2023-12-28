@@ -10,13 +10,10 @@
 	</tutorials>
 	<members>
 		<member name="bar_beats" type="int" setter="set_bar_beats" getter="get_bar_beats" default="4">
-			The number of beats in a bar for the audio stream.
 		</member>
 		<member name="beat_count" type="int" setter="set_beat_count" getter="get_beat_count" default="0">
-			The total count of beats in the audio stream.
 		</member>
 		<member name="bpm" type="float" setter="set_bpm" getter="get_bpm" default="0.0">
-			The beats per minute (BPM) for the audio stream.
 		</member>
 		<member name="data" type="PackedByteArray" setter="set_data" getter="get_data" default="PackedByteArray()">
 			Contains the audio data in bytes.
@@ -30,10 +27,10 @@
 			    return sound
 			[/gdscript]
 			[csharp]
-			public AudioStreamFlac LoadFlac(string path)
+			public AudioStreamFLAC LoadFLAC(string path)
 			{
 			    using var file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
-			    var sound = new AudioStreamFlac();
+			    var sound = new AudioStreamFLAC();
 			    sound.Data = file.GetBuffer(file.GetLength());
 			    return sound;
 			}

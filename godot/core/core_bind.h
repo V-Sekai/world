@@ -131,6 +131,7 @@ public:
 	enum RenderingDriver {
 		RENDERING_DRIVER_VULKAN,
 		RENDERING_DRIVER_OPENGL3,
+		RENDERING_DRIVER_D3D12,
 	};
 
 	virtual PackedStringArray get_connected_midi_inputs();

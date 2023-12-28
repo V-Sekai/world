@@ -121,6 +121,7 @@ private:
 		FILE_NEW,
 		FILE_SHOW_IN_EXPLORER,
 		FILE_OPEN_EXTERNAL,
+		FILE_OPEN_IN_TERMINAL,
 		FILE_COPY_PATH,
 		FILE_COPY_UID,
 		FOLDER_EXPAND_ALL,
@@ -225,6 +226,7 @@ private:
 	int history_max_size;
 
 	String current_path;
+	String select_after_scan;
 
 	bool initialized = false;
 
@@ -369,6 +371,9 @@ protected:
 	static void _bind_methods();
 
 public:
+	const HashMap<String, Color> &get_folder_colors() const;
+	Dictionary get_assigned_folder_colors() const;
+
 	Vector<String> get_selected_paths() const;
 	Vector<String> get_uncollapsed_paths() const;
 

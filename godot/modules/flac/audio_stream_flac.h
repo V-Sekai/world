@@ -34,7 +34,6 @@
 #include "core/io/resource_loader.h"
 #include "scene/resources/texture.h"
 #include "servers/audio/audio_stream.h"
-
 #include "thirdparty/dr_flac/dr_flac.h"
 
 class AudioStreamFLAC;
@@ -56,6 +55,8 @@ class AudioStreamPlaybackFLAC : public AudioStreamPlaybackResampled {
 	friend class AudioStreamFLAC;
 
 	Ref<AudioStreamFLAC> flac_stream;
+
+	//void populate_first_frame(int, mp3dec_frame_info_t *);
 
 protected:
 	virtual int _mix_internal(AudioFrame *p_buffer, int p_frames) override;
@@ -131,4 +132,4 @@ public:
 	virtual ~AudioStreamFLAC();
 };
 
-#endif // AUDIO_STREAM_FLAC_H
+#endif

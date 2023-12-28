@@ -120,6 +120,40 @@ have been removed as they caused massive quality regressions. Apply the patches
 in the `patches/` folder when syncing on newer upstream commits.
 
 
+## d3d12ma
+
+- Upstream: https://github.com/GPUOpen-LibrariesAndSDKs/D3D12MemoryAllocator
+- Version: 2.1.0-development (4d16e802e0b9451c9d3c27cd308928c13b73acd6, 2023)
+- License: MIT
+
+Files extracted from upstream source:
+
+- `src/D3D12MemAlloc.cpp`, `src/D3D12MemAlloc.natvis`
+- `include/D3D12MemAlloc.h`
+- `LICENSE.txt`, `NOTICES.txt`
+
+Important: Some files have Godot-made changes for use with MinGW.
+They are marked with `/* GODOT start */` and `/* GODOT end */`
+comments.
+
+
+## directx_headers
+
+- Upstream: https://github.com/microsoft/DirectX-Headers
+- Version: 1.611.1 (48f23952bc08a6dce0727339c07cedbc4797356c, 2023)
+- License: MIT
+
+Files extracted from upstream source:
+
+- `include/directx/*.h`
+- `include/dxguids/*.h`
+- `LICENSE`
+
+Important: Some files have Godot-made changes for use with MinGW.
+They are marked with `/* GODOT start */` and `/* GODOT end */`
+comments.
+
+
 ## doctest
 
 - Upstream: https://github.com/onqtam/doctest
@@ -143,17 +177,6 @@ Files extracted from upstream source:
 - All `COPYING.*` files.
 
 \* Note that while eigen contains code under many licenses, godot WILL SET BUT DOESN'T CURRENTLY SET, FIXEME the `-DEIGEN_MPL2_ONLY` flag described in `COPYING.README`, which ensures that no code licensed under a more restrictive license than MPL 2.0 is included in godot binaries.
-
-
-## dr_flac
-
-- Upstream: https://github.com/mackron/dr_libs.git
-- Version: v0.12.41 (e07e2b8264da5fa1331a0ca3d30a3606084c311f, 2023)
-- License: Public Domain or MIT-0
-
-Files extracted from upstream source:
-
-- `dr_flac.h`
 
 
 ## embree
@@ -215,6 +238,8 @@ Files extracted from upstream source:
   ```
 - `AUTHORS.txt` and `LICENSE.txt`
 
+Two files (`ProcessRgtc.{cpp,hpp}`) have been added to provide RGTC compression implementation,
+based on library's `ProcessDxtc.{cpp,hpp}`.
 
 ## fonts
 
