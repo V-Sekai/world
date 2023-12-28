@@ -19,3 +19,7 @@ ssh-keyscan github.com >> ~/.ssh/known_hosts
 git clone https://github.com/ingydotnet/git-subrepo ~/git-subrepo
 echo 'source ~/git-subrepo/.rc' >> ~/.bashrc
 ```
+
+## References
+
+https://github.com/nikitalita/lldb-qt-formatters/blob/godot/GodotFormatters.py

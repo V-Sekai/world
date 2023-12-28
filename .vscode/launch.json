@@ -21,6 +21,10 @@
     },
     {
       "name": "Run the Macos editor",
+      "preRunCommands": [
+          "command script import ${workspaceFolder}/.vscode/GodotFormatters.py",
+          "command source ${workspaceFolder}/.vscode/GodotFormatters.lldb"
+      ],            
       "type": "lldb",
       "request": "launch",
       "args": ["--path", "client", "-e"],
