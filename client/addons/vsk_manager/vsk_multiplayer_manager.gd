@@ -103,7 +103,7 @@ const NETWORK_SPAWNER_GROUP_NAME: String = "NetworkSpawnGroup"
 ##
 ## The scene representing the player controller.
 ##
-const PLAYER_SCENE: PackedScene = preload("res://addons/vsk_entities/vsk_player_v2.tscn")
+const PLAYER_SCENE: PackedScene = preload("res://addons/vsk_entities/vsk_player.tscn")
 
 ##
 ## Scene representing MultiplayerSpawner responsible for spawning players.
@@ -483,7 +483,7 @@ func _map_loaded() -> void:
 	
 	#server_state_initialising.emit()
 	
-	var skipped: bool = await VSKFadeManager.execute_fade(false).fade_complete
+	var skipped: bool = await VSKFadeManager.execute_fade(VSKFadeManager.FadeState.FADE_OUT).fade_complete
 
 	await _spawn_map()
 	
