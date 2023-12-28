@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/v-sekai/v-sekai-game
+	branch = main
+	commit = fd08cdc57491eb6be4622d9ea4a7949caaf58ec9
+	parent = 5d451268abf2c26fb760781292331517c957cd85
+	method = merge
+	cmdver = 0.4.6
