@@ -15,12 +15,10 @@
       "command": [
         "scons warnings=no werror=yes dev_build=yes precision=double compiledb=yes target=editor tests=yes"
       ],
-      "problemMatcher": [],
       "group": {
         "kind": "build",
         "isDefault": true
       },
-      "dependsOn": "Godot Engine Android"
     },
     {
       "label": "Godot Clean Engine",
@@ -29,7 +27,7 @@
         "cwd": "${workspaceFolder}/godot"
       },
       "command": [
-        "scons -c warnings=no werror=yes dev_build=no precision=double compiledb=yes target=editor"
+        "scons warnings=no werror=yes dev_build=yes precision=double compiledb=yes target=editor tests=yes"
       ],
       "problemMatcher": [],
       "group": {
