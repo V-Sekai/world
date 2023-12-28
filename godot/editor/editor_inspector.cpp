@@ -149,9 +149,6 @@ void EditorProperty::_notification(int p_what) {
 					if (c->is_set_as_top_level()) {
 						continue;
 					}
-					if (!c->is_visible()) {
-						continue;
-					}
 					if (c == bottom_editor) {
 						continue;
 					}

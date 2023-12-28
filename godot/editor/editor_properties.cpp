@@ -56,7 +56,6 @@
 #include "scene/resources/font.h"
 #include "scene/resources/mesh.h"
 #include "scene/resources/packed_scene.h"
-#include "scene/resources/visual_shader_nodes.h"
 
 ///////////////////// Nil /////////////////////////
 
@@ -1312,12 +1311,17 @@ void EditorPropertyInteger::_set_read_only(bool p_read_only) {
 }
 
 void EditorPropertyInteger::_value_changed(int64_t val) {
+	if (setting) {
+		return;
+	}
 	emit_changed(get_edited_property(), val);
 }
 
 void EditorPropertyInteger::update_property() {
 	int64_t val = get_edited_property_value();
-	spin->set_value_no_signal(val);
+	setting = true;
+	spin->set_value(val);
+	setting = false;
 #ifdef DEBUG_ENABLED
 	// If spin (currently EditorSplinSlider : Range) is changed so that it can use int64_t, then the below warning wouldn't be a problem.
 	if (val != (int64_t)(double)(val)) {
@@ -1447,6 +1451,10 @@ void EditorPropertyFloat::_set_read_only(bool p_read_only) {
 }
 
 void EditorPropertyFloat::_value_changed(double val) {
+	if (setting) {
+		return;
+	}
+
 	if (radians_as_degrees) {
 		val = Math::deg_to_rad(val);
 	}
@@ -1458,7 +1466,9 @@ void EditorPropertyFloat::update_property() {
 	if (radians_as_degrees) {
 		val = Math::rad_to_deg(val);
 	}
-	spin->set_value_no_signal(val);
+	setting = true;
+	spin->set_value(val);
+	setting = false;
 }
 
 void EditorPropertyFloat::_bind_methods() {
@@ -1616,12 +1626,18 @@ void EditorPropertyEasing::_set_preset(int p_preset) {
 }
 
 void EditorPropertyEasing::_setup_spin() {
+	setting = true;
 	spin->setup_and_show();
 	spin->get_line_edit()->set_text(TS->format_number(rtos(get_edited_property_value())));
+	setting = false;
 	spin->show();
 }
 
 void EditorPropertyEasing::_spin_value_changed(double p_value) {
+	if (setting) {
+		return;
+	}
+
 	// 0 is a singularity, but both positive and negative values
 	// are otherwise allowed. Enforce 0+ as workaround.
 	if (Math::is_zero_approx(p_value)) {
@@ -1708,6 +1724,10 @@ void EditorPropertyRect2::_set_read_only(bool p_read_only) {
 }
 
 void EditorPropertyRect2::_value_changed(double val, const String &p_name) {
+	if (setting) {
+		return;
+	}
+
 	Rect2 r2;
 	r2.position.x = spin[0]->get_value();
 	r2.position.y = spin[1]->get_value();
@@ -1718,10 +1738,12 @@ void EditorPropertyRect2::_value_changed(double val, const String &p_name) {
 
 void EditorPropertyRect2::update_property() {
 	Rect2 val = get_edited_property_value();
-	spin[0]->set_value_no_signal(val.position.x);
-	spin[1]->set_value_no_signal(val.position.y);
-	spin[2]->set_value_no_signal(val.size.x);
-	spin[3]->set_value_no_signal(val.size.y);
+	setting = true;
+	spin[0]->set_value(val.position.x);
+	spin[1]->set_value(val.position.y);
+	spin[2]->set_value(val.size.x);
+	spin[3]->set_value(val.size.y);
+	setting = false;
 }
 
 void EditorPropertyRect2::_notification(int p_what) {
@@ -1805,6 +1827,10 @@ void EditorPropertyRect2i::_set_read_only(bool p_read_only) {
 }
 
 void EditorPropertyRect2i::_value_changed(double val, const String &p_name) {
+	if (setting) {
+		return;
+	}
+
 	Rect2i r2;
 	r2.position.x = spin[0]->get_value();
 	r2.position.y = spin[1]->get_value();
@@ -1815,10 +1841,12 @@ void EditorPropertyRect2i::_value_changed(double val, const String &p_name) {
 
 void EditorPropertyRect2i::update_property() {
 	Rect2i val = get_edited_property_value();
-	spin[0]->set_value_no_signal(val.position.x);
-	spin[1]->set_value_no_signal(val.position.y);
-	spin[2]->set_value_no_signal(val.size.x);
-	spin[3]->set_value_no_signal(val.size.y);
+	setting = true;
+	spin[0]->set_value(val.position.x);
+	spin[1]->set_value(val.position.y);
+	spin[2]->set_value(val.size.x);
+	spin[3]->set_value(val.size.y);
+	setting = false;
 }
 
 void EditorPropertyRect2i::_notification(int p_what) {
@@ -1901,6 +1929,10 @@ void EditorPropertyPlane::_set_read_only(bool p_read_only) {
 }
 
 void EditorPropertyPlane::_value_changed(double val, const String &p_name) {
+	if (setting) {
+		return;
+	}
+
 	Plane p;
 	p.normal.x = spin[0]->get_value();
 	p.normal.y = spin[1]->get_value();
@@ -1911,10 +1943,12 @@ void EditorPropertyPlane::_value_changed(double val, const String &p_name) {
 
 void EditorPropertyPlane::update_property() {
 	Plane val = get_edited_property_value();
-	spin[0]->set_value_no_signal(val.normal.x);
-	spin[1]->set_value_no_signal(val.normal.y);
-	spin[2]->set_value_no_signal(val.normal.z);
-	spin[3]->set_value_no_signal(val.d);
+	setting = true;
+	spin[0]->set_value(val.normal.x);
+	spin[1]->set_value(val.normal.y);
+	spin[2]->set_value(val.normal.z);
+	spin[3]->set_value(val.d);
+	setting = false;
 }
 
 void EditorPropertyPlane::_notification(int p_what) {
@@ -2006,6 +2040,10 @@ void EditorPropertyQuaternion::_edit_custom_value() {
 }
 
 void EditorPropertyQuaternion::_custom_value_changed(double val) {
+	if (setting) {
+		return;
+	}
+
 	edit_euler.x = euler[0]->get_value();
 	edit_euler.y = euler[1]->get_value();
 	edit_euler.z = euler[2]->get_value();
@@ -2016,13 +2054,17 @@ void EditorPropertyQuaternion::_custom_value_changed(double val) {
 	v.z = Math::deg_to_rad(edit_euler.z);
 
 	Quaternion temp_q = Quaternion::from_euler(v);
-	spin[0]->set_value_no_signal(temp_q.x);
-	spin[1]->set_value_no_signal(temp_q.y);
-	spin[2]->set_value_no_signal(temp_q.z);
-	spin[3]->set_value_no_signal(temp_q.w);
+	spin[0]->set_value(temp_q.x);
+	spin[1]->set_value(temp_q.y);
+	spin[2]->set_value(temp_q.z);
+	spin[3]->set_value(temp_q.w);
 }
 
 void EditorPropertyQuaternion::_value_changed(double val, const String &p_name) {
+	if (setting) {
+		return;
+	}
+
 	Quaternion p;
 	p.x = spin[0]->get_value();
 	p.y = spin[1]->get_value();
@@ -2042,19 +2084,21 @@ bool EditorPropertyQuaternion::is_grabbing_euler() {
 
 void EditorPropertyQuaternion::update_property() {
 	Quaternion val = get_edited_property_value();
-	spin[0]->set_value_no_signal(val.x);
-	spin[1]->set_value_no_signal(val.y);
-	spin[2]->set_value_no_signal(val.z);
-	spin[3]->set_value_no_signal(val.w);
+	setting = true;
+	spin[0]->set_value(val.x);
+	spin[1]->set_value(val.y);
+	spin[2]->set_value(val.z);
+	spin[3]->set_value(val.w);
 	if (!is_grabbing_euler()) {
 		Vector3 v = val.normalized().get_euler();
 		edit_euler.x = Math::rad_to_deg(v.x);
 		edit_euler.y = Math::rad_to_deg(v.y);
 		edit_euler.z = Math::rad_to_deg(v.z);
-		euler[0]->set_value_no_signal(edit_euler.x);
-		euler[1]->set_value_no_signal(edit_euler.y);
-		euler[2]->set_value_no_signal(edit_euler.z);
+		euler[0]->set_value(edit_euler.x);
+		euler[1]->set_value(edit_euler.y);
+		euler[2]->set_value(edit_euler.z);
 	}
+	setting = false;
 }
 
 void EditorPropertyQuaternion::_warning_pressed() {
@@ -2195,6 +2239,10 @@ void EditorPropertyAABB::_set_read_only(bool p_read_only) {
 }
 
 void EditorPropertyAABB::_value_changed(double val, const String &p_name) {
+	if (setting) {
+		return;
+	}
+
 	AABB p;
 	p.position.x = spin[0]->get_value();
 	p.position.y = spin[1]->get_value();
@@ -2202,17 +2250,21 @@ void EditorPropertyAABB::_value_changed(double val, const String &p_name) {
 	p.size.x = spin[3]->get_value();
 	p.size.y = spin[4]->get_value();
 	p.size.z = spin[5]->get_value();
+
 	emit_changed(get_edited_property(), p, p_name);
 }
 
 void EditorPropertyAABB::update_property() {
 	AABB val = get_edited_property_value();
-	spin[0]->set_value_no_signal(val.position.x);
-	spin[1]->set_value_no_signal(val.position.y);
-	spin[2]->set_value_no_signal(val.position.z);
-	spin[3]->set_value_no_signal(val.size.x);
-	spin[4]->set_value_no_signal(val.size.y);
-	spin[5]->set_value_no_signal(val.size.z);
+	setting = true;
+	spin[0]->set_value(val.position.x);
+	spin[1]->set_value(val.position.y);
+	spin[2]->set_value(val.position.z);
+	spin[3]->set_value(val.size.x);
+	spin[4]->set_value(val.size.y);
+	spin[5]->set_value(val.size.z);
+
+	setting = false;
 }
 
 void EditorPropertyAABB::_notification(int p_what) {
@@ -2270,6 +2322,10 @@ void EditorPropertyTransform2D::_set_read_only(bool p_read_only) {
 }
 
 void EditorPropertyTransform2D::_value_changed(double val, const String &p_name) {
+	if (setting) {
+		return;
+	}
+
 	Transform2D p;
 	p[0][0] = spin[0]->get_value();
 	p[1][0] = spin[1]->get_value();
@@ -2283,12 +2339,15 @@ void EditorPropertyTransform2D::_value_changed(double val, const String &p_name)
 
 void EditorPropertyTransform2D::update_property() {
 	Transform2D val = get_edited_property_value();
-	spin[0]->set_value_no_signal(val[0][0]);
-	spin[1]->set_value_no_signal(val[1][0]);
-	spin[2]->set_value_no_signal(val[2][0]);
-	spin[3]->set_value_no_signal(val[0][1]);
-	spin[4]->set_value_no_signal(val[1][1]);
-	spin[5]->set_value_no_signal(val[2][1]);
+	setting = true;
+	spin[0]->set_value(val[0][0]);
+	spin[1]->set_value(val[1][0]);
+	spin[2]->set_value(val[2][0]);
+	spin[3]->set_value(val[0][1]);
+	spin[4]->set_value(val[1][1]);
+	spin[5]->set_value(val[2][1]);
+
+	setting = false;
 }
 
 void EditorPropertyTransform2D::_notification(int p_what) {
@@ -2354,6 +2413,10 @@ void EditorPropertyBasis::_set_read_only(bool p_read_only) {
 }
 
 void EditorPropertyBasis::_value_changed(double val, const String &p_name) {
+	if (setting) {
+		return;
+	}
+
 	Basis p;
 	p[0][0] = spin[0]->get_value();
 	p[0][1] = spin[1]->get_value();
@@ -2370,15 +2433,18 @@ void EditorPropertyBasis::_value_changed(double val, const String &p_name) {
 
 void EditorPropertyBasis::update_property() {
 	Basis val = get_edited_property_value();
-	spin[0]->set_value_no_signal(val[0][0]);
-	spin[1]->set_value_no_signal(val[0][1]);
-	spin[2]->set_value_no_signal(val[0][2]);
-	spin[3]->set_value_no_signal(val[1][0]);
-	spin[4]->set_value_no_signal(val[1][1]);
-	spin[5]->set_value_no_signal(val[1][2]);
-	spin[6]->set_value_no_signal(val[2][0]);
-	spin[7]->set_value_no_signal(val[2][1]);
-	spin[8]->set_value_no_signal(val[2][2]);
+	setting = true;
+	spin[0]->set_value(val[0][0]);
+	spin[1]->set_value(val[0][1]);
+	spin[2]->set_value(val[0][2]);
+	spin[3]->set_value(val[1][0]);
+	spin[4]->set_value(val[1][1]);
+	spin[5]->set_value(val[1][2]);
+	spin[6]->set_value(val[2][0]);
+	spin[7]->set_value(val[2][1]);
+	spin[8]->set_value(val[2][2]);
+
+	setting = false;
 }
 
 void EditorPropertyBasis::_notification(int p_what) {
@@ -2437,6 +2503,10 @@ void EditorPropertyTransform3D::_set_read_only(bool p_read_only) {
 }
 
 void EditorPropertyTransform3D::_value_changed(double val, const String &p_name) {
+	if (setting) {
+		return;
+	}
+
 	Transform3D p;
 	p.basis[0][0] = spin[0]->get_value();
 	p.basis[0][1] = spin[1]->get_value();
@@ -2459,18 +2529,20 @@ void EditorPropertyTransform3D::update_property() {
 }
 
 void EditorPropertyTransform3D::update_using_transform(Transform3D p_transform) {
-	spin[0]->set_value_no_signal(p_transform.basis[0][0]);
-	spin[1]->set_value_no_signal(p_transform.basis[0][1]);
-	spin[2]->set_value_no_signal(p_transform.basis[0][2]);
-	spin[3]->set_value_no_signal(p_transform.origin[0]);
-	spin[4]->set_value_no_signal(p_transform.basis[1][0]);
-	spin[5]->set_value_no_signal(p_transform.basis[1][1]);
-	spin[6]->set_value_no_signal(p_transform.basis[1][2]);
-	spin[7]->set_value_no_signal(p_transform.origin[1]);
-	spin[8]->set_value_no_signal(p_transform.basis[2][0]);
-	spin[9]->set_value_no_signal(p_transform.basis[2][1]);
-	spin[10]->set_value_no_signal(p_transform.basis[2][2]);
-	spin[11]->set_value_no_signal(p_transform.origin[2]);
+	setting = true;
+	spin[0]->set_value(p_transform.basis[0][0]);
+	spin[1]->set_value(p_transform.basis[0][1]);
+	spin[2]->set_value(p_transform.basis[0][2]);
+	spin[3]->set_value(p_transform.origin[0]);
+	spin[4]->set_value(p_transform.basis[1][0]);
+	spin[5]->set_value(p_transform.basis[1][1]);
+	spin[6]->set_value(p_transform.basis[1][2]);
+	spin[7]->set_value(p_transform.origin[1]);
+	spin[8]->set_value(p_transform.basis[2][0]);
+	spin[9]->set_value(p_transform.basis[2][1]);
+	spin[10]->set_value(p_transform.basis[2][2]);
+	spin[11]->set_value(p_transform.origin[2]);
+	setting = false;
 }
 
 void EditorPropertyTransform3D::_notification(int p_what) {
@@ -2529,6 +2601,10 @@ void EditorPropertyProjection::_set_read_only(bool p_read_only) {
 }
 
 void EditorPropertyProjection::_value_changed(double val, const String &p_name) {
+	if (setting) {
+		return;
+	}
+
 	Projection p;
 	p.columns[0][0] = spin[0]->get_value();
 	p.columns[0][1] = spin[1]->get_value();
@@ -2555,22 +2631,24 @@ void EditorPropertyProjection::update_property() {
 }
 
 void EditorPropertyProjection::update_using_transform(Projection p_transform) {
-	spin[0]->set_value_no_signal(p_transform.columns[0][0]);
-	spin[1]->set_value_no_signal(p_transform.columns[0][1]);
-	spin[2]->set_value_no_signal(p_transform.columns[0][2]);
-	spin[3]->set_value_no_signal(p_transform.columns[0][3]);
-	spin[4]->set_value_no_signal(p_transform.columns[1][0]);
-	spin[5]->set_value_no_signal(p_transform.columns[1][1]);
-	spin[6]->set_value_no_signal(p_transform.columns[1][2]);
-	spin[7]->set_value_no_signal(p_transform.columns[1][3]);
-	spin[8]->set_value_no_signal(p_transform.columns[2][0]);
-	spin[9]->set_value_no_signal(p_transform.columns[2][1]);
-	spin[10]->set_value_no_signal(p_transform.columns[2][2]);
-	spin[11]->set_value_no_signal(p_transform.columns[2][3]);
-	spin[12]->set_value_no_signal(p_transform.columns[3][0]);
-	spin[13]->set_value_no_signal(p_transform.columns[3][1]);
-	spin[14]->set_value_no_signal(p_transform.columns[3][2]);
-	spin[15]->set_value_no_signal(p_transform.columns[3][3]);
+	setting = true;
+	spin[0]->set_value(p_transform.columns[0][0]);
+	spin[1]->set_value(p_transform.columns[0][1]);
+	spin[2]->set_value(p_transform.columns[0][2]);
+	spin[3]->set_value(p_transform.columns[0][3]);
+	spin[4]->set_value(p_transform.columns[1][0]);
+	spin[5]->set_value(p_transform.columns[1][1]);
+	spin[6]->set_value(p_transform.columns[1][2]);
+	spin[7]->set_value(p_transform.columns[1][3]);
+	spin[8]->set_value(p_transform.columns[2][0]);
+	spin[9]->set_value(p_transform.columns[2][1]);
+	spin[10]->set_value(p_transform.columns[2][2]);
+	spin[11]->set_value(p_transform.columns[2][3]);
+	spin[12]->set_value(p_transform.columns[3][0]);
+	spin[13]->set_value(p_transform.columns[3][1]);
+	spin[14]->set_value(p_transform.columns[3][2]);
+	spin[15]->set_value(p_transform.columns[3][3]);
+	setting = false;
 }
 
 void EditorPropertyProjection::_notification(int p_what) {
@@ -2851,14 +2929,6 @@ bool EditorPropertyNodePath::is_drop_valid(const Dictionary &p_drag_data) const 
 		if (dropped_node->is_class(E) ||
 				EditorNode::get_singleton()->is_object_of_custom_type(dropped_node, E)) {
 			return true;
-		} else {
-			Ref<Script> dropped_node_script = dropped_node->get_script();
-			while (dropped_node_script.is_valid()) {
-				if (dropped_node_script->get_path() == E) {
-					return true;
-				}
-				dropped_node_script = dropped_node_script->get_base_script();
-			}
 		}
 	}
 
@@ -3126,13 +3196,6 @@ void EditorPropertyResource::_resource_changed(const Ref<Resource> &p_resource) 
 	Ref<ViewportTexture> vpt = p_resource;
 	if (vpt.is_valid()) {
 		r = Object::cast_to<Resource>(get_edited_object());
-		if (Object::cast_to<VisualShaderNodeTexture>(r)) {
-			EditorNode::get_singleton()->show_warning(TTR("Can't create a ViewportTexture in a Texture2D node because the texture will not be bound to a scene.\nUse a Texture2DParameter node instead and set the texture in the \"Shader Parameters\" tab."));
-			emit_changed(get_edited_property(), Ref<Resource>());
-			update_property();
-			return;
-		}
-
 		if (r && r->get_path().is_resource_file()) {
 			EditorNode::get_singleton()->show_warning(TTR("Can't create a ViewportTexture on resources saved as a file.\nResource needs to belong to a scene."));
 			emit_changed(get_edited_property(), Ref<Resource>());

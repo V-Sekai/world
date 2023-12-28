@@ -254,7 +254,7 @@ public:
 	const Ref<GDScriptNativeClass> &get_native() const { return native; }
 
 	RBSet<GDScript *> get_dependencies();
-	HashMap<GDScript *, RBSet<GDScript *>> get_all_dependencies();
+	RBSet<GDScript *> get_inverted_dependencies();
 	RBSet<GDScript *> get_must_clear_dependencies();
 
 	virtual bool has_script_signal(const StringName &p_signal) const override;
@@ -439,7 +439,6 @@ class GDScriptLanguage : public ScriptLanguage {
 
 	SelfList<GDScriptFunction>::List function_list;
 	bool profiling;
-	bool profile_native_calls;
 	uint64_t script_frame_time;
 
 	HashMap<String, ObjectID> orphan_subclasses;
@@ -591,8 +590,6 @@ public:
 
 	virtual void profiling_start() override;
 	virtual void profiling_stop() override;
-	virtual void profiling_set_save_native_calls(bool p_enable) override;
-	void profiling_collate_native_call_data(bool p_accumulated);
 
 	virtual int profiling_get_accumulated_data(ProfilingInfo *p_info_arr, int p_info_max) override;
 	virtual int profiling_get_frame_data(ProfilingInfo *p_info_arr, int p_info_max) override;

@@ -159,7 +159,9 @@ bool OggPacketSequencePlayback::next_ogg_packet(ogg_packet **p_packet) const {
 
 	*p_packet = packet;
 
-	packet_cursor++;
+	if (!packet->e_o_s) { // Added this so it doesn't try to go to the next packet if it's the last packet of the file.
+		packet_cursor++;
+	}
 
 	return true;
 }

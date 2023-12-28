@@ -42,7 +42,6 @@ void AcceptDialog::_input_from_window(const Ref<InputEvent> &p_event) {
 	if (close_on_escape && p_event->is_action_pressed(SNAME("ui_cancel"), false, true)) {
 		_cancel_pressed();
 	}
-	Window::_input_from_window(p_event);
 }
 
 void AcceptDialog::_parent_focused() {
@@ -429,6 +428,8 @@ AcceptDialog::AcceptDialog() {
 	ok_button->connect("pressed", callable_mp(this, &AcceptDialog::_ok_pressed));
 
 	set_title(TTRC("Alert!"));
+
+	connect("window_input", callable_mp(this, &AcceptDialog::_input_from_window));
 }
 
 AcceptDialog::~AcceptDialog() {

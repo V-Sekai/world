@@ -79,7 +79,6 @@ private:
 
 	HashSet<String> changed_settings;
 
-	mutable Ref<ConfigFile> project_metadata;
 	HashMap<String, PropertyInfo> hints;
 	HashMap<String, VariantContainer> props;
 	int last_order;
@@ -107,7 +106,6 @@ private:
 	void _load_godot2_text_editor_theme();
 	bool _save_text_editor_theme(String p_file);
 	bool _is_default_text_editor_theme(String p_theme_name);
-	const String _get_project_metadata_path() const;
 
 protected:
 	static void _bind_methods();

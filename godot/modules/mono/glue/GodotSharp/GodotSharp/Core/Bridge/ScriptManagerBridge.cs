@@ -194,7 +194,7 @@ namespace Godot.Bridge
 
                 var native = GodotObject.InternalGetClassNativeBase(scriptType);
 
-                var field = native.GetField("NativeName", BindingFlags.DeclaredOnly | BindingFlags.Static |
+                var field = native?.GetField("NativeName", BindingFlags.DeclaredOnly | BindingFlags.Static |
                                                            BindingFlags.Public | BindingFlags.NonPublic);
 
                 if (field == null)
@@ -253,15 +253,11 @@ namespace Godot.Bridge
             {
                 var editorAssembly = AppDomain.CurrentDomain.GetAssemblies()
                     .FirstOrDefault(a => a.GetName().Name == "GodotSharpEditor");
+                wrapperType = editorAssembly?.GetType("Godot." + nativeTypeNameStr);
 
-                if (editorAssembly != null)
+                if (wrapperType == null)
                 {
-                    wrapperType = editorAssembly.GetType("Godot." + nativeTypeNameStr);
-
-                    if (wrapperType == null)
-                    {
-                        wrapperType = GetTypeByGodotClassAttr(editorAssembly, nativeTypeNameStr);
-                    }
+                    wrapperType = GetTypeByGodotClassAttr(editorAssembly, nativeTypeNameStr);
                 }
             }
 

@@ -1,9 +1,6 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.ComponentModel;
-
-#nullable enable
 
 namespace Godot
 {
@@ -1093,7 +1090,7 @@ namespace Godot
         /// </summary>
         /// <param name="obj">The object to compare with.</param>
         /// <returns>Whether or not the basis matrix and the object are exactly equal.</returns>
-        public override readonly bool Equals([NotNullWhen(true)] object? obj)
+        public override readonly bool Equals(object obj)
         {
             return obj is Basis other && Equals(other);
         }
@@ -1143,7 +1140,7 @@ namespace Godot
         /// Converts this <see cref="Basis"/> to a string with the given <paramref name="format"/>.
         /// </summary>
         /// <returns>A string representation of this basis.</returns>
-        public readonly string ToString(string? format)
+        public readonly string ToString(string format)
         {
             return $"[X: {X.ToString(format)}, Y: {Y.ToString(format)}, Z: {Z.ToString(format)}]";
         }

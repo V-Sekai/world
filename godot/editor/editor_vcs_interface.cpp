@@ -32,6 +32,8 @@
 
 #include "editor_node.h"
 
+#define UNIMPLEMENTED() ERR_PRINT(vformat("Unimplemented virtual function in EditorVCSInterface based plugin: %s", __func__))
+
 EditorVCSInterface *EditorVCSInterface::singleton = nullptr;
 
 void EditorVCSInterface::popup_error(String p_msg) {
@@ -41,17 +43,23 @@ void EditorVCSInterface::popup_error(String p_msg) {
 
 bool EditorVCSInterface::initialize(String p_project_path) {
 	bool result = false;
-	GDVIRTUAL_REQUIRED_CALL(_initialize, p_project_path, result);
+	if (!GDVIRTUAL_CALL(_initialize, p_project_path, result)) {
+		UNIMPLEMENTED();
+		return false;
+	}
 	return result;
 }
 
 void EditorVCSInterface::set_credentials(String p_username, String p_password, String p_ssh_public_key, String p_ssh_private_key, String p_ssh_passphrase) {
-	GDVIRTUAL_REQUIRED_CALL(_set_credentials, p_username, p_password, p_ssh_public_key, p_ssh_private_key, p_ssh_passphrase);
+	if (!GDVIRTUAL_CALL(_set_credentials, p_username, p_password, p_ssh_public_key, p_ssh_private_key, p_ssh_passphrase)) {
+		UNIMPLEMENTED();
+	}
 }
 
 List<String> EditorVCSInterface::get_remotes() {
 	TypedArray<String> result;
-	if (!GDVIRTUAL_REQUIRED_CALL(_get_remotes, result)) {
+	if (!GDVIRTUAL_CALL(_get_remotes, result)) {
+		UNIMPLEMENTED();
 		return {};
 	}
 
@@ -64,7 +72,8 @@ List<String> EditorVCSInterface::get_remotes() {
 
 List<EditorVCSInterface::StatusFile> EditorVCSInterface::get_modified_files_data() {
 	TypedArray<Dictionary> result;
-	if (!GDVIRTUAL_REQUIRED_CALL(_get_modified_files_data, result)) {
+	if (!GDVIRTUAL_CALL(_get_modified_files_data, result)) {
+		UNIMPLEMENTED();
 		return {};
 	}
 
@@ -76,24 +85,33 @@ List<EditorVCSInterface::StatusFile> EditorVCSInterface::get_modified_files_data
 }
 
 void EditorVCSInterface::stage_file(String p_file_path) {
-	GDVIRTUAL_REQUIRED_CALL(_stage_file, p_file_path);
+	if (!GDVIRTUAL_CALL(_stage_file, p_file_path)) {
+		UNIMPLEMENTED();
+	}
 }
 
 void EditorVCSInterface::unstage_file(String p_file_path) {
-	GDVIRTUAL_REQUIRED_CALL(_unstage_file, p_file_path);
+	if (!GDVIRTUAL_CALL(_unstage_file, p_file_path)) {
+		UNIMPLEMENTED();
+	}
 }
 
 void EditorVCSInterface::discard_file(String p_file_path) {
-	GDVIRTUAL_REQUIRED_CALL(_discard_file, p_file_path);
+	if (!GDVIRTUAL_CALL(_discard_file, p_file_path)) {
+		UNIMPLEMENTED();
+	}
 }
 
 void EditorVCSInterface::commit(String p_msg) {
-	GDVIRTUAL_REQUIRED_CALL(_commit, p_msg);
+	if (!GDVIRTUAL_CALL(_commit, p_msg)) {
+		UNIMPLEMENTED();
+	}
 }
 
 List<EditorVCSInterface::DiffFile> EditorVCSInterface::get_diff(String p_identifier, TreeArea p_area) {
 	TypedArray<Dictionary> result;
-	if (!GDVIRTUAL_REQUIRED_CALL(_get_diff, p_identifier, int(p_area), result)) {
+	if (!GDVIRTUAL_CALL(_get_diff, p_identifier, int(p_area), result)) {
+		UNIMPLEMENTED();
 		return {};
 	}
 
@@ -106,7 +124,8 @@ List<EditorVCSInterface::DiffFile> EditorVCSInterface::get_diff(String p_identif
 
 List<EditorVCSInterface::Commit> EditorVCSInterface::get_previous_commits(int p_max_commits) {
 	TypedArray<Dictionary> result;
-	if (!GDVIRTUAL_REQUIRED_CALL(_get_previous_commits, p_max_commits, result)) {
+	if (!GDVIRTUAL_CALL(_get_previous_commits, p_max_commits, result)) {
+		UNIMPLEMENTED();
 		return {};
 	}
 
@@ -119,7 +138,8 @@ List<EditorVCSInterface::Commit> EditorVCSInterface::get_previous_commits(int p_
 
 List<String> EditorVCSInterface::get_branch_list() {
 	TypedArray<String> result;
-	if (!GDVIRTUAL_REQUIRED_CALL(_get_branch_list, result)) {
+	if (!GDVIRTUAL_CALL(_get_branch_list, result)) {
+		UNIMPLEMENTED();
 		return {};
 	}
 
@@ -131,48 +151,68 @@ List<String> EditorVCSInterface::get_branch_list() {
 }
 
 void EditorVCSInterface::create_branch(String p_branch_name) {
-	GDVIRTUAL_REQUIRED_CALL(_create_branch, p_branch_name);
+	if (!GDVIRTUAL_CALL(_create_branch, p_branch_name)) {
+		UNIMPLEMENTED();
+	}
 }
 
 void EditorVCSInterface::create_remote(String p_remote_name, String p_remote_url) {
-	GDVIRTUAL_REQUIRED_CALL(_create_remote, p_remote_name, p_remote_url);
+	if (!GDVIRTUAL_CALL(_create_remote, p_remote_name, p_remote_url)) {
+		UNIMPLEMENTED();
+	}
 }
 
 void EditorVCSInterface::remove_branch(String p_branch_name) {
-	GDVIRTUAL_REQUIRED_CALL(_remove_branch, p_branch_name);
+	if (!GDVIRTUAL_CALL(_remove_branch, p_branch_name)) {
+		UNIMPLEMENTED();
+	}
 }
 
 void EditorVCSInterface::remove_remote(String p_remote_name) {
-	GDVIRTUAL_REQUIRED_CALL(_remove_remote, p_remote_name);
+	if (!GDVIRTUAL_CALL(_remove_remote, p_remote_name)) {
+		UNIMPLEMENTED();
+	}
 }
 
 String EditorVCSInterface::get_current_branch_name() {
 	String result;
-	GDVIRTUAL_REQUIRED_CALL(_get_current_branch_name, result);
+	if (!GDVIRTUAL_CALL(_get_current_branch_name, result)) {
+		UNIMPLEMENTED();
+		return "";
+	}
 	return result;
 }
 
 bool EditorVCSInterface::checkout_branch(String p_branch_name) {
 	bool result = false;
-	GDVIRTUAL_REQUIRED_CALL(_checkout_branch, p_branch_name, result);
+	if (!GDVIRTUAL_CALL(_checkout_branch, p_branch_name, result)) {
+		UNIMPLEMENTED();
+	}
 	return result;
 }
 
 void EditorVCSInterface::pull(String p_remote) {
-	GDVIRTUAL_REQUIRED_CALL(_pull, p_remote);
+	if (!GDVIRTUAL_CALL(_pull, p_remote)) {
+		UNIMPLEMENTED();
+	}
 }
 
 void EditorVCSInterface::push(String p_remote, bool p_force) {
-	GDVIRTUAL_REQUIRED_CALL(_push, p_remote, p_force);
+	if (!GDVIRTUAL_CALL(_push, p_remote, p_force)) {
+		UNIMPLEMENTED();
+	}
 }
 
 void EditorVCSInterface::fetch(String p_remote) {
-	GDVIRTUAL_REQUIRED_CALL(_fetch, p_remote);
+	if (!GDVIRTUAL_CALL(_fetch, p_remote)) {
+		UNIMPLEMENTED();
+	}
 }
 
 List<EditorVCSInterface::DiffHunk> EditorVCSInterface::get_line_diff(String p_file_path, String p_text) {
 	TypedArray<Dictionary> result;
-	if (!GDVIRTUAL_REQUIRED_CALL(_get_line_diff, p_file_path, p_text, result)) {
+	if (!GDVIRTUAL_CALL(_get_line_diff, p_file_path, p_text, result)) {
+		UNIMPLEMENTED();
 		return {};
 	}
 
@@ -185,13 +225,19 @@ List<EditorVCSInterface::DiffHunk> EditorVCSInterface::get_line_diff(String p_fi
 
 bool EditorVCSInterface::shut_down() {
 	bool result = false;
-	GDVIRTUAL_REQUIRED_CALL(_shut_down, result);
+	if (!GDVIRTUAL_CALL(_shut_down, result)) {
+		UNIMPLEMENTED();
+		return false;
+	}
 	return result;
 }
 
 String EditorVCSInterface::get_vcs_name() {
 	String result;
-	GDVIRTUAL_REQUIRED_CALL(_get_vcs_name, result);
+	if (!GDVIRTUAL_CALL(_get_vcs_name, result)) {
+		UNIMPLEMENTED();
+		return {};
+	}
 	return result;
 }
 

@@ -1497,10 +1497,8 @@ Error ResourceFormatLoaderBinary::rename_dependencies(const String &p_path, cons
 	fw.unref();
 
 	Ref<DirAccess> da = DirAccess::create(DirAccess::ACCESS_RESOURCES);
-	if (da->exists(p_path + ".depren")) {
-		da->remove(p_path);
-		da->rename(p_path + ".depren", p_path);
-	}
+	da->remove(p_path);
+	da->rename(p_path + ".depren", p_path);
 	return OK;
 }
 

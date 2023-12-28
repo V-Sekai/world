@@ -46,7 +46,6 @@
 #include "editor/editor_settings.h"
 #include "editor/editor_string_names.h"
 #include "editor/editor_undo_redo_manager.h"
-#include "editor/filesystem_dock.h"
 #include "editor/gui/editor_file_dialog.h"
 #include "editor/inspector_dock.h"
 #include "editor/multi_node_edit.h"
@@ -149,8 +148,6 @@ void SceneTreeDock::shortcut_input(const Ref<InputEvent> &p_event) {
 		_tool_selected(TOOL_ERASE, true);
 	} else if (ED_IS_SHORTCUT("scene_tree/copy_node_path", p_event)) {
 		_tool_selected(TOOL_COPY_NODE_PATH);
-	} else if (ED_IS_SHORTCUT("scene_tree/show_in_file_system", p_event)) {
-		_tool_selected(TOOL_SHOW_IN_FILE_SYSTEM);
 	} else if (ED_IS_SHORTCUT("scene_tree/toggle_unique_name", p_event)) {
 		_tool_selected(TOOL_TOGGLE_SCENE_UNIQUE_NAME);
 	} else if (ED_IS_SHORTCUT("scene_tree/delete", p_event)) {
@@ -1016,16 +1013,6 @@ void SceneTreeDock::_tool_selected(int p_tool, bool p_confirm_override) {
 					Node *root = EditorNode::get_singleton()->get_edited_scene();
 					NodePath path = root->get_path().rel_path_to(node->get_path());
 					DisplayServer::get_singleton()->clipboard_set(path);
-				}
-			}
-		} break;
-		case TOOL_SHOW_IN_FILE_SYSTEM: {
-			List<Node *> selection = editor_selection->get_selected_node_list();
-			List<Node *>::Element *e = selection.front();
-			if (e) {
-				const Node *node = e->get();
-				if (node) {
-					FileSystemDock::get_singleton()->navigate_to_path(node->get_scene_file_path());
 				}
 			}
 		} break;
@@ -3287,11 +3274,6 @@ void SceneTreeDock::_tree_rmb(const Vector2 &p_menu_pos) {
 	}
 #endif // MODULE_REGEX_ENABLED
 	menu->add_separator();
-
-	if (full_selection.size() == 1 && !selection[0]->get_scene_file_path().is_empty()) {
-		menu->add_icon_shortcut(get_editor_theme_icon(SNAME("ShowInFileSystem")), ED_GET_SHORTCUT("scene_tree/show_in_file_system"), TOOL_SHOW_IN_FILE_SYSTEM);
-	}
-
 	menu->add_icon_item(get_editor_theme_icon(SNAME("Help")), TTR("Open Documentation"), TOOL_OPEN_DOCUMENTATION);
 
 	if (profile_allow_editing) {
@@ -3330,7 +3312,7 @@ void SceneTreeDock::_filter_changed(const String &p_filter) {
 		filter->set_tooltip_text(warning);
 	} else {
 		filter->remove_theme_icon_override(SNAME("clear"));
-		filter->set_tooltip_text(TTR("Filter nodes by entering a part of their name, type (if prefixed with \"type:\" or \"t:\")\nor group (if prefixed with \"group:\" or \"g:\"). Filtering is case-insensitive."));
+		filter->set_tooltip_text("");
 	}
 }
 
@@ -3993,7 +3975,6 @@ SceneTreeDock::SceneTreeDock(Node *p_scene_root, EditorSelection *p_editor_selec
 	ED_SHORTCUT("scene_tree/make_root", TTR("Make Scene Root"));
 	ED_SHORTCUT("scene_tree/save_branch_as_scene", TTR("Save Branch as Scene"));
 	ED_SHORTCUT("scene_tree/copy_node_path", TTR("Copy Node Path"), KeyModifierMask::CMD_OR_CTRL | KeyModifierMask::SHIFT | Key::C);
-	ED_SHORTCUT("scene_tree/show_in_file_system", TTR("Show In FileSystem"));
 	ED_SHORTCUT("scene_tree/toggle_unique_name", TTR("Toggle Access as Unique Name"));
 	ED_SHORTCUT("scene_tree/delete_no_confirm", TTR("Delete (No Confirm)"), KeyModifierMask::SHIFT | Key::KEY_DELETE);
 	ED_SHORTCUT("scene_tree/delete", TTR("Delete"), Key::KEY_DELETE);
@@ -4058,21 +4039,21 @@ SceneTreeDock::SceneTreeDock(Node *p_scene_root, EditorSelection *p_editor_selec
 	vbc->add_child(button_hb);
 
 	edit_remote = memnew(Button);
-	edit_remote->set_theme_type_variation("FlatButton");
+	edit_remote->set_flat(true);
+	button_hb->add_child(edit_remote);
 	edit_remote->set_h_size_flags(SIZE_EXPAND_FILL);
 	edit_remote->set_text(TTR("Remote"));
 	edit_remote->set_toggle_mode(true);
 	edit_remote->set_tooltip_text(TTR("If selected, the Remote scene tree dock will cause the project to stutter every time it updates.\nSwitch back to the Local scene tree dock to improve performance."));
-	button_hb->add_child(edit_remote);
 	edit_remote->connect("pressed", callable_mp(this, &SceneTreeDock::_remote_tree_selected));
 
 	edit_local = memnew(Button);
-	edit_local->set_theme_type_variation("FlatButton");
+	edit_local->set_flat(true);
+	button_hb->add_child(edit_local);
 	edit_local->set_h_size_flags(SIZE_EXPAND_FILL);
 	edit_local->set_text(TTR("Local"));
 	edit_local->set_toggle_mode(true);
 	edit_local->set_pressed(true);
-	button_hb->add_child(edit_local);
 	edit_local->connect("pressed", callable_mp(this, &SceneTreeDock::_local_tree_selected));
 
 	remote_tree = nullptr;

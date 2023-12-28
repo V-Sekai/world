@@ -381,10 +381,6 @@ float AnimatedSprite2D::get_playing_speed() const {
 }
 
 void AnimatedSprite2D::set_centered(bool p_center) {
-	if (centered == p_center) {
-		return;
-	}
-
 	centered = p_center;
 	queue_redraw();
 	item_rect_changed();
@@ -395,10 +391,6 @@ bool AnimatedSprite2D::is_centered() const {
 }
 
 void AnimatedSprite2D::set_offset(const Point2 &p_offset) {
-	if (offset == p_offset) {
-		return;
-	}
-
 	offset = p_offset;
 	queue_redraw();
 	item_rect_changed();
@@ -409,10 +401,6 @@ Point2 AnimatedSprite2D::get_offset() const {
 }
 
 void AnimatedSprite2D::set_flip_h(bool p_flip) {
-	if (hflip == p_flip) {
-		return;
-	}
-
 	hflip = p_flip;
 	queue_redraw();
 }
@@ -422,10 +410,6 @@ bool AnimatedSprite2D::is_flipped_h() const {
 }
 
 void AnimatedSprite2D::set_flip_v(bool p_flip) {
-	if (vflip == p_flip) {
-		return;
-	}
-
 	vflip = p_flip;
 	queue_redraw();
 }

@@ -95,7 +95,7 @@ const PackedStringArray ProjectSettings::_get_supported_features() {
 	features.append(VERSION_FULL_CONFIG);
 	features.append(VERSION_FULL_BUILD);
 
-#ifdef RD_ENABLED
+#ifdef VULKAN_ENABLED
 	features.append("Forward Plus");
 	features.append("Mobile");
 #endif
@@ -281,11 +281,6 @@ bool ProjectSettings::_set(const StringName &p_name, const Variant &p_value) {
 			if (autoloads.has(node_name)) {
 				remove_autoload(node_name);
 			}
-		} else if (p_name.operator String().begins_with("global_group/")) {
-			String group_name = p_name.operator String().get_slice("/", 1);
-			if (global_groups.has(group_name)) {
-				remove_global_group(group_name);
-			}
 		}
 	} else {
 		if (p_name == CoreStringNames::get_singleton()->_custom_features) {
@@ -332,9 +327,6 @@ bool ProjectSettings::_set(const StringName &p_name, const Variant &p_value) {
 				autoload.path = path;
 			}
 			add_autoload(autoload);
-		} else if (p_name.operator String().begins_with("global_group/")) {
-			String group_name = p_name.operator String().get_slice("/", 1);
-			add_global_group(group_name, p_value);
 		}
 	}
 
@@ -681,8 +673,6 @@ Error ProjectSettings::setup(const String &p_path, const String &p_main_pack, bo
 	Compression::zlib_level = GLOBAL_GET("compression/formats/zlib/compression_level");
 
 	Compression::gzip_level = GLOBAL_GET("compression/formats/gzip/compression_level");
-
-	load_scene_groups_cache();
 
 	project_loaded = err == OK;
 	return err;
@@ -1251,73 +1241,6 @@ ProjectSettings::AutoloadInfo ProjectSettings::get_autoload(const StringName &p_
 	return autoloads[p_name];
 }
 
-const HashMap<StringName, String> &ProjectSettings::get_global_groups_list() const {
-	return global_groups;
-}
-
-void ProjectSettings::add_global_group(const StringName &p_name, const String &p_description) {
-	ERR_FAIL_COND_MSG(p_name == StringName(), "Trying to add global group with no name.");
-	global_groups[p_name] = p_description;
-}
-
-void ProjectSettings::remove_global_group(const StringName &p_name) {
-	ERR_FAIL_COND_MSG(!global_groups.has(p_name), "Trying to remove non-existent global group.");
-	global_groups.erase(p_name);
-}
-
-bool ProjectSettings::has_global_group(const StringName &p_name) const {
-	return global_groups.has(p_name);
-}
-
-void ProjectSettings::remove_scene_groups_cache(const StringName &p_path) {
-	scene_groups_cache.erase(p_path);
-}
-
-void ProjectSettings::add_scene_groups_cache(const StringName &p_path, const HashSet<StringName> &p_cache) {
-	scene_groups_cache[p_path] = p_cache;
-}
-
-void ProjectSettings::save_scene_groups_cache() {
-	Ref<ConfigFile> cf;
-	cf.instantiate();
-	for (const KeyValue<StringName, HashSet<StringName>> &E : scene_groups_cache) {
-		if (E.value.is_empty()) {
-			continue;
-		}
-		Array list;
-		for (const StringName &group : E.value) {
-			list.push_back(group);
-		}
-		cf->set_value(E.key, "groups", list);
-	}
-	cf->save(get_scene_groups_cache_path());
-}
-
-String ProjectSettings::get_scene_groups_cache_path() const {
-	return get_project_data_path().path_join("scene_groups_cache.cfg");
-}
-
-void ProjectSettings::load_scene_groups_cache() {
-	Ref<ConfigFile> cf;
-	cf.instantiate();
-	if (cf->load(get_scene_groups_cache_path()) == OK) {
-		List<String> scene_paths;
-		cf->get_sections(&scene_paths);
-		for (const String &E : scene_paths) {
-			Array scene_groups = cf->get_value(E, "groups", Array());
-			HashSet<StringName> cache;
-			for (int i = 0; i < scene_groups.size(); ++i) {
-				cache.insert(scene_groups[i]);
-			}
-			add_scene_groups_cache(E, cache);
-		}
-	}
-}
-
-const HashMap<StringName, HashSet<StringName>> &ProjectSettings::get_scene_groups_cache() const {
-	return scene_groups_cache;
-}
-
 void ProjectSettings::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("has_setting", "name"), &ProjectSettings::has_setting);
 	ClassDB::bind_method(D_METHOD("set_setting", "name", "value"), &ProjectSettings::set_setting);
@@ -1464,7 +1387,7 @@ ProjectSettings::ProjectSettings() {
 	GLOBAL_DEF_RST(PropertyInfo(Variant::INT, "rendering/occlusion_culling/bvh_build_quality", PROPERTY_HINT_ENUM, "Low,Medium,High"), 2);
 	GLOBAL_DEF(PropertyInfo(Variant::INT, "memory/limits/multithreaded_server/rid_pool_prealloc", PROPERTY_HINT_RANGE, "0,500,1"), 60); // No negative and limit to 500 due to crashes.
 	GLOBAL_DEF_RST("internationalization/rendering/force_right_to_left_layout_direction", false);
-	GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "internationalization/rendering/root_node_layout_direction", PROPERTY_HINT_ENUM, "Based on Application Locale,Left-to-Right,Right-to-Left,Based on System Locale"), 0);
+	GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "internationalization/rendering/root_node_layout_direction", PROPERTY_HINT_ENUM, "Based on Locale,Left-to-Right,Right-to-Left"), 0);
 
 	GLOBAL_DEF(PropertyInfo(Variant::INT, "gui/timers/incremental_search_max_interval_msec", PROPERTY_HINT_RANGE, "0,10000,1,or_greater"), 2000);
 
@@ -1476,13 +1399,6 @@ ProjectSettings::ProjectSettings() {
 	GLOBAL_DEF("rendering/rendering_device/staging_buffer/texture_upload_region_size_px", 64);
 	GLOBAL_DEF("rendering/rendering_device/pipeline_cache/save_chunk_size_mb", 3.0);
 	GLOBAL_DEF("rendering/rendering_device/vulkan/max_descriptors_per_pool", 64);
-
-	GLOBAL_DEF_RST("rendering/rendering_device/d3d12/max_resource_descriptors_per_frame", 16384);
-	custom_prop_info["rendering/rendering_device/d3d12/max_resource_descriptors_per_frame"] = PropertyInfo(Variant::INT, "rendering/rendering_device/d3d12/max_resource_descriptors_per_frame", PROPERTY_HINT_RANGE, "512,262144");
-	GLOBAL_DEF_RST("rendering/rendering_device/d3d12/max_sampler_descriptors_per_frame", 1024);
-	custom_prop_info["rendering/rendering_device/d3d12/max_sampler_descriptors_per_frame"] = PropertyInfo(Variant::INT, "rendering/rendering_device/d3d12/max_sampler_descriptors_per_frame", PROPERTY_HINT_RANGE, "256,2048");
-	GLOBAL_DEF_RST("rendering/rendering_device/d3d12/max_misc_descriptors_per_frame", 512);
-	custom_prop_info["rendering/rendering_device/d3d12/max_misc_descriptors_per_frame"] = PropertyInfo(Variant::INT, "rendering/rendering_device/d3d12/max_misc_descriptors_per_frame", PROPERTY_HINT_RANGE, "32,4096");
 
 	GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "rendering/textures/canvas_textures/default_texture_filter", PROPERTY_HINT_ENUM, "Nearest,Linear,Linear Mipmap,Nearest Mipmap"), 1);
 	GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "rendering/textures/canvas_textures/default_texture_repeat", PROPERTY_HINT_ENUM, "Disable,Enable,Mirror"), 0);

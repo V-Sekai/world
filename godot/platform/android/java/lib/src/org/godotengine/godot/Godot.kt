@@ -184,7 +184,7 @@ class Godot(private val context: Context) : SensorEventListener {
 			return
 		}
 
-		beginBenchmarkMeasure("Startup", "Godot::onCreate")
+		beginBenchmarkMeasure("Godot::onCreate")
 		try {
 			this.primaryHost = primaryHost
 			val activity = requireActivity()
@@ -286,7 +286,7 @@ class Godot(private val context: Context) : SensorEventListener {
 			initializationStarted = false
 			throw e
 		} finally {
-			endBenchmarkMeasure("Startup", "Godot::onCreate");
+			endBenchmarkMeasure("Godot::onCreate");
 		}
 	}
 
@@ -1016,13 +1016,13 @@ class Godot(private val context: Context) : SensorEventListener {
 	}
 
 	@Keep
-	private fun nativeBeginBenchmarkMeasure(scope: String, label: String) {
-		beginBenchmarkMeasure(scope, label)
+	private fun nativeBeginBenchmarkMeasure(label: String) {
+		beginBenchmarkMeasure(label)
 	}
 
 	@Keep
-	private fun nativeEndBenchmarkMeasure(scope: String, label: String) {
-		endBenchmarkMeasure(scope, label)
+	private fun nativeEndBenchmarkMeasure(label: String) {
+		endBenchmarkMeasure(label)
 	}
 
 	@Keep

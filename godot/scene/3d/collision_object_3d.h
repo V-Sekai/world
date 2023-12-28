@@ -116,8 +116,6 @@ protected:
 
 	void set_body_mode(PhysicsServer3D::BodyMode p_mode);
 
-	virtual void _space_changed(const RID &p_new_space);
-
 	void set_only_update_transform_changes(bool p_enable);
 	bool is_only_update_transform_changes_enabled() const;
 

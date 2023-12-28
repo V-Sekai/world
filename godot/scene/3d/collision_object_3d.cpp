@@ -78,7 +78,6 @@ void CollisionObject3D::_notification(int p_what) {
 				} else {
 					PhysicsServer3D::get_singleton()->body_set_space(rid, space);
 				}
-				_space_changed(space);
 			}
 
 			_update_pickable();
@@ -118,7 +117,6 @@ void CollisionObject3D::_notification(int p_what) {
 					} else {
 						PhysicsServer3D::get_singleton()->body_set_space(rid, RID());
 					}
-					_space_changed(RID());
 				}
 			}
 
@@ -246,7 +244,6 @@ void CollisionObject3D::_apply_disabled() {
 					} else {
 						PhysicsServer3D::get_singleton()->body_set_space(rid, RID());
 					}
-					_space_changed(RID());
 				}
 			}
 		} break;
@@ -273,7 +270,6 @@ void CollisionObject3D::_apply_enabled() {
 				} else {
 					PhysicsServer3D::get_singleton()->body_set_space(rid, space);
 				}
-				_space_changed(space);
 			}
 		} break;
 
@@ -322,9 +318,6 @@ void CollisionObject3D::set_body_mode(PhysicsServer3D::BodyMode p_mode) {
 	}
 
 	PhysicsServer3D::get_singleton()->body_set_mode(rid, p_mode);
-}
-
-void CollisionObject3D::_space_changed(const RID &p_new_space) {
 }
 
 void CollisionObject3D::set_only_update_transform_changes(bool p_enable) {

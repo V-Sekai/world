@@ -403,9 +403,7 @@ float get_gizmo_handle_scale(const String &gizmo_handle_name = "") {
 }
 
 void editor_register_and_generate_icons(Ref<Theme> p_theme, bool p_dark_theme, float p_icon_saturation, int p_thumb_size, bool p_only_thumbs = false) {
-	const String benchmark_key = vformat("Generate Icons (%s)", (p_only_thumbs ? "Only Thumbs" : "All"));
-	OS::get_singleton()->benchmark_begin_measure("EditorTheme", benchmark_key);
-
+	OS::get_singleton()->benchmark_begin_measure("editor_register_and_generate_icons_" + String((p_only_thumbs ? "with_only_thumbs" : "all")));
 	// Before we register the icons, we adjust their colors and saturation.
 	// Most icons follow the standard rules for color conversion to follow the editor
 	// theme's polarity (dark/light). We also adjust the saturation for most icons,
@@ -533,11 +531,11 @@ void editor_register_and_generate_icons(Ref<Theme> p_theme, bool p_dark_theme, f
 			p_theme->set_icon(editor_icons_names[index], EditorStringName(EditorIcons), icon);
 		}
 	}
-	OS::get_singleton()->benchmark_end_measure("EditorTheme", benchmark_key);
+	OS::get_singleton()->benchmark_end_measure("editor_register_and_generate_icons_" + String((p_only_thumbs ? "with_only_thumbs" : "all")));
 }
 
 Ref<Theme> create_editor_theme(const Ref<Theme> p_theme) {
-	OS::get_singleton()->benchmark_begin_measure("EditorTheme", "Create Editor Theme");
+	OS::get_singleton()->benchmark_begin_measure("create_editor_theme");
 	Ref<EditorTheme> theme = memnew(EditorTheme);
 
 	// Controls may rely on the scale for their internal drawing logic.
@@ -1423,11 +1421,8 @@ Ref<Theme> create_editor_theme(const Ref<Theme> p_theme) {
 
 	// Tree
 	theme->set_icon("checked", "Tree", theme->get_icon(SNAME("GuiChecked"), EditorStringName(EditorIcons)));
-	theme->set_icon("checked_disabled", "Tree", theme->get_icon(SNAME("GuiCheckedDisabled"), EditorStringName(EditorIcons)));
 	theme->set_icon("indeterminate", "Tree", theme->get_icon(SNAME("GuiIndeterminate"), EditorStringName(EditorIcons)));
-	theme->set_icon("indeterminate_disabled", "Tree", theme->get_icon(SNAME("GuiIndeterminateDisabled"), EditorStringName(EditorIcons)));
 	theme->set_icon("unchecked", "Tree", theme->get_icon(SNAME("GuiUnchecked"), EditorStringName(EditorIcons)));
-	theme->set_icon("unchecked_disabled", "Tree", theme->get_icon(SNAME("GuiUncheckedDisabled"), EditorStringName(EditorIcons)));
 	theme->set_icon("arrow", "Tree", theme->get_icon(SNAME("GuiTreeArrowDown"), EditorStringName(EditorIcons)));
 	theme->set_icon("arrow_collapsed", "Tree", theme->get_icon(SNAME("GuiTreeArrowRight"), EditorStringName(EditorIcons)));
 	theme->set_icon("arrow_collapsed_mirrored", "Tree", theme->get_icon(SNAME("GuiTreeArrowLeft"), EditorStringName(EditorIcons)));
@@ -1440,7 +1435,6 @@ Ref<Theme> create_editor_theme(const Ref<Theme> p_theme) {
 	theme->set_color("custom_button_font_highlight", "Tree", font_hover_color);
 	theme->set_color("font_color", "Tree", font_color);
 	theme->set_color("font_selected_color", "Tree", mono_color);
-	theme->set_color("font_disabled_color", "Tree", font_disabled_color);
 	theme->set_color("font_outline_color", "Tree", font_outline_color);
 	theme->set_color("title_button_color", "Tree", font_color);
 	theme->set_color("drop_position_color", "Tree", accent_color);
@@ -2366,15 +2360,14 @@ Ref<Theme> create_editor_theme(const Ref<Theme> p_theme) {
 	theme->set_color("search_result_color", "CodeEdit", EDITOR_GET("text_editor/theme/highlighting/search_result_color"));
 	theme->set_color("search_result_border_color", "CodeEdit", EDITOR_GET("text_editor/theme/highlighting/search_result_border_color"));
 
-	OS::get_singleton()->benchmark_end_measure("EditorTheme", "Create Editor Theme");
+	OS::get_singleton()->benchmark_end_measure("create_editor_theme");
 
 	return theme;
 }
 
 Ref<Theme> create_custom_theme(const Ref<Theme> p_theme) {
+	OS::get_singleton()->benchmark_begin_measure("create_custom_theme");
 	Ref<Theme> theme = create_editor_theme(p_theme);
-
-	OS::get_singleton()->benchmark_begin_measure("EditorTheme", "Create Custom Theme");
 
 	const String custom_theme_path = EDITOR_GET("interface/theme/custom_theme");
 	if (!custom_theme_path.is_empty()) {
@@ -2384,7 +2377,7 @@ Ref<Theme> create_custom_theme(const Ref<Theme> p_theme) {
 		}
 	}
 
-	OS::get_singleton()->benchmark_end_measure("EditorTheme", "Create Custom Theme");
+	OS::get_singleton()->benchmark_end_measure("create_custom_theme");
 	return theme;
 }
 

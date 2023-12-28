@@ -4194,7 +4194,8 @@ Node *Node3DEditorViewport::_sanitize_preview_node(Node *p_node) const {
 void Node3DEditorViewport::_create_preview_node(const Vector<String> &files) const {
 	bool add_preview = false;
 	for (int i = 0; i < files.size(); i++) {
-		Ref<Resource> res = ResourceLoader::load(files[i]);
+		String path = files[i];
+		Ref<Resource> res = ResourceLoader::load(path);
 		ERR_CONTINUE(res.is_null());
 		Ref<PackedScene> scene = Ref<PackedScene>(Object::cast_to<PackedScene>(*res));
 		Ref<Mesh> mesh = Ref<Mesh>(Object::cast_to<Mesh>(*res));

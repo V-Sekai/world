@@ -407,8 +407,7 @@ void GodotBody2D::set_space(GodotSpace2D *p_space) {
 
 	if (get_space()) {
 		_mass_properties_changed();
-
-		if (active && !active_list.in_list()) {
+		if (active) {
 			get_space()->body_add_to_active_list(&active_list);
 		}
 	}

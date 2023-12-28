@@ -28,15 +28,14 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#include <cstddef>
+#include "audio_stream_flac.h"
+#include "core/io/file_access.h"
+
 #define DR_FLAC_IMPLEMENTATION
 #define DR_FLAC_NO_STDIO
 #define DR_FLAC_NO_OGG
-#include "audio_stream_flac.h"
 
 #include "thirdparty/dr_flac/dr_flac.h"
-
-#include "core/io/file_access.h"
 
 int AudioStreamPlaybackFLAC::_mix_internal(AudioFrame *p_buffer, int p_frames) {
 	if (!active) {
@@ -61,7 +60,7 @@ int AudioStreamPlaybackFLAC::_mix_internal(AudioFrame *p_buffer, int p_frames) {
 		}
 		int mixed = drflac_read_pcm_frames_f32(pFlac, todo, buffer);
 
-		for (int i = 0; i < mixed; i++) {
+		for (int mixed_i = 0; mixed_i < mixed; mixed_i++) {
 			if (loop_fade_remaining < FADE_SIZE) {
 				p_buffer[p_frames - todo] += loop_fade[loop_fade_remaining] * (float(FADE_SIZE - loop_fade_remaining) / float(FADE_SIZE));
 				loop_fade_remaining++;
@@ -71,8 +70,8 @@ int AudioStreamPlaybackFLAC::_mix_internal(AudioFrame *p_buffer, int p_frames) {
 			++frames_mixed;
 
 			if (beat_loop && (int)frames_mixed >= beat_length_frames) {
-				for (int i = 0; i < FADE_SIZE; i++) {
-					p_buffer[i] = AudioFrame(buffer[i * flac_stream->channels], buffer[i * flac_stream->channels + flac_stream->channels - 1]);
+				for (int fade_i = 0; fade_i < FADE_SIZE; fade_i++) {
+					p_buffer[fade_i] = AudioFrame(buffer[fade_i * flac_stream->channels], buffer[fade_i * flac_stream->channels + flac_stream->channels - 1]);
 				}
 				loop_fade_remaining = 0;
 				seek(flac_stream->loop_offset);
@@ -81,18 +80,18 @@ int AudioStreamPlaybackFLAC::_mix_internal(AudioFrame *p_buffer, int p_frames) {
 		}
 
 		if (todo) {
-			//end of file!
+			// This is the end of the file.
 			if (flac_stream->loop) {
-				//loop
+				// This is a loop.
 				seek(flac_stream->loop_offset);
 				loops++;
-				// we still have buffer to fill, start from this element in the next iteration.
+				// We still have buffers to fill, start from this element in the next iteration.
 				start_buffer = p_frames - todo;
 			} else {
 				frames_mixed_this_step = p_frames - todo;
 
-				for (int i = p_frames - todo; i < p_frames; i++) {
-					p_buffer[i] = AudioFrame(0, 0);
+				for (int frame_i = p_frames - todo; frame_i < p_frames; frame_i++) {
+					p_buffer[frame_i] = AudioFrame(0, 0);
 				}
 				active = false;
 				todo = 0;

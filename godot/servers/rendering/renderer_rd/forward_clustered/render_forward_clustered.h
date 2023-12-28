@@ -40,7 +40,6 @@
 #include "servers/rendering/renderer_rd/forward_clustered/scene_shader_forward_clustered.h"
 #include "servers/rendering/renderer_rd/pipeline_cache_rd.h"
 #include "servers/rendering/renderer_rd/renderer_scene_render_rd.h"
-#include "servers/rendering/renderer_rd/shaders/forward_clustered/best_fit_normal.glsl.gen.h"
 #include "servers/rendering/renderer_rd/shaders/forward_clustered/scene_forward_clustered.glsl.gen.h"
 #include "servers/rendering/renderer_rd/storage_rd/utilities.h"
 
@@ -64,6 +63,8 @@ class RenderForwardClustered : public RendererSceneRenderRD {
 		TRANSFORMS_UNIFORM_SET = 2,
 		MATERIAL_UNIFORM_SET = 3,
 	};
+
+	const int SAMPLERS_BINDING_FIRST_INDEX = 16;
 
 	enum {
 		SPEC_CONSTANT_SOFT_SHADOW_SAMPLES = 6,
@@ -157,20 +158,22 @@ class RenderForwardClustered : public RendererSceneRenderRD {
 
 	virtual void setup_render_buffer_data(Ref<RenderSceneBuffersRD> p_render_buffers) override;
 
+	enum BaseUniformSetCache {
+		BASE_UNIFORM_SET_CACHE_VIEWPORT,
+		BASE_UNIFORM_SET_CACHE_DEFAULT,
+		BASE_UNIFORM_SET_CACHE_MAX
+	};
+
 	RID render_base_uniform_set;
+	// One for custom samplers, one for default samplers.
+	// Need to switch between them as default is needed for probes, shadows, materials, etc.
+	RID render_base_uniform_set_cache[BASE_UNIFORM_SET_CACHE_MAX];
 
-	uint64_t lightmap_texture_array_version = 0xFFFFFFFF;
+	uint64_t lightmap_texture_array_version_cache[BASE_UNIFORM_SET_CACHE_MAX] = { 0xFFFFFFFF, 0xFFFFFFFF };
 
-	void _update_render_base_uniform_set();
-	RID _setup_sdfgi_render_pass_uniform_set(RID p_albedo_texture, RID p_emission_texture, RID p_emission_aniso_texture, RID p_geom_facing_texture, const RendererRD::MaterialStorage::Samplers &p_samplers);
-	RID _setup_render_pass_uniform_set(RenderListType p_render_list, const RenderDataRD *p_render_data, RID p_radiance_texture, const RendererRD::MaterialStorage::Samplers &p_samplers, bool p_use_directional_shadow_atlas = false, int p_index = 0);
-
-	struct BestFitNormal {
-		BestFitNormalShaderRD shader;
-		RID shader_version;
-		RID pipeline;
-		RID texture;
-	} best_fit_normal;
+	void _update_render_base_uniform_set(const RendererRD::MaterialStorage::Samplers &p_samplers, BaseUniformSetCache p_cache_index);
+	RID _setup_sdfgi_render_pass_uniform_set(RID p_albedo_texture, RID p_emission_texture, RID p_emission_aniso_texture, RID p_geom_facing_texture);
+	RID _setup_render_pass_uniform_set(RenderListType p_render_list, const RenderDataRD *p_render_data, RID p_radiance_texture, bool p_use_directional_shadow_atlas = false, int p_index = 0);
 
 	enum PassMode {
 		PASS_MODE_COLOR,
@@ -205,6 +208,7 @@ class RenderForwardClustered : public RendererSceneRenderRD {
 		RID render_pass_uniform_set;
 		bool force_wireframe = false;
 		Vector2 uv_offset;
+		Plane lod_plane;
 		float lod_distance_multiplier = 0.0;
 		float screen_mesh_lod_threshold = 0.0;
 		RD::FramebufferFormatID framebuffer_format = 0;
@@ -212,7 +216,7 @@ class RenderForwardClustered : public RendererSceneRenderRD {
 		uint32_t barrier = RD::BARRIER_MASK_ALL_BARRIERS;
 		bool use_directional_soft_shadow = false;
 
-		RenderListParameters(GeometryInstanceSurfaceDataCache **p_elements, RenderElementInfo *p_element_info, int p_element_count, bool p_reverse_cull, PassMode p_pass_mode, uint32_t p_color_pass_flags, bool p_no_gi, bool p_use_directional_soft_shadows, RID p_render_pass_uniform_set, bool p_force_wireframe = false, const Vector2 &p_uv_offset = Vector2(), float p_lod_distance_multiplier = 0.0, float p_screen_mesh_lod_threshold = 0.0, uint32_t p_view_count = 1, uint32_t p_element_offset = 0, uint32_t p_barrier = RD::BARRIER_MASK_ALL_BARRIERS) {
+		RenderListParameters(GeometryInstanceSurfaceDataCache **p_elements, RenderElementInfo *p_element_info, int p_element_count, bool p_reverse_cull, PassMode p_pass_mode, uint32_t p_color_pass_flags, bool p_no_gi, bool p_use_directional_soft_shadows, RID p_render_pass_uniform_set, bool p_force_wireframe = false, const Vector2 &p_uv_offset = Vector2(), const Plane &p_lod_plane = Plane(), float p_lod_distance_multiplier = 0.0, float p_screen_mesh_lod_threshold = 0.0, uint32_t p_view_count = 1, uint32_t p_element_offset = 0, uint32_t p_barrier = RD::BARRIER_MASK_ALL_BARRIERS) {
 			elements = p_elements;
 			element_info = p_element_info;
 			element_count = p_element_count;
@@ -224,6 +228,7 @@ class RenderForwardClustered : public RendererSceneRenderRD {
 			render_pass_uniform_set = p_render_pass_uniform_set;
 			force_wireframe = p_force_wireframe;
 			uv_offset = p_uv_offset;
+			lod_plane = p_lod_plane;
 			lod_distance_multiplier = p_lod_distance_multiplier;
 			screen_mesh_lod_threshold = p_screen_mesh_lod_threshold;
 			element_offset = p_element_offset;
@@ -244,7 +249,6 @@ class RenderForwardClustered : public RendererSceneRenderRD {
 
 	// When changing any of these enums, remember to change the corresponding enums in the shader files as well.
 	enum {
-		INSTANCE_DATA_FLAGS_DYNAMIC = 1 << 3,
 		INSTANCE_DATA_FLAGS_NON_UNIFORM_SCALE = 1 << 4,
 		INSTANCE_DATA_FLAG_USE_GI_BUFFERS = 1 << 5,
 		INSTANCE_DATA_FLAG_USE_SDFGI = 1 << 6,

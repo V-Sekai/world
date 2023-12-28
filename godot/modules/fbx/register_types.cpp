@@ -33,7 +33,7 @@
 #include "fbx_document.h"
 
 #ifdef TOOLS_ENABLED
-#include "editor/editor_scene_importer_ufbx.h"
+#include "editor/editor_scene_importer_fbx.h"
 
 #include "core/config/project_settings.h"
 #include "editor/editor_node.h"
@@ -42,7 +42,7 @@
 static void _editor_init() {
 	Ref<EditorSceneFormatImporterUFBX> import_fbx;
 	import_fbx.instantiate();
-	ResourceImporterScene::add_scene_importer(import_fbx);
+	ResourceImporterScene::add_importer(import_fbx);
 }
 #endif // TOOLS_ENABLED
 

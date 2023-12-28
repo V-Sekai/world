@@ -1,9 +1,6 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-
-#nullable enable
 
 namespace Godot
 {
@@ -609,7 +606,7 @@ namespace Godot
         /// </summary>
         /// <param name="obj">The object to compare with.</param>
         /// <returns>Whether or not the transform and the object are exactly equal.</returns>
-        public override readonly bool Equals([NotNullWhen(true)] object? obj)
+        public override readonly bool Equals(object obj)
         {
             return obj is Transform2D other && Equals(other);
         }
@@ -659,7 +656,7 @@ namespace Godot
         /// Converts this <see cref="Transform2D"/> to a string with the given <paramref name="format"/>.
         /// </summary>
         /// <returns>A string representation of this transform.</returns>
-        public readonly string ToString(string? format)
+        public readonly string ToString(string format)
         {
             return $"[X: {X.ToString(format)}, Y: {Y.ToString(format)}, O: {Origin.ToString(format)}]";
         }

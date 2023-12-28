@@ -293,8 +293,6 @@ static Ref<ResourceFormatSaverShaderInclude> resource_saver_shader_include;
 static Ref<ResourceFormatLoaderShaderInclude> resource_loader_shader_include;
 
 void register_scene_types() {
-	OS::get_singleton()->benchmark_begin_measure("Scene", "Register Types");
-
 	SceneStringNames::create();
 
 	OS::get_singleton()->yield(); // may take time to init
@@ -455,10 +453,6 @@ void register_scene_types() {
 	}
 	AcceptDialog::set_swap_cancel_ok(swap_cancel_ok);
 #endif
-
-	int root_dir = GLOBAL_GET("internationalization/rendering/root_node_layout_direction");
-	Control::set_root_layout_direction(root_dir);
-	Window::set_root_layout_direction(root_dir);
 
 	/* REGISTER ANIMATION */
 	GDREGISTER_CLASS(Tween);
@@ -1188,13 +1182,9 @@ void register_scene_types() {
 	}
 
 	SceneDebugger::initialize();
-
-	OS::get_singleton()->benchmark_end_measure("Scene", "Register Types");
 }
 
 void unregister_scene_types() {
-	OS::get_singleton()->benchmark_begin_measure("Scene", "Unregister Types");
-
 	SceneDebugger::deinitialize();
 
 	ResourceLoader::remove_resource_format_loader(resource_loader_texture_layered);
@@ -1237,16 +1227,10 @@ void unregister_scene_types() {
 	CanvasItemMaterial::finish_shaders();
 	ColorPicker::finish_shaders();
 	SceneStringNames::free();
-
-	OS::get_singleton()->benchmark_end_measure("Scene", "Unregister Types");
 }
 
 void register_scene_singletons() {
-	OS::get_singleton()->benchmark_begin_measure("Scene", "Register Singletons");
-
 	GDREGISTER_CLASS(ThemeDB);
 
 	Engine::get_singleton()->add_singleton(Engine::Singleton("ThemeDB", ThemeDB::get_singleton()));
-
-	OS::get_singleton()->benchmark_end_measure("Scene", "Register Singletons");
 }

@@ -524,7 +524,6 @@ bool TileMapEditorTilesPlugin::forward_canvas_gui_input(const Ref<InputEvent> &p
 	}
 
 	if (CanvasItemEditor::get_singleton()->get_current_tool() != CanvasItemEditor::TOOL_SELECT) {
-		_stop_dragging();
 		return false;
 	}
 
@@ -3439,7 +3438,7 @@ void TileMapEditorTerrainsPlugin::_update_tiles_list() {
 		terrains_tile_list->set_item_metadata(item_index, list_metadata_dict);
 
 		item_index = terrains_tile_list->add_icon_item(main_vbox_container->get_editor_theme_icon(SNAME("TerrainPath")));
-		terrains_tile_list->set_item_tooltip(item_index, TTR("Path mode: paints a terrain, then connects it to the previous tile painted within the same stroke."));
+		terrains_tile_list->set_item_tooltip(item_index, TTR("Path mode: paints a terrain, thens connects it to the previous tile painted within the same stroke."));
 		list_metadata_dict = Dictionary();
 		list_metadata_dict["type"] = SELECTED_TYPE_PATH;
 		terrains_tile_list->set_item_metadata(item_index, list_metadata_dict);

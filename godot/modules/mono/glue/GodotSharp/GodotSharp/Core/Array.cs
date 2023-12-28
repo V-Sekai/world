@@ -6,8 +6,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using Godot.NativeInterop;
 
-#nullable enable
-
 namespace Godot.Collections
 {
     /// <summary>
@@ -24,7 +22,7 @@ namespace Godot.Collections
     {
         internal godot_array.movable NativeValue;
 
-        private WeakReference<IDisposable>? _weakReferenceToSelf;
+        private WeakReference<IDisposable> _weakReferenceToSelf;
 
         /// <summary>
         /// Constructs a new empty <see cref="Array"/>.
@@ -1142,8 +1140,7 @@ namespace Godot.Collections
         /// </summary>
         /// <param name="from">The typed array to convert.</param>
         /// <returns>A new Godot Array, or <see langword="null"/> if <see paramref="from"/> was null.</returns>
-        [return: NotNullIfNotNull("from")]
-        public static explicit operator Array?(Array<T>? from)
+        public static explicit operator Array(Array<T> from)
         {
             return from?._underlyingArray;
         }

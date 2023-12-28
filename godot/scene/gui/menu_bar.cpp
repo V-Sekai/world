@@ -249,13 +249,11 @@ String MenuBar::bind_global_menu() {
 	Vector<PopupMenu *> popups = _get_popups();
 	for (int i = 0; i < menu_cache.size(); i++) {
 		String submenu_name = popups[i]->bind_global_menu();
-		if (!popups[i]->is_system_menu()) {
-			int index = ds->global_menu_add_submenu_item("_main", menu_cache[i].name, submenu_name, global_start_idx + i);
-			ds->global_menu_set_item_tag("_main", index, global_menu_name + "#" + itos(i));
-			ds->global_menu_set_item_hidden("_main", index, menu_cache[i].hidden);
-			ds->global_menu_set_item_disabled("_main", index, menu_cache[i].disabled);
-			ds->global_menu_set_item_tooltip("_main", index, menu_cache[i].tooltip);
-		}
+		int index = ds->global_menu_add_submenu_item("_main", menu_cache[i].name, submenu_name, global_start_idx + i);
+		ds->global_menu_set_item_tag("_main", index, global_menu_name + "#" + itos(i));
+		ds->global_menu_set_item_hidden("_main", index, menu_cache[i].hidden);
+		ds->global_menu_set_item_disabled("_main", index, menu_cache[i].disabled);
+		ds->global_menu_set_item_tooltip("_main", index, menu_cache[i].tooltip);
 	}
 
 	return global_menu_name;
@@ -270,10 +268,8 @@ void MenuBar::unbind_global_menu() {
 	int global_start = _find_global_start_index();
 	Vector<PopupMenu *> popups = _get_popups();
 	for (int i = menu_cache.size() - 1; i >= 0; i--) {
-		if (!popups[i]->is_system_menu()) {
-			popups[i]->unbind_global_menu();
-			ds->global_menu_remove_item("_main", global_start + i);
-		}
+		popups[i]->unbind_global_menu();
+		ds->global_menu_remove_item("_main", global_start + i);
 	}
 
 	global_menu_name = String();
@@ -562,10 +558,8 @@ void MenuBar::add_child_notify(Node *p_child) {
 
 	if (!global_menu_name.is_empty()) {
 		String submenu_name = pm->bind_global_menu();
-		if (!pm->is_system_menu()) {
-			int index = DisplayServer::get_singleton()->global_menu_add_submenu_item("_main", atr(menu.name), submenu_name, _find_global_start_index() + menu_cache.size() - 1);
-			DisplayServer::get_singleton()->global_menu_set_item_tag("_main", index, global_menu_name + "#" + itos(menu_cache.size() - 1));
-		}
+		int index = DisplayServer::get_singleton()->global_menu_add_submenu_item("_main", atr(menu.name), submenu_name, _find_global_start_index() + menu_cache.size() - 1);
+		DisplayServer::get_singleton()->global_menu_set_item_tag("_main", index, global_menu_name + "#" + itos(menu_cache.size() - 1));
 	}
 	update_minimum_size();
 }
@@ -593,16 +587,14 @@ void MenuBar::move_child_notify(Node *p_child) {
 	menu_cache.insert(new_idx, menu);
 
 	if (!global_menu_name.is_empty()) {
-		if (!pm->is_system_menu()) {
-			int global_start = _find_global_start_index();
-			if (old_idx != -1) {
-				DisplayServer::get_singleton()->global_menu_remove_item("_main", global_start + old_idx);
-			}
-			if (new_idx != -1) {
-				String submenu_name = pm->bind_global_menu();
-				int index = DisplayServer::get_singleton()->global_menu_add_submenu_item("_main", atr(menu.name), submenu_name, global_start + new_idx);
-				DisplayServer::get_singleton()->global_menu_set_item_tag("_main", index, global_menu_name + "#" + itos(new_idx));
-			}
+		int global_start = _find_global_start_index();
+		if (old_idx != -1) {
+			DisplayServer::get_singleton()->global_menu_remove_item("_main", global_start + old_idx);
+		}
+		if (new_idx != -1) {
+			String submenu_name = pm->bind_global_menu();
+			int index = DisplayServer::get_singleton()->global_menu_add_submenu_item("_main", atr(menu.name), submenu_name, global_start + new_idx);
+			DisplayServer::get_singleton()->global_menu_set_item_tag("_main", index, global_menu_name + "#" + itos(new_idx));
 		}
 	}
 }
@@ -620,10 +612,8 @@ void MenuBar::remove_child_notify(Node *p_child) {
 	menu_cache.remove_at(idx);
 
 	if (!global_menu_name.is_empty()) {
-		if (!pm->is_system_menu()) {
-			pm->unbind_global_menu();
-			DisplayServer::get_singleton()->global_menu_remove_item("_main", _find_global_start_index() + idx);
-		}
+		pm->unbind_global_menu();
+		DisplayServer::get_singleton()->global_menu_remove_item("_main", _find_global_start_index() + idx);
 	}
 
 	p_child->remove_meta("_menu_name");

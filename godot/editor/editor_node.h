@@ -68,12 +68,12 @@ class VBoxContainer;
 class VSplitContainer;
 class Window;
 
-class AudioStreamImportSettingsDialog;
+class AudioStreamImportSettings;
 class AudioStreamPreviewGenerator;
 class BackgroundProgress;
 class DependencyEditor;
 class DependencyErrorDialog;
-class DynamicFontImportSettingsDialog;
+class DynamicFontImportSettings;
 class EditorAbout;
 class EditorBuildProfileManager;
 class EditorCommandPalette;
@@ -111,7 +111,7 @@ class ProgressDialog;
 class ProjectExportDialog;
 class ProjectSettingsEditor;
 class RunSettingsDialog;
-class SceneImportSettingsDialog;
+class SceneImportSettings;
 class ScriptCreateDialog;
 class SurfaceUpgradeTool;
 class SurfaceUpgradeDialog;
@@ -264,7 +264,6 @@ private:
 		String path;
 		bool debug = false;
 		bool pack_only = false;
-		bool android_build_template = false;
 	} export_defer;
 
 	static EditorNode *singleton;
@@ -346,7 +345,6 @@ private:
 	EditorRunBar *project_run_bar = nullptr;
 	VBoxContainer *main_screen_vbox = nullptr;
 	MenuBar *main_menu = nullptr;
-	PopupMenu *apple_menu = nullptr;
 	PopupMenu *file_menu = nullptr;
 	PopupMenu *project_menu = nullptr;
 	PopupMenu *debug_menu = nullptr;
@@ -486,9 +484,9 @@ private:
 	String open_navigate;
 	String saving_scene;
 
-	DynamicFontImportSettingsDialog *fontdata_import_settings = nullptr;
-	SceneImportSettingsDialog *scene_import_settings = nullptr;
-	AudioStreamImportSettingsDialog *audio_stream_import_settings = nullptr;
+	DynamicFontImportSettings *fontdata_import_settings = nullptr;
+	SceneImportSettings *scene_import_settings = nullptr;
+	AudioStreamImportSettings *audio_stream_import_settings = nullptr;
 
 	String import_reload_fn;
 
@@ -614,7 +612,6 @@ private:
 
 	void _renderer_selected(int);
 	void _update_renderer_color();
-	void _add_renderer_entry(const String &p_renderer_name, bool p_mark_overridden);
 
 	void _exit_editor(int p_exit_code);
 
@@ -633,6 +630,8 @@ private:
 	void _save_scene_with_preview(String p_file, int p_idx = -1);
 
 	bool _find_scene_in_use(Node *p_node, const String &p_path) const;
+
+	void _update_dock_containers();
 
 	void _dock_select_input(const Ref<InputEvent> &p_input);
 	void _dock_move_left();
@@ -883,7 +882,7 @@ public:
 
 	void _copy_warning(const String &p_str);
 
-	Error export_preset(const String &p_preset, const String &p_path, bool p_debug, bool p_pack_only, bool p_android_build_template);
+	Error export_preset(const String &p_preset, const String &p_path, bool p_debug, bool p_pack_only);
 	bool is_project_exporting() const;
 
 	Control *get_gui_base() { return gui_base; }

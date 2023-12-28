@@ -5,8 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Godot.NativeInterop;
 
-#nullable enable
-
 namespace Godot.Collections
 {
     /// <summary>
@@ -21,7 +19,7 @@ namespace Godot.Collections
     {
         internal godot_dictionary.movable NativeValue;
 
-        private WeakReference<IDisposable>? _weakReferenceToSelf;
+        private WeakReference<IDisposable> _weakReferenceToSelf;
 
         /// <summary>
         /// Constructs a new empty <see cref="Dictionary"/>.
@@ -561,8 +559,7 @@ namespace Godot.Collections
         /// </summary>
         /// <param name="from">The typed dictionary to convert.</param>
         /// <returns>A new Godot Dictionary, or <see langword="null"/> if <see paramref="from"/> was null.</returns>
-        [return: NotNullIfNotNull("from")]
-        public static explicit operator Dictionary?(Dictionary<TKey, TValue>? from)
+        public static explicit operator Dictionary(Dictionary<TKey, TValue> from)
         {
             return from?._underlyingDict;
         }

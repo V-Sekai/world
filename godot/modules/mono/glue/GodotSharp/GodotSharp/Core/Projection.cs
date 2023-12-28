@@ -1,8 +1,5 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
-
-#nullable enable
 
 namespace Godot
 {
@@ -589,7 +586,7 @@ namespace Godot
         public readonly Vector2 GetFarPlaneHalfExtents()
         {
             var res = GetProjectionPlane(Planes.Far).Intersect3(GetProjectionPlane(Planes.Right), GetProjectionPlane(Planes.Top));
-            return res is null ? default : new Vector2(res.Value.X, res.Value.Y);
+            return new Vector2(res.Value.X, res.Value.Y);
         }
 
         /// <summary>
@@ -600,7 +597,7 @@ namespace Godot
         public readonly Vector2 GetViewportHalfExtents()
         {
             var res = GetProjectionPlane(Planes.Near).Intersect3(GetProjectionPlane(Planes.Right), GetProjectionPlane(Planes.Top));
-            return res is null ? default : new Vector2(res.Value.X, res.Value.Y);
+            return new Vector2(res.Value.X, res.Value.Y);
         }
 
         /// <summary>
@@ -984,7 +981,7 @@ namespace Godot
         /// </summary>
         /// <param name="obj">The object to compare with.</param>
         /// <returns>Whether or not the vector and the object are equal.</returns>
-        public override readonly bool Equals([NotNullWhen(true)] object? obj)
+        public override readonly bool Equals(object obj)
         {
             return obj is Projection other && Equals(other);
         }
@@ -1021,7 +1018,7 @@ namespace Godot
         /// Converts this <see cref="Projection"/> to a string with the given <paramref name="format"/>.
         /// </summary>
         /// <returns>A string representation of this projection.</returns>
-        public readonly string ToString(string? format)
+        public readonly string ToString(string format)
         {
             return $"{X.X.ToString(format)}, {X.Y.ToString(format)}, {X.Z.ToString(format)}, {X.W.ToString(format)}\n" +
                 $"{Y.X.ToString(format)}, {Y.Y.ToString(format)}, {Y.Z.ToString(format)}, {Y.W.ToString(format)}\n" +

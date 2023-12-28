@@ -49,9 +49,6 @@ void EditorSceneFormatImporterFBX::get_extensions(List<String> *r_extensions) co
 Node *EditorSceneFormatImporterFBX::import_scene(const String &p_path, uint32_t p_flags,
 		const HashMap<StringName, Variant> &p_options,
 		List<String> *r_missing_deps, Error *r_err) {
-	if (p_options.has("fbx/importer_type") && int(p_options["fbx/importer_type"]) != 0) {
-		return nullptr;
-	}
 	// Get global paths for source and sink.
 
 	// Don't use `c_escape()` as it can generate broken paths. These paths will be
@@ -118,44 +115,8 @@ Variant EditorSceneFormatImporterFBX::get_option_visibility(const String &p_path
 	return true;
 }
 
-#define ADD_OPTION_ENUM(PATH, ENUM_HINT, VALUE) \
-	r_options->push_back(ResourceImporter::ImportOption(PropertyInfo(Variant::INT, SNAME(PATH), PROPERTY_HINT_ENUM, ENUM_HINT), VALUE));
-
 void EditorSceneFormatImporterFBX::get_import_options(const String &p_path,
 		List<ResourceImporter::ImportOption> *r_options) {
-	ADD_OPTION_ENUM("fbx/importer_type", "ufbx,fbx2glTF", 0);
-}
-
-bool EditorFileSystemImportFormatSupportQueryFBX::is_active() const {
-	String fbx2gltf_path = EDITOR_GET("filesystem/import/fbx/fbx2gltf_path");
-	return !FileAccess::exists(fbx2gltf_path);
-}
-
-Vector<String> EditorFileSystemImportFormatSupportQueryFBX::get_file_extensions() const {
-	Vector<String> ret;
-	ret.push_back("fbx");
-	return ret;
-}
-
-bool EditorFileSystemImportFormatSupportQueryFBX::query() {
-	FBXImporterManager::get_singleton()->show_dialog(true);
-
-	while (true) {
-		OS::get_singleton()->delay_usec(1);
-		DisplayServer::get_singleton()->process_events();
-		Main::iteration();
-		if (!FBXImporterManager::get_singleton()->is_visible()) {
-			break;
-		}
-	}
-
-	return false;
-}
-
-void EditorSceneFormatImporterFBX::handle_compatibility_options(HashMap<StringName, Variant> &p_import_params) const {
-	if (!p_import_params.has("fbx/importer_type")) {
-		p_import_params["fbx/importer_type"] = 0;
-	}
 }
 
 #endif // TOOLS_ENABLED

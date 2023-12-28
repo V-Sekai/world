@@ -112,8 +112,6 @@ struct Polygon {
 
 	/// The center of this `Polygon`
 	Vector3 center;
-
-	real_t surface_area = 0.0;
 };
 
 struct NavigationPoly {
