@@ -71,7 +71,9 @@ CopyEffects::CopyEffects(bool p_prefer_raster_effects) {
 		for (int i = 0; i < BLUR_MODE_MAX; i++) {
 			blur_raster.pipelines[i].clear();
 		}
+	}
 
+	{
 		Vector<String> copy_modes;
 		copy_modes.push_back("\n#define MODE_GAUSSIAN_BLUR\n");
 		copy_modes.push_back("\n#define MODE_GAUSSIAN_BLUR\n#define DST_IMAGE_8BIT\n");
@@ -310,12 +312,12 @@ CopyEffects::~CopyEffects() {
 		filter.raster_shader.version_free(filter.shader_version);
 		roughness.raster_shader.version_free(roughness.shader_version);
 	} else {
-		copy.shader.version_free(copy.shader_version);
 		cubemap_downsampler.compute_shader.version_free(cubemap_downsampler.shader_version);
 		filter.compute_shader.version_free(filter.shader_version);
 		roughness.compute_shader.version_free(roughness.shader_version);
 	}
 
+	copy.shader.version_free(copy.shader_version);
 	specular_merge.shader.version_free(specular_merge.shader_version);
 
 	RD::get_singleton()->free(filter.coefficient_buffer);
@@ -335,8 +337,6 @@ CopyEffects::~CopyEffects() {
 }
 
 void CopyEffects::copy_to_rect(RID p_source_rd_texture, RID p_dest_texture, const Rect2i &p_rect, bool p_flip_y, bool p_force_luminance, bool p_all_source, bool p_8_bit_dst, bool p_alpha_to_one) {
-	ERR_FAIL_COND_MSG(prefer_raster_effects, "Can't use the compute version of the copy_to_rect shader with the mobile renderer.");
-
 	UniformSetCacheRD *uniform_set_cache = UniformSetCacheRD::get_singleton();
 	ERR_FAIL_NULL(uniform_set_cache);
 	MaterialStorage *material_storage = MaterialStorage::get_singleton();
@@ -386,8 +386,6 @@ void CopyEffects::copy_to_rect(RID p_source_rd_texture, RID p_dest_texture, cons
 }
 
 void CopyEffects::copy_cubemap_to_panorama(RID p_source_cube, RID p_dest_panorama, const Size2i &p_panorama_size, float p_lod, bool p_is_array) {
-	ERR_FAIL_COND_MSG(prefer_raster_effects, "Can't use the compute version of the copy_cubemap_to_panorama shader with the mobile renderer.");
-
 	UniformSetCacheRD *uniform_set_cache = UniformSetCacheRD::get_singleton();
 	ERR_FAIL_NULL(uniform_set_cache);
 	MaterialStorage *material_storage = MaterialStorage::get_singleton();
@@ -423,8 +421,6 @@ void CopyEffects::copy_cubemap_to_panorama(RID p_source_cube, RID p_dest_panoram
 }
 
 void CopyEffects::copy_depth_to_rect(RID p_source_rd_texture, RID p_dest_texture, const Rect2i &p_rect, bool p_flip_y) {
-	ERR_FAIL_COND_MSG(prefer_raster_effects, "Can't use the compute version of the copy_depth_to_rect shader with the mobile renderer.");
-
 	UniformSetCacheRD *uniform_set_cache = UniformSetCacheRD::get_singleton();
 	ERR_FAIL_NULL(uniform_set_cache);
 	MaterialStorage *material_storage = MaterialStorage::get_singleton();
@@ -462,8 +458,6 @@ void CopyEffects::copy_depth_to_rect(RID p_source_rd_texture, RID p_dest_texture
 }
 
 void CopyEffects::copy_depth_to_rect_and_linearize(RID p_source_rd_texture, RID p_dest_texture, const Rect2i &p_rect, bool p_flip_y, float p_z_near, float p_z_far) {
-	ERR_FAIL_COND_MSG(prefer_raster_effects, "Can't use the compute version of the copy_depth_to_rect_and_linearize shader with the mobile renderer.");
-
 	UniformSetCacheRD *uniform_set_cache = UniformSetCacheRD::get_singleton();
 	ERR_FAIL_NULL(uniform_set_cache);
 	MaterialStorage *material_storage = MaterialStorage::get_singleton();
@@ -539,7 +533,7 @@ void CopyEffects::copy_to_atlas_fb(RID p_source_rd_texture, RID p_dest_framebuff
 	RD::get_singleton()->draw_list_draw(draw_list, true);
 }
 
-void CopyEffects::copy_to_fb_rect(RID p_source_rd_texture, RID p_dest_framebuffer, const Rect2i &p_rect, bool p_flip_y, bool p_force_luminance, bool p_alpha_to_zero, bool p_srgb, RID p_secondary, bool p_multiview, bool p_alpha_to_one, bool p_linear) {
+void CopyEffects::copy_to_fb_rect(RID p_source_rd_texture, RID p_dest_framebuffer, const Rect2i &p_rect, bool p_flip_y, bool p_force_luminance, bool p_alpha_to_zero, bool p_srgb, RID p_secondary, bool p_multiview, bool p_alpha_to_one, bool p_linear, bool p_normal) {
 	UniformSetCacheRD *uniform_set_cache = UniformSetCacheRD::get_singleton();
 	ERR_FAIL_NULL(uniform_set_cache);
 	MaterialStorage *material_storage = MaterialStorage::get_singleton();
@@ -570,6 +564,10 @@ void CopyEffects::copy_to_fb_rect(RID p_source_rd_texture, RID p_dest_framebuffe
 		copy_to_fb.push_constant.luminance_multiplier = prefer_raster_effects ? 2.0 : 1.0;
 	}
 
+	if (p_normal) {
+		copy_to_fb.push_constant.flags |= COPY_TO_FB_FLAG_NORMAL;
+	}
+
 	// setup our uniforms
 	RID default_sampler = material_storage->sampler_rd_get_default(RS::CANVAS_ITEM_TEXTURE_FILTER_LINEAR, RS::CANVAS_ITEM_TEXTURE_REPEAT_DISABLED);
 
@@ -597,6 +595,40 @@ void CopyEffects::copy_to_fb_rect(RID p_source_rd_texture, RID p_dest_framebuffe
 	RD::get_singleton()->draw_list_set_push_constant(draw_list, &copy_to_fb.push_constant, sizeof(CopyToFbPushConstant));
 	RD::get_singleton()->draw_list_draw(draw_list, true);
 	RD::get_singleton()->draw_list_end();
+}
+
+void CopyEffects::copy_to_drawlist(RD::DrawListID p_draw_list, RD::FramebufferFormatID p_fb_format, RID p_source_rd_texture, bool p_linear) {
+	UniformSetCacheRD *uniform_set_cache = UniformSetCacheRD::get_singleton();
+	ERR_FAIL_NULL(uniform_set_cache);
+	MaterialStorage *material_storage = MaterialStorage::get_singleton();
+	ERR_FAIL_NULL(material_storage);
+
+	memset(&copy_to_fb.push_constant, 0, sizeof(CopyToFbPushConstant));
+	copy_to_fb.push_constant.luminance_multiplier = 1.0;
+
+	if (p_linear) {
+		// Used for copying to a linear buffer. In the mobile renderer we divide the contents of the linear buffer
+		// to allow for a wider effective range.
+		copy_to_fb.push_constant.flags |= COPY_TO_FB_FLAG_LINEAR;
+		copy_to_fb.push_constant.luminance_multiplier = prefer_raster_effects ? 2.0 : 1.0;
+	}
+
+	// setup our uniforms
+	RID default_sampler = material_storage->sampler_rd_get_default(RS::CANVAS_ITEM_TEXTURE_FILTER_LINEAR, RS::CANVAS_ITEM_TEXTURE_REPEAT_DISABLED);
+
+	RD::Uniform u_source_rd_texture(RD::UNIFORM_TYPE_SAMPLER_WITH_TEXTURE, 0, Vector<RID>({ default_sampler, p_source_rd_texture }));
+
+	// Multiview not supported here!
+	CopyToFBMode mode = COPY_TO_FB_COPY;
+
+	RID shader = copy_to_fb.shader.version_get_shader(copy_to_fb.shader_version, mode);
+	ERR_FAIL_COND(shader.is_null());
+
+	RD::get_singleton()->draw_list_bind_render_pipeline(p_draw_list, copy_to_fb.pipelines[mode].get_render_pipeline(RD::INVALID_ID, p_fb_format));
+	RD::get_singleton()->draw_list_bind_uniform_set(p_draw_list, uniform_set_cache->get_cache(shader, 0, u_source_rd_texture), 0);
+	RD::get_singleton()->draw_list_bind_index_array(p_draw_list, material_storage->get_quad_index_array());
+	RD::get_singleton()->draw_list_set_push_constant(p_draw_list, &copy_to_fb.push_constant, sizeof(CopyToFbPushConstant));
+	RD::get_singleton()->draw_list_draw(p_draw_list, true);
 }
 
 void CopyEffects::copy_raster(RID p_source_texture, RID p_dest_framebuffer) {

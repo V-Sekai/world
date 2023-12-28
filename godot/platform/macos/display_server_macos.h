@@ -39,11 +39,13 @@
 #include "gl_manager_macos_legacy.h"
 #endif // GLES3_ENABLED
 
+#if defined(RD_ENABLED)
+#include "servers/rendering/rendering_device.h"
+
 #if defined(VULKAN_ENABLED)
 #include "vulkan_context_macos.h"
-
-#include "drivers/vulkan/rendering_device_vulkan.h"
 #endif // VULKAN_ENABLED
+#endif // RD_ENABLED
 
 #define BitMap _QDBitMap // Suppress deprecated QuickDraw definition.
 
@@ -133,13 +135,15 @@ private:
 	GLManagerLegacy_MacOS *gl_manager_legacy = nullptr;
 	GLManagerANGLE_MacOS *gl_manager_angle = nullptr;
 #endif
-#if defined(VULKAN_ENABLED)
-	VulkanContextMacOS *context_vulkan = nullptr;
-	RenderingDeviceVulkan *rendering_device_vulkan = nullptr;
+#if defined(RD_ENABLED)
+	ApiContextRD *context_rd = nullptr;
+	RenderingDevice *rendering_device = nullptr;
 #endif
 	String rendering_driver;
 
 	NSMenu *apple_menu = nullptr;
+	NSMenu *window_menu = nullptr;
+	NSMenu *help_menu = nullptr;
 	NSMenu *dock_menu = nullptr;
 	struct MenuData {
 		Callable open;
@@ -226,7 +230,8 @@ private:
 
 	static NSCursor *_cursor_from_selector(SEL p_selector, SEL p_fallback = nil);
 
-	bool _has_help_menu() const;
+	int _get_system_menu_start(const NSMenu *p_menu) const;
+	int _get_system_menu_count(const NSMenu *p_menu) const;
 	NSMenuItem *_menu_add_item(const String &p_menu_root, const String &p_label, Key p_accel, int p_index, int *r_out);
 
 public:
@@ -320,6 +325,8 @@ public:
 
 	virtual void global_menu_remove_item(const String &p_menu_root, int p_idx) override;
 	virtual void global_menu_clear(const String &p_menu_root) override;
+
+	virtual Dictionary global_menu_get_system_menu_roots() const override;
 
 	virtual bool tts_is_speaking() const override;
 	virtual bool tts_is_paused() const override;

@@ -36,4 +36,4 @@
 void initialize_flac_module(ModuleInitializationLevel p_level);
 void uninitialize_flac_module(ModuleInitializationLevel p_level);
 
-#endif // FLAC_REGISTER_TYPES_H
+#endif

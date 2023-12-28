@@ -119,6 +119,8 @@ static MovieWriterPNGWAV *writer_pngwav = nullptr;
 static MovieWriterEXRWAV *writer_exrwav = nullptr;
 
 void register_server_types() {
+	OS::get_singleton()->benchmark_begin_measure("Servers", "Register Extensions");
+
 	shader_types = memnew(ShaderTypes);
 
 	GDREGISTER_CLASS(TextServerManager);
@@ -298,17 +300,25 @@ void register_server_types() {
 
 	writer_exrwav = memnew(MovieWriterEXRWAV);
 	MovieWriter::add_writer(writer_exrwav);
+
+	OS::get_singleton()->benchmark_end_measure("Servers", "Register Extensions");
 }
 
 void unregister_server_types() {
+	OS::get_singleton()->benchmark_begin_measure("Servers", "Unregister Extensions");
+
 	ServersDebugger::deinitialize();
 	memdelete(shader_types);
 	memdelete(writer_mjpeg);
 	memdelete(writer_pngwav);
 	memdelete(writer_exrwav);
+    
+	OS::get_singleton()->benchmark_end_measure("Servers", "Unregister Extensions");
 }
 
 void register_server_singletons() {
+	OS::get_singleton()->benchmark_begin_measure("Servers", "Register Singletons");
+
 	Engine::get_singleton()->add_singleton(Engine::Singleton("DisplayServer", DisplayServer::get_singleton(), "DisplayServer"));
 	Engine::get_singleton()->add_singleton(Engine::Singleton("RenderingServer", RenderingServer::get_singleton(), "RenderingServer"));
 	Engine::get_singleton()->add_singleton(Engine::Singleton("AudioServer", AudioServer::get_singleton(), "AudioServer"));
@@ -318,4 +328,6 @@ void register_server_singletons() {
 	Engine::get_singleton()->add_singleton(Engine::Singleton("NavigationServer3D", NavigationServer3D::get_singleton(), "NavigationServer3D"));
 	Engine::get_singleton()->add_singleton(Engine::Singleton("XRServer", XRServer::get_singleton(), "XRServer"));
 	Engine::get_singleton()->add_singleton(Engine::Singleton("CameraServer", CameraServer::get_singleton(), "CameraServer"));
+
+	OS::get_singleton()->benchmark_end_measure("Servers", "Register Singletons");
 }

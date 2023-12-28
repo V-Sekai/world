@@ -770,7 +770,14 @@ void TextEdit::_notification(int p_what) {
 					Dictionary color_map = _get_line_syntax_highlighting(minimap_line);
 
 					Color line_background_color = text.get_line_background_color(minimap_line);
-					line_background_color.a *= 0.6;
+
+					if (line_background_color != theme_cache.background_color) {
+						// Make non-default background colors more visible, such as error markers.
+						line_background_color.a = 1.0;
+					} else {
+						line_background_color.a *= 0.6;
+					}
+
 					Color current_color = theme_cache.font_color;
 					if (!editable) {
 						current_color = theme_cache.font_readonly_color;
@@ -5307,8 +5314,7 @@ int TextEdit::get_line_wrap_index_at_column(int p_line, int p_column) const {
 	Vector<String> lines = get_line_wrapped_text(p_line);
 	for (int i = 0; i < lines.size(); i++) {
 		wrap_index = i;
-		String s = lines[wrap_index];
-		col += s.length();
+		col += lines[wrap_index].length();
 		if (col > p_column) {
 			break;
 		}
@@ -7684,7 +7690,11 @@ void TextEdit::_insert_text(int p_line, int p_char, const String &p_text, int *r
 	op.version = ++version;
 	op.chain_forward = false;
 	op.chain_backward = false;
-	op.start_carets = carets;
+	if (next_operation_is_complex) {
+		op.start_carets = current_op.start_carets;
+	} else {
+		op.start_carets = carets;
+	}
 	op.end_carets = carets;
 
 	// See if it should just be set as current op.
@@ -7739,7 +7749,11 @@ void TextEdit::_remove_text(int p_from_line, int p_from_column, int p_to_line, i
 	op.version = ++version;
 	op.chain_forward = false;
 	op.chain_backward = false;
-	op.start_carets = carets;
+	if (next_operation_is_complex) {
+		op.start_carets = current_op.start_carets;
+	} else {
+		op.start_carets = carets;
+	}
 	op.end_carets = carets;
 
 	// See if it should just be set as current op.

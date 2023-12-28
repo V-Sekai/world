@@ -66,14 +66,4 @@ using FBXSkeletonIndex = int;
 using FBXSkinIndex = int;
 using FBXTextureIndex = int;
 
-enum FBXType {
-	TYPE_SCALAR,
-	TYPE_VEC2,
-	TYPE_VEC3,
-	TYPE_VEC4,
-	TYPE_MAT2,
-	TYPE_MAT3,
-	TYPE_MAT4,
-};
-
 #endif // FBX_DEFINES_H
