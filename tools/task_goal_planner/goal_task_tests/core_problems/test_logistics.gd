@@ -1,6 +1,6 @@
-# Copyright (c) 2018-present. This file is part of V-Sekai https://v-sekai.org/.
-# K. S. Ernest (Fire) Lee & Contributors
-# test_temporal_logistics_small.gd
+# Copyright (c) 2023-present. This file is part of V-Sekai https://v-sekai.org/.
+# K. S. Ernest (Fire) Lee & Contributors (see .all-contributorsrc).
+# test_logistics.gd
 # SPDX-License-Identifier: MIT
 
 extends GutTest
@@ -20,45 +20,47 @@ var planner = preload("res://addons/task_goal/core/plan.gd").new()
 ## Actions
 
 
-func drive_truck(state, t, l):
+func drive_truck(state, t, l) -> Dictionary:
 	state.truck_at[t] = l
 	return state
 
 
-func load_truck(state, o, t):
+func load_truck(state, o, t) -> Dictionary:
 	state.at[o] = t
 	return state
 
 
-func unload_truck(state, o, l):
+func unload_truck(state, o, l) -> Variant:
 	var t = state.at[o]
 	if state.truck_at[t] == l:
 		state.at[o] = l
 		return state
+	return false
 
 
-func fly_plane(state, plane, a):
+func fly_plane(state, plane, a) -> Dictionary:
 	state.plane_at[plane] = a
 	return state
 
 
-func load_plane(state, o, plane):
+func load_plane(state, o, plane) -> Dictionary:
 	state.at[o] = plane
 	return state
 
 
-func unload_plane(state, o, a):
+func unload_plane(state, o, a) -> Variant:
 	var plane = state.at[o]
 	if state.plane_at[plane] == a:
 		state.at[o] = a
 		return state
+	return false
 
 
 ## Helper functions for the methods
 
 
 # Find a truck in the same city as the package
-func find_truck(state, o):
+func find_truck(state, o) -> Variant:
 	for t in state.trucks:
 		if state.in_city[state.truck_at[t]] == state.in_city[state.at[o]]:
 			return t
@@ -66,7 +68,7 @@ func find_truck(state, o):
 
 
 # Find a plane in the same city as the package; if none available, find a random plane
-func find_plane(state, o):
+func find_plane(state, o) -> Variant:
 	var random_plane
 	for plane in state.airplanes:
 		if state.in_city[state.plane_at[plane]] == state.in_city[state.at[o]]:
@@ -76,7 +78,7 @@ func find_plane(state, o):
 
 
 # Find an airport in the same city as the location
-func find_airport(state, l):
+func find_airport(state, l) -> Variant:
 	for a in state.airports:
 		if state.in_city[a] == state.in_city[l]:
 			return a
@@ -86,44 +88,50 @@ func find_airport(state, l):
 ## Methods to call the actions
 
 
-func m_drive_truck(state, t, l):
+func m_drive_truck(state, t, l) -> Variant:
 	if (
 		t in state.trucks
 		and l in state.locations
 		and state.in_city[state.truck_at[t]] == state.in_city[l]
 	):
 		return [["drive_truck", t, l]]
+	return false
 
 
-func m_load_truck(state, o, t):
+func m_load_truck(state, o, t) -> Variant:
 	if o in state.packages and t in state.trucks and state.at[o] == state.truck_at[t]:
 		return [["load_truck", o, t]]
+	return false
 
 
-func m_unload_truck(state, o, l):
+func m_unload_truck(state, o, l) -> Variant:
 	if o in state.packages and state.at[o] in state.trucks and l in state.locations:
 		return [["unload_truck", o, l]]
+	return false
 
 
-func m_fly_plane(state, plane, a):
+func m_fly_plane(state, plane, a) -> Variant:
 	if plane in state.airplanes and a in state.airports:
 		return [["fly_plane", plane, a]]
+	return false
 
 
-func m_load_plane(state, o, plane):
+func m_load_plane(state, o, plane) -> Variant:
 	if o in state.packages and plane in state.airplanes and state.at[o] == state.plane_at[plane]:
 		return [["load_plane", o, plane]]
+	return false
 
 
-func m_unload_plane(state, o, a):
+func m_unload_plane(state, o, a) -> Variant:
 	if o in state.packages and state.at[o] in state.airplanes and a in state.airports:
 		return [["unload_plane", o, a]]
+	return false
 
 
 ## Other methods
 
 
-func move_within_city(state, o, l):
+func move_within_city(state, o, l) -> Variant:
 	if (
 		o in state.packages
 		and state.at[o] in state.locations
@@ -135,7 +143,7 @@ func move_within_city(state, o, l):
 	return false
 
 
-func move_between_airports(state, o, a):
+func move_between_airports(state, o, a) -> Variant:
 	if (
 		o in state.packages
 		and state.at[o] in state.airports
@@ -153,7 +161,7 @@ func move_between_airports(state, o, a):
 	return false
 
 
-func move_between_city(state, o, l):
+func move_between_city(state, o, l) -> Variant:
 	if (
 		o in state.packages
 		and state.at[o] in state.locations
@@ -168,9 +176,10 @@ func move_between_city(state, o, l):
 
 var state1: Dictionary
 
-func test_move_goal_1():
+
+func before_each() -> void:
 	state1.clear()
-	planner._domains.push_back(the_domain)
+	planner.domains.push_back(the_domain)
 
 	# If we've changed to some other domain, this will change us back.
 	planner.current_domain = the_domain
@@ -206,35 +215,7 @@ func test_move_goal_1():
 		]
 	)
 
-	#	planner.print_domain()
-
-	var stn = SimpleTemporalNetwork.new()
-
-	var drive_truck1_duration = 5
-	var load_truck1_duration = 2
-	var drive_truck6_duration = 7
-	var unload_truck1_duration = 3
-	var fly_plane2_duration = 4
-	var load_plane2_duration = 2
-	var unload_plane2_duration = 3
-
-	stn.add_temporal_constraint(TemporalConstraint.new(0, 0, drive_truck1_duration, TemporalConstraint.TemporalQualifier.AT_END, "drive_truck1"),
-				TemporalConstraint.new(0, 0, load_truck1_duration, TemporalConstraint.TemporalQualifier.AT_START, "load_truck1"))
-
-	stn.add_temporal_constraint(TemporalConstraint.new(0, 0, load_truck1_duration, TemporalConstraint.TemporalQualifier.AT_END, "load_truck1"),
-				TemporalConstraint.new(0, 0, drive_truck6_duration, TemporalConstraint.TemporalQualifier.AT_START, "drive_truck6"))
-
-	stn.add_temporal_constraint(TemporalConstraint.new(0, 0, drive_truck6_duration, TemporalConstraint.TemporalQualifier.AT_END, "drive_truck6"),
-				TemporalConstraint.new(0, 0, unload_truck1_duration, TemporalConstraint.TemporalQualifier.AT_START, "unload_truck1"))
-
-	stn.add_temporal_constraint(TemporalConstraint.new(0, 2, unload_truck1_duration, TemporalConstraint.TemporalQualifier.AT_END, "unload_truck1"),
-				TemporalConstraint.new(0, 0, fly_plane2_duration, TemporalConstraint.TemporalQualifier.OVERALL, "fly_plane2"))
-
-	stn.add_temporal_constraint(TemporalConstraint.new(0, 0, fly_plane2_duration, TemporalConstraint.TemporalQualifier.AT_END, "fly_plane2"),
-				TemporalConstraint.new(0, 0, load_plane2_duration, TemporalConstraint.TemporalQualifier.AT_START, "load_plane2"))
-
-	stn.add_temporal_constraint(TemporalConstraint.new(0, 0, load_plane2_duration, TemporalConstraint.TemporalQualifier.AT_END, "load_plane2"),
-				TemporalConstraint.new(0, 0, unload_plane2_duration, TemporalConstraint.TemporalQualifier.AT_START, "unload_plane2"))
+#	planner.print_domain()
 
 	state1.packages = ["package1", "package2"]
 	state1.trucks = ["truck1", "truck6"]
@@ -254,12 +235,63 @@ func test_move_goal_1():
 		"location10": "city2",
 		"airport2": "city2"
 	}
-	
-	var plan = planner.find_plan(state1.duplicate(true), [
-		["at", "package1", "airport2"],
-	], stn)
+
+
+func test_move_goal_1() -> void:
+	var plan = planner.find_plan(
+		state1.duplicate(true), [["at", "package1", "location2"], ["at", "package2", "location3"]]
+	)
 	assert_eq(
 		plan,
-		[["drive_truck", "truck1", "location1"], ["load_truck", "package1", "truck1"], ["drive_truck", "truck1", "airport1"], ["unload_truck", "package1", "airport1"], ["fly_plane", "plane2", "airport1"], ["load_plane", "package1", "plane2"], ["fly_plane", "plane2", "airport2"], ["unload_plane", "package1", "airport2"]]
+		[
+			["drive_truck", "truck1", "location1"],
+			["load_truck", "package1", "truck1"],
+			["drive_truck", "truck1", "location2"],
+			["unload_truck", "package1", "location2"],
+			["load_truck", "package2", "truck1"],
+			["drive_truck", "truck1", "location3"],
+			["unload_truck", "package2", "location3"]
+		]
 	)
-	print(stn.to_dictionary())
+
+
+##	Goal 2: package1 is at location10 (transport to a different city)
+func test_move_goal_2() -> void:
+	var plan = planner.find_plan(state1.duplicate(true), [["at", "package1", "location10"]])
+	assert_eq(
+		plan,
+		[
+			["drive_truck", "truck1", "location1"],
+			["load_truck", "package1", "truck1"],
+			["drive_truck", "truck1", "airport1"],
+			["unload_truck", "package1", "airport1"],
+			["fly_plane", "plane2", "airport1"],
+			["load_plane", "package1", "plane2"],
+			["fly_plane", "plane2", "airport2"],
+			["unload_plane", "package1", "airport2"],
+			["drive_truck", "truck6", "airport2"],
+			["load_truck", "package1", "truck6"],
+			["drive_truck", "truck6", "location10"],
+			["unload_truck", "package1", "location10"]
+		]
+	)
+
+
+## Goal 3: package1 is at location1 (no actions needed)
+func test_move_goal_3() -> void:
+	var plan = planner.find_plan(state1.duplicate(true), [["at", "package1", "location1"]])
+	assert_eq(plan, [])
+
+
+##	Goal 4: package1 is at location2
+func test_move_goal_4() -> void:
+	var plan = planner.find_plan(state1.duplicate(true), [["at", "package1", "location2"]])
+	assert_eq(
+		plan,
+		[
+			["drive_truck", "truck1", "location1"],
+			["load_truck", "package1", "truck1"],
+			["drive_truck", "truck1", "location2"],
+			["unload_truck", "package1", "location2"]
+		]
+	)

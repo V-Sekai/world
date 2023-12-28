@@ -1,5 +1,5 @@
-# Copyright (c) 2018-present. This file is part of V-Sekai https://v-sekai.org/.
-# K. S. Ernest (Fire) Lee & Contributors
+# Copyright (c) 2023-present. This file is part of V-Sekai https://v-sekai.org/.
+# K. S. Ernest (Fire) Lee & Contributors (see .all-contributorsrc).
 # test_simple_htn.gd
 # SPDX-License-Identifier: MIT
 
@@ -12,9 +12,8 @@ extends GutTest
 #"""
 
 var domain_name = "simple_htn"
-var the_domain = preload("../core/domain.gd").new("plan")
-
-var planner = preload("../core/plan.gd").new()
+var the_domain = preload("res://addons/task_goal/core/domain.gd").new("plan")
+var planner = preload("res://addons/task_goal/core/plan.gd").new()
 
 ################################################################################
 # states and rigid relations
@@ -45,12 +44,12 @@ var state0: Dictionary = {
 # Helper functions:
 
 
-func taxi_rate(dist):
+func taxi_rate(dist_) -> float:
 	"In this domain, the taxi fares are quite low :-)"
-	return 1.5 + 0.5 * dist
+	return 1.5 + 0.5 * dist_
 
 
-func distance(x, y):
+func distance(x, y) -> float:
 	"""
 	If rigid.dist[(x,y)] = d, this function figures out that d is both
 	the distance from x to y and the distance from y to x.
@@ -68,7 +67,7 @@ func distance(x, y):
 	return INF
 
 
-func is_a(variable, type):
+func is_a(variable, type) -> bool:
 	"""
 	In most classical planners, one would declare data-types for the parameters
 	of each action, and the data-type checks would be done by the planner.
@@ -86,21 +85,23 @@ func is_a(variable, type):
 # Actions:
 
 
-func walk(state, p, x, y):
+func walk(state, p, x, y) -> Variant:
 	if is_a(p, "person") and is_a(x, "location") and is_a(y, "location") and x != y:
 		if state.loc[p] == x:
 			state.loc[p] = y
 			return state
+	return false
 
 
-func call_taxi(state, p, x):
+func call_taxi(state, p, x) -> Variant:
 	if is_a(p, "person") and is_a(x, "location"):
 		state.loc["taxi1"] = x
 		state.loc[p] = "taxi1"
 		return state
+	return false
 
 
-func ride_taxi(state, p, y):
+func ride_taxi(state, p, y) -> Variant:
 	# if p is a person, p is in a taxi, and y is a location:
 	if is_a(p, "person") and is_a(state.loc[p], "taxi") and is_a(y, "location"):
 		var taxi = state.loc[p]
@@ -109,44 +110,49 @@ func ride_taxi(state, p, y):
 			state.loc[taxi] = y
 			state.owe[p] = taxi_rate(distance(x, y))
 			return state
+	return false
 
 
-func pay_driver(state, p, y):
+func pay_driver(state, p, y) -> Variant:
 	if is_a(p, "person"):
 		if state.cash[p] >= state.owe[p]:
 			state.cash[p] = state.cash[p] - state.owe[p]
 			state.owe[p] = 0
 			state.loc[p] = y
 			return state
+	return false
 
 
 ###############################################################################
 # Methods:
 
 
-func do_nothing(state, p, y):
+func do_nothing(state, p, y) -> Variant:
 	if is_a(p, "person") and is_a(y, "location"):
 		var x = state.loc[p]
 		if x == y:
 			return []
+	return false
 
 
-func travel_by_foot(state, p, y):
+func travel_by_foot(state, p, y) -> Variant:
 	if is_a(p, "person") and is_a(y, "location"):
 		var x = state.loc[p]
 		if x != y and distance(x, y) <= 2:
 			return [["walk", p, x, y]]
+	return false
 
 
-func travel_by_taxi(state, p, y):
+func travel_by_taxi(state, p, y) -> Variant:
 	if is_a(p, "person") and is_a(y, "location"):
 		var x = state.loc[p]
 		if x != y and state.cash[p] >= taxi_rate(distance(x, y)):
 			return [["call_taxi", p, x], ["ride_taxi", p, y], ["pay_driver", p, y]]
+	return false
 
 
-func test_simple_gtn():
-	planner._domains.push_back(the_domain)
+func test_simple_gtn() -> void:
+	planner.domains.push_back(the_domain)
 	planner.current_domain = the_domain
 	planner.declare_actions(
 		[
@@ -168,23 +174,26 @@ func test_simple_gtn():
 	###############################################################################
 	# Running the examples
 
-#	print("-----------------------------------------------------------------------")
-#	print("Created the domain '%s'. To run the examples, type this:" % domain_name)
-#	print("%s.main()" % domain_name)
+	gut.p("-----------------------------------------------------------------------")
+	gut.p("Created the domain '%s'. To run the examples, type this:" % domain_name)
+	gut.p("%s.main()" % domain_name)
 
 	planner.current_domain = the_domain
 #	planner.print_domain()
 
 	var state1 = state0.duplicate(true)
 
-#	print("Initial state is %s" % state1)
-#
-#	print(
-#		"""
-#Use find_plan to plan how to get Alice from home to the park.
-#We'll do it several times with different values for 'verbose'.
-#"""
-#	)
+	gut.p("Initial state is %s" % state1)
+
+	(
+		gut
+		. p(
+			"""
+Use find_plan to plan how to get Alice from home to the park.
+We'll do it several times with different values for 'verbose'.
+"""
+		)
+	)
 
 	var expected = [
 		["call_taxi", "alice", "home_a"],
@@ -192,24 +201,24 @@ func test_simple_gtn():
 		["pay_driver", "alice", "park"],
 	]
 
-#	print("-- If verbose=0, the planner will return the solution but print nothing.")
+	gut.p("-- If verbose=0, the planner will return the solution but print nothing.")
 	var result = planner.find_plan(state1.duplicate(true), [["travel", "alice", "park"]])
-#	print("Result %s" % [result])
+	gut.p("Result %s" % [result])
 	assert_eq(result, expected)
-#	print("-- If verbose=1, the planner will print the problem and solution,")
-#	print("-- and then return the solution.\n")
-#
-#	print("-- If verbose=2, the planner will print the problem, a note at each")
-#	print("-- recursive call, and the solution. Then it will return the solution.")
-#
-#	print("-- If verbose=3, the planner will print even more information.")
-#
-#	print("Find a plan that will first get Alice to the park, then get Bob to the park.")
+	gut.p("-- If verbose=1, the planner will print the problem and solution,")
+	gut.p("-- and then return the solution.\n")
+
+	gut.p("-- If verbose=2, the planner will print the problem, a note at each")
+	gut.p("-- recursive call, and the solution. Then it will return the solution.")
+
+	gut.p("-- If verbose=3, the planner will print even more information.")
+
+	gut.p("Find a plan that will first get Alice to the park, then get Bob to the park.")
 	var plan = planner.find_plan(
 		state1.duplicate(true), [["travel", "alice", "park"], ["travel", "bob", "park"]]
 	)
 
-#	print("Plan %s" % [plan])
+	gut.p("Plan %s" % [plan])
 	assert_eq(
 		plan,
 		[
@@ -219,22 +228,22 @@ func test_simple_gtn():
 			["walk", "bob", "home_b", "park"],
 		]
 	)
-#
-#	print(
-#		"""Next, we'll use run_lazy_lookahead to try to get Alice to the park. With
-#Pr = 1/2, the taxi won't arrive. In this case, run_lazy_lookahead will call
-#find_plan again, and find_plan will return the same plan as before. This will
-#happen repeatedly until either the taxi arrives or run_lazy_lookahead decides
-#it has tried too many times."""
-#	)
-	var new_state = planner.run_lazy_lookahead(
-		state1.duplicate(true), [["travel", "alice", "park"]], SimpleTemporalNetwork.new()
+
+	(
+		gut
+		. p(
+			"""Next, we'll use run_lazy_lookahead to try to get Alice to the park. With
+Pr = 1/2, the taxi won't arrive. In this case, run_lazy_lookahead will call
+find_plan again, and find_plan will return the same plan as before. This will
+happen repeatedly until either the taxi arrives or run_lazy_lookahead decides
+it has tried too many times."""
+		)
 	)
+	planner.run_lazy_lookahead(state1.duplicate(true), [["travel", "alice", "park"]])
 
-#	print("")
-#	print("If run_lazy_lookahead succeeded, then Alice is now at the park,")
-#	print("so the planner will return an empty plan: ")
+	gut.p("If run_lazy_lookahead succeeded, then Alice is now at the park,")
+	gut.p("so the planner will return an empty plan: ")
 
-	plan = planner.find_plan(new_state, [["travel", "alice", "park"]])
-#	print("Plan %s" % [plan])
-	assert_eq(plan, [])
+	plan = planner.find_plan(state1, [["travel", "alice", "park"]])
+	gut.p("Plan %s" % [plan])
+	assert_ne(plan, [])

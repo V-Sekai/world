@@ -5,7 +5,7 @@
  "dirs": [
   "res://"
  ],
- "disable_colors": false,
+ "disable_colors": true,
  "double_strategy": 1,
  "errors_do_not_cause_failure": false,
  "font_color": "ccccccff",
@@ -24,7 +24,7 @@
  "panel_options": {
   "font_name": "CourierPrime",
   "font_size": 30,
-  "hide_output_text": true,
+  "hide_output_text": false,
   "hide_result_tree": false,
   "hide_settings": false,
   "output_font_name": "CourierPrime",
@@ -34,7 +34,7 @@
  "post_run_script": "",
  "pre_run_script": "",
  "prefix": "test_",
- "selected": "test_game_project.gd",
+ "selected": "test_magical_town_planner.gd",
  "should_exit": true,
  "should_exit_on_success": false,
  "should_maximize": false,

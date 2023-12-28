@@ -1,5 +1,5 @@
-# Copyright (c) 2018-present. This file is part of V-Sekai https://v-sekai.org/.
-# K. S. Ernest (Fire) Lee & Contributors
+# Copyright (c) 2023-present. This file is part of V-Sekai https://v-sekai.org/.
+# K. S. Ernest (Fire) Lee & Contributors (see .all-contributorsrc).
 # test_simple_gtn.gd
 # SPDX-License-Identifier: MIT
 
@@ -49,12 +49,12 @@ var goal3 = Multigoal.new("goal3", {"loc": {"alice": "park", "bob": "park"}})
 # Helper functions:
 
 
-func taxi_rate(taxi_dist):
+func taxi_rate(taxi_dist) -> float:
 #	"In this domain, the taxi fares are quite low :-)"
 	return 1.5 + 0.5 * taxi_dist
 
 
-func distance(x: String, y: String):
+func distance(x: String, y: String) -> float:
 #	"""
 #	If rigid.dist[(x,y)] = d, this function figures out that d is both
 #	the distance from x to y and the distance from y to x.
@@ -72,7 +72,7 @@ func distance(x: String, y: String):
 	return INF
 
 
-func is_a(variable, type):
+func is_a(variable, type) -> bool:
 #	"""
 #	In most classical planners, one would declare data-types for the parameters
 #	of each action, and the data-type checks would be done by the planner.
@@ -90,21 +90,23 @@ func is_a(variable, type):
 # Actions:
 
 
-func walk(state, p, x, y):
+func walk(state, p, x, y) -> Variant:
 	if is_a(p, "person") and is_a(x, "location") and is_a(y, "location") and x != y:
 		if state.loc[p] == x:
 			state.loc[p] = y
 			return state
+	return false
 
 
-func call_taxi(state, p, x):
+func call_taxi(state, p, x) -> Variant:
 	if is_a(p, "person") and is_a(x, "location"):
 		state.loc["taxi1"] = x
 		state.loc[p] = "taxi1"
 		return state
+	return false
 
 
-func ride_taxi(state, p, y):
+func ride_taxi(state, p, y) -> Variant:
 	# if p is a person, p is in a taxi, and y is a location:
 	if is_a(p, "person") and is_a(state.loc[p], "taxi") and is_a(y, "location"):
 		var taxi = state.loc[p]
@@ -113,44 +115,49 @@ func ride_taxi(state, p, y):
 			state.loc[taxi] = y
 			state.owe[p] = taxi_rate(distance(x, y))
 			return state
+	return false
 
 
-func pay_driver(state: Dictionary, p: String, y: String):
+func pay_driver(state: Dictionary, p: String, y: String) -> Variant:
 	if is_a(p, "person"):
 		if state.cash[p] >= state.owe[p]:
 			state.cash[p] = state.cash[p] - state.owe[p]
 			state.owe[p] = 0
 			state.loc[p] = y
 			return state
+	return false
 
 
 ###############################################################################
 # Methods:
 
 
-func do_nothing(state, p, y):
+func do_nothing(state, p, y) -> Variant:
 	if is_a(p, "person") and is_a(y, "location"):
 		var x = state.loc[p]
 		if x == y:
 			return []
+	return false
 
 
-func travel_by_foot(state, p, y):
+func travel_by_foot(state, p, y) -> Variant:
 	if is_a(p, "person") and is_a(y, "location"):
 		var x = state.loc[p]
 		if x != y and distance(x, y) <= 2:
 			return [["walk", p, x, y]]
+	return false
 
 
-func travel_by_taxi(state, p, y):
+func travel_by_taxi(state, p, y) -> Variant:
 	if is_a(p, "person") and is_a(y, "location"):
 		var x = state.loc[p]
 		if x != y and state.cash[p] >= taxi_rate(distance(x, y)):
 			return [["call_taxi", p, x], ["ride_taxi", p, y], ["pay_driver", p, y]]
+	return false
 
 
-func _ready():
-	planner._domains.push_back(the_domain)
+func _ready() -> void:
+	planner.domains.push_back(the_domain)
 	planner.current_domain = the_domain
 	goal1.state["loc"] = {"alice": "park"}
 	goal2.state["loc"] = {"bob": "park"}
@@ -184,21 +191,21 @@ func _ready():
 	planner.declare_multigoal_methods([planner.m_split_multigoal])
 
 
-func test_simple_gtn():
+func test_simple_gtn() -> void:
 	# If we've changed to some other domain, this will change us back.
 	planner.current_domain = the_domain
 #	planner.print_domain()
 
-#	print("The initial state is")
-#	print(state0.duplicate(true))
+#	gut.p("The initial state is")
+#	gut.p(state0.duplicate(true))
 
-#	print(
+#	gut.p(
 #		"""
 #Next, several planning problems using the above domain and initial state.
 #"""
 #	)
 
-#	print(
+#	gut.p(
 #		"""
 #Below, we give find_plan the goal of having alice be at the park.
 #We do it several times with different values for 'verbose'.
@@ -221,7 +228,7 @@ func test_simple_gtn():
 # achieved its goal.
 # If verbose=3, the planner prints even more information.
 
-#	print(
+#	gut.p(
 #		"""
 #Next, we give find_plan a sequence of two goals: first for Alice to be at the
 #park, then for Bob to be at the park. Since this is a sequence, it doesn't
@@ -241,9 +248,9 @@ func test_simple_gtn():
 		]
 	)
 
-#	print(state1)
+#	gut.p(state1)
 
-#	print(
+#	gut.p(
 #		"""
 #A multigoal g looks similar to a state, but usually it includes just a few of
 #the state variables rather than all of them. It specifies *desired* values
@@ -254,9 +261,9 @@ func test_simple_gtn():
 #"""
 #	)
 
-#	print("Goal 3 state %s" % [goal3.state])
+#	gut.p("Goal 3 state %s" % [goal3.state])
 #
-#	print(
+#	gut.p(
 #		"""
 #Next, we'll call find_plan on goal3, with verbose=2. In the printout,
 #_verify_mg is a task used by the planner to check whether a multigoal
@@ -265,7 +272,7 @@ func test_simple_gtn():
 #	)
 	state1 = state0.duplicate(true)
 	plan = planner.find_plan(state1, [goal3])
-#	print("Plan %s" % [plan])
+	gut.p("Plan %s" % [plan])
 	assert_eq(
 		plan,
 		[
@@ -275,7 +282,10 @@ func test_simple_gtn():
 			["walk", "bob", "home_b", "park"]
 		]
 	)
-	var new_state = planner.run_lazy_lookahead(state1, [["loc", "alice", "park"]], SimpleTemporalNetwork.new())
-#	print("Alice is now at the park, so the planner will return an empty plan:")
-	plan = planner.find_plan(new_state, [["loc", "alice", "park"]])
+	var new_plan = planner.run_lazy_lookahead(
+		state1, [Multigoal.new("goal1", {"loc": {"alice": "park"}})]
+	)
+	assert_ne_deep(new_plan, [])
+	gut.p("Alice is now at the park, so the planner will return an empty plan:")
+	plan = planner.find_plan(state1, [Multigoal.new("goal1", {"loc": {"alice": "park"}})])
 	assert_eq(plan, [])

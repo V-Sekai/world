@@ -1,5 +1,5 @@
-# Copyright (c) 2018-present. This file is part of V-Sekai https://v-sekai.org/.
-# K. S. Ernest (Fire) Lee & Contributors
+# Copyright (c) 2023-present. This file is part of V-Sekai https://v-sekai.org/.
+# K. S. Ernest (Fire) Lee & Contributors (see .all-contributorsrc).
 # temporal_constraint.gd
 # SPDX-License-Identifier: MIT
 
@@ -13,9 +13,10 @@ enum TemporalQualifier {
 	OVERALL,
 }
 
-var time_interval: Vector2i
-var duration: int
-var temporal_qualifier: TemporalQualifier
+@export var time_interval: Vector2i
+@export var duration: int
+@export var temporal_qualifier: TemporalQualifier
+
 
 func _init(start: int, end: int, duration: int, qualifier: TemporalQualifier, resource: String):
 	time_interval = Vector2i(start, end)
@@ -23,5 +24,20 @@ func _init(start: int, end: int, duration: int, qualifier: TemporalQualifier, re
 	temporal_qualifier = qualifier
 	resource_name = resource
 
-func to_dictionary() -> Dictionary:
-	return { "resource_name": resource_name, "time_interval" : time_interval, "duration": duration, "temporal_qualifier": temporal_qualifier }
+
+func _to_string() -> String:
+	return str(
+		{
+			"resource_name": resource_name,
+			"time_interval": time_interval,
+			"duration": duration,
+			"temporal_qualifier": temporal_qualifier
+		}
+	)
+
+
+static func sort_func(a: TemporalConstraint, b: TemporalConstraint) -> bool:
+	return (
+		a.time_interval.x < b.time_interval.x
+		or (a.time_interval.x == b.time_interval.x and a.time_interval.y < b.time_interval.y)
+	)
