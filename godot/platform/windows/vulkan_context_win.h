@@ -39,7 +39,7 @@
 #include <windows.h>
 
 class VulkanContextWindows : public VulkanContext {
-	virtual const char *_get_platform_surface_extension() const override final;
+	virtual const char *_get_platform_surface_extension() const;
 
 public:
 	struct WindowPlatformData {
