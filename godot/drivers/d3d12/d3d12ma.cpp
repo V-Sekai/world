@@ -42,7 +42,6 @@
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 #pragma GCC diagnostic ignored "-Wunused-function"
 #pragma GCC diagnostic ignored "-Wnonnull-compare"
-#pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #endif
 
 #if defined(_MSC_VER)
