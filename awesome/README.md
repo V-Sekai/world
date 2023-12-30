@@ -32,6 +32,7 @@ A curated list of all the projects V-Sekai has been involved with in the field o
 - [V-Sekai Manuals Website](https://github.com/V-Sekai/manuals)
 - [Godot GLTF 2.0 Scene Exporter](https://godotengine.org/article/introducing-the-godot-gltf-2-0-scene-exporter/)
 - [Animation Retargeting in Godot 4.0](https://godotengine.org/article/animation-retargeting-in-godot-4-0/)
+- [Godot Engine PRs by File](https://godotengine.github.io/godot-prs-by-file/)
 
 ## Artwork
 
@@ -101,6 +102,10 @@ Modules extend Godot Engine core (C++).
 - [Image comparison](https://imgsli.com)
 - [Code Name Generator: Colors, Metal, Animals](https://www.codenamegenerator.com/)
 
+## Articles
+
+- [Coding for a Finite World](https://yoric.github.io/post/coding-for-a-finite-world/)
+
 ## Groups
 
 - [Godot Engine](https://godotengine.org/teams)
@@ -122,3 +127,4 @@ Modules extend Godot Engine core (C++).
 
 - [Incredibly Fast Whisper Automatic Voice Recognition](https://replicate.com/vaibhavs10/incredibly-fast-whisper)
 - [Obsidian-3B-V0.5: Worlds smallest multi-modal LLM](https://replicate.com/tomasmcm/obsidian-3b-v0.5)
+- [MeshTransformer](https://github.com/lucidrains/meshgpt-pytorch/)
