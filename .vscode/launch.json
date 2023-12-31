@@ -51,7 +51,7 @@
       "request": "launch",
       "args": ["--path", "godot/modules/speech/demo"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/godot/bin/godot.windows.editor.double.x86_64.exe",
+      "program": "${workspaceFolder}/godot/bin/godot.windows.editor.double.x86_64.llvm.exe",
       "preLaunchTask": "Godot Engine Windows Clang"
     },
   ]
