@@ -39,12 +39,6 @@
 
 #include <functiondiscoverykeys.h>
 
-// Silence warning due to a COM API weirdness (GH-35194).
-#if defined(__GNUC__) && !defined(__clang__) || defined(__MINGW32__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
-#endif
-
 // Define IAudioClient3 if not already defined by MinGW headers
 #if defined __MINGW32__ || defined __MINGW64__
 
@@ -127,6 +121,12 @@ const IID IID_IAudioCaptureClient = __uuidof(IAudioCaptureClient);
 static bool default_output_device_changed = false;
 static bool default_input_device_changed = false;
 
+// Silence warning due to a COM API weirdness (GH-35194).
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+#endif
+
 class CMMNotificationClient : public IMMNotificationClient {
 	LONG _cRef = 1;
 	IMMDeviceEnumerator *_pEnumerator = nullptr;
@@ -195,7 +195,7 @@ public:
 	}
 };
 
-#if defined(__GNUC__) && !defined(__clang__) || defined(__MINGW32__)
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
 
