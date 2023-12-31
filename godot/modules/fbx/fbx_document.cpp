@@ -231,6 +231,44 @@ static uint32_t _decode_vertex_index(const Vector3 &p_vertex) {
 	return uint32_t(p_vertex.x) | uint32_t(p_vertex.y) << 16;
 }
 
+struct ThreadPool {
+	struct Group {
+		ufbx_thread_pool_context ctx = {};
+		WorkerThreadPool::GroupID task_id = {};
+		uint32_t start_index = 0;
+	};
+
+	WorkerThreadPool *pool;
+	Group groups[UFBX_THREAD_GROUP_COUNT] = {};
+};
+
+static void _thread_pool_task(void *user, uint32_t index) {
+	ThreadPool::Group *group = (ThreadPool::Group *)user;
+	ufbx_thread_pool_run_task(group->ctx, group->start_index + index);
+}
+
+static bool _thread_pool_init_fn(void *user, ufbx_thread_pool_context ctx, const ufbx_thread_pool_info *info) {
+	ThreadPool *pool = (ThreadPool *)user;
+	for (ThreadPool::Group &group : pool->groups) {
+		group.ctx = ctx;
+	}
+	return true;
+}
+
+static bool _thread_pool_run_fn(void *user, ufbx_thread_pool_context ctx, uint32_t group, uint32_t start_index, uint32_t count) {
+	ThreadPool *pool = (ThreadPool *)user;
+	ThreadPool::Group &pool_group = pool->groups[group];
+	pool_group.start_index = start_index;
+	pool_group.task_id = pool->pool->add_native_group_task(_thread_pool_task, &pool_group, (int)count, -1, true, "ufbx");
+	return true;
+}
+
+static bool _thread_pool_wait_fn(void *user, ufbx_thread_pool_context ctx, uint32_t group, uint32_t max_index) {
+	ThreadPool *pool = (ThreadPool *)user;
+	pool->pool->wait_for_group_task_completion(pool->groups[group].task_id);
+	return true;
+}
+
 String FBXDocument::_gen_unique_name(Ref<FBXState> p_state, const String &p_name) {
 	const String s_name = p_name.validate_node_name();
 
@@ -2554,6 +2592,15 @@ Error FBXDocument::_parse(Ref<FBXState> p_state, String p_path, Ref<FileAccess> 
 		opts.ignore_embedded = true;
 	}
 	opts.generate_missing_normals = true;
+
+	ThreadPool thread_pool;
+	thread_pool.pool = WorkerThreadPool::get_singleton();
+
+	opts.thread_opts.pool.init_fn = &_thread_pool_init_fn;
+	opts.thread_opts.pool.run_fn = &_thread_pool_run_fn;
+	opts.thread_opts.pool.wait_fn = &_thread_pool_wait_fn;
+	opts.thread_opts.pool.user = &thread_pool;
+	opts.thread_opts.memory_limit = 64 * 1024 * 1024;
 
 	ufbx_error error;
 	ufbx_stream file_stream = {};
