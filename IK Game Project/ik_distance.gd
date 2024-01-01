@@ -13,18 +13,25 @@ func chamfer_distance(set_A, set_B):
 				min_distance = distance
 		total_distance += min_distance
 	return total_distance
+	
+var timer : Timer = null
 
-func _process(_delta):
-	#var set_A = [Vector2(1, 2), Vector2(3, 4), Vector2(5, 6)]
-	#var set_B = [Vector2(7, 8), Vector2(9, 10), Vector2(11, 12)]
-	#print("Test distance: %s" % chamfer_distance(set_A, set_B))
+func _ready():
+	timer = Timer.new()
+	timer.autostart = true
+	timer.wait_time = 2
+	add_child(timer)
+	timer.owner = self
+	timer.timeout.connect(print_distance)
+
+func print_distance():
 	var bones: Array = [
 		"Root",
 		"Hips",
 		"Chest",
-		#"LeftUpperArm",
+		"LeftUpperArm",
 		"LeftHand",
-		#"RightUpperArm",
+		"RightUpperArm",
 		"RightHand",
 		"LeftLowerLeg",
 		"RightLowerLeg",
@@ -37,8 +44,6 @@ func _process(_delta):
 	
 	var reference_skeleton:Skeleton3D = get_node("vrm_1_vsekai_godot_engine_humanoid_08/Root/GeneralSkeleton")
 	for bone_name in bones:
-		if bone_name == "Root":
-			bone_name = "root"
 		var bone_id = reference_skeleton.find_bone(bone_name)
 		if bone_id != -1:
 			var bone_position = reference_skeleton.get_bone_pose_position(bone_id)
@@ -54,6 +59,4 @@ func _process(_delta):
 			set_b.append(bone_position)
 		else:
 			print("Bone '%s' not found!" % bone_name)
-	#var distance = chamfer_distance(set_a, set_b)
-	#print("Skeleton distance same: %s" % chamfer_distance(set_a, set_a))
 	print("Skeleton distance: %s" % chamfer_distance(set_a, set_b))
