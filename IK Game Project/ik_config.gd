@@ -118,12 +118,12 @@ func _run():
 		var resistance = 0
 		if bone_name == "Root":
 			twist_from = deg_to_rad(0.0)
-			twist_range = deg_to_rad(360)
+			twist_range = deg_to_rad(5)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(3.0)))
 			# Cannot use resistance on root bones.
 		elif bone_name == "Hips":
 			twist_from = deg_to_rad(0.0)
-			twist_range = deg_to_rad(360)
+			twist_range = deg_to_rad(5)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(3.0)))
 			# Cannot use resistance on root bones.
 		elif bone_name == "Spine":
@@ -156,21 +156,23 @@ func _run():
 		elif bone_name == "LeftUpperLeg":
 			twist_from = deg_to_rad(300.0)
 			twist_range = deg_to_rad(10.0)
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(25.0)))
+			#swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(25.0)))
 			resistance = 0.8
 		elif bone_name == "LeftLowerLeg":
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)))
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_TOP, deg_to_rad(2.5)))
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5)))
+			#swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)))
+			#swing_limit_cones.append(LimitCone.new(Vector3.MODEL_TOP, deg_to_rad(2.5)))
+			#swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5)))
+			pass
 		elif bone_name == "RightUpperLeg":
 			twist_from = deg_to_rad(300.0)
 			twist_range = deg_to_rad(10.0)
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(25.0)))
+			#swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(25.0)))
 			resistance = 0.8
 		elif bone_name == "RightLowerLeg":
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)))
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_TOP, deg_to_rad(2.5)))
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5)))
+			#swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)))
+			#swing_limit_cones.append(LimitCone.new(Vector3.MODEL_TOP, deg_to_rad(2.5)))
+			#swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5)))
+			pass
 		elif bone_name in ["LeftShoulder", "RightShoulder"]:
 			#swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(30.0)))
 			pass
