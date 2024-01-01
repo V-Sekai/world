@@ -177,7 +177,7 @@ static func skeleton_rename(gstate: GLTFState, p_base_scene: Node, p_skeleton: S
 					if bind_bone_name.is_empty():
 						#bind_bone_name = node.get_bone_name(skin.get_bind_bone(i))
 						if skin.get_bind_bone(i) != -1:
-							break # Not using named binds: no need to rename skin.
+							break  # Not using named binds: no need to rename skin.
 					var bone_name_from_skel: StringName = p_bone_map.find_profile_bone_name(bind_bone_name)
 					if not bone_name_from_skel.is_empty():
 						skin.set_bind_name(i, bone_name_from_skel)
@@ -294,10 +294,10 @@ static func apply_mesh_rotation(p_base_scene: Node, src_skeleton: Skeleton3D, ol
 		var bone_idx: int = attachment.bone_idx
 		if bone_idx == -1:
 			bone_idx = src_skeleton.find_bone(attachment.bone_name)
-		var adjust_transform: Transform3D = src_skeleton.get_bone_global_rest(bone_idx).affine_inverse() * old_skeleton_global_rest[bone_idx];
-		adjust_transform = adjust_transform.scaled(global_transform_scale_local);
+		var adjust_transform: Transform3D = src_skeleton.get_bone_global_rest(bone_idx).affine_inverse() * old_skeleton_global_rest[bone_idx]
+		adjust_transform = adjust_transform.scaled(global_transform_scale_local)
 
-		var child_nodes: Array[Node] = attachment.get_children();
+		var child_nodes: Array[Node] = attachment.get_children()
 		while not child_nodes.is_empty():
 			var child: Node3D = child_nodes.pop_back() as Node3D
 			if child == null:
@@ -370,14 +370,15 @@ static func _generate_hide_bone_mesh(mesh: ImporterMesh, skin: Skin, bone_names_
 		var hide_verts: PackedInt32Array
 		hide_verts.resize(vert_arr_len)
 		var did_hide_verts: bool = false
-		if typeof(arr[ArrayMesh.ARRAY_BONES]) == TYPE_PACKED_INT32_ARRAY:
+		if typeof(arr[ArrayMesh.ARRAY_BONES]) == TYPE_PACKED_INT32_ARRAY and typeof(arr[ArrayMesh.ARRAY_WEIGHTS]) == TYPE_PACKED_FLOAT32_ARRAY:
 			var bonearr: PackedInt32Array = arr[ArrayMesh.ARRAY_BONES]
+			var weightarr: PackedFloat32Array = arr[ArrayMesh.ARRAY_WEIGHTS]
 			var bones_per_vert = len(bonearr) / vert_arr_len
 			var outidx = 0
 			for i in range(vert_arr_len):
 				var keepvert = true
 				for j in range(bones_per_vert):
-					if bind_indices_to_hide.has(bonearr[i * bones_per_vert + j]):
+					if not is_zero_approx(weightarr[i * bones_per_vert + j]) and bind_indices_to_hide.has(bonearr[i * bones_per_vert + j]):
 						hide_verts[i] = 1
 						did_hide_verts = true
 						did_hide_any_surface_verts = true

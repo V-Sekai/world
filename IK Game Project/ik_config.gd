@@ -1,6 +1,38 @@
 @tool
 extends EditorScript
 
+
+func euclidean_distance(p1, p2):
+	return p1.distance_to(p2)
+
+func chamfer_distance(set_A, set_B):
+	var total_distance = 0.0
+
+	for point_A in set_A:
+		var min_distance = INF
+		for point_B in set_B:
+			var distance = euclidean_distance(point_A, point_B)
+			if distance < min_distance:
+				min_distance = distance
+		total_distance += min_distance
+
+	for point_B in set_B:
+		var min_distance = INF
+		for point_A in set_A:
+			var distance = euclidean_distance(point_B, point_A)
+			if distance < min_distance:
+				min_distance = distance
+		total_distance += min_distance
+
+	return total_distance / (set_A.size() + set_B.size())
+
+
+func test_chamfer_distance():
+	var set_A = [Vector2(1, 2), Vector2(3, 4), Vector2(5, 6)]
+	var set_B = [Vector2(7, 8), Vector2(9, 10), Vector2(11, 12)]
+	print(chamfer_distance(set_A, set_B))
+
+
 class LimitCone:
 	var direction: Vector3
 	var angle: float
@@ -86,12 +118,12 @@ func _run():
 		var resistance = 0
 		if bone_name == "Root":
 			twist_from = deg_to_rad(0.0)
-			#twist_range = deg_to_rad(1)
+			twist_range = deg_to_rad(1)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(3.0)))
 			resistance = 0.5
 		elif bone_name == "Hips":
 			twist_from = deg_to_rad(0.0)
-			#twist_range = deg_to_rad(1)
+			twist_range = deg_to_rad(1)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(3.0)))
 			resistance = 0.5
 		elif bone_name == "Spine":
@@ -101,17 +133,17 @@ func _run():
 			resistance = 0.5
 		elif bone_name == "Chest":
 			twist_from = deg_to_rad(5.0)
-			#twist_range = deg_to_rad(-10.0)
+			twist_range = deg_to_rad(-10.0)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(3.0)))
 			resistance = 0.5
 		elif bone_name == "UpperChest":
 			twist_from = deg_to_rad(10.0)
-			#twist_range = deg_to_rad(40.0)
+			twist_range = deg_to_rad(40.0)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(10.0)))
 			resistance = 0.6
 		elif bone_name == "Neck":
 			twist_from = deg_to_rad(15.0)
-			#twist_range = deg_to_rad(15.0)
+			twist_range = deg_to_rad(15.0)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(10.0)))
 			resistance = 0.6
 		elif bone_name == "Head":
@@ -189,33 +221,36 @@ func _run():
 			continue
 		set_bone_constraint(many_bone_ik, bone_name, twist_from, twist_range, swing_limit_cones, resistance)
 
+
 	var bones: Array = [
-		"Root",
+		"root",
 		"Hips",
-		"Chest",
-		"Head",
-		"LeftShoulder",
+		"Spine",
+		"LeftUpperArm",
 		"LeftHand",
-		"RightShoulder",
+		"RightUpperArm",
 		"RightHand",
 		"LeftLowerLeg",
-		"LeftFoot",
 		"RightLowerLeg",
-		"RightFoot",
+		"Head",
 	]
-
+	
 	many_bone_ik.set_pin_count(0)
 	many_bone_ik.set_pin_count(bones.size())
 
-	var children: Array[Node] = root.find_children("*", "Marker3D")
+	var children: Array[Node] = root.find_children("*", "BoneAttachment3D")
 	for i in range(children.size()):
 		var node: Node = children[i] as Node
 		node.queue_free()
 	
 	for pin_i in range(bones.size()):
 		var bone_name: String = bones[pin_i]
-		var marker_3d: Marker3D = Marker3D.new()
+		var marker_3d: BoneAttachment3D = BoneAttachment3D.new()
 		marker_3d.name = bone_name
+		marker_3d.bone_name = bone_name
+		marker_3d.use_external_skeleton = true
+		var reference_skeleton_nodepath = String(many_bone_ik.get_path_to(many_bone_ik.owner)) + "/../vrm_1_vsekai_godot_engine_humanoid_08/Root/Skeleton3D"
+		marker_3d.set_external_skeleton(reference_skeleton_nodepath)
 		many_bone_ik.add_child(marker_3d, true)
 		marker_3d.owner = root
 		var bone_i: int = skeleton.find_bone(bone_name)
@@ -230,6 +265,30 @@ func _run():
 		many_bone_ik.set_pin_passthrough_factor(pin_i, 1.0)
 
 	skeleton.show_rest_only = false
+
+	var set_a: Array[Vector3] = []
+	var set_b: Array[Vector3] = []
+	
+	var reference_skeleton = many_bone_ik.owner.get_node("vrm_1_vsekai_godot_engine_humanoid_08/Root/Skeleton3D")
+	for bone_name in bones:
+		var bone_id = reference_skeleton.find_bone(bone_name)
+		if bone_id != -1:
+			var bone_position = reference_skeleton.get_bone_global_pose(bone_id).origin
+			set_a.append(bone_position)
+		else:
+			print("Bone '%s' not found!" % bone_name)
+	
+	var target_skeleton = many_bone_ik.owner.get_node("VVVV_200502/Armature/GeneralSkeleton")
+	for bone_name in bones:
+		var bone_id = target_skeleton.find_bone(bone_name)
+		if bone_id != -1:
+			var bone_position = target_skeleton.get_bone_global_pose(bone_id).origin
+			set_b.append(bone_position)
+		else:
+			print("Bone '%s' not found!" % bone_name)
+	var distance = chamfer_distance(set_a, set_b)
+	print(distance)
+
 var bone_constraints: Dictionary
 
 func get_bone_constraint(p_bone_name: String) -> BoneConstraint:

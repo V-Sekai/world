@@ -27,7 +27,7 @@
       ],            
       "type": "lldb",
       "request": "launch",
-      "args": ["--path", "client", "-e"],
+      "args": ["--path", "IK Game Project", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"

@@ -11,7 +11,8 @@ config_version=5
 [application]
 
 config/name="IK Game Project"
-config/features=PackedStringArray("4.2", "Double Precision", "Forward Plus")
+run/main_scene="res://node_3d.tscn"
+config/features=PackedStringArray("4.3", "Double Precision")
 config/icon="res://icon.svg"
 
 [editor_plugins]

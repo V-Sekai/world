@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://dr078qoc13bwh"
-path="res://.godot/imported/VVVV_200502.vrm-cde116105ecf8f14c5346a193df930a3.scn"
+uid="uid://6we2rrmpoola"
+path="res://.godot/imported/vrm_1_vsekai_godot_engine_humanoid_08.glb-d9230500c50ce7fa07f9da6f3672a6f1.scn"
 
 [deps]
 
-source_file="res://VVVV/VVVV_200502.vrm"
-dest_files=["res://.godot/imported/VVVV_200502.vrm-cde116105ecf8f14c5346a193df930a3.scn"]
+source_file="res://vrm_01/vrm_1_vsekai_godot_engine_humanoid_08.glb"
+dest_files=["res://.godot/imported/vrm_1_vsekai_godot_engine_humanoid_08.glb-d9230500c50ce7fa07f9da6f3672a6f1.scn"]
 
 [params]
 
