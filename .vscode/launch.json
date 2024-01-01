@@ -20,7 +20,7 @@
       "preLaunchTask": "Godot Engine"
     },
     {
-      "name": "Run the Macos editor",
+      "name": "Run the Macos editor Dev",
       "preRunCommands": [
           "command script import ${workspaceFolder}/.vscode/GodotFormatters.py",
           "command source ${workspaceFolder}/.vscode/GodotFormatters.lldb"
@@ -30,6 +30,19 @@
       "args": ["--path", "IK Game Project", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/godot/bin/godot.macos.editor.dev.double.arm64",
+      "preLaunchTask": "Godot Engine Dev"
+    },
+    {
+      "name": "Run the Macos editor",
+      "preRunCommands": [
+          "command script import ${workspaceFolder}/.vscode/GodotFormatters.py",
+          "command source ${workspaceFolder}/.vscode/GodotFormatters.lldb"
+      ],            
+      "type": "lldb",
+      "request": "launch",
+      "args": ["--path", "IK Game Project", "-e"],
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
     },
     {

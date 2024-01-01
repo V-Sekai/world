@@ -13,6 +13,20 @@
         "cwd": "${workspaceFolder}/godot"
       },
       "command": [
+        "scons warnings=no werror=yes dev_build=no precision=double compiledb=yes target=editor tests=yes"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+    },
+    {
+      "label": "Godot Engine Dev",
+      "type": "shell",
+      "options": {
+        "cwd": "${workspaceFolder}/godot"
+      },
+      "command": [
         "scons warnings=no werror=yes dev_build=yes precision=double compiledb=yes target=editor tests=yes"
       ],
       "group": {
