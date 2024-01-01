@@ -221,9 +221,9 @@ func _run():
 		else:
 			continue
 		set_bone_constraint(many_bone_ik, bone_name, twist_from, twist_range, swing_limit_cones, resistance)
-
+	many_bone_ik.queue_print_skeleton()
 	var bones: Array = [
-		"Root",
+		#"Root",
 		"Hips",
 		"Spine",
 		"LeftUpperArm",
