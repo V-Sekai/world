@@ -267,7 +267,7 @@ func _run():
 		marker_3d.global_transform = pose
 		many_bone_ik.set_pin_nodepath(pin_i, many_bone_ik.get_path_to(marker_3d))
 		many_bone_ik.set_pin_bone_name(pin_i, bone_name)
-		if bone_name != "Root":
+		if not bone_name in ["Root", "Hips"]:
 			many_bone_ik.set_pin_passthrough_factor(pin_i, 1.0)
 		if not bone_name in ["Hips", "Root"]:
 			many_bone_ik.set_pin_weight(pin_i, 1.0)
