@@ -221,9 +221,8 @@ func _run():
 			continue
 		set_bone_constraint(many_bone_ik, bone_name, twist_from, twist_range, swing_limit_cones, resistance)
 
-
 	var bones: Array = [
-		"root",
+		"Root",
 		"Hips",
 		"Spine",
 		"LeftUpperArm",
@@ -247,7 +246,10 @@ func _run():
 		var bone_name: String = bones[pin_i]
 		var marker_3d: BoneAttachment3D = BoneAttachment3D.new()
 		marker_3d.name = bone_name
-		marker_3d.bone_name = bone_name
+		if bone_name == "Root":
+			marker_3d.bone_name = "root"
+		else:
+			marker_3d.bone_name = bone_name
 		marker_3d.use_external_skeleton = true
 		var reference_skeleton_nodepath = String(many_bone_ik.get_path_to(many_bone_ik.owner)) + "/../vrm_1_vsekai_godot_engine_humanoid_08/Root/Skeleton3D"
 		marker_3d.set_external_skeleton(reference_skeleton_nodepath)
@@ -260,9 +262,10 @@ func _run():
 		marker_3d.global_transform = pose
 		many_bone_ik.set_pin_nodepath(pin_i, many_bone_ik.get_path_to(marker_3d))
 		many_bone_ik.set_pin_bone_name(pin_i, bone_name)
-		if bone_name == "Root":
-			continue
-		many_bone_ik.set_pin_passthrough_factor(pin_i, 1.0)
+		if bone_name != "Root":
+			many_bone_ik.set_pin_passthrough_factor(pin_i, 1.0)
+		if not bone_name in ["Hips", "Root"]:
+			many_bone_ik.set_pin_weight(pin_i, 1.0)
 
 	skeleton.show_rest_only = false
 
