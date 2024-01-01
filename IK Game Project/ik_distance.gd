@@ -21,7 +21,7 @@ func _process(_delta):
 	var bones: Array = [
 		"Root",
 		"Hips",
-		"Spine",
+		"Chest",
 		#"LeftUpperArm",
 		"LeftHand",
 		#"RightUpperArm",
@@ -29,12 +29,13 @@ func _process(_delta):
 		"LeftLowerLeg",
 		"RightLowerLeg",
 		"Head",
+		"Neck",
 	]
 	
 	var set_a: Array[Vector3] = []
 	var set_b: Array[Vector3] = []
 	
-	var reference_skeleton:Skeleton3D = get_node("vrm_1_vsekai_godot_engine_humanoid_08/Root/Skeleton3D")
+	var reference_skeleton:Skeleton3D = get_node("vrm_1_vsekai_godot_engine_humanoid_08/Root/GeneralSkeleton")
 	for bone_name in bones:
 		if bone_name == "Root":
 			bone_name = "root"

@@ -236,10 +236,10 @@ func _run():
 		"RightLowerLeg",
 		"LeftFoot",
 		"RightFoot",
-		"LeftToes",
-		"RightToes",
+		#"LeftToes",
+		#"RightToes",
 		"Head",
-		"Neck",
+		#"Neck",
 	]
 	
 	many_bone_ik.set_pin_count(0)
@@ -259,10 +259,14 @@ func _run():
 		else:
 			marker_3d.bone_name = bone_name
 		marker_3d.use_external_skeleton = true
-		var reference_skeleton_nodepath = String(many_bone_ik.get_path_to(many_bone_ik.owner)) + "/../vrm_1_vsekai_godot_engine_humanoid_08/Root/Skeleton3D"
+		var reference_skeleton_nodepath = String(many_bone_ik.get_path_to(many_bone_ik.owner)) + "/../vrm_1_vsekai_godot_engine_humanoid_08/Root/GeneralSkeleton"
 		marker_3d.set_external_skeleton(reference_skeleton_nodepath)
 		many_bone_ik.add_child(marker_3d, true)
 		marker_3d.owner = root
+		var targets_3d: Marker3D = Marker3D.new()
+		targets_3d.gizmo_extents =  .05
+		marker_3d.add_child(targets_3d, true)
+		targets_3d.owner = root
 		var bone_i: int = skeleton.find_bone(bone_name)
 		if bone_i == -1:
 			continue
