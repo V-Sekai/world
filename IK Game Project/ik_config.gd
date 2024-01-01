@@ -118,17 +118,17 @@ func _run():
 		var resistance = 0
 		if bone_name == "Root":
 			twist_from = deg_to_rad(0.0)
-			twist_range = deg_to_rad(1)
+			twist_range = deg_to_rad(360)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(3.0)))
-			resistance = 0.5
+			# Cannot use resistance on root bones.
 		elif bone_name == "Hips":
 			twist_from = deg_to_rad(0.0)
-			twist_range = deg_to_rad(1)
+			twist_range = deg_to_rad(360)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(3.0)))
-			resistance = 0.5
+			# Cannot use resistance on root bones.
 		elif bone_name == "Spine":
 			twist_from = deg_to_rad(4.0)
-			twist_range = deg_to_rad(360)
+			twist_range = deg_to_rad(10)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(3.0)))
 			resistance = 0.5
 		elif bone_name == "Chest":
@@ -231,7 +231,12 @@ func _run():
 		"RightHand",
 		"LeftLowerLeg",
 		"RightLowerLeg",
+		"LeftFoot",
+		"RightFoot",
+		"LeftToes",
+		"RightToes",
 		"Head",
+		"Neck",
 	]
 	
 	many_bone_ik.set_pin_count(0)
