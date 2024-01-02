@@ -14,7 +14,7 @@
       "name": "Run the Linux editor",
       "type": "lldb",
       "request": "launch",
-      "args": ["--path", "client", "-e"],
+      "args": ["--path", "tools/task_goal_planner", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/godot/bin/godot.linuxbsd.editor.double.x86_64",
       "preLaunchTask": "Godot Engine"
@@ -40,7 +40,7 @@
       ],            
       "type": "lldb",
       "request": "launch",
-      "args": ["--path", "IK Game Project", "-e"],
+      "args": ["--path", "tools/task_goal_planner", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
