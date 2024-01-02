@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  editor_scene_exporter_gltf_plugin.h                                   */
+/*  variant_callable.cpp                                                  */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,35 +28,54 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef EDITOR_SCENE_EXPORTER_GLTF_PLUGIN_H
-#define EDITOR_SCENE_EXPORTER_GLTF_PLUGIN_H
+#include "variant_callable.h"
 
-#ifdef TOOLS_ENABLED
+#include "core/templates/hashfuncs.h"
 
-#include "../gltf_document.h"
-#include "editor_scene_exporter_gltf_settings.h"
+bool VariantCallable::compare_equal(const CallableCustom *p_a, const CallableCustom *p_b) {
+	return p_a->hash() == p_b->hash();
+}
 
-#include "editor/editor_plugin.h"
+bool VariantCallable::compare_less(const CallableCustom *p_a, const CallableCustom *p_b) {
+	return p_a->hash() < p_b->hash();
+}
 
-class EditorFileDialog;
-class EditorInspector;
+uint32_t VariantCallable::hash() const {
+	return h;
+}
 
-class SceneExporterGLTFPlugin : public EditorPlugin {
-	GDCLASS(SceneExporterGLTFPlugin, EditorPlugin);
+String VariantCallable::get_as_text() const {
+	return vformat("%s::%s (Callable)", Variant::get_type_name(variant.get_type()), method);
+}
 
-	Ref<GLTFDocument> _gltf_document;
-	Ref<EditorSceneExporterGLTFSettings> _export_settings;
-	EditorInspector *_settings_inspector = nullptr;
-	EditorFileDialog *_file_dialog = nullptr;
-	void _popup_gltf_export_dialog();
-	void _export_scene_as_gltf(const String &p_file_path);
+CallableCustom::CompareEqualFunc VariantCallable::get_compare_equal_func() const {
+	return compare_equal;
+}
 
-public:
-	virtual String get_name() const override;
-	bool has_main_screen() const override;
-	SceneExporterGLTFPlugin();
-};
+CallableCustom::CompareLessFunc VariantCallable::get_compare_less_func() const {
+	return compare_less;
+}
 
-#endif // TOOLS_ENABLED
+bool VariantCallable::is_valid() const {
+	return Variant::has_builtin_method(variant.get_type(), method);
+}
 
-#endif // EDITOR_SCENE_EXPORTER_GLTF_PLUGIN_H
+StringName VariantCallable::get_method() const {
+	return method;
+}
+
+ObjectID VariantCallable::get_object() const {
+	return ObjectID();
+}
+
+void VariantCallable::call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, Callable::CallError &r_call_error) const {
+	Variant v = variant;
+	v.callp(method, p_arguments, p_argcount, r_return_value, r_call_error);
+}
+
+VariantCallable::VariantCallable(const Variant &p_variant, const StringName &p_method) {
+	variant = p_variant;
+	method = p_method;
+	h = variant.hash();
+	h = hash_murmur3_one_64(Variant::get_builtin_method_hash(variant.get_type(), method), h);
+}

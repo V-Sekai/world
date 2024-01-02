@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  editor_scene_exporter_gltf_plugin.h                                   */
+/*  variant_callable.h                                                    */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,35 +28,31 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef EDITOR_SCENE_EXPORTER_GLTF_PLUGIN_H
-#define EDITOR_SCENE_EXPORTER_GLTF_PLUGIN_H
+#ifndef VARIANT_CALLABLE_H
+#define VARIANT_CALLABLE_H
 
-#ifdef TOOLS_ENABLED
+#include "core/variant/callable.h"
+#include "core/variant/variant.h"
 
-#include "../gltf_document.h"
-#include "editor_scene_exporter_gltf_settings.h"
+class VariantCallable : public CallableCustom {
+	Variant variant;
+	StringName method;
+	uint32_t h = 0;
 
-#include "editor/editor_plugin.h"
-
-class EditorFileDialog;
-class EditorInspector;
-
-class SceneExporterGLTFPlugin : public EditorPlugin {
-	GDCLASS(SceneExporterGLTFPlugin, EditorPlugin);
-
-	Ref<GLTFDocument> _gltf_document;
-	Ref<EditorSceneExporterGLTFSettings> _export_settings;
-	EditorInspector *_settings_inspector = nullptr;
-	EditorFileDialog *_file_dialog = nullptr;
-	void _popup_gltf_export_dialog();
-	void _export_scene_as_gltf(const String &p_file_path);
+	static bool compare_equal(const CallableCustom *p_a, const CallableCustom *p_b);
+	static bool compare_less(const CallableCustom *p_a, const CallableCustom *p_b);
 
 public:
-	virtual String get_name() const override;
-	bool has_main_screen() const override;
-	SceneExporterGLTFPlugin();
+	uint32_t hash() const override;
+	String get_as_text() const override;
+	CompareEqualFunc get_compare_equal_func() const override;
+	CompareLessFunc get_compare_less_func() const override;
+	bool is_valid() const override;
+	StringName get_method() const override;
+	ObjectID get_object() const override;
+	void call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, Callable::CallError &r_call_error) const override;
+
+	VariantCallable(const Variant &p_variant, const StringName &p_method);
 };
 
-#endif // TOOLS_ENABLED
-
-#endif // EDITOR_SCENE_EXPORTER_GLTF_PLUGIN_H
+#endif // VARIANT_CALLABLE_H
