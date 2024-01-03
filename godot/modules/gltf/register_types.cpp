@@ -82,7 +82,7 @@ static void _editor_init() {
 	if (fbx_enabled) {
 		Ref<EditorSceneFormatImporterFBX> importer;
 		importer.instantiate();
-		ResourceImporterScene::add_scene_importer(importer, true);
+		ResourceImporterScene::add_scene_importer(importer);
 
 		Ref<EditorFileSystemImportFormatSupportQueryFBX> fbx_import_query;
 		fbx_import_query.instantiate();
