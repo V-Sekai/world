@@ -1565,7 +1565,9 @@ void SceneTreeDock::_load_request(const String &p_path) {
 }
 
 void SceneTreeDock::_script_open_request(const Ref<Script> &p_script) {
-	EditorNode::get_singleton()->edit_resource(p_script);
+	if (ScriptEditor::get_singleton()->edit(p_script, true)) {
+		EditorNode::get_singleton()->editor_select(EditorNode::EDITOR_SCRIPT);
+	}
 }
 
 void SceneTreeDock::_push_item(Object *p_object) {
@@ -2949,7 +2951,7 @@ void SceneTreeDock::_files_dropped(Vector<String> p_files, NodePath p_to, int p_
 		_normalize_drop(node, to_pos, p_type);
 		_perform_instantiate_scenes(p_files, node, to_pos);
 	} else {
-		String res_path = p_files[0];
+		const String &res_path = p_files[0];
 		StringName res_type = EditorFileSystem::get_singleton()->get_file_type(res_path);
 		List<String> valid_properties;
 
@@ -3065,6 +3067,9 @@ void SceneTreeDock::_nodes_dragged(Array p_nodes, NodePath p_to, int p_type) {
 
 	_normalize_drop(to_node, to_pos, p_type);
 	_do_reparent(to_node, to_pos, nodes, !Input::get_singleton()->is_key_pressed(Key::SHIFT));
+	for (Node *E : nodes) {
+		editor_selection->add_node(E);
+	}
 }
 
 void SceneTreeDock::_add_children_to_popup(Object *p_obj, int p_depth) {
