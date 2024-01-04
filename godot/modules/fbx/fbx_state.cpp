@@ -64,6 +64,8 @@ void FBXState::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_images", "images"), &FBXState::set_images);
 	ClassDB::bind_method(D_METHOD("get_skins"), &FBXState::get_skins);
 	ClassDB::bind_method(D_METHOD("set_skins", "skins"), &FBXState::set_skins);
+	ClassDB::bind_method(D_METHOD("get_cameras"), &FBXState::get_cameras);
+	ClassDB::bind_method(D_METHOD("set_cameras", "cameras"), &FBXState::set_cameras);
 	ClassDB::bind_method(D_METHOD("get_unique_names"), &FBXState::get_unique_names);
 	ClassDB::bind_method(D_METHOD("set_unique_names", "unique_names"), &FBXState::set_unique_names);
 	ClassDB::bind_method(D_METHOD("get_unique_animation_names"), &FBXState::get_unique_animation_names);
@@ -95,6 +97,7 @@ void FBXState::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "textures", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_STORAGE | PROPERTY_USAGE_INTERNAL | PROPERTY_USAGE_EDITOR), "set_textures", "get_textures"); // Vector<Ref<FBXTexture>>
 	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "images", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_STORAGE | PROPERTY_USAGE_INTERNAL | PROPERTY_USAGE_EDITOR), "set_images", "get_images"); // Vector<Ref<Texture>
 	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "skins", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_STORAGE | PROPERTY_USAGE_INTERNAL | PROPERTY_USAGE_EDITOR), "set_skins", "get_skins"); // Vector<Ref<FBXSkin>>
+	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "cameras", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_STORAGE | PROPERTY_USAGE_INTERNAL | PROPERTY_USAGE_EDITOR), "set_cameras", "get_cameras"); // Vector<Ref<FBXCamera>>
 	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "unique_names", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_STORAGE | PROPERTY_USAGE_INTERNAL | PROPERTY_USAGE_EDITOR), "set_unique_names", "get_unique_names"); // Set<String>
 	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "unique_animation_names", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_STORAGE | PROPERTY_USAGE_INTERNAL | PROPERTY_USAGE_EDITOR), "set_unique_animation_names", "get_unique_animation_names"); // Set<String>
 	ADD_PROPERTY(PropertyInfo(Variant::ARRAY, "skeletons", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_STORAGE | PROPERTY_USAGE_INTERNAL | PROPERTY_USAGE_EDITOR), "set_skeletons", "get_skeletons"); // Vector<Ref<FBXSkeleton>>
@@ -215,6 +218,14 @@ void FBXState::set_skins(TypedArray<FBXSkin> p_skins) {
 	FBXTemplateConvert::set_from_array(skins, p_skins);
 }
 
+TypedArray<FBXCamera> FBXState::get_cameras() {
+	return FBXTemplateConvert::to_array(cameras);
+}
+
+void FBXState::set_cameras(TypedArray<FBXCamera> p_cameras) {
+	FBXTemplateConvert::set_from_array(cameras, p_cameras);
+}
+
 TypedArray<String> FBXState::get_unique_names() {
 	return FBXTemplateConvert::to_array(unique_names);
 }
@@ -310,4 +321,12 @@ Variant FBXState::get_additional_data(const StringName &p_extension_name) {
 
 void FBXState::set_additional_data(const StringName &p_extension_name, Variant p_additional_data) {
 	additional_data[p_extension_name] = p_additional_data;
+}
+
+bool FBXState::get_allow_geometry_helper_nodes() {
+	return allow_geometry_helper_nodes;
+}
+
+void FBXState::set_allow_geometry_helper_nodes(bool p_allow_geometry_helper_nodes) {
+	allow_geometry_helper_nodes = p_allow_geometry_helper_nodes;
 }

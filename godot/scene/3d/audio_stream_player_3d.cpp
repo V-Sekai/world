@@ -281,6 +281,7 @@ void AudioStreamPlayer3D::_notification(int p_what) {
 				velocity_tracker->update_position(get_global_transform().origin);
 			}
 		} break;
+
 		case NOTIFICATION_INTERNAL_PHYSICS_PROCESS: {
 			// Update anything related to position first, if possible of course.
 			if (GLOBAL_GET("audio/enable_resonance_audio")) {
@@ -307,6 +308,7 @@ void AudioStreamPlayer3D::_notification(int p_what) {
 				setplayback.unref();
 				setplay.set(-1);
 			}
+
 			if (!stream_playbacks.is_empty() && active.is_set()) {
 				// Stop playing if no longer active.
 				Vector<Ref<AudioStreamPlayback>> playbacks_to_remove;
@@ -328,6 +330,7 @@ void AudioStreamPlayer3D::_notification(int p_what) {
 					emit_signal(SNAME("finished"));
 				}
 			}
+
 			while (stream_playbacks.size() > max_polyphony) {
 				AudioServer::get_singleton()->stop_playback_stream(stream_playbacks[0]);
 				stream_playbacks.remove_at(0);
@@ -442,10 +445,6 @@ Vector<AudioFrame> AudioStreamPlayer3D::_update_panning() {
 		Vector3 listener_area_pos;
 
 		Area3D *area = _get_overriding_area();
-
-		//TODO: The lower the second parameter (tightness) the more the sound will "enclose" the listener (more undirected / playing from
-		//      speakers not facing the source) - this could be made distance dependent.
-		_calc_output_vol(local_pos.normalized(), 4.0, output_volume_vector);
 
 		if (area && area->is_using_reverb_bus() && area->get_reverb_uniformity() > 0) {
 			area_sound_pos = space_state->get_closest_point_to_object_volume(area->get_rid(), listener_node->get_global_transform().origin);

@@ -32,13 +32,15 @@
 #define FBX_STATE_H
 
 #include "structures/fbx_animation.h"
+#include "structures/fbx_camera.h"
+#include "structures/fbx_light.h"
 #include "structures/fbx_mesh.h"
 #include "structures/fbx_node.h"
 #include "structures/fbx_skeleton.h"
 #include "structures/fbx_skin.h"
 #include "structures/fbx_texture.h"
 
-#include "thirdparty/ufbx/ufbx.h"
+#include <ufbx.h>
 
 class FBXState : public Resource {
 	GDCLASS(FBXState, Resource);
@@ -55,6 +57,7 @@ class FBXState : public Resource {
 	bool use_named_skin_binds = false;
 	bool use_khr_texture_transform = false;
 	bool discard_meshes_and_materials = false;
+	bool allow_geometry_helper_nodes = false;
 	bool create_animations = true;
 
 	int handle_binary_image = HANDLE_BINARY_EXTRACT_TEXTURES;
@@ -62,7 +65,7 @@ class FBXState : public Resource {
 	Vector<Ref<FBXNode>> nodes;
 	Vector<Vector<uint8_t>> buffers;
 
-	Vector<Ref<FBXMesh>> meshes; // meshes are loaded directly, no reason not to.
+	Vector<Ref<FBXMesh>> meshes; // Meshes are loaded directly, no reason not to.
 
 	Vector<AnimationPlayer *> animation_players;
 	HashMap<Ref<Material>, FBXMaterialIndex> material_cache;
@@ -81,6 +84,8 @@ class FBXState : public Resource {
 
 	Vector<Ref<FBXSkin>> skins;
 	Vector<FBXSkinIndex> skin_indices;
+	Vector<Ref<FBXCamera>> cameras;
+	Vector<Ref<FBXLight>> lights;
 	HashSet<String> unique_names;
 	HashSet<String> unique_animation_names;
 
@@ -103,7 +108,7 @@ public:
 		HANDLE_BINARY_DISCARD_TEXTURES = 0,
 		HANDLE_BINARY_EXTRACT_TEXTURES,
 		HANDLE_BINARY_EMBED_AS_BASISU,
-		HANDLE_BINARY_EMBED_AS_UNCOMPRESSED, // if this value changes from 3, ResourceImporterScene::pre_import must be changed as well.
+		HANDLE_BINARY_EMBED_AS_UNCOMPRESSED, // If this value changes from 3, ResourceImporterScene::pre_import must be changed as well.
 	};
 	int32_t get_handle_binary_image() {
 		return handle_binary_image;
@@ -166,6 +171,9 @@ public:
 	TypedArray<FBXSkin> get_skins();
 	void set_skins(TypedArray<FBXSkin> p_skins);
 
+	TypedArray<FBXCamera> get_cameras();
+	void set_cameras(TypedArray<FBXCamera> p_cameras);
+
 	TypedArray<String> get_unique_names();
 	void set_unique_names(TypedArray<String> p_unique_names);
 
@@ -190,6 +198,9 @@ public:
 
 	Variant get_additional_data(const StringName &p_extension_name);
 	void set_additional_data(const StringName &p_extension_name, Variant p_additional_data);
+
+	bool get_allow_geometry_helper_nodes();
+	void set_allow_geometry_helper_nodes(bool p_allow_geometry_helper_nodes);
 };
 
 #endif // FBX_STATE_H

@@ -470,8 +470,6 @@ void FileSystemDock::_update_display_mode(bool p_force) {
 			case DISPLAY_MODE_HSPLIT:
 			case DISPLAY_MODE_VSPLIT:
 				const bool is_vertical = display_mode == DISPLAY_MODE_VSPLIT;
-				const int split_offset = split_box->get_split_offset();
-				is_vertical ? split_box_offset_h = split_offset : split_box_offset_v = split_offset;
 				split_box->set_vertical(is_vertical);
 
 				const int actual_offset = is_vertical ? split_box_offset_v : split_box_offset_h;
@@ -1883,10 +1881,6 @@ Vector<String> FileSystemDock::_check_existing() {
 	return conflicting_items;
 }
 
-void FileSystemDock::_move_dialog_confirm(const String &p_path) {
-	_move_operation_confirm(p_path, move_dialog->is_copy_pressed());
-}
-
 void FileSystemDock::_move_operation_confirm(const String &p_to_path, bool p_copy, Overwrite p_overwrite) {
 	if (p_overwrite == OVERWRITE_UNDECIDED) {
 		to_move_path = p_to_path;
@@ -2363,6 +2357,7 @@ void FileSystemDock::_file_option(int p_option, const Vector<String> &p_selected
 				}
 			}
 			if (to_move.size() > 0) {
+				move_dialog->config(p_selected);
 				move_dialog->popup_centered_ratio(0.4);
 			}
 		} break;
@@ -2586,6 +2581,14 @@ void FileSystemDock::_change_split_mode() {
 
 	set_display_mode(next_mode);
 	emit_signal(SNAME("display_mode_changed"));
+}
+
+void FileSystemDock::_split_dragged(int p_offset) {
+	if (split_box->is_vertical()) {
+		split_box_offset_v = p_offset;
+	} else {
+		split_box_offset_h = p_offset;
+	}
 }
 
 void FileSystemDock::fix_dependencies(const String &p_for_file) {
@@ -3767,6 +3770,8 @@ FileSystemDock::FileSystemDock() {
 
 	split_box = memnew(SplitContainer);
 	split_box->set_v_size_flags(SIZE_EXPAND_FILL);
+	split_box->connect("dragged", callable_mp(this, &FileSystemDock::_split_dragged));
+	split_box_offset_h = 240 * EDSCALE;
 	add_child(split_box);
 
 	tree = memnew(FileSystemTree);
@@ -3847,7 +3852,8 @@ FileSystemDock::FileSystemDock() {
 
 	move_dialog = memnew(EditorDirDialog);
 	add_child(move_dialog);
-	move_dialog->connect("dir_selected", callable_mp(this, &FileSystemDock::_move_dialog_confirm));
+	move_dialog->connect("move_pressed", callable_mp(this, &FileSystemDock::_move_operation_confirm).bind(false, OVERWRITE_UNDECIDED));
+	move_dialog->connect("copy_pressed", callable_mp(this, &FileSystemDock::_move_operation_confirm).bind(true, OVERWRITE_UNDECIDED));
 
 	overwrite_dialog = memnew(ConfirmationDialog);
 	add_child(overwrite_dialog);
@@ -3884,7 +3890,7 @@ FileSystemDock::FileSystemDock() {
 
 	make_dir_dialog = memnew(DirectoryCreateDialog);
 	add_child(make_dir_dialog);
-	make_dir_dialog->connect("dir_created", callable_mp(this, &FileSystemDock::_rescan));
+	make_dir_dialog->connect("dir_created", callable_mp(this, &FileSystemDock::_rescan).unbind(1));
 
 	make_scene_dialog = memnew(SceneCreateDialog);
 	add_child(make_scene_dialog);

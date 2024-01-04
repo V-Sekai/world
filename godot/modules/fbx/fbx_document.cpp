@@ -30,51 +30,34 @@
 
 #include "fbx_document.h"
 
-#include "core/config/project_settings.h"
 #include "core/crypto/crypto_core.h"
-#include "core/error/error_list.h"
-#include "core/error/error_macros.h"
 #include "core/io/config_file.h"
-#include "core/io/dir_access.h"
 #include "core/io/file_access.h"
 #include "core/io/file_access_memory.h"
 #include "core/io/image.h"
-#include "core/io/json.h"
-#include "core/io/stream_peer.h"
 #include "core/math/color.h"
 #include "core/math/disjoint_set.h"
-#include "core/string/print_string.h"
-#include "core/version.h"
-#include "drivers/png/png_driver_common.h"
+#include "fbx_defines.h"
 #include "scene/3d/bone_attachment_3d.h"
 #include "scene/3d/camera_3d.h"
 #include "scene/3d/importer_mesh_instance_3d.h"
-#include "scene/3d/light_3d.h"
-#include "scene/3d/mesh_instance_3d.h"
-#include "scene/3d/multimesh_instance_3d.h"
 #include "scene/resources/image_texture.h"
 #include "scene/resources/material.h"
 #include "scene/resources/portable_compressed_texture.h"
 #include "scene/resources/skin.h"
 #include "scene/resources/surface_tool.h"
-
-#include "modules/modules_enabled.gen.h" // For csg, gridmap.
+#include "structures/fbx_light.h"
 
 #ifdef TOOLS_ENABLED
 #include "editor/editor_file_system.h"
 #endif
-#ifdef MODULE_CSG_ENABLED
-#include "modules/csg/csg_shape.h"
-#endif // MODULE_CSG_ENABLED
-#ifdef MODULE_GRIDMAP_ENABLED
-#include "modules/gridmap/grid_map.h"
-#endif // MODULE_GRIDMAP_ENABLED
 
 // FIXME: Hardcoded to avoid editor dependency.
 #define FBX_IMPORT_USE_NAMED_SKIN_BINDS 16
 #define FBX_IMPORT_DISCARD_MESHES_AND_MATERIALS 32
+#define FBX_IMPORT_FORCE_DISABLE_MESH_COMPRESSION 64
 
-#include "thirdparty/ufbx/ufbx.h"
+#include <ufbx.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -386,6 +369,12 @@ Error FBXDocument::_parse_nodes(Ref<FBXState> p_state) {
 			node->set_name(_as_string(fbx_node->name));
 		} else if (fbx_node->is_root) {
 			node->set_name("Root");
+		}
+		if (fbx_node->camera) {
+			node->camera = fbx_node->camera->typed_id;
+		}
+		if (fbx_node->light) {
+			node->light = fbx_node->light->typed_id;
 		}
 		if (fbx_node->mesh) {
 			node->mesh = fbx_node->mesh->typed_id;
@@ -967,7 +956,7 @@ FBXImageIndex FBXDocument::_parse_image_save_image(Ref<FBXState> p_state, const 
 				EditorFileSystem::get_singleton()->update_file(file_path);
 				EditorFileSystem::get_singleton()->reimport_append(file_path, custom_options, String(), generator_parameters);
 			}
-			Ref<Texture2D> saved_image = ResourceLoader::load(file_path, "Texture2D");
+			Ref<Texture2D> saved_image = ResourceLoader::load(p_state->get_base_path().path_join(file_path), "Texture2D");
 			if (saved_image.is_valid()) {
 				p_state->images.push_back(saved_image);
 				p_state->source_images.push_back(saved_image->get_image());
@@ -1017,14 +1006,14 @@ Error FBXDocument::_parse_images(Ref<FBXState> p_state, const String &p_base_pat
 			data.resize(int(fbx_texture_file.content.size));
 			memcpy(data.ptrw(), fbx_texture_file.content.data, fbx_texture_file.content.size);
 		} else {
-			Ref<Texture2D> texture = ResourceLoader::load(path);
+			String base_dir = p_state->get_base_path();
+			Ref<Texture2D> texture = ResourceLoader::load(base_dir.path_join(path), "Texture2D");
 			if (texture.is_valid()) {
 				p_state->images.push_back(texture);
 				p_state->source_images.push_back(texture->get_image());
 				continue;
 			}
-			// Fallback to loading as byte array. This enables us to support the
-			// spec's requirement that we honor mimetype regardless of file URI.
+			// Fallback to loading as byte array.
 			data = FileAccess::get_file_as_bytes(path);
 			if (data.size() == 0) {
 				WARN_PRINT(vformat("FBX: Image index '%d' couldn't be loaded from path: %s because there was no data to load. Skipping it.", texture_i, path));
@@ -1124,7 +1113,7 @@ Error FBXDocument::_parse_materials(Ref<FBXState> p_state) {
 				}
 			}
 
-			// Multiply the albedo alpha with the transparency texture if necessary
+			// Multiply the albedo alpha with the transparency texture if necessary.
 			if (albedo_texture.is_valid() && transparency_texture.is_valid() && albedo_texture != transparency_texture) {
 				Pair<uint64_t, uint64_t> key = { albedo_texture->get_rid().get_id(), transparency_texture->get_rid().get_id() };
 				FBXTextureIndex *texture_index_ptr = p_state->albedo_transparency_textures.getptr(key);
@@ -1992,6 +1981,35 @@ void FBXDocument::_remove_duplicate_skins(Ref<FBXState> p_state) {
 	}
 }
 
+Error FBXDocument::_parse_cameras(Ref<FBXState> p_state) {
+	const ufbx_scene *fbx_scene = p_state->scene.get();
+	for (FBXCameraIndex i = 0; i < static_cast<FBXCameraIndex>(fbx_scene->cameras.count); i++) {
+		const ufbx_camera *fbx_camera = fbx_scene->cameras[i];
+
+		Ref<FBXCamera> camera;
+		camera.instantiate();
+		camera->set_name(_as_string(fbx_camera->name));
+		if (fbx_camera->projection_mode == UFBX_PROJECTION_MODE_PERSPECTIVE) {
+			camera->set_perspective(true);
+			camera->set_fov(Math::deg_to_rad(real_t(fbx_camera->field_of_view_deg.y)));
+		} else {
+			camera->set_perspective(false);
+			camera->set_size_mag(real_t(fbx_camera->orthographic_extent));
+		}
+		if (fbx_camera->near_plane != 0.0f) {
+			camera->set_depth_near(fbx_camera->near_plane);
+		}
+		if (fbx_camera->far_plane != 0.0f) {
+			camera->set_depth_far(fbx_camera->far_plane);
+		}
+		p_state->cameras.push_back(camera);
+	}
+
+	print_verbose("FBX: Total cameras: " + itos(p_state->cameras.size()));
+
+	return OK;
+}
+
 Error FBXDocument::_parse_animations(Ref<FBXState> p_state) {
 	const ufbx_scene *fbx_scene = p_state->scene.get();
 	for (FBXAnimationIndex animation_i = 0; animation_i < static_cast<FBXAnimationIndex>(fbx_scene->anim_stacks.count); animation_i++) {
@@ -2081,6 +2099,8 @@ void FBXDocument::_assign_node_names(Ref<FBXState> p_state) {
 		if (fbx_node->get_name().is_empty()) {
 			if (fbx_node->mesh >= 0) {
 				fbx_node->set_name(_gen_unique_name(p_state, "Mesh"));
+			} else if (fbx_node->camera >= 0) {
+				fbx_node->set_name(_gen_unique_name(p_state, "Camera3D"));
 			} else {
 				fbx_node->set_name(_gen_unique_name(p_state, "Node"));
 			}
@@ -2122,6 +2142,28 @@ ImporterMeshInstance3D *FBXDocument::_generate_mesh_instance(Ref<FBXState> p_sta
 	}
 	mi->set_mesh(import_mesh);
 	return mi;
+}
+
+Camera3D *FBXDocument::_generate_camera(Ref<FBXState> p_state, const FBXNodeIndex p_node_index) {
+	Ref<FBXNode> fbx_node = p_state->nodes[p_node_index];
+
+	ERR_FAIL_INDEX_V(fbx_node->camera, p_state->cameras.size(), nullptr);
+
+	print_verbose("FBX: Creating camera for: " + fbx_node->get_name());
+
+	Ref<FBXCamera> c = p_state->cameras[fbx_node->camera];
+	return c->to_node();
+}
+
+Light3D *FBXDocument::_generate_light(Ref<FBXState> p_state, const FBXNodeIndex p_node_index) {
+	Ref<FBXNode> fbx_node = p_state->nodes[p_node_index];
+
+	ERR_FAIL_INDEX_V(fbx_node->light, p_state->lights.size(), nullptr);
+
+	print_verbose("FBX: Creating light for: " + fbx_node->get_name());
+
+	Ref<FBXLight> l = p_state->lights[fbx_node->light];
+	return l->to_node();
 }
 
 Node3D *FBXDocument::_generate_spatial(Ref<FBXState> p_state, const FBXNodeIndex p_node_index) {
@@ -2172,6 +2214,10 @@ void FBXDocument::_generate_scene_node(Ref<FBXState> p_state, const FBXNodeIndex
 			current_node->add_child(mesh_inst, true);
 		} else if (fbx_node->mesh >= 0) {
 			current_node = _generate_mesh_instance(p_state, p_node_index);
+		} else if (fbx_node->camera >= 0) {
+			current_node = _generate_camera(p_state, p_node_index);
+		} else if (fbx_node->light >= 0) {
+			current_node = _generate_light(p_state, p_node_index);
 		} else {
 			current_node = _generate_spatial(p_state, p_node_index);
 		}
@@ -2203,7 +2249,7 @@ void FBXDocument::_generate_skeleton_bone_node(Ref<FBXState> p_state, const FBXN
 	Skeleton3D *skeleton = p_state->skeletons[fbx_node->skeleton]->godot_skeleton;
 	// In this case, this node is already a bone in skeleton.
 	const bool is_skinned_mesh = (fbx_node->skin >= 0 && fbx_node->mesh >= 0);
-	const bool requires_extra_node = (fbx_node->mesh >= 0);
+	const bool requires_extra_node = (fbx_node->mesh >= 0 || fbx_node->camera >= 0 || fbx_node->light >= 0);
 
 	Skeleton3D *active_skeleton = Object::cast_to<Skeleton3D>(p_scene_parent);
 	if (active_skeleton != skeleton) {
@@ -2257,6 +2303,8 @@ void FBXDocument::_generate_skeleton_bone_node(Ref<FBXState> p_state, const FBXN
 		if (!current_node) {
 			if (fbx_node->mesh >= 0) {
 				current_node = _generate_mesh_instance(p_state, p_node_index);
+			} else if (fbx_node->camera >= 0) {
+				current_node = _generate_camera(p_state, p_node_index);
 			} else {
 				current_node = _generate_spatial(p_state, p_node_index);
 			}
@@ -2578,8 +2626,13 @@ Error FBXDocument::_parse(Ref<FBXState> p_state, String p_path, Ref<FileAccess> 
 	opts.target_axes = ufbx_axes_right_handed_y_up;
 	opts.target_unit_meters = 1.0f;
 	opts.space_conversion = UFBX_SPACE_CONVERSION_MODIFY_GEOMETRY;
-	opts.geometry_transform_handling = UFBX_GEOMETRY_TRANSFORM_HANDLING_HELPER_NODES;
-	opts.inherit_mode_handling = UFBX_INHERIT_MODE_HANDLING_COMPENSATE;
+	if (!p_state->get_allow_geometry_helper_nodes()) {
+		opts.geometry_transform_handling = UFBX_GEOMETRY_TRANSFORM_HANDLING_MODIFY_GEOMETRY_NO_FALLBACK;
+		opts.inherit_mode_handling = UFBX_INHERIT_MODE_HANDLING_IGNORE;
+	} else {
+		opts.geometry_transform_handling = UFBX_GEOMETRY_TRANSFORM_HANDLING_HELPER_NODES;
+		opts.inherit_mode_handling = UFBX_INHERIT_MODE_HANDLING_COMPENSATE;
+	}
 	opts.geometry_transform_helper_name.data = "GeometryTransformHelper";
 	opts.geometry_transform_helper_name.length = SIZE_MAX;
 	opts.scale_helper_name.data = "ScaleHelper";
@@ -2755,6 +2808,14 @@ Error FBXDocument::_parse_fbx_state(Ref<FBXState> p_state, const String &p_searc
 	err = _parse_meshes(p_state);
 	ERR_FAIL_COND_V(err != OK, ERR_PARSE_ERROR);
 
+	/* PARSE LIGHTS */
+	err = _parse_lights(p_state);
+	ERR_FAIL_COND_V(err != OK, ERR_PARSE_ERROR);
+
+	/* PARSE CAMERAS */
+	err = _parse_cameras(p_state);
+	ERR_FAIL_COND_V(err != OK, ERR_PARSE_ERROR);
+
 	/* PARSE ANIMATIONS */
 	err = _parse_animations(p_state);
 	ERR_FAIL_COND_V(err != OK, ERR_PARSE_ERROR);
@@ -2812,4 +2873,27 @@ void FBXDocument::_zero_unused_elements(Vector<float> &cur_custom, int start, in
 			cur_custom.write[index + channel] = 0;
 		}
 	}
+}
+Error FBXDocument::_parse_lights(Ref<FBXState> p_state) {
+	const ufbx_scene *fbx_scene = p_state->scene.get();
+	for (size_t i = 0; i < fbx_scene->lights.count; i++) {
+		const ufbx_light *fbx_light = fbx_scene->lights.data[i];
+		Ref<FBXLight> light;
+		light.instantiate();
+		light->set_name(_as_string(fbx_light->name));
+		light->set_color(Color(fbx_light->color.x, fbx_light->color.y, fbx_light->color.z));
+		light->set_intensity(fbx_light->intensity);
+		Vector3 local_dir(fbx_light->local_direction.x, fbx_light->local_direction.y, fbx_light->local_direction.z);
+		light->set_local_direction(local_dir);
+		light->set_type(fbx_light->type);
+		light->set_decay(fbx_light->decay);
+		light->set_area_shape(fbx_light->area_shape);
+		light->set_inner_angle(Math::deg_to_rad(fbx_light->inner_angle));
+		light->set_outer_angle(Math::deg_to_rad(fbx_light->outer_angle));
+		light->set_cast_light(fbx_light->cast_light);
+		light->set_cast_shadows(fbx_light->cast_shadows);
+		p_state->lights.push_back(light);
+	}
+	print_verbose("FBX: Total lights: " + itos(p_state->lights.size()));
+	return OK;
 }
