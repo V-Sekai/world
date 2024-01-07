@@ -69,7 +69,7 @@ void POTGenerator::generate_pot(const String &p_file) {
 	for (int i = 0; i < files.size(); i++) {
 		Vector<String> msgids;
 		Vector<Vector<String>> msgids_context_plural;
-		const String &file_path = files[i];
+		String file_path = files[i];
 		String file_extension = file_path.get_extension();
 
 		if (EditorTranslationParser::get_singleton()->can_parse(file_extension)) {
@@ -80,7 +80,7 @@ void POTGenerator::generate_pot(const String &p_file) {
 		}
 
 		for (int j = 0; j < msgids_context_plural.size(); j++) {
-			const Vector<String> &entry = msgids_context_plural[j];
+			Vector<String> entry = msgids_context_plural[j];
 			_add_new_msgid(entry[0], entry[1], entry[2], file_path);
 		}
 		for (int j = 0; j < msgids.size(); j++) {

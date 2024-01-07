@@ -597,8 +597,7 @@ private:
 
 	ToolMode tool_mode;
 
-	RID origin_mesh;
-	RID origin_multimesh;
+	RID origin;
 	RID origin_instance;
 	bool origin_enabled = false;
 	RID grid[3];
@@ -632,7 +631,7 @@ private:
 	RID indicators_instance;
 	RID cursor_mesh;
 	RID cursor_instance;
-	Ref<ShaderMaterial> origin_mat;
+	Ref<StandardMaterial3D> indicator_mat;
 	Ref<ShaderMaterial> grid_mat[3];
 	Ref<StandardMaterial3D> cursor_material;
 

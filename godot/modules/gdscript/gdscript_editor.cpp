@@ -620,9 +620,9 @@ static String _trim_parent_class(const String &p_class, const String &p_base_cla
 	}
 	Vector<String> names = p_class.split(".", false, 1);
 	if (names.size() == 2) {
-		const String &first = names[0];
+		String first = names[0];
+		String rest = names[1];
 		if (ClassDB::class_exists(p_base_class) && ClassDB::class_exists(first) && ClassDB::is_parent_class(p_base_class, first)) {
-			const String &rest = names[1];
 			return rest;
 		}
 	}
@@ -1210,8 +1210,6 @@ static void _find_identifiers_in_base(const GDScriptCompletionIdentifier &p_base
 					return;
 				}
 
-				int location = ScriptLanguage::LOCATION_OTHER;
-
 				if (!p_only_functions) {
 					List<PropertyInfo> members;
 					if (p_base.value.get_type() != Variant::NIL) {
@@ -1225,11 +1223,7 @@ static void _find_identifiers_in_base(const GDScriptCompletionIdentifier &p_base
 							continue;
 						}
 						if (!String(E.name).contains("/")) {
-							ScriptLanguage::CodeCompletionOption option(E.name, ScriptLanguage::CODE_COMPLETION_KIND_MEMBER, location);
-							if (base_type.kind == GDScriptParser::DataType::ENUM) {
-								// Sort enum members in their declaration order.
-								location += 1;
-							}
+							ScriptLanguage::CodeCompletionOption option(E.name, ScriptLanguage::CODE_COMPLETION_KIND_MEMBER);
 							if (GDScriptParser::theme_color_names.has(E.name)) {
 								option.theme_color_name = GDScriptParser::theme_color_names[E.name];
 							}
@@ -1245,7 +1239,7 @@ static void _find_identifiers_in_base(const GDScriptCompletionIdentifier &p_base
 						// Enum types are static and cannot change, therefore we skip non-const dictionary methods.
 						continue;
 					}
-					ScriptLanguage::CodeCompletionOption option(E.name, ScriptLanguage::CODE_COMPLETION_KIND_FUNCTION, location);
+					ScriptLanguage::CodeCompletionOption option(E.name, ScriptLanguage::CODE_COMPLETION_KIND_FUNCTION);
 					if (E.arguments.size()) {
 						option.insert_text += "(";
 					} else {

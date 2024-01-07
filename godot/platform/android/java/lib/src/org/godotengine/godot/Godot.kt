@@ -484,14 +484,6 @@ class Godot(private val context: Context) : SensorEventListener {
 		return containerLayout
 	}
 
-	fun onStart(host: GodotHost) {
-		if (host != primaryHost) {
-			return
-		}
-
-		renderView!!.onActivityStarted()
-	}
-
 	fun onResume(host: GodotHost) {
 		if (host != primaryHost) {
 			return
@@ -534,14 +526,6 @@ class Godot(private val context: Context) : SensorEventListener {
 		for (plugin in pluginRegistry.allPlugins) {
 			plugin.onMainPause()
 		}
-	}
-
-	fun onStop(host: GodotHost) {
-		if (host != primaryHost) {
-			return
-		}
-
-		renderView!!.onActivityStopped()
 	}
 
 	fun onDestroy(primaryHost: GodotHost) {

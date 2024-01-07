@@ -287,13 +287,13 @@ Vector<StringName> GraphEditArranger::_split(const Vector<StringName> &r_layer, 
 		return Vector<StringName>();
 	}
 
-	const StringName &p = r_layer[Math::random(0, r_layer.size() - 1)];
+	StringName p = r_layer[Math::random(0, r_layer.size() - 1)];
 	Vector<StringName> left;
 	Vector<StringName> right;
 
 	for (int i = 0; i < r_layer.size(); i++) {
 		if (p != r_layer[i]) {
-			const StringName &q = r_layer[i];
+			StringName q = r_layer[i];
 			int cross_pq = r_crossings[p][q];
 			int cross_qp = r_crossings[q][p];
 			if (cross_pq > cross_qp) {
@@ -326,9 +326,9 @@ void GraphEditArranger::_horizontal_alignment(Dictionary &r_root, Dictionary &r_
 
 		for (int j = 0; j < lower_layer.size(); j++) {
 			Vector<Pair<int, StringName>> up;
-			const StringName &current_node = lower_layer[j];
+			StringName current_node = lower_layer[j];
 			for (int k = 0; k < upper_layer.size(); k++) {
-				const StringName &adjacent_neighbour = upper_layer[k];
+				StringName adjacent_neighbour = upper_layer[k];
 				if (r_upper_neighbours[current_node].has(adjacent_neighbour)) {
 					up.push_back(Pair<int, StringName>(k, adjacent_neighbour));
 				}
@@ -360,12 +360,12 @@ void GraphEditArranger::_crossing_minimisation(HashMap<int, Vector<StringName>> 
 		HashMap<StringName, Dictionary> c;
 
 		for (int j = 0; j < lower_layer.size(); j++) {
-			const StringName &p = lower_layer[j];
+			StringName p = lower_layer[j];
 			Dictionary d;
 
 			for (int k = 0; k < lower_layer.size(); k++) {
 				unsigned int crossings = 0;
-				const StringName &q = lower_layer[k];
+				StringName q = lower_layer[k];
 
 				if (j != k) {
 					for (int h = 1; h < upper_layer.size(); h++) {
