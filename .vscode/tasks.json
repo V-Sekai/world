@@ -15,10 +15,6 @@
       "command": [
         "scons warnings=no werror=yes dev_build=no precision=double compiledb=yes target=editor tests=yes debug_symbols=yes"
       ],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
     },
     {
       "label": "Godot Engine Dev",
@@ -32,7 +28,7 @@
       "group": {
         "kind": "build",
         "isDefault": true
-      },
+      }
     },
     {
       "label": "Godot Clean Engine",
@@ -43,11 +39,6 @@
       "command": [
         "scons warnings=no werror=yes dev_build=no precision=double compiledb=yes target=editor tests=yes -c"
       ],
-      "problemMatcher": [],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      }
     },
     {
       "label": "Godot Engine Windows Clang",
@@ -58,7 +49,6 @@
       "command": [
         "scons warnings=no werror=yes dev_build=no precision=double use_llvm=yes use_mingw=yes LINKFLAGS='-Wl,-pdb=' CCFLAGS='-g -gcodeview' compiledb=yes target=editor"
       ],
-      "problemMatcher": [],
     },
     {
       "label": "Godot Engine Windows MSVC",
@@ -68,9 +58,7 @@
       },
       "command": [
         "scons warnings=no werror=no dev_build=yes precision=double vsproj=yes compiledb=yes target=editor"
-        // "scons warnings=no werror=yes dev_build=no precision=double use_llvm=yes use_mingw=yes LINKFLAGS='-Wl,-pdb=' CCFLAGS='-g -gcodeview' compiledb=yes target=editor"
       ],
-      "problemMatcher": [],
-    },
+    }
   ]
 }
