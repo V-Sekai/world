@@ -45,6 +45,7 @@
 #include "core/io/file_access_zip.h"
 #include "core/io/image_loader.h"
 #include "core/io/ip.h"
+#include "core/io/resource.h"
 #include "core/io/resource_loader.h"
 #include "core/object/message_queue.h"
 #include "core/os/os.h"
@@ -77,6 +78,7 @@
 #include "servers/physics_server_3d.h"
 #include "servers/register_server_types.h"
 #include "servers/rendering/rendering_server_default.h"
+#include "servers/resonanceaudio/resonance_audio_wrapper.h"
 #include "servers/text/text_server_dummy.h"
 #include "servers/text_server.h"
 #include "servers/xr_server.h"
@@ -140,6 +142,7 @@ static MessageQueue *message_queue = nullptr;
 
 // Initialized in setup2()
 static AudioServer *audio_server = nullptr;
+static ResonanceAudioServer *resonance_audio_server = nullptr;
 static DisplayServer *display_server = nullptr;
 static RenderingServer *rendering_server = nullptr;
 static CameraServer *camera_server = nullptr;
@@ -813,6 +816,16 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	for (const String &arg : platform_args) {
 		args.push_back(arg);
 	}
+#if defined(IOS_ENABLED) && defined(TOOLS_ENABLED)
+	String _cmd_path = OS::get_singleton()->get_user_data_dir().path_join("_cmd");
+	String _cmd_args_str = FileAccess::get_file_as_string(_cmd_path);
+	Vector<String> _cmd_args = _cmd_args_str.split("\n");
+	for (int i = 0; i < _cmd_args.size(); i++) {
+		args.push_back(_cmd_args[i]);
+	}
+	Ref<DirAccess> dir_access = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
+	dir_access->remove(_cmd_path);
+#endif
 
 	List<String>::Element *I = args.front();
 
@@ -1859,12 +1872,21 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	if (default_renderer_mobile.is_empty()) {
 		default_renderer_mobile = "gl_compatibility";
 	}
+#ifndef IOS_ENABLED
 	// Default to Compatibility when using the project manager.
 	if (rendering_driver.is_empty() && rendering_method.is_empty() && project_manager) {
 		rendering_driver = "opengl3";
 		rendering_method = "gl_compatibility";
 		default_renderer_mobile = "gl_compatibility";
 	}
+#else
+	if (rendering_driver.is_empty() && rendering_method.is_empty() && project_manager) {
+		rendering_driver = "vulkan";
+		rendering_method = "mobile";
+		default_renderer_mobile = "mobile";
+	}
+#endif
+
 #endif
 	if (renderer_hints.is_empty()) {
 		ERR_PRINT("No renderers available.");
@@ -2573,6 +2595,8 @@ Error Main::setup2() {
 		audio_server = memnew(AudioServer);
 		audio_server->init();
 
+	    resonance_audio_server = memnew(ResonanceAudioServer);
+		
 		OS::get_singleton()->benchmark_end_measure("Servers", "Audio");
 	}
 
@@ -3981,6 +4005,10 @@ void Main::cleanup(bool p_force) {
 	if (audio_server) {
 		audio_server->finish();
 		memdelete(audio_server);
+	}
+
+	if (resonance_audio_server) {
+		memdelete(resonance_audio_server);
 	}
 
 	if (camera_server) {

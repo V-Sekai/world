@@ -31,8 +31,11 @@
 #include "camera_3d.h"
 
 #include "collision_object_3d.h"
+#include "core/config/project_settings.h"
 #include "core/math/projection.h"
 #include "scene/main/viewport.h"
+#include "servers/audio_server.h"
+#include "servers/resonanceaudio/resonance_audio_wrapper.h"
 
 void Camera3D::_update_audio_listener_state() {
 }
@@ -120,6 +123,10 @@ void Camera3D::_notification(int p_what) {
 		} break;
 
 		case NOTIFICATION_TRANSFORM_CHANGED: {
+			if (viewport->is_audio_listener_3d() && GLOBAL_GET("audio/enable_resonance_audio")) {
+				ResonanceAudioServer::get_singleton()->set_head_transform(get_global_transform());
+			}
+
 			_request_camera_update();
 			if (doppler_tracking != DOPPLER_TRACKING_DISABLED) {
 				velocity_tracker->update_position(get_global_transform().origin);
@@ -239,6 +246,15 @@ void Camera3D::set_frustum(real_t p_size, Vector2 p_offset, real_t p_z_near, rea
 
 	RenderingServer::get_singleton()->camera_set_frustum(camera, size, frustum_offset, near, far);
 	update_gizmos();
+}
+
+Projection Camera3D::get_override_projection() const {
+	return override_projection;
+}
+
+void Camera3D::set_override_projection(const Projection &p_matrix) {
+	override_projection = p_matrix;
+	RenderingServer::get_singleton()->camera_set_override_projection(camera, override_projection);
 }
 
 void Camera3D::set_projection(ProjectionType p_mode) {
@@ -523,6 +539,8 @@ void Camera3D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_near", "near"), &Camera3D::set_near);
 	ClassDB::bind_method(D_METHOD("get_projection"), &Camera3D::get_projection);
 	ClassDB::bind_method(D_METHOD("set_projection", "mode"), &Camera3D::set_projection);
+	ClassDB::bind_method(D_METHOD("get_override_projection"), &Camera3D::get_override_projection);
+	ClassDB::bind_method(D_METHOD("set_override_projection", "projection_matrix"), &Camera3D::set_override_projection);
 	ClassDB::bind_method(D_METHOD("set_h_offset", "offset"), &Camera3D::set_h_offset);
 	ClassDB::bind_method(D_METHOD("get_h_offset"), &Camera3D::get_h_offset);
 	ClassDB::bind_method(D_METHOD("set_v_offset", "offset"), &Camera3D::set_v_offset);
@@ -555,6 +573,7 @@ void Camera3D::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "v_offset", PROPERTY_HINT_NONE, "suffix:m"), "set_v_offset", "get_v_offset");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "doppler_tracking", PROPERTY_HINT_ENUM, "Disabled,Idle,Physics"), "set_doppler_tracking", "get_doppler_tracking");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "projection", PROPERTY_HINT_ENUM, "Perspective,Orthogonal,Frustum"), "set_projection", "get_projection");
+	ADD_PROPERTY(PropertyInfo(Variant::PROJECTION, "override_projection"), "set_override_projection", "get_override_projection");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "current"), "set_current", "is_current");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "fov", PROPERTY_HINT_RANGE, "1,179,0.1,degrees"), "set_fov", "get_fov");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "size", PROPERTY_HINT_RANGE, "0.001,100,0.001,or_greater,suffix:m"), "set_size", "get_size");
@@ -708,7 +727,6 @@ RID Camera3D::get_pyramid_shape_rid() {
 		pyramid_shape_points = get_near_plane_points();
 		pyramid_shape = PhysicsServer3D::get_singleton()->convex_polygon_shape_create();
 		PhysicsServer3D::get_singleton()->shape_set_data(pyramid_shape, pyramid_shape_points);
-
 	} else { //check if points changed
 		Vector<Vector3> local_points = get_near_plane_points();
 
@@ -732,6 +750,7 @@ RID Camera3D::get_pyramid_shape_rid() {
 
 Camera3D::Camera3D() {
 	camera = RenderingServer::get_singleton()->camera_create();
+	override_projection.set_zero();
 	set_perspective(75.0, 0.05, 4000.0);
 	RenderingServer::get_singleton()->camera_set_cull_mask(camera, layers);
 	//active=false;
