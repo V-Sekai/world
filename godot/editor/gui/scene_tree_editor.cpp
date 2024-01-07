@@ -41,10 +41,8 @@
 #include "editor/editor_undo_redo_manager.h"
 #include "editor/node_dock.h"
 #include "editor/plugins/animation_player_editor_plugin.h"
-#include "editor/plugins/animation_tree_editor_plugin.h"
 #include "editor/plugins/canvas_item_editor_plugin.h"
 #include "editor/plugins/script_editor_plugin.h"
-#include "modules/multiplayer/editor/replication_editor.h"
 #include "scene/gui/flow_container.h"
 #include "scene/gui/label.h"
 #include "scene/gui/tab_container.h"
@@ -118,14 +116,10 @@ void SceneTreeEditor::_cell_button_pressed(Object *p_item, int p_column, int p_i
 		undo_redo->commit_action();
 	} else if (p_id == BUTTON_PIN) {
 		if (n->is_class("AnimationMixer")) {
-			AnimationPlayerEditor::get_singleton()->unpin(n);
-			if (n->is_class("AnimationTree")) {
-				AnimationTreeEditor::get_singleton()->unpin(n);
-			}
-		} else if (n->is_class("MultiplayerSynchronizer")) {
-			ReplicationEditor::get_singleton()->unpin(n);
+			AnimationPlayerEditor::get_singleton()->unpin();
+			_update_tree();
 		}
-		_update_tree();
+
 	} else if (p_id == BUTTON_GROUP) {
 		undo_redo->create_action(TTR("Ungroup Children"));
 
@@ -215,7 +209,6 @@ void SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent) {
 	}
 
 	TreeItem *item = tree->create_item(p_parent);
-	ERR_FAIL_NULL(item);
 
 	item->set_text(0, p_node->get_name());
 	if (can_rename && !part_of_subscene) {
@@ -368,12 +361,33 @@ void SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent) {
 	}
 
 	{
-		_update_node_tooltip(p_node, item);
-		Callable delay_update_tooltip = callable_mp(this, &SceneTreeEditor::_queue_update_node_tooltip);
-		if (p_node->is_connected("editor_description_changed", delay_update_tooltip)) {
-			p_node->disconnect("editor_description_changed", delay_update_tooltip);
+		// Display the node name in all tooltips so that long node names can be previewed
+		// without having to rename them.
+		String tooltip = String(p_node->get_name());
+
+		if (p_node == get_scene_node() && p_node->get_scene_inherited_state().is_valid()) {
+			item->add_button(0, get_editor_theme_icon(SNAME("InstanceOptions")), BUTTON_SUBSCENE, false, TTR("Open in Editor"));
+			tooltip += String("\n" + TTR("Inherits:") + " " + p_node->get_scene_inherited_state()->get_path());
+		} else if (p_node != get_scene_node() && !p_node->get_scene_file_path().is_empty() && can_open_instance) {
+			item->add_button(0, get_editor_theme_icon(SNAME("InstanceOptions")), BUTTON_SUBSCENE, false, TTR("Open in Editor"));
+			tooltip += String("\n" + TTR("Instance:") + " " + p_node->get_scene_file_path());
 		}
-		p_node->connect("editor_description_changed", delay_update_tooltip.bind(item));
+
+		StringName custom_type = EditorNode::get_singleton()->get_object_custom_type_name(p_node);
+		tooltip += String("\n" + TTR("Type:") + " " + (custom_type != StringName() ? String(custom_type) : p_node->get_class()));
+
+		if (!p_node->get_editor_description().is_empty()) {
+			const PackedInt32Array boundaries = TS->string_get_word_breaks(p_node->get_editor_description(), "", 80);
+			tooltip += "\n";
+
+			for (int i = 0; i < boundaries.size(); i += 2) {
+				const int start = boundaries[i];
+				const int end = boundaries[i + 1];
+				tooltip += "\n" + p_node->get_editor_description().substr(start, end - start + 1).rstrip("\n");
+			}
+		}
+
+		item->set_tooltip_text(0, tooltip);
 	}
 
 	if (can_open_instance && is_scene_tree_dock) { // Show buttons only when necessary (SceneTreeDock) to avoid crashes.
@@ -397,8 +411,6 @@ void SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent) {
 			item->add_button(0, get_editor_theme_icon(SNAME("Script")), BUTTON_SCRIPT, false, TTR("Open Script:") + " " + scr->get_path() + additional_notes);
 			item->set_button_color(0, item->get_button_count(0) - 1, button_color);
 		}
-
-		int pin_count = 0;
 
 		if (p_node->is_class("CanvasItem")) {
 			if (p_node->has_meta("_edit_lock_")) {
@@ -454,26 +466,10 @@ void SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent) {
 
 			_update_visibility_color(p_node, item);
 		} else if (p_node->is_class("AnimationMixer")) {
-			if (AnimationPlayerEditor::get_singleton()->get_editing_node() == p_node && AnimationPlayerEditor::get_singleton()->is_pinned()) {
-				pin_count++;
-			}
+			bool is_pinned = AnimationPlayerEditor::get_singleton()->get_editing_node() == p_node && AnimationPlayerEditor::get_singleton()->is_pinned();
 
-			if (p_node->is_class("AnimationTree")) {
-				if (AnimationTreeEditor::get_singleton()->get_animation_tree() == p_node && AnimationTreeEditor::get_singleton()->is_pinned()) {
-					pin_count++;
-				}
-			}
-		} else if (p_node->is_class("MultiplayerSynchronizer")) {
-			if (ReplicationEditor::get_singleton()->get_current() == p_node && ReplicationEditor::get_singleton()->is_pinned()) {
-				pin_count++;
-			}
-		}
-
-		if (pin_count) {
-			if (pin_count > 1) {
-				item->add_button(0, get_editor_theme_icon(SNAME("MultiplePins")), BUTTON_PIN, false, TTR("Node is pinned.\nClick to unpin."));
-			} else {
-				item->add_button(0, get_editor_theme_icon(SNAME("Pin")), BUTTON_PIN, false, TTR("Node is pinned.\nClick to unpin."));
+			if (is_pinned) {
+				item->add_button(0, get_editor_theme_icon(SNAME("Pin")), BUTTON_PIN, false, TTR("AnimationPlayer is pinned.\nClick to unpin."));
 			}
 		}
 	}
@@ -522,46 +518,6 @@ void SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent) {
 			item->set_selectable(0, false);
 		}
 	}
-}
-
-void SceneTreeEditor::_queue_update_node_tooltip(Node *p_node, TreeItem *p_item) {
-	Callable update_tooltip = callable_mp(this, &SceneTreeEditor::_update_node_tooltip);
-	if (update_node_tooltip_delay->is_connected("timeout", update_tooltip)) {
-		update_node_tooltip_delay->disconnect("timeout", update_tooltip);
-	}
-
-	update_node_tooltip_delay->connect("timeout", update_tooltip.bind(p_node, p_item));
-	update_node_tooltip_delay->start();
-}
-
-void SceneTreeEditor::_update_node_tooltip(Node *p_node, TreeItem *p_item) {
-	// Display the node name in all tooltips so that long node names can be previewed
-	// without having to rename them.
-	String tooltip = p_node->get_name();
-
-	if (p_node == get_scene_node() && p_node->get_scene_inherited_state().is_valid()) {
-		p_item->add_button(0, get_editor_theme_icon(SNAME("InstanceOptions")), BUTTON_SUBSCENE, false, TTR("Open in Editor"));
-		tooltip += String("\n" + TTR("Inherits:") + " " + p_node->get_scene_inherited_state()->get_path());
-	} else if (p_node != get_scene_node() && !p_node->get_scene_file_path().is_empty() && can_open_instance) {
-		p_item->add_button(0, get_editor_theme_icon(SNAME("InstanceOptions")), BUTTON_SUBSCENE, false, TTR("Open in Editor"));
-		tooltip += String("\n" + TTR("Instance:") + " " + p_node->get_scene_file_path());
-	}
-
-	StringName custom_type = EditorNode::get_singleton()->get_object_custom_type_name(p_node);
-	tooltip += "\n" + TTR("Type:") + " " + (custom_type != StringName() ? String(custom_type) : p_node->get_class());
-
-	if (!p_node->get_editor_description().is_empty()) {
-		const PackedInt32Array boundaries = TS->string_get_word_breaks(p_node->get_editor_description(), "", 80);
-		tooltip += "\n";
-
-		for (int i = 0; i < boundaries.size(); i += 2) {
-			const int start = boundaries[i];
-			const int end = boundaries[i + 1];
-			tooltip += "\n" + p_node->get_editor_description().substr(start, end - start + 1).rstrip("\n");
-		}
-	}
-
-	p_item->set_tooltip_text(0, tooltip);
 }
 
 void SceneTreeEditor::_node_visibility_changed(Node *p_node) {
@@ -772,7 +728,7 @@ bool SceneTreeEditor::_item_matches_all_terms(TreeItem *p_item, PackedStringArra
 	}
 
 	for (int i = 0; i < p_terms.size(); i++) {
-		const String &term = p_terms[i];
+		String term = p_terms[i];
 
 		// Recognize special filter.
 		if (term.contains(":") && !term.get_slicec(':', 0).is_empty()) {
@@ -1351,9 +1307,8 @@ bool SceneTreeEditor::can_drop_data_fw(const Point2 &p_point, const Variant &p_d
 		return false;
 	}
 
-	TreeItem *root = tree->get_root();
 	int section = tree->get_drop_section_at_position(p_point);
-	if (section < -1 || (section == -1 && (item->get_parent() == root))) {
+	if (section < -1 || (section == -1 && !item->get_parent())) {
 		return false;
 	}
 
@@ -1582,11 +1537,6 @@ SceneTreeEditor::SceneTreeEditor(bool p_label, bool p_can_rename, bool p_can_ope
 	update_timer->set_one_shot(true);
 	update_timer->set_wait_time(0.5);
 	add_child(update_timer);
-
-	update_node_tooltip_delay = memnew(Timer);
-	update_node_tooltip_delay->set_wait_time(0.5);
-	update_node_tooltip_delay->set_one_shot(true);
-	add_child(update_node_tooltip_delay);
 
 	script_types = memnew(List<StringName>);
 	ClassDB::get_inheriters_from_class("Script", script_types);

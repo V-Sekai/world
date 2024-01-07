@@ -533,7 +533,7 @@ bool ShaderEditorPlugin::can_drop_data_fw(const Point2 &p_point, const Variant &
 		}
 
 		for (int i = 0; i < files.size(); i++) {
-			const String &file = files[i];
+			String file = files[i];
 			if (ResourceLoader::exists(file, "Shader")) {
 				Ref<Shader> shader = ResourceLoader::load(file);
 				if (shader.is_valid()) {
@@ -574,7 +574,7 @@ void ShaderEditorPlugin::drop_data_fw(const Point2 &p_point, const Variant &p_da
 		Vector<String> files = d["files"];
 
 		for (int i = 0; i < files.size(); i++) {
-			const String &file = files[i];
+			String file = files[i];
 			Ref<Resource> res;
 			if (ResourceLoader::exists(file, "Shader") || ResourceLoader::exists(file, "ShaderInclude")) {
 				res = ResourceLoader::load(file);
@@ -657,7 +657,6 @@ ShaderEditorPlugin::ShaderEditorPlugin() {
 	}
 
 	shader_list = memnew(ItemList);
-	shader_list->set_auto_translate(false);
 	shader_list->set_v_size_flags(Control::SIZE_EXPAND_FILL);
 	vb->add_child(shader_list);
 	shader_list->connect("item_selected", callable_mp(this, &ShaderEditorPlugin::_shader_selected));

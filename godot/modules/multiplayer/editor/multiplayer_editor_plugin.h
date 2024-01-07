@@ -62,15 +62,13 @@ class MultiplayerEditorPlugin : public EditorPlugin {
 
 private:
 	Button *button = nullptr;
-	ObjectID last_multiplayer_sync;
 	ReplicationEditor *repl_editor = nullptr;
 	Ref<MultiplayerEditorDebugger> debugger;
-	bool is_visible = false;
 
 	void _open_request(const String &p_path);
-	void _multiplayer_synchronizer_removed(Node *p_node);
+	void _node_removed(Node *p_node);
 
-	void _pin_toggled();
+	void _pinned();
 
 protected:
 	void _notification(int p_what);

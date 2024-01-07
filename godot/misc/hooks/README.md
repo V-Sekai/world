@@ -29,7 +29,7 @@ so they should work out of the box on Linux/macOS.
 
 ##### clang-format
 - Download LLVM for Windows (version 13 or later) from
-  <https://github.com/llvm/llvm-project/releases>
+  <https://releases.llvm.org/download.html>
 - Make sure LLVM is added to the `PATH` during installation
 
 ##### black

@@ -1603,7 +1603,7 @@ void AnimationTimelineEdit::update_values() {
 		length->set_step(1);
 		length->set_tooltip_text(TTR("Animation length (frames)"));
 		time_icon->set_tooltip_text(TTR("Animation length (frames)"));
-		if (track_edit && track_edit->editor) {
+		if (track_edit) {
 			track_edit->editor->_update_key_edit();
 		}
 	} else {
@@ -6416,8 +6416,6 @@ void AnimationTrackEditor::_select_all_tracks_for_copy() {
 }
 
 void AnimationTrackEditor::_bind_methods() {
-	ClassDB::bind_method("set_root", &AnimationTrackEditor::set_root);
-
 	ClassDB::bind_method("_animation_update", &AnimationTrackEditor::_animation_update);
 	ClassDB::bind_method("_track_grab_focus", &AnimationTrackEditor::_track_grab_focus);
 	ClassDB::bind_method("_redraw_tracks", &AnimationTrackEditor::_redraw_tracks);
@@ -6466,14 +6464,11 @@ void AnimationTrackEditor::_pick_track_select_recursive(TreeItem *p_item, const 
 		return;
 	}
 
-	// Skip root node since root is hidden and has no metadata.
-	if (p_item->get_tree()->get_root() != p_item) {
-		NodePath np = p_item->get_metadata(0);
-		Node *node = get_node(np);
+	NodePath np = p_item->get_metadata(0);
+	Node *node = get_node(np);
 
-		if (!p_filter.is_empty() && ((String)node->get_name()).findn(p_filter) != -1) {
-			p_select_candidates.push_back(node);
-		}
+	if (!p_filter.is_empty() && ((String)node->get_name()).findn(p_filter) != -1) {
+		p_select_candidates.push_back(node);
 	}
 
 	TreeItem *c = p_item->get_first_child();

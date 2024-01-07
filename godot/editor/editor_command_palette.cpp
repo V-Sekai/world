@@ -92,6 +92,8 @@ void EditorCommandPalette::_update_command_search(const String &search_text) {
 		}
 	}
 
+	command_keys.clear();
+
 	TreeItem *root = search_options->get_root();
 	root->clear_children();
 

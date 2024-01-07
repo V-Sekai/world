@@ -172,11 +172,9 @@ void FindInFiles::_iterate() {
 			_current_dir = _current_dir.path_join(folder_name);
 
 			PackedStringArray sub_dirs;
-			PackedStringArray files_to_scan;
-			_scan_dir("res://" + _current_dir, sub_dirs, files_to_scan);
+			_scan_dir("res://" + _current_dir, sub_dirs);
 
 			_folders_stack.push_back(sub_dirs);
-			_files_to_scan.append_array(files_to_scan);
 
 		} else {
 			// Go back one level.
@@ -213,7 +211,7 @@ float FindInFiles::get_progress() const {
 	return 0;
 }
 
-void FindInFiles::_scan_dir(String path, PackedStringArray &out_folders, PackedStringArray &out_files_to_scan) {
+void FindInFiles::_scan_dir(String path, PackedStringArray &out_folders) {
 	Ref<DirAccess> dir = DirAccess::open(path);
 	if (dir.is_null()) {
 		print_verbose("Cannot open directory! " + path);
@@ -229,11 +227,8 @@ void FindInFiles::_scan_dir(String path, PackedStringArray &out_folders, PackedS
 			break;
 		}
 
-		// If there is a .gdignore file in the directory, clear all the files/folders
-		// to be searched on this path and skip searching the directory.
+		// If there is a .gdignore file in the directory, skip searching the directory.
 		if (file == ".gdignore") {
-			out_folders.clear();
-			out_files_to_scan.clear();
 			break;
 		}
 
@@ -252,7 +247,7 @@ void FindInFiles::_scan_dir(String path, PackedStringArray &out_folders, PackedS
 		} else {
 			String file_ext = file.get_extension();
 			if (_extension_filter.has(file_ext)) {
-				out_files_to_scan.push_back(path.path_join(file));
+				_files_to_scan.push_back(path.path_join(file));
 			}
 		}
 	}
