@@ -35,7 +35,7 @@
 
 #include "editor/editor_file_system.h"
 #include "editor/fbx_importer_manager.h"
-#include "editor/import/resource_importer_scene.h"
+#include "editor/import/3d/resource_importer_scene.h"
 
 class Animation;
 class Node;
@@ -54,15 +54,6 @@ public:
 	virtual Variant get_option_visibility(const String &p_path, bool p_for_animation, const String &p_option,
 			const HashMap<StringName, Variant> &p_options) override;
 	virtual void handle_compatibility_options(HashMap<StringName, Variant> &p_import_params) const override;
-};
-
-class EditorFileSystemImportFormatSupportQueryFBX : public EditorFileSystemImportFormatSupportQuery {
-	GDCLASS(EditorFileSystemImportFormatSupportQueryFBX, EditorFileSystemImportFormatSupportQuery);
-
-public:
-	virtual bool is_active() const override;
-	virtual Vector<String> get_file_extensions() const override;
-	virtual bool query() override;
 };
 
 #endif // TOOLS_ENABLED

@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  detect_prime_egl.h                                                    */
+/*  editor_import_collada.h                                               */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,38 +28,20 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef DETECT_PRIME_EGL_H
-#define DETECT_PRIME_EGL_H
+#ifndef EDITOR_IMPORT_COLLADA_H
+#define EDITOR_IMPORT_COLLADA_H
 
-#ifdef GLES3_ENABLED
-#ifdef EGL_ENABLED
+#include "editor/import/3d/resource_importer_scene.h"
 
-class DetectPrimeEGL {
-private:
-	struct Vendor {
-		const char *glxvendor = nullptr;
-		int priority = 0;
-	};
-
-	static constexpr Vendor vendor_map[] = {
-		{ "Advanced Micro Devices, Inc.", 30 },
-		{ "AMD", 30 },
-		{ "NVIDIA Corporation", 30 },
-		{ "X.Org", 30 },
-		{ "Intel Open Source Technology Center", 20 },
-		{ "Intel", 20 },
-		{ "nouveau", 10 },
-		{ "Mesa Project", 0 },
-		{ nullptr, 0 }
-	};
-
-	static void create_context();
+class EditorSceneFormatImporterCollada : public EditorSceneFormatImporter {
+	GDCLASS(EditorSceneFormatImporterCollada, EditorSceneFormatImporter);
 
 public:
-	static int detect_prime();
+	virtual uint32_t get_import_flags() const override;
+	virtual void get_extensions(List<String> *r_extensions) const override;
+	virtual Node *import_scene(const String &p_path, uint32_t p_flags, const HashMap<StringName, Variant> &p_options, List<String> *r_missing_deps = nullptr, Error *r_err = nullptr) override;
+
+	EditorSceneFormatImporterCollada();
 };
 
-#endif // GLES3_ENABLED
-#endif // EGL_ENABLED
-
-#endif // DETECT_PRIME_EGL_H
+#endif // EDITOR_IMPORT_COLLADA_H

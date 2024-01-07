@@ -915,7 +915,7 @@ FBXImageIndex FBXDocument::_parse_image_save_image(Ref<FBXState> p_state, const 
 			bool must_import = true;
 			Vector<uint8_t> img_data = p_image->get_data();
 			Dictionary generator_parameters;
-			String file_path = p_state->get_base_path() + "/" + p_state->filename.get_basename() + "_" + p_image->get_name();
+			String file_path = p_state->get_base_path().path_join(p_state->filename.get_basename() + "_" + p_image->get_name());
 			file_path += p_file_extension.is_empty() ? ".png" : p_file_extension;
 			if (FileAccess::exists(file_path + ".import")) {
 				Ref<ConfigFile> config;
@@ -927,6 +927,8 @@ FBXImageIndex FBXDocument::_parse_image_save_image(Ref<FBXState> p_state, const 
 				if (!generator_parameters.has("md5")) {
 					must_import = false; // Didn't come from a gltf document; don't overwrite.
 				}
+			}
+			if (must_import) {
 				String existing_md5 = generator_parameters["md5"];
 				unsigned char md5_hash[16];
 				CryptoCore::md5(img_data.ptr(), img_data.size(), md5_hash);
@@ -956,7 +958,7 @@ FBXImageIndex FBXDocument::_parse_image_save_image(Ref<FBXState> p_state, const 
 				EditorFileSystem::get_singleton()->update_file(file_path);
 				EditorFileSystem::get_singleton()->reimport_append(file_path, custom_options, String(), generator_parameters);
 			}
-			Ref<Texture2D> saved_image = ResourceLoader::load(p_state->get_base_path().path_join(file_path), "Texture2D");
+			Ref<Texture2D> saved_image = ResourceLoader::load(_get_texture_path(p_state->get_base_path(), file_path), "Texture2D");
 			if (saved_image.is_valid()) {
 				p_state->images.push_back(saved_image);
 				p_state->source_images.push_back(saved_image->get_image());
@@ -1007,7 +1009,7 @@ Error FBXDocument::_parse_images(Ref<FBXState> p_state, const String &p_base_pat
 			memcpy(data.ptrw(), fbx_texture_file.content.data, fbx_texture_file.content.size);
 		} else {
 			String base_dir = p_state->get_base_path();
-			Ref<Texture2D> texture = ResourceLoader::load(base_dir.path_join(path), "Texture2D");
+			Ref<Texture2D> texture = ResourceLoader::load(_get_texture_path(base_dir, path), "Texture2D");
 			if (texture.is_valid()) {
 				p_state->images.push_back(texture);
 				p_state->source_images.push_back(texture->get_image());
@@ -1994,7 +1996,7 @@ Error FBXDocument::_parse_cameras(Ref<FBXState> p_state) {
 			camera->set_fov(Math::deg_to_rad(real_t(fbx_camera->field_of_view_deg.y)));
 		} else {
 			camera->set_perspective(false);
-			camera->set_size_mag(real_t(fbx_camera->orthographic_extent));
+			camera->set_size_mag(real_t(fbx_camera->orthographic_size.y));
 		}
 		if (fbx_camera->near_plane != 0.0f) {
 			camera->set_depth_near(fbx_camera->near_plane);
@@ -2637,6 +2639,7 @@ Error FBXDocument::_parse(Ref<FBXState> p_state, String p_path, Ref<FileAccess> 
 	opts.geometry_transform_helper_name.length = SIZE_MAX;
 	opts.scale_helper_name.data = "ScaleHelper";
 	opts.scale_helper_name.length = SIZE_MAX;
+	opts.node_depth_limit = 512;
 	opts.target_camera_axes = ufbx_axes_right_handed_y_up;
 	opts.target_light_axes = ufbx_axes_right_handed_y_up;
 	opts.clean_skin_weights = true;
@@ -2883,17 +2886,38 @@ Error FBXDocument::_parse_lights(Ref<FBXState> p_state) {
 		light->set_name(_as_string(fbx_light->name));
 		light->set_color(Color(fbx_light->color.x, fbx_light->color.y, fbx_light->color.z));
 		light->set_intensity(fbx_light->intensity);
-		Vector3 local_dir(fbx_light->local_direction.x, fbx_light->local_direction.y, fbx_light->local_direction.z);
+		Vector3 local_dir(fbx_light->local_direction.x, fbx_light->local_direction.y, -fbx_light->local_direction.z);
 		light->set_local_direction(local_dir);
 		light->set_type(fbx_light->type);
 		light->set_decay(fbx_light->decay);
 		light->set_area_shape(fbx_light->area_shape);
-		light->set_inner_angle(Math::deg_to_rad(fbx_light->inner_angle));
-		light->set_outer_angle(Math::deg_to_rad(fbx_light->outer_angle));
+		light->set_inner_angle(fbx_light->inner_angle);
+		light->set_outer_angle(fbx_light->outer_angle);
 		light->set_cast_light(fbx_light->cast_light);
 		light->set_cast_shadows(fbx_light->cast_shadows);
 		p_state->lights.push_back(light);
 	}
 	print_verbose("FBX: Total lights: " + itos(p_state->lights.size()));
 	return OK;
+}
+
+String FBXDocument::_get_texture_path(const String &p_base_dir, const String &p_source_file_path) const {
+	const String tex_file_name = p_source_file_path.get_file();
+	const Vector<String> subdirs = {
+		"", "textures/", "Textures/", "images/",
+		"Images/", "materials/", "Materials/",
+		"maps/", "Maps/", "tex/", "Tex/"
+	};
+	String base_dir = p_base_dir.replace("res://", "");
+	const String source_file_name = tex_file_name.replace("res://", "");
+	while (!base_dir.is_empty()) {
+		for (int i = 0; i < subdirs.size(); ++i) {
+			String full_path = "res://" + base_dir.path_join(subdirs[i] + source_file_name);
+			if (FileAccess::exists(full_path)) {
+				return full_path.strip_edges();
+			}
+		}
+		base_dir = base_dir.get_base_dir().replace("res://", "");
+	}
+	return String();
 }
