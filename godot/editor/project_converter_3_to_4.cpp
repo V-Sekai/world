@@ -561,7 +561,7 @@ bool ProjectConverter3To4::validate_conversion() {
 
 	// Check file by file.
 	for (int i = 0; i < collected_files.size(); i++) {
-		String file_name = collected_files[i];
+		const String &file_name = collected_files[i];
 		Vector<String> lines;
 		uint32_t ignored_lines = 0;
 		uint64_t file_size = 0;
@@ -1045,107 +1045,108 @@ bool ProjectConverter3To4::test_conversion(RegExContainer &reg_container) {
 
 	// get_object_of_execution
 	{
-		{ String base = "var roman = kieliszek.";
-	String expected = "kieliszek.";
-	String got = get_object_of_execution(base);
-	if (got != expected) {
-		ERR_PRINT(vformat("Failed to get proper data from get_object_of_execution. \"%s\" should return \"%s\"(%d), got \"%s\"(%d), instead.", base, expected, expected.size(), got, got.size()));
+		String base = "var roman = kieliszek.";
+		String expected = "kieliszek.";
+		String got = get_object_of_execution(base);
+		if (got != expected) {
+			ERR_PRINT(vformat("Failed to get proper data from get_object_of_execution. \"%s\" should return \"%s\"(%d), got \"%s\"(%d), instead.", base, expected, expected.size(), got, got.size()));
+		}
+		valid = valid && (got == expected);
 	}
-	valid = valid && (got == expected);
-}
-{
-	String base = "r.";
-	String expected = "r.";
-	String got = get_object_of_execution(base);
-	if (got != expected) {
-		ERR_PRINT(vformat("Failed to get proper data from get_object_of_execution. \"%s\" should return \"%s\"(%d), got \"%s\"(%d), instead.", base, expected, expected.size(), got, got.size()));
+	{
+		String base = "r.";
+		String expected = "r.";
+		String got = get_object_of_execution(base);
+		if (got != expected) {
+			ERR_PRINT(vformat("Failed to get proper data from get_object_of_execution. \"%s\" should return \"%s\"(%d), got \"%s\"(%d), instead.", base, expected, expected.size(), got, got.size()));
+		}
+		valid = valid && (got == expected);
 	}
-	valid = valid && (got == expected);
-}
-{
-	String base = "mortadela(";
-	String expected = "";
-	String got = get_object_of_execution(base);
-	if (got != expected) {
-		ERR_PRINT(vformat("Failed to get proper data from get_object_of_execution. \"%s\" should return \"%s\"(%d), got \"%s\"(%d), instead.", base, expected, expected.size(), got, got.size()));
+	{
+		String base = "mortadela(";
+		String expected = "";
+		String got = get_object_of_execution(base);
+		if (got != expected) {
+			ERR_PRINT(vformat("Failed to get proper data from get_object_of_execution. \"%s\" should return \"%s\"(%d), got \"%s\"(%d), instead.", base, expected, expected.size(), got, got.size()));
+		}
+		valid = valid && (got == expected);
 	}
-	valid = valid && (got == expected);
-}
-{
-	String base = "var node = $world/ukraine/lviv.";
-	String expected = "$world/ukraine/lviv.";
-	String got = get_object_of_execution(base);
-	if (got != expected) {
-		ERR_PRINT(vformat("Failed to get proper data from get_object_of_execution. \"%s\" should return \"%s\"(%d), got \"%s\"(%d), instead.", base, expected, expected.size(), got, got.size()));
+	{
+		String base = "var node = $world/ukraine/lviv.";
+		String expected = "$world/ukraine/lviv.";
+		String got = get_object_of_execution(base);
+		if (got != expected) {
+			ERR_PRINT(vformat("Failed to get proper data from get_object_of_execution. \"%s\" should return \"%s\"(%d), got \"%s\"(%d), instead.", base, expected, expected.size(), got, got.size()));
+		}
+		valid = valid && (got == expected);
 	}
-	valid = valid && (got == expected);
-}
-}
-// get_starting_space
-{
-	String base = "\t\t\t var roman = kieliszek.";
-	String expected = "\t\t\t";
-	String got = get_starting_space(base);
-	if (got != expected) {
-		ERR_PRINT(vformat("Failed to get proper data from get_object_of_execution. \"%s\" should return \"%s\"(%d), got \"%s\"(%d), instead.", base, expected, expected.size(), got, got.size()));
-	}
-	valid = valid && (got == expected);
-}
-// Parse Arguments
-{
-	String line = "( )";
-	Vector<String> got_vector = parse_arguments(line);
-	String got = "";
-	String expected = "";
-	for (String &part : got_vector) {
-		got += part + "|||";
-	}
-	if (got != expected) {
-		ERR_PRINT(vformat("Failed to get proper data from parse_arguments. \"%s\" should return \"%s\"(%d), got \"%s\"(%d), instead.", line, expected, expected.size(), got, got.size()));
-	}
-	valid = valid && (got == expected);
-}
-{
-	String line = "(a , b , c)";
-	Vector<String> got_vector = parse_arguments(line);
-	String got = "";
-	String expected = "a|||b|||c|||";
-	for (String &part : got_vector) {
-		got += part + "|||";
-	}
-	if (got != expected) {
-		ERR_PRINT(vformat("Failed to get proper data from parse_arguments. \"%s\" should return \"%s\"(%d), got \"%s\"(%d), instead.", line, expected, expected.size(), got, got.size()));
-	}
-	valid = valid && (got == expected);
-}
-{
-	String line = "(a , \"b,\" , c)";
-	Vector<String> got_vector = parse_arguments(line);
-	String got = "";
-	String expected = "a|||\"b,\"|||c|||";
-	for (String &part : got_vector) {
-		got += part + "|||";
-	}
-	if (got != expected) {
-		ERR_PRINT(vformat("Failed to get proper data from parse_arguments. \"%s\" should return \"%s\"(%d), got \"%s\"(%d), instead.", line, expected, expected.size(), got, got.size()));
-	}
-	valid = valid && (got == expected);
-}
-{
-	String line = "(a , \"(,),,,,\" , c)";
-	Vector<String> got_vector = parse_arguments(line);
-	String got = "";
-	String expected = "a|||\"(,),,,,\"|||c|||";
-	for (String &part : got_vector) {
-		got += part + "|||";
-	}
-	if (got != expected) {
-		ERR_PRINT(vformat("Failed to get proper data from parse_arguments. \"%s\" should return \"%s\"(%d), got \"%s\"(%d), instead.", line, expected, expected.size(), got, got.size()));
-	}
-	valid = valid && (got == expected);
-}
 
-return valid;
+	// get_starting_space
+	{
+		String base = "\t\t\t var roman = kieliszek.";
+		String expected = "\t\t\t";
+		String got = get_starting_space(base);
+		if (got != expected) {
+			ERR_PRINT(vformat("Failed to get proper data from get_object_of_execution. \"%s\" should return \"%s\"(%d), got \"%s\"(%d), instead.", base, expected, expected.size(), got, got.size()));
+		}
+		valid = valid && (got == expected);
+	}
+
+	// Parse Arguments
+	{
+		String line = "( )";
+		Vector<String> got_vector = parse_arguments(line);
+		String got = "";
+		String expected = "";
+		for (String &part : got_vector) {
+			got += part + "|||";
+		}
+		if (got != expected) {
+			ERR_PRINT(vformat("Failed to get proper data from parse_arguments. \"%s\" should return \"%s\"(%d), got \"%s\"(%d), instead.", line, expected, expected.size(), got, got.size()));
+		}
+		valid = valid && (got == expected);
+	}
+	{
+		String line = "(a , b , c)";
+		Vector<String> got_vector = parse_arguments(line);
+		String got = "";
+		String expected = "a|||b|||c|||";
+		for (String &part : got_vector) {
+			got += part + "|||";
+		}
+		if (got != expected) {
+			ERR_PRINT(vformat("Failed to get proper data from parse_arguments. \"%s\" should return \"%s\"(%d), got \"%s\"(%d), instead.", line, expected, expected.size(), got, got.size()));
+		}
+		valid = valid && (got == expected);
+	}
+	{
+		String line = "(a , \"b,\" , c)";
+		Vector<String> got_vector = parse_arguments(line);
+		String got = "";
+		String expected = "a|||\"b,\"|||c|||";
+		for (String &part : got_vector) {
+			got += part + "|||";
+		}
+		if (got != expected) {
+			ERR_PRINT(vformat("Failed to get proper data from parse_arguments. \"%s\" should return \"%s\"(%d), got \"%s\"(%d), instead.", line, expected, expected.size(), got, got.size()));
+		}
+		valid = valid && (got == expected);
+	}
+	{
+		String line = "(a , \"(,),,,,\" , c)";
+		Vector<String> got_vector = parse_arguments(line);
+		String got = "";
+		String expected = "a|||\"(,),,,,\"|||c|||";
+		for (String &part : got_vector) {
+			got += part + "|||";
+		}
+		if (got != expected) {
+			ERR_PRINT(vformat("Failed to get proper data from parse_arguments. \"%s\" should return \"%s\"(%d), got \"%s\"(%d), instead.", line, expected, expected.size(), got, got.size()));
+		}
+		valid = valid && (got == expected);
+	}
+
+	return valid;
 }
 
 // Validate in all arrays if names don't do cyclic renames "Node" -> "Node2D" | "Node2D" -> "2DNode"
@@ -2733,7 +2734,7 @@ void ProjectConverter3To4::rename_joypad_buttons_and_axes(Vector<SourceLine> &so
 			for (int i = 0; i < reg_match.size(); ++i) {
 				Ref<RegExMatch> match = reg_match[i];
 				PackedStringArray strings = match->get_strings();
-				String button_index_entry = strings[0];
+				const String &button_index_entry = strings[0];
 				int button_index_value = strings[1].to_int();
 				if (button_index_value == 6) { // L2 and R2 are mapped to joypad axes in Godot 4.
 					line = line.replace("InputEventJoypadButton", "InputEventJoypadMotion");
@@ -2742,7 +2743,7 @@ void ProjectConverter3To4::rename_joypad_buttons_and_axes(Vector<SourceLine> &so
 					line = line.replace("InputEventJoypadButton", "InputEventJoypadMotion");
 					line = line.replace(button_index_entry, ",\"axis\":5,\"axis_value\":1.0");
 				} else if (button_index_value < 22) { // There are no mappings for indexes greater than 22 in both Godot 3 & 4.
-					String pressure_and_pressed_properties = strings[2];
+					const String &pressure_and_pressed_properties = strings[2];
 					line = line.replace(button_index_entry, ",\"button_index\":" + String::num_int64(reg_container.joypad_button_mappings[button_index_value]) + "," + pressure_and_pressed_properties);
 				}
 			}
@@ -2751,7 +2752,7 @@ void ProjectConverter3To4::rename_joypad_buttons_and_axes(Vector<SourceLine> &so
 			for (int i = 0; i < reg_match.size(); ++i) {
 				Ref<RegExMatch> match = reg_match[i];
 				PackedStringArray strings = match->get_strings();
-				String axis_entry = strings[0];
+				const String &axis_entry = strings[0];
 				int axis_value = strings[1].to_int();
 				if (axis_value == 6) {
 					line = line.replace(axis_entry, ",\"axis\":4");
@@ -2773,7 +2774,7 @@ Vector<String> ProjectConverter3To4::check_for_rename_joypad_buttons_and_axes(Ve
 			for (int i = 0; i < reg_match.size(); ++i) {
 				Ref<RegExMatch> match = reg_match[i];
 				PackedStringArray strings = match->get_strings();
-				String button_index_entry = strings[0];
+				const String &button_index_entry = strings[0];
 				int button_index_value = strings[1].to_int();
 				if (button_index_value == 6) { // L2 and R2 are mapped to joypad axes in Godot 4.
 					found_renames.append(line_formatter(current_line, "InputEventJoypadButton", "InputEventJoypadMotion", line));
@@ -2790,7 +2791,7 @@ Vector<String> ProjectConverter3To4::check_for_rename_joypad_buttons_and_axes(Ve
 			for (int i = 0; i < reg_match.size(); ++i) {
 				Ref<RegExMatch> match = reg_match[i];
 				PackedStringArray strings = match->get_strings();
-				String axis_entry = strings[0];
+				const String &axis_entry = strings[0];
 				int axis_value = strings[1].to_int();
 				if (axis_value == 6) {
 					found_renames.append(line_formatter(current_line, axis_entry, ",\"axis\":4", line));
