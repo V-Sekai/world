@@ -16,7 +16,7 @@
       "request": "launch",
       "args": ["--path", "game", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/godot/bin/godot.linuxbsd.editor.dev.double.x86_64",
+      "program": "${workspaceFolder}/godot/bin/godot.linuxbsd.editor.double.x86_64",
       "preLaunchTask": "Godot Engine"
     },
     {
