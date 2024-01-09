@@ -47,7 +47,7 @@
         "cwd": "${workspaceFolder}/godot"
       },
       "command": [
-        "scons warnings=no werror=yes dev_build=no precision=double use_llvm=yes use_mingw=yes LINKFLAGS='-Wl,-pdb=' CCFLAGS='-g -gcodeview' compiledb=yes target=editor"
+        "scons warnings=no werror=yes dev_build=no debug_symbols=yes precision=double use_llvm=yes use_mingw=yes LINKFLAGS='-Wl,-pdb=' CCFLAGS='-g -gcodeview' compiledb=yes target=editor"
       ],
     },
     {
