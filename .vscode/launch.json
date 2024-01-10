@@ -40,7 +40,7 @@
       ],            
       "type": "lldb",
       "request": "launch",
-      "args": ["--path", "tools/task_goal_planner", "-e"],
+      "args": ["--path", "../TEST_fbx_mocap_market", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
@@ -62,7 +62,7 @@
       "name": "Run the Windows editor",
       "type": "lldb",
       "request": "launch",
-      "args": ["--path", "../godot-active-ragdoll-physics-animations", "-e"],
+      "args": ["--path", "../TEST_fbx_mocap_market", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/godot/bin/godot.windows.editor.double.x86_64.llvm.exe",
       "preLaunchTask": "Godot Engine Windows Clang"
