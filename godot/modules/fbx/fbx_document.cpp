@@ -1300,15 +1300,11 @@ Error FBXDocument::_parse_animations(Ref<FBXState> p_state) {
 
 				if (fbx_element->type == UFBX_ELEMENT_BLEND_CHANNEL && prop_name == UFBX_DeformPercent) {
 					const ufbx_blend_channel *fbx_blend_channel = ufbx_as_blend_channel(fbx_element);
-
-					int blend_i = fbx_blend_channel->typed_id;
 					GLTFAnimation::Channel<real_t> blend_shape_track;
-
 					for (const ufbx_baked_vec3 &key : fbx_baked_prop.keys) {
 						blend_shape_track.times.push_back(float(key.time));
 						blend_shape_track.values.push_back(real_t(key.value.x / 100.0));
 					}
-
 					animation->get_tracks()[node].weight_tracks.push_back(blend_shape_track);
 				}
 			}
@@ -1788,7 +1784,7 @@ void FBXDocument::_import_animation(Ref<FBXState> p_state, AnimationPlayer *p_an
 		for (int i = 0; i < blend_channels.size(); i++) {
 			GLTFAnimation::Track tracks = anim->get_tracks()[blend_channels[i]];
 			for (int channel_i = 0; channel_i < tracks.weight_tracks.size(); channel_i++) {
-				GLTFAnimation::Channel<double> weights = tracks.weight_tracks[channel_i];
+				GLTFAnimation::Channel<real_t> weights = tracks.weight_tracks[channel_i];
 				const String blend_path = String(mesh_instance_node_path) + ":" + String(mesh->get_mesh()->get_blend_shape_name(i));
 				const int track_idx = animation->get_track_count();
 				animation->add_track(Animation::TYPE_BLEND_SHAPE);
@@ -1798,7 +1794,7 @@ void FBXDocument::_import_animation(Ref<FBXState> p_state, AnimationPlayer *p_an
 				animation->track_set_interpolation_type(track_idx, Animation::INTERPOLATION_LINEAR);
 				for (int j = 0; j < weights.times.size(); j++) {
 					const double t = weights.times[j] - anim_start_offset;
-					const double attribs = weights.values[j];
+					const real_t attribs = weights.values[j];
 					animation->blend_shape_track_insert_key(track_idx, t, attribs);
 				}
 			}
