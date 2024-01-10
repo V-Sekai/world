@@ -648,6 +648,9 @@ Error FBXDocument::_parse_meshes(Ref<FBXState> p_state) {
 
 				// Find the first imported skin deformer
 				for (ufbx_skin_deformer *fbx_skin : fbx_mesh->skin_deformers) {
+					if (!p_state->skin_indices.has(fbx_skin->typed_id)) {
+						continue;
+					}
 					FBXSkinIndex skin_i = p_state->skin_indices[fbx_skin->typed_id];
 					if (skin_i < 0) {
 						continue;
@@ -1493,14 +1496,11 @@ Error FBXDocument::_verify_skin(Vector<Ref<FBXNode>> &r_nodes, Ref<FBXSkin> p_sk
 
 Error FBXDocument::_parse_skins(Ref<FBXState> p_state) {
 	const ufbx_scene *fbx_scene = p_state->scene.get();
-
-	Vector<FBXNodeIndex> skin_indices_out;
-	Vector<Ref<FBXSkin>> skin_out;
-	HashMap<FBXNodeIndex, bool>  joint_mapping;
+	HashMap<FBXNodeIndex, bool> joint_mapping;
 
 	for (const ufbx_skin_deformer *fbx_skin : fbx_scene->skin_deformers) {
 		if (fbx_skin->clusters.count == 0) {
-			skin_indices_out.push_back(-1);
+			p_state->skin_indices.push_back(-1);
 			continue;
 		}
 
@@ -1523,9 +1523,8 @@ Error FBXDocument::_parse_skins(Ref<FBXState> p_state) {
 		} else {
 			skin->set_name(vformat("skin_%s", itos(fbx_skin->typed_id)));
 		}
-
-		skin_indices_out.push_back(p_state->skins.size());
-		skin_out.push_back(skin);
+		p_state->skin_indices.push_back(p_state->skins.size());
+		p_state->skins.push_back(skin);
 	}
 
 	for (const ufbx_bone *fbx_bone : fbx_scene->bones) {
@@ -1546,11 +1545,11 @@ Error FBXDocument::_parse_skins(Ref<FBXState> p_state) {
 		}
 	}
 	Error err = asset_parse_skins(
+			p_state->skin_indices.duplicate(),
+			p_state->skins.duplicate(),
+			p_state->nodes.duplicate(),
 			p_state->skin_indices,
 			p_state->skins,
-			p_state->nodes,
-			skin_indices_out,
-			skin_out,
 			joint_mapping);
 	if (err != OK) {
 		return err;
