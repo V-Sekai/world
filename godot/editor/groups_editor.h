@@ -84,8 +84,8 @@ class GroupsEditor : public VBoxContainer {
 	HashMap<StringName, bool> scene_groups;
 	HashMap<StringName, String> global_groups;
 
-	void _update_scene_groups(ObjectID p_id);
-	void _cache_scene_groups(ObjectID p_id);
+	void _update_scene_groups(const ObjectID &p_id);
+	void _cache_scene_groups(const ObjectID &p_id);
 
 	void _show_add_group_dialog();
 	void _show_rename_group_dialog();

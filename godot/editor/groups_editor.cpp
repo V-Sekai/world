@@ -274,16 +274,17 @@ void GroupsEditor::_update_groups_and_tree() {
 	_update_tree();
 }
 
-void GroupsEditor::_update_scene_groups(ObjectID p_id) {
-	if (scene_groups_cache.has(p_id)) {
-		scene_groups = scene_groups_cache[p_id];
-		scene_groups_cache.erase(p_id);
+void GroupsEditor::_update_scene_groups(const ObjectID &p_id) {
+	HashMap<ObjectID, HashMap<StringName, bool>>::Iterator I = scene_groups_cache.find(p_id);
+	if (I) {
+		scene_groups = I->value;
+		scene_groups_cache.remove(I);
 	} else {
 		scene_groups = HashMap<StringName, bool>();
 	}
 }
 
-void GroupsEditor::_cache_scene_groups(ObjectID p_id) {
+void GroupsEditor::_cache_scene_groups(const ObjectID &p_id) {
 	const int edited_scene_count = EditorNode::get_editor_data().get_edited_scene_count();
 	for (int i = 0; i < edited_scene_count; i++) {
 		Node *edited_scene_root = EditorNode::get_editor_data().get_edited_scene_root(i);
