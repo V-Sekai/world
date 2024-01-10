@@ -134,11 +134,6 @@ const InternalConfig = function (initConfig) { // eslint-disable-line no-unused-
 		 */
 		fileSizes: [],
 		/**
-		 * @ignore
-		 * @type {boolean}
-		 */
-		ignoreDevtoolsInput: false,
-		/**
 		 * A callback function for handling Godot's ``OS.execute`` calls.
 		 *
 		 * This is for example used in the Web Editor template to switch between project manager and editor, and for running the game.
@@ -264,7 +259,6 @@ const InternalConfig = function (initConfig) { // eslint-disable-line no-unused-
 		this.serviceWorker = parse('serviceWorker', this.serviceWorker);
 		this.gdextensionLibs = parse('gdextensionLibs', this.gdextensionLibs);
 		this.fileSizes = parse('fileSizes', this.fileSizes);
-		this.ignoreDevtoolsInput = parse('ignoreDevtoolsInput', this.ignoreDevtoolsInput);
 		this.args = parse('args', this.args);
 		this.onExecute = parse('onExecute', this.onExecute);
 		this.onExit = parse('onExit', this.onExit);
@@ -354,7 +348,6 @@ const InternalConfig = function (initConfig) { // eslint-disable-line no-unused-
 			'persistentDrops': this.persistentDrops,
 			'virtualKeyboard': this.experimentalVK,
 			'focusCanvas': this.focusCanvas,
-			'ignoreDevtoolsInput': this.ignoreDevtoolsInput,
 			'onExecute': this.onExecute,
 			'onExit': function (p_code) {
 				cleanup(); // We always need to call the cleanup callback to free memory.

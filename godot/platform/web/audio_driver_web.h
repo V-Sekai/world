@@ -120,7 +120,9 @@ public:
 	virtual void lock() override;
 	virtual void unlock() override;
 };
+
 #else
+
 class AudioDriverWorklet : public AudioDriverWeb {
 private:
 	static void _process_callback(int p_pos, int p_samples);
@@ -166,6 +168,7 @@ public:
 
 	AudioDriverScriptProcessor() { singleton = this; }
 };
-#endif
+
+#endif // THREADS_ENABLED
 
 #endif // AUDIO_DRIVER_WEB_H

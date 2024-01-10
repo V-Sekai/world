@@ -4,7 +4,12 @@ from SCons.Util import WhereIs
 
 
 def run_closure_compiler(target, source, env, for_signature):
-    closure_bin = os.path.join(os.path.dirname(WhereIs("emcc")), "node_modules", ".bin", "google-closure-compiler")
+    closure_bin = os.path.join(
+        os.path.dirname(WhereIs("emcc")),
+        "node_modules",
+        ".bin",
+        "google-closure-compiler",
+    )
     cmd = [WhereIs("node"), closure_bin]
     cmd.extend(["--compilation_level", "ADVANCED_OPTIMIZATIONS"])
     for f in env["JSEXTERNS"]:
@@ -75,11 +80,12 @@ def create_template_zip(env, js, wasm, worker, side):
             cache.append("godot.editor.worker.js")
         opt_cache = ["godot.editor.wasm"]
         subst_dict = {
-            "@GODOT_VERSION@": get_build_version(),
-            "@GODOT_NAME@": "GodotEngine",
-            "@GODOT_CACHE@": json.dumps(cache),
-            "@GODOT_OPT_CACHE@": json.dumps(opt_cache),
-            "@GODOT_OFFLINE_PAGE@": "offline.html",
+            "___GODOT_VERSION___": get_build_version(),
+            "___GODOT_NAME___": "GodotEngine",
+            "___GODOT_CACHE___": json.dumps(cache),
+            "___GODOT_OPT_CACHE___": json.dumps(opt_cache),
+            "___GODOT_OFFLINE_PAGE___": "offline.html",
+            "___GODOT_THREADS_ENABLED___": "true" if env["use_threads"] else "false",
         }
         html = env.Substfile(target="#bin/godot${PROGSUFFIX}.html", source=html, SUBST_DICT=subst_dict)
         in_files.append(html)
@@ -91,7 +97,9 @@ def create_template_zip(env, js, wasm, worker, side):
         out_files.append(zip_dir.File("favicon.png"))
         # PWA
         service_worker = env.Substfile(
-            target="#bin/godot${PROGSUFFIX}.service.worker.js", source=service_worker, SUBST_DICT=subst_dict
+            target="#bin/godot${PROGSUFFIX}.service.worker.js",
+            source=service_worker,
+            SUBST_DICT=subst_dict,
         )
         in_files.append(service_worker)
         out_files.append(zip_dir.File("service.worker.js"))

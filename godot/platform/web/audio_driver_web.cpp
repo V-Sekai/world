@@ -29,10 +29,10 @@
 /**************************************************************************/
 
 #include "audio_driver_web.h"
+
 #include "godot_audio.h"
 
 #include "core/config/project_settings.h"
-#include "core/error/error_list.h"
 
 #include <emscripten.h>
 

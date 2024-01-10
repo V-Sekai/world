@@ -63,7 +63,6 @@ const GodotConfig = {
 		persistent_drops: false,
 		on_execute: null,
 		on_exit: null,
-		ignore_devtools_input: false,
 
 		init_config: function (p_opts) {
 			GodotConfig.canvas_resize_policy = p_opts['canvasResizePolicy'];
@@ -73,7 +72,6 @@ const GodotConfig = {
 			GodotConfig.persistent_drops = !!p_opts['persistentDrops'];
 			GodotConfig.on_execute = p_opts['onExecute'];
 			GodotConfig.on_exit = p_opts['onExit'];
-			GodotConfig.ignore_devtools_input = p_opts['ignoreDevtoolsInput'];
 			if (p_opts['focusCanvas']) {
 				GodotConfig.canvas.focus();
 			}
