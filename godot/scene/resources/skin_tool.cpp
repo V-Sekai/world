@@ -729,7 +729,9 @@ Error SkinTool::asset_parse_skins(
 		if (skin_index >= 0 && skin_index < input_skins.size()) {
 			output_skin_indices.push_back(skin_index);
 			output_skins.push_back(input_skins[skin_index]);
-			Ref<FBXSkin> skin = input_skins[skin_index];
+			Ref<FBXSkin> skin;
+			skin.instantiate();
+			skin->from_dictionary(input_skins[skin_index]);
 			Vector<SkinNodeIndex> skin_joints = skin->get_joints();
 			for (int j = 0; j < skin_joints.size(); ++j) {
 				SkinNodeIndex joint_index = skin_joints[j];
