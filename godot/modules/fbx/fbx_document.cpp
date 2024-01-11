@@ -1958,7 +1958,7 @@ void FBXDocument::unregister_all_fbx_document_extensions() {
 }
 
 Node *FBXDocument::generate_scene(Ref<FBXState> p_state, float p_bake_fps, bool p_trimming, bool p_remove_immutable_tracks) {
-	ERR_FAIL_COND_V(p_state.is_null(), nullptr);
+	ERR_FAIL_NULL_V(p_state, nullptr);
 	ERR_FAIL_INDEX_V(0, p_state->root_nodes.size(), nullptr);
 	GLTFNodeIndex fbx_root = p_state->root_nodes.write[0];
 	Node *fbx_root_node = p_state->get_scene_node(fbx_root);
@@ -1973,6 +1973,7 @@ Node *FBXDocument::generate_scene(Ref<FBXState> p_state, float p_bake_fps, bool 
 			_import_animation(p_state, ap, i, p_bake_fps, p_trimming, p_remove_immutable_tracks);
 		}
 	}
+	ERR_FAIL_NULL_V(root, nullptr);
 	return root;
 }
 
