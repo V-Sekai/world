@@ -49,7 +49,7 @@ func test_performance_with_large_number_of_constraints_fixme() -> void:
 func test_performance_with_large_number_of_constraints_failure_fixme() -> void:
 	var start_time = Time.get_ticks_msec()
 
-	for i in range(200):
+	for i in range(1000):
 		var qualifier_1 = TemporalConstraint.TemporalQualifier.AT_START
 		var interval_1 = calculate_time_interval(i, qualifier_1)
 		var from_constraint = TemporalConstraint.new(
