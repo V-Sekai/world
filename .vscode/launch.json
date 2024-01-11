@@ -62,7 +62,7 @@
       "name": "Run the Windows editor",
       "type": "lldb",
       "request": "launch",
-      "args": ["--path", "godot/modules/speech/demo", "-e"],
+      "args": ["--path", "godot/modules/speech/demo", "-e", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/godot/bin/godot.windows.editor.double.x86_64.llvm.exe",
       "preLaunchTask": "Godot Engine Windows Clang"
