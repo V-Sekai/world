@@ -169,11 +169,11 @@ func get_temporal_constraint_by_name(constraint_name: String) -> TemporalConstra
 
 
 func is_consistent() -> bool:
+	if not constraints.size():
+		return true
 	var constraints_str: String
 	for c in constraints:
 		constraints_str += str(c) + ", "
-	if not constraints.size():
-		return true
 
 	constraints.sort_custom(TemporalConstraint.sort_func)
 	for i in range(constraints.size()):
