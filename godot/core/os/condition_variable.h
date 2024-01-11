@@ -31,7 +31,7 @@
 #ifndef CONDITION_VARIABLE_H
 #define CONDITION_VARIABLE_H
 
-#ifdef THREADS_ENABLED
+#include "core/os/mutex.h"
 
 #ifdef MINGW_ENABLED
 #define MINGW_STDTHREAD_REDUNDANCY_WARNING
@@ -65,17 +65,5 @@ public:
 		condition.notify_all();
 	}
 };
-
-#else // No threads.
-
-class ConditionVariable {
-public:
-	template <class BinaryMutexT>
-	void wait(const MutexLock<BinaryMutexT> &p_lock) const {}
-	void notify_one() const {}
-	void notify_all() const {}
-};
-
-#endif // THREADS_ENABLED
 
 #endif // CONDITION_VARIABLE_H

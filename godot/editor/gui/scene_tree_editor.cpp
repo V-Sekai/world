@@ -31,7 +31,6 @@
 #include "scene_tree_editor.h"
 
 #include "core/config/project_settings.h"
-#include "core/object/message_queue.h"
 #include "core/object/script_language.h"
 #include "editor/editor_file_system.h"
 #include "editor/editor_node.h"
@@ -41,10 +40,8 @@
 #include "editor/editor_undo_redo_manager.h"
 #include "editor/node_dock.h"
 #include "editor/plugins/animation_player_editor_plugin.h"
-#include "editor/plugins/animation_tree_editor_plugin.h"
 #include "editor/plugins/canvas_item_editor_plugin.h"
 #include "editor/plugins/script_editor_plugin.h"
-#include "modules/multiplayer/editor/replication_editor.h"
 #include "scene/gui/flow_container.h"
 #include "scene/gui/label.h"
 #include "scene/gui/tab_container.h"
@@ -118,14 +115,10 @@ void SceneTreeEditor::_cell_button_pressed(Object *p_item, int p_column, int p_i
 		undo_redo->commit_action();
 	} else if (p_id == BUTTON_PIN) {
 		if (n->is_class("AnimationMixer")) {
-			AnimationPlayerEditor::get_singleton()->unpin(n);
-			if (n->is_class("AnimationTree")) {
-				AnimationTreeEditor::get_singleton()->unpin(n);
-			}
-		} else if (n->is_class("MultiplayerSynchronizer")) {
-			ReplicationEditor::get_singleton()->unpin(n);
+			AnimationPlayerEditor::get_singleton()->unpin();
+			_update_tree();
 		}
-		_update_tree();
+
 	} else if (p_id == BUTTON_GROUP) {
 		undo_redo->create_action(TTR("Ungroup Children"));
 
@@ -215,7 +208,6 @@ void SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent) {
 	}
 
 	TreeItem *item = tree->create_item(p_parent);
-	ERR_FAIL_NULL(item);
 
 	item->set_text(0, p_node->get_name());
 	if (can_rename && !part_of_subscene) {
@@ -398,8 +390,6 @@ void SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent) {
 			item->set_button_color(0, item->get_button_count(0) - 1, button_color);
 		}
 
-		int pin_count = 0;
-
 		if (p_node->is_class("CanvasItem")) {
 			if (p_node->has_meta("_edit_lock_")) {
 				item->add_button(0, get_editor_theme_icon(SNAME("Lock")), BUTTON_LOCK, false, TTR("Node is locked.\nClick to unlock it."));
@@ -454,26 +444,10 @@ void SceneTreeEditor::_add_nodes(Node *p_node, TreeItem *p_parent) {
 
 			_update_visibility_color(p_node, item);
 		} else if (p_node->is_class("AnimationMixer")) {
-			if (AnimationPlayerEditor::get_singleton()->get_editing_node() == p_node && AnimationPlayerEditor::get_singleton()->is_pinned()) {
-				pin_count++;
-			}
+			bool is_pinned = AnimationPlayerEditor::get_singleton()->get_editing_node() == p_node && AnimationPlayerEditor::get_singleton()->is_pinned();
 
-			if (p_node->is_class("AnimationTree")) {
-				if (AnimationTreeEditor::get_singleton()->get_animation_tree() == p_node && AnimationTreeEditor::get_singleton()->is_pinned()) {
-					pin_count++;
-				}
-			}
-		} else if (p_node->is_class("MultiplayerSynchronizer")) {
-			if (ReplicationEditor::get_singleton()->get_current() == p_node && ReplicationEditor::get_singleton()->is_pinned()) {
-				pin_count++;
-			}
-		}
-
-		if (pin_count) {
-			if (pin_count > 1) {
-				item->add_button(0, get_editor_theme_icon(SNAME("MultiplePins")), BUTTON_PIN, false, TTR("Node is pinned.\nClick to unpin."));
-			} else {
-				item->add_button(0, get_editor_theme_icon(SNAME("Pin")), BUTTON_PIN, false, TTR("Node is pinned.\nClick to unpin."));
+			if (is_pinned) {
+				item->add_button(0, get_editor_theme_icon(SNAME("Pin")), BUTTON_PIN, false, TTR("AnimationPlayer is pinned.\nClick to unpin."));
 			}
 		}
 	}
@@ -618,7 +592,7 @@ void SceneTreeEditor::_node_script_changed(Node *p_node) {
 		return;
 	}
 
-	MessageQueue::get_singleton()->push_call(this, "_update_tree");
+	callable_mp(this, &SceneTreeEditor::_update_tree).call_deferred(false);
 	tree_dirty = true;
 }
 
@@ -651,7 +625,7 @@ void SceneTreeEditor::_node_renamed(Node *p_node) {
 	emit_signal(SNAME("node_renamed"));
 
 	if (!tree_dirty) {
-		MessageQueue::get_singleton()->push_call(this, "_update_tree");
+		callable_mp(this, &SceneTreeEditor::_update_tree).call_deferred(false);
 		tree_dirty = true;
 	}
 }
@@ -868,12 +842,12 @@ void SceneTreeEditor::_test_update_tree() {
 		return; // did not change
 	}
 
-	MessageQueue::get_singleton()->push_call(this, "_update_tree");
+	callable_mp(this, &SceneTreeEditor::_update_tree).call_deferred(false);
 	tree_dirty = true;
 }
 
 void SceneTreeEditor::_tree_process_mode_changed() {
-	MessageQueue::get_singleton()->push_call(this, "_update_tree");
+	callable_mp(this, &SceneTreeEditor::_update_tree).call_deferred(false);
 	tree_dirty = true;
 }
 
@@ -888,7 +862,7 @@ void SceneTreeEditor::_tree_changed() {
 		return;
 	}
 
-	MessageQueue::get_singleton()->push_call(this, "_test_update_tree");
+	callable_mp(this, &SceneTreeEditor::_test_update_tree).call_deferred();
 	pending_test_update = true;
 }
 
@@ -1510,7 +1484,6 @@ void SceneTreeEditor::set_connecting_signal(bool p_enable) {
 void SceneTreeEditor::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_update_tree"), &SceneTreeEditor::_update_tree, DEFVAL(false)); // Still used by UndoRedo.
 	ClassDB::bind_method("_rename_node", &SceneTreeEditor::_rename_node);
-	ClassDB::bind_method("_test_update_tree", &SceneTreeEditor::_test_update_tree);
 
 	ClassDB::bind_method(D_METHOD("update_tree"), &SceneTreeEditor::update_tree);
 
@@ -1668,7 +1641,7 @@ void SceneTreeDialog::_notification(int p_what) {
 				tree->update_tree();
 
 				// Select the search bar by default.
-				filter->call_deferred(SNAME("grab_focus"));
+				callable_mp((Control *)filter, &Control::grab_focus).call_deferred();
 			}
 		} break;
 

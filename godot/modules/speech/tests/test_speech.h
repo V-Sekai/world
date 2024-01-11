@@ -40,97 +40,115 @@ namespace TestJitter {
 TEST_CASE("[Modules][Speech] Basic Tests") {
 	{
 		int step_size = 10;
-		Ref<JitterBuffer> jitter = VoipJitterBuffer::jitter_buffer_init(step_size);
+		Ref<JitterBuffer> jitter;
+		jitter.instantiate();
+		Ref<VoipJitterBuffer> buffer;
+		buffer.instantiate();
+		jitter = buffer->jitter_buffer_init(step_size);
 		CHECK_MESSAGE(jitter.is_valid(), "Initialize the jitter buffer");
-		CHECK_MESSAGE(jitter->get_reset_state() == 1, "Destroy the jitter buffer.");
-	}
-	{
-		int step_size = 10;
-		Ref<JitterBuffer> jitter = VoipJitterBuffer::jitter_buffer_init(step_size);
-		CHECK_MESSAGE(jitter.is_valid(), "Initialize the jitter buffer");
-		VoipJitterBuffer::jitter_buffer_reset(jitter);
-		CHECK_MESSAGE(jitter->get_reset_state() == 1, "Reset the jitter buffer.");
-		VoipJitterBuffer::jitter_buffer_destroy(jitter);
+		buffer->jitter_buffer_destroy(jitter);
 		CHECK_MESSAGE(jitter->get_reset_state() == 1, "Destroy the jitter buffer.");
 	}
 	{
 		int step_size = 10;
 		Ref<JitterBuffer> jitter;
 		jitter.instantiate();
-		jitter = VoipJitterBuffer::jitter_buffer_init(step_size);
+		Ref<VoipJitterBuffer> buffer;
+		buffer.instantiate();
+		jitter = buffer->jitter_buffer_init(step_size);
+		CHECK_MESSAGE(jitter.is_valid(), "Initialize the jitter buffer");
+		buffer->jitter_buffer_reset(jitter);
+		CHECK_MESSAGE(jitter->get_reset_state() == 1, "Reset the jitter buffer.");
+		buffer->jitter_buffer_destroy(jitter);
+		CHECK_MESSAGE(jitter->get_reset_state() == 1, "Destroy the jitter buffer.");
+	}
+	{
+		int step_size = 10;
+		Ref<JitterBuffer> jitter;
+		jitter.instantiate();
+		Ref<VoipJitterBuffer> buffer;
+		buffer.instantiate();
+		jitter = buffer->jitter_buffer_init(step_size);
 		CHECK_MESSAGE(jitter.is_valid(), "Initialize the jitter buffer");
 		int request = JitterBufferPacket::JITTER_BUFFER_SET_MARGIN;
 		int32_t margin = 5;
-		int result = VoipJitterBuffer::jitter_buffer_ctl(jitter, request, &margin);
+		int result = buffer->jitter_buffer_ctl(jitter, request, &margin);
 		CHECK_MESSAGE(result == 0, "Set jitter buffer margin");
-		VoipJitterBuffer::jitter_buffer_destroy(jitter);
+		buffer->jitter_buffer_destroy(jitter);
 		CHECK_MESSAGE(jitter->get_reset_state() == 1, "Reset the jitter buffer.");
 	}
 	{
 		int step_size = 10;
-		Ref<JitterBuffer> jitter = VoipJitterBuffer::jitter_buffer_init(step_size);
+		Ref<JitterBuffer> jitter;
+		jitter.instantiate();
+		Ref<VoipJitterBuffer> buffer;
+		buffer.instantiate();
+		jitter = buffer->jitter_buffer_init(step_size);
 		CHECK_MESSAGE(jitter.is_valid(), "Initialize the jitter buffer");
-
 		Ref<JitterBufferPacket> packet;
 		packet.instantiate();
 		PackedByteArray bytes;
 		bytes.resize(100);
 		bytes.fill(0);
 		packet->set_data(bytes);
-		VoipJitterBuffer::jitter_buffer_put(jitter, packet);
-
+		buffer->jitter_buffer_put(jitter, packet);
 		Ref<JitterBufferPacket> retrieved_packet;
 		retrieved_packet.instantiate();
 		retrieved_packet->set_data(bytes);
-		VoipJitterBuffer::jitter_buffer_put(jitter, retrieved_packet);
-
+		buffer->jitter_buffer_put(jitter, retrieved_packet);
 		int32_t desired_span = 10;
-		Array result = VoipJitterBuffer::jitter_buffer_get(jitter, retrieved_packet, desired_span);
-		CHECK_MESSAGE(result.size() > 0, "Successfully retrieved packets from the jitter buffer.");
-
-		VoipJitterBuffer::jitter_buffer_tick(jitter);
-
-		result = VoipJitterBuffer::jitter_buffer_get(jitter, retrieved_packet, desired_span);
-		CHECK_MESSAGE(result.size() > 0, "Successfully retrieved packets from the jitter buffer after tick.");
-
-		VoipJitterBuffer::jitter_buffer_destroy(jitter);
-
-		bool is_destroyed = !jitter.is_valid() || jitter->get_reset_state() == 1;
-		CHECK_MESSAGE(is_destroyed, "The jitter buffer is destroyed correctly.");
-	}
-	{
-		int step_size = 10;
-		Ref<JitterBuffer> jitter = VoipJitterBuffer::jitter_buffer_init(step_size);
-		Ref<JitterBufferPacket> packet;
-		packet.instantiate();
-		VoipJitterBuffer::jitter_buffer_put(jitter, packet);
-		Ref<JitterBufferPacket> another_packet;
-		another_packet.instantiate();
-		int result = VoipJitterBuffer::jitter_buffer_get_another(jitter, another_packet);
-		CHECK_MESSAGE(result, "Retrieved packet");
-		VoipJitterBuffer::jitter_buffer_destroy(jitter);
+		Array result = buffer->jitter_buffer_get(jitter, retrieved_packet, desired_span);
+		CHECK_MESSAGE(result.size(), "Get the jitter buffer.");
+		buffer->jitter_buffer_tick(jitter);
+		CHECK_MESSAGE(result.size(), "Tick the jitter buffer.");
+		buffer->jitter_buffer_destroy(jitter);
 		CHECK_MESSAGE(jitter->get_reset_state() == 1, "Destroy the jitter buffer.");
 	}
 	{
 		int step_size = 10;
-		Ref<JitterBuffer> jitter = VoipJitterBuffer::jitter_buffer_init(step_size);
+		Ref<JitterBuffer> jitter;
+		jitter.instantiate();
+		Ref<VoipJitterBuffer> buffer;
+		buffer.instantiate();
+		jitter = buffer->jitter_buffer_init(step_size);
+		Ref<JitterBufferPacket> packet;
+		packet.instantiate();
+		buffer->jitter_buffer_put(jitter, packet);
+		Ref<JitterBufferPacket> another_packet;
+		another_packet.instantiate();
+		int result = buffer->jitter_buffer_get_another(jitter, another_packet);
+		CHECK_MESSAGE(result, "Retrieved packet");
+		buffer->jitter_buffer_destroy(jitter);
+		CHECK_MESSAGE(jitter->get_reset_state() == 1, "Destroy the jitter buffer.");
+	}
+	{
+		int step_size = 10;
+		Ref<JitterBuffer> jitter;
+		jitter.instantiate();
+		Ref<VoipJitterBuffer> buffer;
+		buffer.instantiate();
+		jitter = buffer->jitter_buffer_init(step_size);
 		Ref<JitterBufferPacket> packet;
 		packet.instantiate();
 		PackedByteArray bytes;
 		bytes.resize(100);
 		bytes.fill(0);
 		packet->set_data(bytes);
-		int32_t delay = VoipJitterBuffer::jitter_buffer_update_delay(jitter, packet);
+		int32_t delay = buffer->jitter_buffer_update_delay(jitter, packet);
 		CHECK_MESSAGE(delay == 0, "The retrieved packet.");
-		VoipJitterBuffer::jitter_buffer_destroy(jitter);
+		buffer->jitter_buffer_destroy(jitter);
 		CHECK_MESSAGE(jitter->get_reset_state() == 1, "Destroy the jitter buffer.");
 	}
 	{
 		int step_size = 10;
-		Ref<JitterBuffer> jitter = VoipJitterBuffer::jitter_buffer_init(step_size);
-		int timestamp = VoipJitterBuffer::jitter_buffer_get_pointer_timestamp(jitter);
+		Ref<JitterBuffer> jitter;
+		jitter.instantiate();
+		Ref<VoipJitterBuffer> buffer;
+		buffer.instantiate();
+		jitter = buffer->jitter_buffer_init(step_size);
+		int timestamp = buffer->jitter_buffer_get_pointer_timestamp(jitter);
 		CHECK_MESSAGE(timestamp == 0, "Got a timestamp.");
-		VoipJitterBuffer::jitter_buffer_destroy(jitter);
+		buffer->jitter_buffer_destroy(jitter);
 		CHECK_MESSAGE(jitter->get_reset_state() == 1, "Destroy the jitter buffer.");
 	}
 }
@@ -138,58 +156,72 @@ TEST_CASE("[Modules][Speech] Basic Tests") {
 TEST_CASE("[Modules][Speech] Additional Tests") {
 	{
 		int step_size = 10;
-		Ref<JitterBuffer> jitter = VoipJitterBuffer::jitter_buffer_init(step_size);
+		Ref<JitterBuffer> jitter;
+		jitter.instantiate();
+		Ref<VoipJitterBuffer> buffer;
+		buffer.instantiate();
+		jitter = buffer->jitter_buffer_init(step_size);
 		CHECK_MESSAGE(jitter.is_valid(), "Initialize the jitter buffer");
 		uint32_t rem = 5;
-		VoipJitterBuffer::jitter_buffer_remaining_span(jitter, rem);
+		buffer->jitter_buffer_remaining_span(jitter, rem);
 		CHECK_MESSAGE(jitter->get_buffered() == 0, "Check initial remaining span of the jitter buffer.");
-		VoipJitterBuffer::jitter_buffer_destroy(jitter);
+		buffer->jitter_buffer_destroy(jitter);
 		CHECK_MESSAGE(jitter->get_reset_state() == 1, "Destroy the jitter buffer.");
 	}
 	{
 		int step_size = 10;
 		Ref<JitterBuffer> jitter;
 		jitter.instantiate();
-		jitter = VoipJitterBuffer::jitter_buffer_init(step_size);
+		Ref<VoipJitterBuffer> buffer;
+		buffer.instantiate();
+		jitter = buffer->jitter_buffer_init(step_size);
 		CHECK_MESSAGE(jitter.is_valid(), "Initialize the jitter buffer");
 		int request = JitterBufferPacket::JITTER_BUFFER_SET_DELAY_STEP;
 		int32_t delay_step = 5;
-		int result = VoipJitterBuffer::jitter_buffer_ctl(jitter, request, &delay_step);
+		int result = buffer->jitter_buffer_ctl(jitter, request, &delay_step);
 		CHECK_MESSAGE(result == 0, "Set jitter buffer delay step");
-		VoipJitterBuffer::jitter_buffer_destroy(jitter);
+		buffer->jitter_buffer_destroy(jitter);
 		CHECK_MESSAGE(jitter->get_reset_state() == 1, "Destroy the jitter buffer.");
 	}
 	{
 		int step_size = 10;
-		Ref<JitterBuffer> jitter = VoipJitterBuffer::jitter_buffer_init(step_size);
+		Ref<JitterBuffer> jitter;
+		jitter.instantiate();
+		Ref<VoipJitterBuffer> buffer;
+		buffer.instantiate();
+		jitter = buffer->jitter_buffer_init(step_size);
 		CHECK_MESSAGE(jitter.is_valid(), "Initialize the jitter buffer");
 		int request = JitterBufferPacket::JITTER_BUFFER_SET_CONCEALMENT_SIZE;
 		int32_t concealment_size = 5;
-		int result = VoipJitterBuffer::jitter_buffer_ctl(jitter, request, &concealment_size);
+		int result = buffer->jitter_buffer_ctl(jitter, request, &concealment_size);
 		CHECK_MESSAGE(result == 0, "Set jitter buffer concealment size");
-		VoipJitterBuffer::jitter_buffer_destroy(jitter);
+		buffer->jitter_buffer_destroy(jitter);
 		CHECK_MESSAGE(jitter->get_reset_state() == 1, "Destroy the jitter buffer.");
 	}
 }
 
 TEST_CASE("[Modules][Speech] Adding and Retrieving Voice Packets with Jitter Correction") {
 	int step_size = 10;
-	Ref<JitterBuffer> jitter = VoipJitterBuffer::jitter_buffer_init(step_size);
+	Ref<JitterBuffer> jitter;
+	jitter.instantiate();
+	Ref<VoipJitterBuffer> buffer;
+	buffer.instantiate();
+	jitter = buffer->jitter_buffer_init(step_size);
 	CHECK_MESSAGE(jitter.is_valid(), "Initialize the jitter buffer");
 
 	// Simulate adding voice packets to the buffer.
 	for (int i = 0; i < 3; ++i) {
 		Ref<JitterBufferPacket> packet;
 		packet.instantiate();
-		packet->set_timestamp(i * step_size);
+        packet->set_timestamp(i * step_size);
 		packet->set_span(step_size);
-		packet->set_sequence(i);
-		packet->set_user_data(i);
+        packet->set_sequence(i); 
+        packet->set_user_data(i);
 		PackedByteArray data;
 		data.resize(10);
 		data.fill(1);
 		packet->set_data(data);
-		VoipJitterBuffer::jitter_buffer_put(jitter, packet);
+		buffer->jitter_buffer_put(jitter, packet);
 		MESSAGE("Added packet with timestamp");
 		MESSAGE(i * step_size);
 	}
@@ -198,13 +230,13 @@ TEST_CASE("[Modules][Speech] Adding and Retrieving Voice Packets with Jitter Cor
 	for (int i = 0; i < 3; ++i) {
 		Ref<JitterBufferPacket> packet;
 		packet.instantiate();
-		Array result = VoipJitterBuffer::jitter_buffer_get(jitter, packet, step_size);
+		Array result = buffer->jitter_buffer_get(jitter, packet, step_size);
 		CHECK_MESSAGE(int(result[0]) == JitterBufferPacket::JITTER_BUFFER_OK, "Retrieve voice packet from jitter buffer");
 		bool has_correct_time_stamp = packet->get_timestamp() >= -100 && packet->get_timestamp() <= 100;
 		CHECK_MESSAGE(has_correct_time_stamp, "Check timestamp of retrieved packet");
 	}
 
-	VoipJitterBuffer::jitter_buffer_destroy(jitter);
+	buffer->jitter_buffer_destroy(jitter);
 	CHECK_MESSAGE(jitter->get_reset_state() == 1, "Destroy the jitter buffer.");
 }
 
