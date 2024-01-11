@@ -60,9 +60,9 @@
     },
     {
       "name": "Run the Windows editor",
-      "type": "lldb",
+      "type": "cppvsdbg",
       "request": "launch",
-      "args": ["--path", "../TEST_fbx_mocap_market", "-e"],
+      "args": ["--path", "godot/modules/speech/demo", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/godot/bin/godot.windows.editor.double.x86_64.llvm.exe",
       "preLaunchTask": "Godot Engine Windows Clang"
