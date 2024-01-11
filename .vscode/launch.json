@@ -60,7 +60,7 @@
     },
     {
       "name": "Run the Windows editor",
-      "type": "cppvsdbg",
+      "type": "lldb",
       "request": "launch",
       "args": ["--path", "godot/modules/speech/demo", "-e"],
       "cwd": "${workspaceFolder}",
