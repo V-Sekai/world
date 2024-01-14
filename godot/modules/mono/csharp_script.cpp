@@ -371,7 +371,7 @@ Ref<Script> CSharpLanguage::make_template(const String &p_template, const String
 	return scr;
 }
 
-Vector<ScriptLanguage::ScriptTemplate> CSharpLanguage::get_built_in_templates(StringName p_object) {
+Vector<ScriptLanguage::ScriptTemplate> CSharpLanguage::get_built_in_templates(const StringName &p_object) {
 	Vector<ScriptLanguage::ScriptTemplate> templates;
 #ifdef TOOLS_ENABLED
 	for (int i = 0; i < TEMPLATES_ARRAY_SIZE; i++) {
@@ -2245,6 +2245,17 @@ bool CSharpScript::_update_exports(PlaceHolderScriptInstance *p_instance_to_upda
 				}
 			} else {
 				p_instance_to_update->update(propnames, values);
+			}
+		} else if (placeholders.size()) {
+			uint64_t script_modified_time = FileAccess::get_modified_time(get_path());
+			uint64_t last_valid_build_time = GDMono::get_singleton()->get_project_assembly_modified_time();
+			if (script_modified_time > last_valid_build_time) {
+				for (PlaceHolderScriptInstance *instance : placeholders) {
+					Object *owner = instance->get_owner();
+					if (owner->get_script_instance() == instance) {
+						owner->notify_property_list_changed();
+					}
+				}
 			}
 		}
 	}

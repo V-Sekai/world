@@ -2311,11 +2311,7 @@ void Node::set_editor_description(const String &p_editor_description) {
 	}
 
 	data.editor_description = p_editor_description;
-
-	if (Engine::get_singleton()->is_editor_hint() && is_inside_tree()) {
-		// Update tree so the tooltip in the Scene tree dock is also updated in the editor.
-		get_tree()->tree_changed();
-	}
+	emit_signal(SNAME("editor_description_changed"), this);
 }
 
 String Node::get_editor_description() const {
@@ -2832,7 +2828,7 @@ void Node::replace_by(Node *p_node, bool p_keep_groups) {
 	}
 
 	Node *parent = data.parent;
-	int index_in_parent = get_index();
+	int index_in_parent = get_index(false);
 
 	if (data.parent) {
 		parent->remove_child(this);
@@ -3069,7 +3065,7 @@ static void _add_nodes_to_options(const Node *p_base, const Node *p_node, List<S
 
 void Node::get_argument_options(const StringName &p_function, int p_idx, List<String> *r_options) const {
 	String pf = p_function;
-	if (p_idx == 0 && (pf == "has_node" || pf == "get_node")) {
+	if (p_idx == 0 && (pf == "has_node" || pf == "get_node" || pf == "get_node_or_null")) {
 		_add_nodes_to_options(this, this, r_options);
 	} else if (p_idx == 0 && (pf == "add_to_group" || pf == "remove_from_group" || pf == "is_in_group")) {
 		HashMap<StringName, String> global_groups = ProjectSettings::get_singleton()->get_global_groups_list();
@@ -3536,6 +3532,7 @@ void Node::_bind_methods() {
 
 	ADD_SIGNAL(MethodInfo("child_order_changed"));
 	ADD_SIGNAL(MethodInfo("replacing_by", PropertyInfo(Variant::OBJECT, "node", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT, "Node")));
+	ADD_SIGNAL(MethodInfo("editor_description_changed", PropertyInfo(Variant::OBJECT, "node", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT, "Node")));
 
 	ADD_PROPERTY(PropertyInfo(Variant::STRING_NAME, "name", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NONE), "set_name", "get_name");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "unique_name_in_owner", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR), "set_unique_name_in_owner", "is_unique_name_in_owner");

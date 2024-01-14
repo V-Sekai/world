@@ -50,15 +50,17 @@
 #import <dlfcn.h>
 #include <sys/sysctl.h>
 
-#if defined(VULKAN_ENABLED)
+#if defined(RD_ENABLED)
 #include "servers/rendering/renderer_rd/renderer_compositor_rd.h"
-
 #import <QuartzCore/CAMetalLayer.h>
+
+#if defined(VULKAN_ENABLED)
 #ifdef USE_VOLK
 #include <volk.h>
 #else
 #include <vulkan/vulkan.h>
 #endif
+#endif // VULKAN_ENABLED
 #endif
 
 // Initialization order between compilation units is not guaranteed,
@@ -254,6 +256,8 @@ Error OS_IOS::open_dynamic_library(const String p_path, void *&p_library_handle,
 		// Load .dylib converted to framework from a standard iOS location.
 		path = get_framework_executable(get_executable_path().get_base_dir().path_join("Frameworks").path_join(p_path.get_file().get_basename() + ".framework"));
 	}
+
+	ERR_FAIL_COND_V(!FileAccess::exists(path), ERR_FILE_NOT_FOUND);
 
 	p_library_handle = dlopen(path.utf8().get_data(), RTLD_NOW);
 	ERR_FAIL_NULL_V_MSG(p_library_handle, ERR_CANT_OPEN, vformat("Can't open dynamic library: %s. Error: %s.", p_path, dlerror()));

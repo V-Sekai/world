@@ -766,7 +766,7 @@ void TextureStorage::texture_2d_layered_initialize(RID p_texture, const Vector<R
 	ERR_FAIL_COND(p_layered_type == RS::TEXTURE_LAYERED_CUBEMAP && p_layers.size() != 6);
 	ERR_FAIL_COND_MSG(p_layered_type == RS::TEXTURE_LAYERED_CUBEMAP_ARRAY, "Cubemap Arrays are not supported in the GL Compatibility backend.");
 
-	Ref<Image> image = p_layers[0];
+	const Ref<Image> &image = p_layers[0];
 	{
 		int valid_width = 0;
 		int valid_height = 0;
@@ -2647,7 +2647,10 @@ void TextureStorage::render_target_copy_to_back_buffer(RID p_render_target, cons
 	glBindFramebuffer(GL_FRAMEBUFFER, rt->backbuffer_fbo);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, rt->color);
-	GLES3::CopyEffects::get_singleton()->copy_screen();
+	Rect2 normalized_region = region;
+	normalized_region.position = normalized_region.position / Size2(rt->size);
+	normalized_region.size = normalized_region.size / Size2(rt->size);
+	GLES3::CopyEffects::get_singleton()->copy_to_and_from_rect(normalized_region);
 
 	if (p_gen_mipmaps) {
 		GLES3::CopyEffects::get_singleton()->gaussian_blur(rt->backbuffer, rt->mipmap_count, region, rt->size);

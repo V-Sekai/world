@@ -845,7 +845,7 @@ GDScriptParser::DataType GDScriptAnalyzer::resolve_datatype(GDScriptParser::Type
 	return result;
 }
 
-void GDScriptAnalyzer::resolve_class_member(GDScriptParser::ClassNode *p_class, StringName p_name, const GDScriptParser::Node *p_source) {
+void GDScriptAnalyzer::resolve_class_member(GDScriptParser::ClassNode *p_class, const StringName &p_name, const GDScriptParser::Node *p_source) {
 	ERR_FAIL_COND(!p_class->has_member(p_name));
 	resolve_class_member(p_class, p_class->members_indices[p_name], p_source);
 }
@@ -3636,7 +3636,7 @@ void GDScriptAnalyzer::reduce_identifier_from_base(GDScriptParser::IdentifierNod
 			switch (base.builtin_type) {
 				case Variant::NIL: {
 					if (base.is_hard_type()) {
-						push_error(vformat(R"(Invalid get index "%s" on base Nil)", name), p_identifier);
+						push_error(vformat(R"(Cannot get property "%s" on a null object.)", name), p_identifier);
 					}
 					return;
 				}
@@ -3657,6 +3657,10 @@ void GDScriptAnalyzer::reduce_identifier_from_base(GDScriptParser::IdentifierNod
 							p_identifier->set_datatype(type_from_property(prop));
 							return;
 						}
+					}
+					if (Variant::has_builtin_method(base.builtin_type, name)) {
+						p_identifier->set_datatype(make_callable_type(Variant::get_builtin_method_info(base.builtin_type, name)));
+						return;
 					}
 					if (base.is_hard_type()) {
 #ifdef SUGGEST_GODOT4_RENAMES

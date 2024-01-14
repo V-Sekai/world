@@ -132,17 +132,26 @@ Files extracted from upstream source:
 - `include/D3D12MemAlloc.h`
 - `LICENSE.txt`, `NOTICES.txt`
 
+Important: Some files have Godot-made changes for use with MinGW.
+They are marked with `/* GODOT start */` and `/* GODOT end */`
+comments.
+
 
 ## directx_headers
 
 - Upstream: https://github.com/microsoft/DirectX-Headers
-- Version: 1.606.3 (fd329244e62201bf959331d28514928fc1d45005, 2022)
+- Version: 1.611.1 (48f23952bc08a6dce0727339c07cedbc4797356c, 2023)
 - License: MIT
 
 Files extracted from upstream source:
 
 - `include/directx/*.h`
+- `include/dxguids/*.h`
 - `LICENSE`
+
+Important: Some files have Godot-made changes for use with MinGW.
+They are marked with `/* GODOT start */` and `/* GODOT end */`
+comments.
 
 
 ## doctest
@@ -380,7 +389,7 @@ Files extracted from upstream source:
 ## icu4c
 
 - Upstream: https://github.com/unicode-org/icu
-- Version: 73.2 (680f521746a3bd6a86f25f25ee50a62d88b489cf, 2023)
+- Version: 74.1 (9edac7b78327a1cb58db29e2714b15f9fa14e4d7, 2023)
 - License: Unicode
 
 Files extracted from upstream source:
@@ -392,7 +401,7 @@ Files extracted from upstream source:
 
 Files generated from upstream source:
 
-- The `icudt73l.dat` built with the provided `godot_data.json` config file (see
+- The `icudt74l.dat` built with the provided `godot_data.json` config file (see
   https://github.com/unicode-org/icu/blob/master/docs/userguide/icu_data/buildtool.md
   for instructions).
 
@@ -402,7 +411,7 @@ Files generated from upstream source:
 3. Reconfigure ICU with custom data config:
    `ICU_DATA_FILTER_FILE={GODOT_SOURCE}/thirdparty/icu4c/godot_data.json ./runConfigureICU {PLATFORM} --with-data-packaging=common`
 4. Delete `data/out` folder and rebuild data: `cd data && rm -rf ./out && make`
-5. Copy `source/data/out/icudt73l.dat` to the `{GODOT_SOURCE}/thirdparty/icu4c/icudt73l.dat`
+5. Copy `source/data/out/icudt74l.dat` to the `{GODOT_SOURCE}/thirdparty/icu4c/icudt74l.dat`
 
 
 ## jpeg-compressor
@@ -852,13 +861,25 @@ instead of `miniz.h` as an external dependency.
 ## thorvg
 
 - Upstream: https://github.com/thorvg/thorvg
-- Version: 0.11.2 (b01fe9bf4461146304d3520d6dc699cf580a3744, 2023)
+- Version: 0.12.0 (25ea242d3867ed66807714f5a52d080984d3c8cc, 2024)
 - License: MIT
 
 Files extracted from upstream source:
 
 See `thorvg/update-thorvg.sh` for extraction instructions. Set the version
 number and run the script.
+
+
+## ufbx
+
+- Upstream: https://github.com/ufbx/ufbx
+- Version: git (6163260eb203ca3e6dd26306324b8e4946229523, 2024)
+- License: MIT
+
+Files extracted from upstream source:
+
+- `ufbx.{c,h}`
+- `LICENSE`
 
 
 ## vhacd

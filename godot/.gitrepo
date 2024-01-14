@@ -5,8 +5,8 @@
 ;
 [subrepo]
 	remote = https://github.com/V-Sekai/godot.git
-	branch = vsk-speech-4.3
-	commit = 5915a5ff256c4572019b024e3c88c82c4120e631
-	parent = b412a1bf3648f7ed1f7e5e7bb50b5c8878a255d8
+	branch = vsk-ufbx
+	commit = 40425d8dd8ff364659c0264c8ada391c652fced1
+	parent = 76df6b3fde21eb5710c1d33ce86501742ee4aab1
 	method = merge
 	cmdver = 0.4.6
