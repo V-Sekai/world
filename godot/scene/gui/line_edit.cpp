@@ -31,6 +31,7 @@
 #include "line_edit.h"
 
 #include "core/input/input_map.h"
+#include "core/object/message_queue.h"
 #include "core/os/keyboard.h"
 #include "core/os/os.h"
 #include "core/string/print_string.h"
@@ -269,7 +270,7 @@ void LineEdit::gui_input(const Ref<InputEvent> &p_event) {
 
 				if (!text_changed_dirty) {
 					if (is_inside_tree()) {
-						callable_mp(this, &LineEdit::_text_changed).call_deferred();
+						MessageQueue::get_singleton()->push_call(this, "_text_changed");
 					}
 					text_changed_dirty = true;
 				}
@@ -623,12 +624,7 @@ void LineEdit::gui_input(const Ref<InputEvent> &p_event) {
 			int prev_len = text.length();
 			insert_text_at_caret(ucodestr);
 			if (text.length() != prev_len) {
-				if (!text_changed_dirty) {
-					if (is_inside_tree()) {
-						callable_mp(this, &LineEdit::_text_changed).call_deferred();
-					}
-					text_changed_dirty = true;
-				}
+				_text_changed();
 			}
 			accept_event();
 			return;
@@ -713,7 +709,7 @@ void LineEdit::drop_data(const Point2 &p_point, const Variant &p_data) {
 		select(caret_column_tmp, caret_column);
 		if (!text_changed_dirty) {
 			if (is_inside_tree()) {
-				callable_mp(this, &LineEdit::_text_changed).call_deferred();
+				MessageQueue::get_singleton()->push_call(this, "_text_changed");
 			}
 			text_changed_dirty = true;
 		}
@@ -1189,7 +1185,7 @@ void LineEdit::paste_text() {
 
 		if (!text_changed_dirty) {
 			if (is_inside_tree() && text.length() != prev_len) {
-				callable_mp(this, &LineEdit::_text_changed).call_deferred();
+				MessageQueue::get_singleton()->push_call(this, "_text_changed");
 			}
 			text_changed_dirty = true;
 		}
@@ -1503,7 +1499,7 @@ void LineEdit::delete_text(int p_from_column, int p_to_column) {
 
 	if (!text_changed_dirty) {
 		if (is_inside_tree()) {
-			callable_mp(this, &LineEdit::_text_changed).call_deferred();
+			MessageQueue::get_singleton()->push_call(this, "_text_changed");
 		}
 		text_changed_dirty = true;
 	}
@@ -1717,12 +1713,6 @@ void LineEdit::set_caret_column(int p_column) {
 	} else if (MAX(primary_caret_offset.x, primary_caret_offset.y) >= ofs_max) {
 		scroll_offset += ofs_max - MAX(primary_caret_offset.x, primary_caret_offset.y);
 	}
-
-	// Scroll to show as much text as possible
-	if (text_width + scroll_offset + x_ofs < ofs_max) {
-		scroll_offset = ofs_max - x_ofs - text_width;
-	}
-
 	scroll_offset = MIN(0, scroll_offset);
 
 	queue_redraw();
@@ -2511,6 +2501,8 @@ void LineEdit::_validate_property(PropertyInfo &p_property) const {
 }
 
 void LineEdit::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("_text_changed"), &LineEdit::_text_changed);
+
 	ClassDB::bind_method(D_METHOD("set_horizontal_alignment", "alignment"), &LineEdit::set_horizontal_alignment);
 	ClassDB::bind_method(D_METHOD("get_horizontal_alignment"), &LineEdit::get_horizontal_alignment);
 

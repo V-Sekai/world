@@ -84,7 +84,7 @@ namespace Godot
         /// Converts a <see cref="StringName"/> to a string.
         /// </summary>
         /// <param name="from">The <see cref="StringName"/> to convert.</param>
-        [return: NotNullIfNotNull("from")]
+        [return: NotNullIfNotNull(nameof(from))]
         public static implicit operator string?(StringName? from) => from?.ToString();
 
         /// <summary>

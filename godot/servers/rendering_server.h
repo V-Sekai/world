@@ -800,7 +800,6 @@ public:
 	virtual void camera_set_perspective(RID p_camera, float p_fovy_degrees, float p_z_near, float p_z_far) = 0;
 	virtual void camera_set_orthogonal(RID p_camera, float p_size, float p_z_near, float p_z_far) = 0;
 	virtual void camera_set_frustum(RID p_camera, float p_size, Vector2 p_offset, float p_z_near, float p_z_far) = 0;
-	virtual void camera_set_override_projection(RID p_camera, const Projection &p_matrix) = 0;
 	virtual void camera_set_transform(RID p_camera, const Transform3D &p_transform) = 0;
 	virtual void camera_set_cull_mask(RID p_camera, uint32_t p_layers) = 0;
 	virtual void camera_set_environment(RID p_camera, RID p_env) = 0;
@@ -1613,14 +1612,13 @@ public:
 	virtual Color get_default_clear_color() = 0;
 	virtual void set_default_clear_color(const Color &p_color) = 0;
 
-#ifndef DISABLE_DEPRECATED
-	// Never actually used, should be removed when we can break compatibility.
 	enum Features {
 		FEATURE_SHADERS,
 		FEATURE_MULTITHREADED,
 	};
+
 	virtual bool has_feature(Features p_feature) const = 0;
-#endif
+
 	virtual bool has_os_feature(const String &p_feature) const = 0;
 
 	virtual void set_debug_generate_wireframes(bool p_generate) = 0;
@@ -1640,10 +1638,6 @@ public:
 	void set_render_loop_enabled(bool p_enabled);
 
 	virtual void call_on_render_thread(const Callable &p_callable) = 0;
-
-#ifdef TOOLS_ENABLED
-	virtual void get_argument_options(const StringName &p_function, int p_idx, List<String> *r_options) const override;
-#endif
 
 	RenderingServer();
 	virtual ~RenderingServer();
@@ -1750,12 +1744,9 @@ VARIANT_ENUM_CAST(RenderingServer::CanvasLightShadowFilter);
 VARIANT_ENUM_CAST(RenderingServer::CanvasOccluderPolygonCullMode);
 VARIANT_ENUM_CAST(RenderingServer::GlobalShaderParameterType);
 VARIANT_ENUM_CAST(RenderingServer::RenderingInfo);
+VARIANT_ENUM_CAST(RenderingServer::Features);
 VARIANT_ENUM_CAST(RenderingServer::CanvasTextureChannel);
 VARIANT_ENUM_CAST(RenderingServer::BakeChannels);
-
-#ifndef DISABLE_DEPRECATED
-VARIANT_ENUM_CAST(RenderingServer::Features);
-#endif
 
 // Alias to make it easier to use.
 #define RS RenderingServer

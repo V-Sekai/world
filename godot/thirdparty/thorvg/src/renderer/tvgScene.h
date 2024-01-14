@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2024 the ThorVG project. All rights reserved.
+ * Copyright (c) 2020 - 2023 the ThorVG project. All rights reserved.
 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,12 +20,15 @@
  * SOFTWARE.
  */
 
-#ifndef _TVG_SCENE_H_
-#define _TVG_SCENE_H_
+#ifndef _TVG_SCENE_IMPL_H_
+#define _TVG_SCENE_IMPL_H_
 
 #include <float.h>
 #include "tvgPaint.h"
 
+/************************************************************************/
+/* Internal Class Implementation                                        */
+/************************************************************************/
 
 struct SceneIterator : Iterator
 {
@@ -63,7 +66,7 @@ struct Scene::Impl
     RenderData rd = nullptr;
     Scene* scene = nullptr;
     uint8_t opacity;                     //for composition
-    bool needComp = false;               //composite or not
+    bool needComp;                       //composite or not
 
     Impl(Scene* s) : scene(s)
     {
@@ -72,7 +75,7 @@ struct Scene::Impl
     ~Impl()
     {
         for (auto paint : paints) {
-            if (P(paint)->unref() == 0) delete(paint);
+            if (paint->pImpl->unref() == 0) delete(paint);
         }
     }
 
@@ -123,7 +126,8 @@ struct Scene::Impl
         this->renderer = &renderer;
 
         if (clipper) {
-            Array<RenderData> rds(paints.size());
+            Array<RenderData> rds;
+            rds.reserve(paints.size());
             for (auto paint : paints) {
                 rds.push(paint->pImpl->update(renderer, transform, clips, opacity, flag, true));
             }
@@ -144,7 +148,6 @@ struct Scene::Impl
         if (needComp) {
             cmp = renderer.target(bounds(renderer), renderer.colorSpace());
             renderer.beginComposite(cmp, CompositeMethod::None, opacity);
-            needComp = false;
         }
 
         for (auto paint : paints) {
@@ -212,8 +215,9 @@ struct Scene::Impl
 
     Paint* duplicate()
     {
-        auto ret = Scene::gen().release();
-        auto dup = ret->pImpl;
+        auto ret = Scene::gen();
+
+        auto dup = ret.get()->pImpl;
 
         for (auto paint : paints) {
             auto cdup = paint->duplicate();
@@ -221,7 +225,7 @@ struct Scene::Impl
             dup->paints.push_back(cdup);
         }
 
-        return ret;
+        return ret.release();
     }
 
     void clear(bool free)
@@ -242,4 +246,4 @@ struct Scene::Impl
     }
 };
 
-#endif //_TVG_SCENE_H_
+#endif //_TVG_SCENE_IMPL_H_

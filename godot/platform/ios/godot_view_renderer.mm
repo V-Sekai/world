@@ -44,8 +44,6 @@
 #import <QuartzCore/QuartzCore.h>
 #import <UIKit/UIKit.h>
 
-extern void ios_finish();
-
 @interface GodotViewRenderer ()
 
 @property(assign, nonatomic) BOOL hasFinishedProjectDataSetup;
@@ -115,13 +113,7 @@ extern void ios_finish();
 		return;
 	}
 
-	if (OS_IOS::get_singleton()->iterate()) {
-		OS_IOS::get_singleton()->delete_main_loop();
-		ios_finish();
-#ifdef TOOLS_ENABLED
-		exit(0);
-#endif
-	}
+	OS_IOS::get_singleton()->iterate();
 }
 
 @end

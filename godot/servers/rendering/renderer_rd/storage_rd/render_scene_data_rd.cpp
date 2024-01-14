@@ -51,7 +51,7 @@ void RenderSceneDataRD::update_ubo(RID p_uniform_buffer, RS::ViewportDebugDraw p
 	Projection correction;
 	correction.set_depth_correction(p_flip_y);
 	correction.add_jitter_offset(taa_jitter);
-	Projection projection = correction * view_projection[0];
+	Projection projection = correction * cam_projection;
 
 	//store camera into ubo
 	RendererRD::MaterialStorage::store_camera(projection, ubo.projection_matrix);
@@ -227,7 +227,7 @@ void RenderSceneDataRD::update_ubo(RID p_uniform_buffer, RS::ViewportDebugDraw p
 		Projection prev_correction;
 		prev_correction.set_depth_correction(true);
 		prev_correction.add_jitter_offset(prev_taa_jitter);
-		Projection prev_projection = prev_correction * view_projection[0];
+		Projection prev_projection = prev_correction * prev_cam_projection;
 
 		//store camera into ubo
 		RendererRD::MaterialStorage::store_camera(prev_projection, prev_ubo.projection_matrix);
@@ -252,7 +252,7 @@ void RenderSceneDataRD::update_ubo(RID p_uniform_buffer, RS::ViewportDebugDraw p
 	}
 
 	uniform_buffer = p_uniform_buffer;
-	RD::get_singleton()->buffer_update(uniform_buffer, 0, sizeof(UBODATA), &ubo);
+	RD::get_singleton()->buffer_update(uniform_buffer, 0, sizeof(UBODATA), &ubo, RD::BARRIER_MASK_RASTER);
 }
 
 RID RenderSceneDataRD::get_uniform_buffer() {

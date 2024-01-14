@@ -35,7 +35,6 @@
 #import "app_delegate.h"
 #import "display_server_ios.h"
 #import "godot_view.h"
-#import "ios_terminal_logger.h"
 #import "view_controller.h"
 
 #include "core/config/project_settings.h"
@@ -51,17 +50,15 @@
 #import <dlfcn.h>
 #include <sys/sysctl.h>
 
-#if defined(RD_ENABLED)
-#include "servers/rendering/renderer_rd/renderer_compositor_rd.h"
-#import <QuartzCore/CAMetalLayer.h>
-
 #if defined(VULKAN_ENABLED)
+#include "servers/rendering/renderer_rd/renderer_compositor_rd.h"
+
+#import <QuartzCore/CAMetalLayer.h>
 #ifdef USE_VOLK
 #include <volk.h>
 #else
 #include <vulkan/vulkan.h>
 #endif
-#endif // VULKAN_ENABLED
 #endif
 
 // Initialization order between compilation units is not guaranteed,
@@ -106,7 +103,12 @@ OS_IOS::OS_IOS() {
 	main_loop = nullptr;
 
 	Vector<Logger *> loggers;
-	loggers.push_back(memnew(IOSTerminalLogger));
+	loggers.push_back(memnew(SyslogLogger));
+#ifdef DEBUG_ENABLED
+	// it seems iOS app's stdout/stderr is only obtainable if you launch it from
+	// Xcode
+	loggers.push_back(memnew(StdLogger));
+#endif
 	_set_logger(memnew(CompositeLogger(loggers)));
 
 	AudioDriverManager::add_driver(&audio_driver);
@@ -190,22 +192,10 @@ void OS_IOS::start() {
 
 void OS_IOS::finalize() {
 	deinitialize_modules();
-}
 
-#ifdef TOOLS_ENABLED
-Error OS_IOS::create_instance(const List<String> &p_arguments, ProcessID *r_child_id) {
-	String _cmd_path = OS::get_singleton()->get_user_data_dir().path_join("_cmd");
-	{
-		Ref<FileAccess> f = FileAccess::open(_cmd_path, FileAccess::WRITE);
-		if (f.is_valid()) {
-			for (const String &arg : p_arguments) {
-				f->store_line(arg);
-			}
-		}
-	}
-	return OK;
+	// Already gets called
+	//delete_main_loop();
 }
-#endif
 
 // MARK: Dynamic Libraries
 
@@ -264,8 +254,6 @@ Error OS_IOS::open_dynamic_library(const String p_path, void *&p_library_handle,
 		// Load .dylib converted to framework from a standard iOS location.
 		path = get_framework_executable(get_executable_path().get_base_dir().path_join("Frameworks").path_join(p_path.get_file().get_basename() + ".framework"));
 	}
-
-	ERR_FAIL_COND_V(!FileAccess::exists(path), ERR_FILE_NOT_FOUND);
 
 	p_library_handle = dlopen(path.utf8().get_data(), RTLD_NOW);
 	ERR_FAIL_NULL_V_MSG(p_library_handle, ERR_CANT_OPEN, vformat("Can't open dynamic library: %s. Error: %s.", p_path, dlerror()));
@@ -330,21 +318,6 @@ Error OS_IOS::shell_open(String p_uri) {
 	[[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
 
 	return OK;
-}
-
-String OS_IOS::get_config_path() const {
-	static String ret;
-	if (ret.is_empty()) {
-		NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
-		if (paths && [paths count] >= 1) {
-			ret.parse_utf8([[paths firstObject] UTF8String]);
-		}
-	}
-	return ret;
-}
-
-String OS_IOS::get_data_path() const {
-	return get_config_path();
 }
 
 String OS_IOS::get_user_data_dir() const {

@@ -42,9 +42,10 @@ class GDScriptFunction;
 class GDScriptInstance;
 
 class GDScriptLambdaCallable : public CallableCustom {
-	GDScript::UpdatableFuncPtr function;
+	GDScriptFunction *function = nullptr;
 	Ref<GDScript> script;
 	uint32_t h;
+	GDScript::UpdatableFuncPtrElement updatable_func_ptr_element;
 
 	Vector<Variant> captures;
 
@@ -61,18 +62,17 @@ public:
 	StringName get_method() const override;
 	void call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, Callable::CallError &r_call_error) const override;
 
-	GDScriptLambdaCallable(GDScriptLambdaCallable &) = delete;
-	GDScriptLambdaCallable(const GDScriptLambdaCallable &) = delete;
 	GDScriptLambdaCallable(Ref<GDScript> p_script, GDScriptFunction *p_function, const Vector<Variant> &p_captures);
-	virtual ~GDScriptLambdaCallable() = default;
+	virtual ~GDScriptLambdaCallable();
 };
 
 // Lambda callable that references a particular object, so it can use `self` in the body.
 class GDScriptLambdaSelfCallable : public CallableCustom {
-	GDScript::UpdatableFuncPtr function;
+	GDScriptFunction *function = nullptr;
 	Ref<RefCounted> reference; // For objects that are RefCounted, keep a reference.
 	Object *object = nullptr; // For non RefCounted objects, use a direct pointer.
 	uint32_t h;
+	GDScript::UpdatableFuncPtrElement updatable_func_ptr_element;
 
 	Vector<Variant> captures;
 
@@ -88,11 +88,9 @@ public:
 	ObjectID get_object() const override;
 	void call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, Callable::CallError &r_call_error) const override;
 
-	GDScriptLambdaSelfCallable(GDScriptLambdaSelfCallable &) = delete;
-	GDScriptLambdaSelfCallable(const GDScriptLambdaSelfCallable &) = delete;
 	GDScriptLambdaSelfCallable(Ref<RefCounted> p_self, GDScriptFunction *p_function, const Vector<Variant> &p_captures);
 	GDScriptLambdaSelfCallable(Object *p_self, GDScriptFunction *p_function, const Vector<Variant> &p_captures);
-	virtual ~GDScriptLambdaSelfCallable() = default;
+	virtual ~GDScriptLambdaSelfCallable();
 };
 
 #endif // GDSCRIPT_LAMBDA_CALLABLE_H

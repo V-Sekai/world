@@ -47,7 +47,7 @@
 #include "editor/editor_string_names.h"
 #include "editor/gui/editor_dir_dialog.h"
 #include "editor/gui/editor_scene_tabs.h"
-#include "editor/import/3d/scene_import_settings.h"
+#include "editor/import/scene_import_settings.h"
 #include "editor/import_dock.h"
 #include "editor/plugins/editor_resource_tooltip_plugins.h"
 #include "editor/scene_create_dialog.h"
@@ -388,7 +388,7 @@ void FileSystemDock::_update_tree(const Vector<String> &p_uncollapsed_paths, boo
 	const Color default_folder_color = get_theme_color(SNAME("folder_icon_color"), SNAME("FileDialog"));
 
 	for (int i = 0; i < favorite_paths.size(); i++) {
-		const String &favorite = favorite_paths[i];
+		String favorite = favorite_paths[i];
 		if (!favorite.begins_with("res://")) {
 			continue;
 		}
@@ -470,6 +470,8 @@ void FileSystemDock::_update_display_mode(bool p_force) {
 			case DISPLAY_MODE_HSPLIT:
 			case DISPLAY_MODE_VSPLIT:
 				const bool is_vertical = display_mode == DISPLAY_MODE_VSPLIT;
+				const int split_offset = split_box->get_split_offset();
+				is_vertical ? split_box_offset_h = split_offset : split_box_offset_v = split_offset;
 				split_box->set_vertical(is_vertical);
 
 				const int actual_offset = is_vertical ? split_box_offset_v : split_box_offset_h;
@@ -651,7 +653,7 @@ void FileSystemDock::_notification(int p_what) {
 void FileSystemDock::_tree_multi_selected(Object *p_item, int p_column, bool p_selected) {
 	// Update the import dock.
 	import_dock_needs_update = true;
-	callable_mp(this, &FileSystemDock::_update_import_dock).call_deferred();
+	call_deferred(SNAME("_update_import_dock"));
 
 	// Return if we don't select something new.
 	if (!p_selected) {
@@ -1881,6 +1883,10 @@ Vector<String> FileSystemDock::_check_existing() {
 	return conflicting_items;
 }
 
+void FileSystemDock::_move_dialog_confirm(const String &p_path) {
+	_move_operation_confirm(p_path, move_dialog->is_copy_pressed());
+}
+
 void FileSystemDock::_move_operation_confirm(const String &p_to_path, bool p_copy, Overwrite p_overwrite) {
 	if (p_overwrite == OVERWRITE_UNDECIDED) {
 		to_move_path = p_to_path;
@@ -2129,135 +2135,6 @@ void FileSystemDock::_file_option(int p_option, const Vector<String> &p_selected
 			}
 		} break;
 
-		case FILE_OPEN_IN_TERMINAL: {
-			String fpath = current_path;
-			if (current_path == "Favorites") {
-				fpath = p_selected[0];
-			}
-
-			Vector<String> terminal_emulators;
-			const String terminal_emulator_setting = EDITOR_GET("filesystem/external_programs/terminal_emulator");
-			if (terminal_emulator_setting.is_empty()) {
-				// Figure out a default terminal emulator to use.
-#if defined(WINDOWS_ENABLED)
-				// Default to PowerShell as done by Windows 10 and later.
-				terminal_emulators.push_back("powershell");
-#elif defined(MACOS_ENABLED)
-				terminal_emulators.push_back("/System/Applications/Utilities/Terminal.app");
-#elif defined(LINUXBSD_ENABLED)
-				// Try terminal emulators that ship with common Linux distributions first.
-				terminal_emulators.push_back("gnome-terminal");
-				terminal_emulators.push_back("konsole");
-				terminal_emulators.push_back("xfce4-terminal");
-				terminal_emulators.push_back("lxterminal");
-				terminal_emulators.push_back("kitty");
-				terminal_emulators.push_back("alacritty");
-				terminal_emulators.push_back("urxvt");
-				terminal_emulators.push_back("xterm");
-#endif
-			} else {
-				// Use the user-specified terminal.
-				terminal_emulators.push_back(terminal_emulator_setting);
-			}
-
-			String arguments = EDITOR_GET("filesystem/external_programs/terminal_emulator_flags");
-			if (arguments.is_empty()) {
-				// NOTE: This default value is ignored further below if the terminal executable is `powershell` or `cmd`,
-				// due to these terminals requiring nonstandard syntax to start in a specified folder.
-				arguments = "{directory}";
-			}
-
-#ifdef LINUXBSD_ENABLED
-			String chosen_terminal_emulator;
-			for (const String &terminal_emulator : terminal_emulators) {
-				List<String> test_args; // Required for `execute()`, as it doesn't accept `Vector<String>`.
-				test_args.push_back("-v");
-				test_args.push_back(terminal_emulator);
-				// Silence command name being printed when found. (stderr is already silenced by `OS::execute()` by default.)
-				// FIXME: This doesn't appear to silence stdout.
-				test_args.push_back(">");
-				test_args.push_back("/dev/null");
-				int exit_code = 0;
-				const Error err = OS::get_singleton()->execute("command", test_args, nullptr, &exit_code);
-				if (err == OK && exit_code == EXIT_SUCCESS) {
-					chosen_terminal_emulator = terminal_emulator;
-					break;
-				} else if (err == ERR_CANT_FORK) {
-					ERR_PRINT_ED(vformat(TTR("Couldn't run external program to check for terminal emulator presence: command -v %s"), terminal_emulator));
-				}
-			}
-#else
-			// On Windows and macOS, the first (and only) terminal emulator in the list is always available.
-			String chosen_terminal_emulator = terminal_emulators[0];
-#endif
-
-			List<String> terminal_emulator_args; // Required for `execute()`, as it doesn't accept `Vector<String>`.
-#ifdef LINUXBSD_ENABLED
-			// Prepend default arguments based on the terminal emulator name.
-			// Use `String.ends_with()` so that installations in non-default paths
-			// or `/usr/local/bin` are detected correctly.
-			if (chosen_terminal_emulator.ends_with("konsole")) {
-				terminal_emulator_args.push_back("--workdir");
-			}
-#endif
-
-			bool append_default_args = true;
-
-#ifdef WINDOWS_ENABLED
-			// Prepend default arguments based on the terminal emulator name.
-			// Use `String.get_basename().to_lower()` to handle Windows' case-insensitive paths
-			// with optional file extensions for executables in `PATH`.
-			if (chosen_terminal_emulator.get_basename().to_lower() == "powershell") {
-				terminal_emulator_args.push_back("-noexit");
-				terminal_emulator_args.push_back("-command");
-				terminal_emulator_args.push_back("cd '{directory}'");
-				append_default_args = false;
-			} else if (chosen_terminal_emulator.get_basename().to_lower() == "cmd") {
-				terminal_emulator_args.push_back("/K");
-				terminal_emulator_args.push_back("cd /d {directory}");
-				append_default_args = false;
-			}
-#endif
-
-			Vector<String> arguments_array = arguments.split(" ");
-			for (const String &argument : arguments_array) {
-				if (!append_default_args && argument == "{directory}") {
-					// Prevent appending a `{directory}` placeholder twice when using powershell or cmd.
-					// This allows users to enter the path to cmd or PowerShell in the custom terminal emulator path,
-					// and make it work without having to enter custom arguments.
-					continue;
-				}
-				terminal_emulator_args.push_back(argument);
-			}
-
-			const bool is_directory = fpath.ends_with("/");
-			for (int i = 0; i < terminal_emulator_args.size(); i++) {
-				if (is_directory) {
-					terminal_emulator_args[i] = terminal_emulator_args[i].replace("{directory}", ProjectSettings::get_singleton()->globalize_path(fpath));
-				} else {
-					terminal_emulator_args[i] = terminal_emulator_args[i].replace("{directory}", ProjectSettings::get_singleton()->globalize_path(fpath).get_base_dir());
-				}
-			}
-
-			if (OS::get_singleton()->is_stdout_verbose()) {
-				// Print full command line to help with troubleshooting.
-				String command_string = chosen_terminal_emulator;
-				for (const String &arg : terminal_emulator_args) {
-					command_string += " " + arg;
-				}
-				print_line("Opening terminal emulator:", command_string);
-			}
-
-			const Error err = OS::get_singleton()->create_process(chosen_terminal_emulator, terminal_emulator_args, nullptr, true);
-			if (err != OK) {
-				String args_string;
-				for (int i = 0; i < terminal_emulator_args.size(); i++) {
-					args_string += terminal_emulator_args[i];
-				}
-				ERR_PRINT_ED(vformat(TTR("Couldn't run external terminal program (error code %d): %s %s\nCheck `filesystem/external_programs/terminal_emulator` and `filesystem/external_programs/terminal_emulator_flags` in the Editor Settings."), err, chosen_terminal_emulator, args_string));
-			}
-		} break;
-
 		case FILE_OPEN: {
 			// Open folders.
 			TreeItem *selected = tree->get_root();
@@ -2295,7 +2172,7 @@ void FileSystemDock::_file_option(int p_option, const Vector<String> &p_selected
 			// Instantiate all selected scenes.
 			Vector<String> paths;
 			for (int i = 0; i < p_selected.size(); i++) {
-				const String &fpath = p_selected[i];
+				String fpath = p_selected[i];
 				if (EditorFileSystem::get_singleton()->get_file_type(fpath) == "PackedScene") {
 					paths.push_back(fpath);
 				}
@@ -2333,7 +2210,7 @@ void FileSystemDock::_file_option(int p_option, const Vector<String> &p_selected
 		case FILE_DEPENDENCIES: {
 			// Checkout the file dependencies.
 			if (!p_selected.is_empty()) {
-				const String &fpath = p_selected[0];
+				String fpath = p_selected[0];
 				deps_editor->edit(fpath);
 			}
 		} break;
@@ -2341,7 +2218,7 @@ void FileSystemDock::_file_option(int p_option, const Vector<String> &p_selected
 		case FILE_OWNERS: {
 			// Checkout the file owners.
 			if (!p_selected.is_empty()) {
-				const String &fpath = p_selected[0];
+				String fpath = p_selected[0];
 				owners_editor->show(fpath);
 			}
 		} break;
@@ -2351,13 +2228,12 @@ void FileSystemDock::_file_option(int p_option, const Vector<String> &p_selected
 			to_move.clear();
 			Vector<String> collapsed_paths = _remove_self_included_paths(p_selected);
 			for (int i = collapsed_paths.size() - 1; i >= 0; i--) {
-				const String &fpath = collapsed_paths[i];
+				String fpath = collapsed_paths[i];
 				if (fpath != "res://") {
 					to_move.push_back(FileOrFolder(fpath, !fpath.ends_with("/")));
 				}
 			}
 			if (to_move.size() > 0) {
-				move_dialog->config(p_selected);
 				move_dialog->popup_centered_ratio(0.4);
 			}
 		} break;
@@ -2399,7 +2275,7 @@ void FileSystemDock::_file_option(int p_option, const Vector<String> &p_selected
 			Vector<String> collapsed_paths = _remove_self_included_paths(p_selected);
 
 			for (int i = 0; i < collapsed_paths.size(); i++) {
-				const String &fpath = collapsed_paths[i];
+				String fpath = collapsed_paths[i];
 				if (fpath != "res://") {
 					if (fpath.ends_with("/")) {
 						remove_folders.push_back(fpath);
@@ -2471,7 +2347,7 @@ void FileSystemDock::_file_option(int p_option, const Vector<String> &p_selected
 
 		case FILE_COPY_PATH: {
 			if (!p_selected.is_empty()) {
-				const String &fpath = p_selected[0];
+				String fpath = p_selected[0];
 				DisplayServer::get_singleton()->clipboard_set(fpath);
 			}
 		} break;
@@ -2581,14 +2457,6 @@ void FileSystemDock::_change_split_mode() {
 
 	set_display_mode(next_mode);
 	emit_signal(SNAME("display_mode_changed"));
-}
-
-void FileSystemDock::_split_dragged(int p_offset) {
-	if (split_box->is_vertical()) {
-		split_box_offset_v = p_offset;
-	} else {
-		split_box_offset_h = p_offset;
-	}
 }
 
 void FileSystemDock::fix_dependencies(const String &p_for_file) {
@@ -2991,7 +2859,7 @@ void FileSystemDock::_folder_color_index_pressed(int p_index, PopupMenu *p_menu)
 
 	// Update project settings with new folder colors.
 	for (int i = 0; i < selected.size(); i++) {
-		const String &fpath = selected[i];
+		String fpath = selected[i];
 
 		if (chosen_color_name) {
 			assigned_folder_colors[fpath] = chosen_color_name;
@@ -3022,7 +2890,7 @@ void FileSystemDock::_file_and_folders_fill_popup(PopupMenu *p_popup, Vector<Str
 	bool all_not_favorites = true;
 
 	for (int i = 0; i < p_paths.size(); i++) {
-		const String &fpath = p_paths[i];
+		String fpath = p_paths[i];
 		if (fpath.ends_with("/")) {
 			foldernames.push_back(fpath);
 			all_files = false;
@@ -3180,23 +3048,19 @@ void FileSystemDock::_file_and_folders_fill_popup(PopupMenu *p_popup, Vector<Str
 	}
 
 	if (p_paths.size() == 1) {
-		const String &fpath = p_paths[0];
+		const String fpath = p_paths[0];
 
 #if !defined(ANDROID_ENABLED) && !defined(WEB_ENABLED)
 		p_popup->add_separator();
 
 		// Opening the system file manager is not supported on the Android and web editors.
 		const bool is_directory = fpath.ends_with("/");
-
+		const String item_text = is_directory ? TTR("Open in File Manager") : TTR("Show in File Manager");
 		p_popup->add_icon_shortcut(get_editor_theme_icon(SNAME("Filesystem")), ED_GET_SHORTCUT("filesystem_dock/show_in_explorer"), FILE_SHOW_IN_EXPLORER);
-		p_popup->set_item_text(p_popup->get_item_index(FILE_SHOW_IN_EXPLORER), is_directory ? TTR("Open in File Manager") : TTR("Show in File Manager"));
-
+		p_popup->set_item_text(p_popup->get_item_index(FILE_SHOW_IN_EXPLORER), item_text);
 		if (!is_directory) {
 			p_popup->add_icon_shortcut(get_editor_theme_icon(SNAME("ExternalLink")), ED_GET_SHORTCUT("filesystem_dock/open_in_external_program"), FILE_OPEN_EXTERNAL);
 		}
-
-		p_popup->add_icon_shortcut(get_editor_theme_icon(SNAME("Terminal")), ED_GET_SHORTCUT("filesystem_dock/open_in_terminal"), FILE_OPEN_IN_TERMINAL);
-		p_popup->set_item_text(p_popup->get_item_index(FILE_OPEN_IN_TERMINAL), is_directory ? TTR("Open in Terminal") : TTR("Open Containing Folder in Terminal"));
 #endif
 
 		current_path = fpath;
@@ -3241,7 +3105,6 @@ void FileSystemDock::_tree_empty_click(const Vector2 &p_pos, MouseButton p_butto
 	// Opening the system file manager is not supported on the Android and web editors.
 	tree_popup->add_separator();
 	tree_popup->add_icon_shortcut(get_editor_theme_icon(SNAME("Filesystem")), ED_GET_SHORTCUT("filesystem_dock/show_in_explorer"), FILE_SHOW_IN_EXPLORER);
-	tree_popup->add_icon_shortcut(get_editor_theme_icon(SNAME("Terminal")), ED_GET_SHORTCUT("filesystem_dock/open_in_terminal"), FILE_OPEN_IN_TERMINAL);
 #endif
 
 	tree_popup->set_position(tree->get_screen_position() + p_pos);
@@ -3329,7 +3192,7 @@ void FileSystemDock::_file_multi_selected(int p_index, bool p_selected) {
 
 	// Update the import dock.
 	import_dock_needs_update = true;
-	callable_mp(this, &FileSystemDock::_update_import_dock).call_deferred();
+	call_deferred(SNAME("_update_import_dock"));
 }
 
 void FileSystemDock::_tree_mouse_exited() {
@@ -3420,8 +3283,6 @@ void FileSystemDock::_tree_gui_input(Ref<InputEvent> p_event) {
 			_tree_rmb_option(FILE_SHOW_IN_EXPLORER);
 		} else if (ED_IS_SHORTCUT("filesystem_dock/open_in_external_program", p_event)) {
 			_tree_rmb_option(FILE_OPEN_EXTERNAL);
-		} else if (ED_IS_SHORTCUT("filesystem_dock/open_in_terminal", p_event)) {
-			_tree_rmb_option(FILE_OPEN_IN_TERMINAL);
 		} else if (ED_IS_SHORTCUT("editor/open_search", p_event)) {
 			focus_on_filter();
 		} else {
@@ -3482,8 +3343,6 @@ void FileSystemDock::_file_list_gui_input(Ref<InputEvent> p_event) {
 			_file_list_rmb_option(FILE_RENAME);
 		} else if (ED_IS_SHORTCUT("filesystem_dock/show_in_explorer", p_event)) {
 			_file_list_rmb_option(FILE_SHOW_IN_EXPLORER);
-		} else if (ED_IS_SHORTCUT("filesystem_dock/open_in_terminal", p_event)) {
-			_file_list_rmb_option(FILE_OPEN_IN_TERMINAL);
 		} else if (ED_IS_SHORTCUT("editor/open_search", p_event)) {
 			focus_on_filter();
 		} else {
@@ -3565,7 +3424,7 @@ void FileSystemDock::_update_import_dock() {
 	Vector<String> imports;
 	String import_type;
 	for (int i = 0; i < efiles.size(); i++) {
-		const String &fpath = efiles[i];
+		String fpath = efiles[i];
 		Ref<ConfigFile> cf;
 		cf.instantiate();
 		Error err = cf->load(fpath + ".import");
@@ -3645,10 +3504,15 @@ MenuButton *FileSystemDock::_create_file_menu_button() {
 }
 
 void FileSystemDock::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("_update_tree"), &FileSystemDock::_update_tree);
+
 	ClassDB::bind_method(D_METHOD("_file_list_thumbnail_done"), &FileSystemDock::_file_list_thumbnail_done);
 	ClassDB::bind_method(D_METHOD("_tree_thumbnail_done"), &FileSystemDock::_tree_thumbnail_done);
+	ClassDB::bind_method(D_METHOD("_select_file"), &FileSystemDock::_select_file);
 
 	ClassDB::bind_method(D_METHOD("navigate_to_path", "path"), &FileSystemDock::navigate_to_path);
+
+	ClassDB::bind_method(D_METHOD("_update_import_dock"), &FileSystemDock::_update_import_dock);
 
 	ClassDB::bind_method(D_METHOD("add_resource_tooltip_plugin", "plugin"), &FileSystemDock::add_resource_tooltip_plugin);
 	ClassDB::bind_method(D_METHOD("remove_resource_tooltip_plugin", "plugin"), &FileSystemDock::remove_resource_tooltip_plugin);
@@ -3683,7 +3547,6 @@ FileSystemDock::FileSystemDock() {
 	// Opening the system file manager or opening in an external program is not supported on the Android and web editors.
 	ED_SHORTCUT("filesystem_dock/show_in_explorer", TTR("Open in File Manager"));
 	ED_SHORTCUT("filesystem_dock/open_in_external_program", TTR("Open in External Program"));
-	ED_SHORTCUT("filesystem_dock/open_in_terminal", TTR("Open in Terminal"));
 #endif
 
 	// Properly translating color names would require a separate HashMap, so for simplicity they are provided as comments.
@@ -3765,8 +3628,6 @@ FileSystemDock::FileSystemDock() {
 
 	split_box = memnew(SplitContainer);
 	split_box->set_v_size_flags(SIZE_EXPAND_FILL);
-	split_box->connect("dragged", callable_mp(this, &FileSystemDock::_split_dragged));
-	split_box_offset_h = 240 * EDSCALE;
 	add_child(split_box);
 
 	tree = memnew(FileSystemTree);
@@ -3847,8 +3708,7 @@ FileSystemDock::FileSystemDock() {
 
 	move_dialog = memnew(EditorDirDialog);
 	add_child(move_dialog);
-	move_dialog->connect("move_pressed", callable_mp(this, &FileSystemDock::_move_operation_confirm).bind(false, OVERWRITE_UNDECIDED));
-	move_dialog->connect("copy_pressed", callable_mp(this, &FileSystemDock::_move_operation_confirm).bind(true, OVERWRITE_UNDECIDED));
+	move_dialog->connect("dir_selected", callable_mp(this, &FileSystemDock::_move_dialog_confirm));
 
 	overwrite_dialog = memnew(ConfirmationDialog);
 	add_child(overwrite_dialog);
@@ -3885,7 +3745,7 @@ FileSystemDock::FileSystemDock() {
 
 	make_dir_dialog = memnew(DirectoryCreateDialog);
 	add_child(make_dir_dialog);
-	make_dir_dialog->connect("dir_created", callable_mp(this, &FileSystemDock::_rescan).unbind(1));
+	make_dir_dialog->connect("dir_created", callable_mp(this, &FileSystemDock::_rescan));
 
 	make_scene_dialog = memnew(SceneCreateDialog);
 	add_child(make_scene_dialog);

@@ -33,9 +33,9 @@
 
 #include "servers/display_server.h"
 
-#if defined(RD_ENABLED)
-class ApiContextRD;
-class RenderingDevice;
+#if defined(VULKAN_ENABLED)
+class VulkanContextAndroid;
+class RenderingDeviceVulkan;
 #endif
 
 class DisplayServerAndroid : public DisplayServer {
@@ -72,9 +72,9 @@ class DisplayServerAndroid : public DisplayServer {
 
 	CursorShape cursor_shape = CursorShape::CURSOR_ARROW;
 
-#if defined(RD_ENABLED)
-	ApiContextRD *context_rd = nullptr;
-	RenderingDevice *rendering_device = nullptr;
+#if defined(VULKAN_ENABLED)
+	VulkanContextAndroid *context_vulkan = nullptr;
+	RenderingDeviceVulkan *rendering_device_vulkan = nullptr;
 #endif
 
 	ObjectID window_attached_instance_id;

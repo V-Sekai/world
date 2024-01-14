@@ -460,12 +460,7 @@ void GPUParticles3D::_notification(int p_what) {
 		// Use internal process when emitting and one_shot is on so that when
 		// the shot ends the editor can properly update.
 		case NOTIFICATION_INTERNAL_PROCESS: {
-			const Vector3 velocity = (get_global_position() - previous_position) / get_process_delta_time();
-
-			if (velocity != previous_velocity) {
-				RS::get_singleton()->particles_set_emitter_velocity(particles, velocity);
-				previous_velocity = velocity;
-			}
+			RS::get_singleton()->particles_set_emitter_velocity(particles, (get_global_position() - previous_position) / get_process_delta_time());
 			previous_position = get_global_position();
 
 			if (one_shot) {

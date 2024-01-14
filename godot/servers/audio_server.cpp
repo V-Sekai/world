@@ -43,7 +43,6 @@
 #include "scene/scene_string_names.h"
 #include "servers/audio/audio_driver_dummy.h"
 #include "servers/audio/effects/audio_effect_compressor.h"
-#include "servers/resonanceaudio/resonance_audio_wrapper.h"
 
 #include <cstring>
 
@@ -123,10 +122,8 @@ int AudioDriver::_get_configured_mix_rate() {
 
 	// In the case of invalid mix rate, let's default to a sensible value..
 	if (mix_rate <= 0) {
-#ifndef WEB_ENABLED
 		WARN_PRINT(vformat("Invalid mix rate of %d, consider reassigning setting \'%s\'. \nDefaulting mix rate to value %d.",
 				mix_rate, audio_driver_setting, AudioDriverManager::DEFAULT_MIX_RATE));
-#endif
 		mix_rate = AudioDriverManager::DEFAULT_MIX_RATE;
 	}
 
@@ -202,9 +199,8 @@ int AudioDriverManager::get_driver_count() {
 
 void AudioDriverManager::initialize(int p_driver) {
 	GLOBAL_DEF_RST("audio/driver/enable_input", false);
-	GLOBAL_DEF_RST("audio/enable_resonance_audio", true);
-	GLOBAL_DEF_RST(PropertyInfo(Variant::INT, "audio/driver/mix_rate", PROPERTY_HINT_RANGE, "11025,192000,1,or_greater,suffix:Hz"), DEFAULT_MIX_RATE);
-	GLOBAL_DEF_RST(PropertyInfo(Variant::INT, "audio/driver/mix_rate.web", PROPERTY_HINT_RANGE, "0,192000,1,or_greater,suffix:Hz"), 0); // Safer default output_latency for web (use browser default).
+	GLOBAL_DEF_RST("audio/driver/mix_rate", DEFAULT_MIX_RATE);
+	GLOBAL_DEF_RST("audio/driver/mix_rate.web", 0); // Safer default output_latency for web (use browser default).
 
 	int failed_driver = -1;
 
@@ -403,6 +399,7 @@ void AudioServer::_mix_step() {
 				continue;
 			}
 			int bus_idx = thread_find_bus_index(bus_details.bus[idx]);
+
 			int prev_bus_idx = -1;
 			for (int search_idx = 0; search_idx < MAX_BUSES_PER_PLAYBACK; search_idx++) {
 				if (!playback->prev_bus_details->bus_active[search_idx]) {
@@ -412,6 +409,7 @@ void AudioServer::_mix_step() {
 					prev_bus_idx = search_idx;
 				}
 			}
+
 			for (int channel_idx = 0; channel_idx < channel_count; channel_idx++) {
 				AudioFrame *channel_buf = thread_get_channel_mix_buffer(bus_idx, channel_idx);
 				if (fading_out) {
@@ -423,7 +421,7 @@ void AudioServer::_mix_step() {
 				if (prev_bus_idx != -1) {
 					prev_channel_vol = playback->prev_bus_details->volume[prev_bus_idx][channel_idx];
 				}
-				_mix_step_for_channel(channel_buf, buf, prev_channel_vol, channel_vol, playback->attenuation_filter_cutoff_hz.get(), playback->highshelf_gain.get(), playback->source_id, &playback->filter_process[channel_idx * 2], &playback->filter_process[channel_idx * 2 + 1]);
+				_mix_step_for_channel(channel_buf, buf, prev_channel_vol, channel_vol, playback->attenuation_filter_cutoff_hz.get(), playback->highshelf_gain.get(), &playback->filter_process[channel_idx * 2], &playback->filter_process[channel_idx * 2 + 1]);
 			}
 		}
 
@@ -449,7 +447,7 @@ void AudioServer::_mix_step() {
 				AudioFrame *channel_buf = thread_get_channel_mix_buffer(bus_idx, channel_idx);
 				AudioFrame prev_channel_vol = playback->prev_bus_details->volume[idx][channel_idx];
 				// Fade out to silence
-				_mix_step_for_channel(channel_buf, buf, prev_channel_vol, AudioFrame(0, 0), playback->attenuation_filter_cutoff_hz.get(), playback->highshelf_gain.get(), playback->source_id, &playback->filter_process[channel_idx * 2], &playback->filter_process[channel_idx * 2 + 1]);
+				_mix_step_for_channel(channel_buf, buf, prev_channel_vol, AudioFrame(0, 0), playback->attenuation_filter_cutoff_hz.get(), playback->highshelf_gain.get(), &playback->filter_process[channel_idx * 2], &playback->filter_process[channel_idx * 2 + 1]);
 			}
 		}
 
@@ -484,6 +482,7 @@ void AudioServer::_mix_step() {
 				break;
 		}
 	}
+
 	for (int i = buses.size() - 1; i >= 0; i--) {
 		//go bus by bus
 		Bus *bus = buses[i];
@@ -603,22 +602,6 @@ void AudioServer::_mix_step() {
 				for (uint32_t j = 0; j < buffer_size; j++) {
 					target_buf[j] += buf[j];
 				}
-			} else {
-				if (GLOBAL_GET("audio/enable_resonance_audio")) {
-					AudioFrame *master_buf = thread_get_channel_mix_buffer(0, 0);
-					bool success = false;
-					if (master_buf) {
-						for (int frame_idx = 0; frame_idx < spatial_pull_buffer.size(); frame_idx++) {
-							spatial_pull_buffer.write[frame_idx] = master_buf[frame_idx];
-						}
-						success = ResonanceAudioServer::get_singleton()->pull_listener_buffer(buffer_size, spatial_pull_buffer.ptrw());
-					}
-					if (success) {
-						for (int frame_idx = 0; frame_idx < spatial_pull_buffer.size(); frame_idx++) {
-							master_buf[frame_idx] += spatial_pull_buffer[frame_idx];
-						}
-					}
-				}
 			}
 		}
 	}
@@ -627,18 +610,11 @@ void AudioServer::_mix_step() {
 	to_mix = buffer_size;
 }
 
-void AudioServer::_mix_step_for_channel(AudioFrame *p_out_buf, AudioFrame *p_source_buf, AudioFrame p_vol_start, AudioFrame p_vol_final, float p_attenuation_filter_cutoff_hz, float p_highshelf_gain, AudioSourceId p_audio_source_id, AudioFilterSW::Processor *p_processor_l, AudioFilterSW::Processor *p_processor_r) {
-	if (GLOBAL_GET("audio/enable_resonance_audio") && p_audio_source_id.get_id() != -1) {
-		for (unsigned int frame_idx = 0; frame_idx < buffer_size; frame_idx++) {
-			// Make this buffer size invariant if buffer_size ever becomes a project setting.
-			float lerp_param = (float)frame_idx / buffer_size;
-			p_out_buf[frame_idx] += (p_vol_final * lerp_param + (1 - lerp_param) * p_vol_start) * p_source_buf[frame_idx];
-		}
-		ResonanceAudioServer::get_singleton()->push_source_buffer(p_audio_source_id, buffer_size, p_out_buf);
-	} else if (p_highshelf_gain != 0) {
+void AudioServer::_mix_step_for_channel(AudioFrame *p_out_buf, AudioFrame *p_source_buf, AudioFrame p_vol_start, AudioFrame p_vol_final, float p_attenuation_filter_cutoff_hz, float p_highshelf_gain, AudioFilterSW::Processor *p_processor_l, AudioFilterSW::Processor *p_processor_r) {
+	if (p_highshelf_gain != 0) {
 		AudioFilterSW filter;
 		filter.set_mode(AudioFilterSW::HIGHSHELF);
-		filter.set_sampling_rate(get_mix_rate());
+		filter.set_sampling_rate(AudioServer::get_singleton()->get_mix_rate());
 		filter.set_cutoff(p_attenuation_filter_cutoff_hz);
 		filter.set_resonance(1);
 		filter.set_stages(1);
@@ -662,6 +638,7 @@ void AudioServer::_mix_step_for_channel(AudioFrame *p_out_buf, AudioFrame *p_sou
 			p_processor_r->process_one_interp(mixed.r);
 			p_out_buf[frame_idx] += mixed;
 		}
+
 	} else {
 		for (unsigned int frame_idx = 0; frame_idx < buffer_size; frame_idx++) {
 			// Make this buffer size invariant if buffer_size ever becomes a project setting.
@@ -1141,7 +1118,7 @@ float AudioServer::get_playback_speed_scale() const {
 	return playback_speed_scale;
 }
 
-void AudioServer::start_playback_stream(Ref<AudioStreamPlayback> p_playback, const StringName &p_bus, Vector<AudioFrame> p_volume_db_vector, float p_start_time, float p_pitch_scale) {
+void AudioServer::start_playback_stream(Ref<AudioStreamPlayback> p_playback, StringName p_bus, Vector<AudioFrame> p_volume_db_vector, float p_start_time, float p_pitch_scale) {
 	ERR_FAIL_COND(p_playback.is_null());
 
 	HashMap<StringName, Vector<AudioFrame>> map;
@@ -1150,7 +1127,7 @@ void AudioServer::start_playback_stream(Ref<AudioStreamPlayback> p_playback, con
 	start_playback_stream(p_playback, map, p_start_time, p_pitch_scale);
 }
 
-void AudioServer::start_playback_stream(Ref<AudioStreamPlayback> p_playback, const HashMap<StringName, Vector<AudioFrame>> &p_bus_volumes, float p_start_time, float p_pitch_scale, float p_highshelf_gain, float p_attenuation_cutoff_hz, AudioSourceId p_source_id) {
+void AudioServer::start_playback_stream(Ref<AudioStreamPlayback> p_playback, HashMap<StringName, Vector<AudioFrame>> p_bus_volumes, float p_start_time, float p_pitch_scale, float p_highshelf_gain, float p_attenuation_cutoff_hz) {
 	ERR_FAIL_COND(p_playback.is_null());
 
 	AudioStreamPlaybackListNode *playback_node = new AudioStreamPlaybackListNode();
@@ -1170,9 +1147,7 @@ void AudioServer::start_playback_stream(Ref<AudioStreamPlayback> p_playback, con
 		for (int channel_idx = 0; channel_idx < MAX_CHANNELS_PER_BUS; channel_idx++) {
 			new_bus_details->volume[idx][channel_idx] = pair.value[channel_idx];
 		}
-		idx++;
 	}
-	playback_node->source_id = p_source_id;
 	playback_node->bus_details = new_bus_details;
 	playback_node->prev_bus_details = new AudioStreamPlaybackBusDetails();
 
@@ -1210,15 +1185,16 @@ void AudioServer::stop_playback_stream(Ref<AudioStreamPlayback> p_playback) {
 	} while (!playback_node->state.compare_exchange_strong(old_state, new_state));
 }
 
-void AudioServer::set_playback_bus_exclusive(Ref<AudioStreamPlayback> p_playback, const StringName &p_bus, Vector<AudioFrame> p_volumes, AudioSourceId p_source_id) {
+void AudioServer::set_playback_bus_exclusive(Ref<AudioStreamPlayback> p_playback, StringName p_bus, Vector<AudioFrame> p_volumes) {
 	ERR_FAIL_COND(p_volumes.size() != MAX_CHANNELS_PER_BUS);
 
 	HashMap<StringName, Vector<AudioFrame>> map;
 	map[p_bus] = p_volumes;
-	set_playback_bus_volumes_linear(p_playback, map, p_source_id);
+
+	set_playback_bus_volumes_linear(p_playback, map);
 }
 
-void AudioServer::set_playback_bus_volumes_linear(Ref<AudioStreamPlayback> p_playback, const HashMap<StringName, Vector<AudioFrame>> &p_bus_volumes, AudioSourceId p_source_id) {
+void AudioServer::set_playback_bus_volumes_linear(Ref<AudioStreamPlayback> p_playback, HashMap<StringName, Vector<AudioFrame>> p_bus_volumes) {
 	ERR_FAIL_COND(p_bus_volumes.size() > MAX_BUSES_PER_PLAYBACK);
 
 	AudioStreamPlaybackListNode *playback_node = _find_playback_list_node(p_playback);
@@ -1237,7 +1213,6 @@ void AudioServer::set_playback_bus_volumes_linear(Ref<AudioStreamPlayback> p_pla
 
 		new_bus_details->bus_active[idx] = true;
 		new_bus_details->bus[idx] = pair.key;
-		new_bus_details->audio_source_id = p_source_id;
 		for (int channel_idx = 0; channel_idx < MAX_CHANNELS_PER_BUS; channel_idx++) {
 			new_bus_details->volume[idx][channel_idx] = pair.value[channel_idx];
 		}
@@ -1251,7 +1226,7 @@ void AudioServer::set_playback_bus_volumes_linear(Ref<AudioStreamPlayback> p_pla
 	bus_details_graveyard.insert(old_bus_details);
 }
 
-void AudioServer::set_playback_all_bus_volumes_linear(Ref<AudioStreamPlayback> p_playback, Vector<AudioFrame> p_volumes, AudioSourceId p_audio_source_id) {
+void AudioServer::set_playback_all_bus_volumes_linear(Ref<AudioStreamPlayback> p_playback, Vector<AudioFrame> p_volumes) {
 	ERR_FAIL_COND(p_playback.is_null());
 	ERR_FAIL_COND(p_volumes.size() != MAX_CHANNELS_PER_BUS);
 
@@ -1266,7 +1241,8 @@ void AudioServer::set_playback_all_bus_volumes_linear(Ref<AudioStreamPlayback> p
 			map[playback_node->bus_details.load()->bus[bus_idx]] = p_volumes;
 		}
 	}
-	set_playback_bus_volumes_linear(p_playback, map, p_audio_source_id);
+
+	set_playback_bus_volumes_linear(p_playback, map);
 }
 
 void AudioServer::set_playback_pitch_scale(Ref<AudioStreamPlayback> p_playback, float p_pitch_scale) {
@@ -1302,14 +1278,14 @@ void AudioServer::set_playback_paused(Ref<AudioStreamPlayback> p_playback, bool 
 	} while (!playback_node->state.compare_exchange_strong(old_state, new_state));
 }
 
-void AudioServer::set_playback_highshelf_params(Ref<AudioStreamPlayback> p_playback, float p_gain, float p_attenuation_cutoff_hz, AudioSourceId p_source_id) {
+void AudioServer::set_playback_highshelf_params(Ref<AudioStreamPlayback> p_playback, float p_gain, float p_attenuation_cutoff_hz) {
 	ERR_FAIL_COND(p_playback.is_null());
 
 	AudioStreamPlaybackListNode *playback_node = _find_playback_list_node(p_playback);
 	if (!playback_node) {
 		return;
 	}
-	playback_node->source_id = p_source_id;
+
 	playback_node->attenuation_filter_cutoff_hz.set(p_attenuation_cutoff_hz);
 	playback_node->highshelf_gain.set(p_gain);
 }
@@ -1365,7 +1341,6 @@ void AudioServer::init_channels_and_buffers() {
 	channel_count = get_channel_count();
 	temp_buffer.resize(channel_count);
 	mix_buffer.resize(buffer_size + LOOKAHEAD_BUFFER_SIZE);
-	spatial_pull_buffer.resize(buffer_size);
 
 	for (int i = 0; i < temp_buffer.size(); i++) {
 		temp_buffer.write[i].resize(buffer_size);

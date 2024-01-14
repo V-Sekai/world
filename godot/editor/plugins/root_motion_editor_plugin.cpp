@@ -32,7 +32,6 @@
 
 #include "editor/editor_node.h"
 #include "editor/editor_scale.h"
-#include "scene/3d/skeleton_3d.h"
 #include "scene/animation/animation_mixer.h"
 #include "scene/gui/button.h"
 #include "scene/gui/dialogs.h"

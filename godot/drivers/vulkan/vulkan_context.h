@@ -37,9 +37,8 @@
 #include "core/templates/hash_map.h"
 #include "core/templates/rb_map.h"
 #include "core/templates/rid_owner.h"
-#include "rendering_device_driver_vulkan.h"
 #include "servers/display_server.h"
-#include "servers/rendering/renderer_rd/api_context_rd.h"
+#include "servers/rendering/rendering_device.h"
 
 #ifdef USE_VOLK
 #include <volk.h>
@@ -49,7 +48,7 @@
 
 #include "vulkan_hooks.h"
 
-class VulkanContext : public ApiContextRD {
+class VulkanContext {
 public:
 	struct SubgroupCapabilities {
 		uint32_t size;
@@ -64,6 +63,14 @@ public:
 		String supported_stages_desc() const;
 		uint32_t supported_operations_flags_rd() const;
 		String supported_operations_desc() const;
+	};
+
+	struct MultiviewCapabilities {
+		bool is_supported;
+		bool geometry_shader_is_supported;
+		bool tessellation_shader_is_supported;
+		uint32_t max_view_count;
+		uint32_t max_instance_count;
 	};
 
 	struct VRSCapabilities {
@@ -108,7 +115,7 @@ private:
 
 	uint32_t instance_api_version = VK_API_VERSION_1_0;
 	SubgroupCapabilities subgroup_capabilities;
-	RDD::MultiviewCapabilities multiview_capabilities;
+	MultiviewCapabilities multiview_capabilities;
 	VRSCapabilities vrs_capabilities;
 	ShaderCapabilities shader_capabilities;
 	StorageBufferCapabilities storage_buffer_capabilities;
@@ -164,12 +171,9 @@ private:
 		bool waiting = false;
 		VkDevice device = VK_NULL_HANDLE;
 		VkQueue queue = VK_NULL_HANDLE;
-		RenderingDeviceDriverVulkan *driver = nullptr;
 	};
 
 	RID_Owner<LocalDevice, true> local_device_owner;
-
-	RenderingDeviceDriverVulkan *driver = nullptr;
 
 	HashMap<DisplayServer::WindowID, Window> windows;
 	uint32_t swapchainImageCount = 0;
@@ -178,8 +182,8 @@ private:
 
 	bool prepared = false;
 
-	LocalVector<VkCommandBuffer> command_buffer_queue;
-	uint32_t command_buffer_count = 1;
+	Vector<VkCommandBuffer> command_buffer_queue;
+	int command_buffer_count = 1;
 
 	// Extensions.
 	static bool instance_extensions_initialized;
@@ -246,7 +250,7 @@ private:
 
 	Error _initialize_queues(VkSurfaceKHR p_surface);
 
-	Error _create_device(VkDevice &r_vk_device);
+	Error _create_device();
 
 	Error _clean_up_swap_chain(Window *window);
 
@@ -258,7 +262,7 @@ private:
 	Vector<VkAttachmentReference> _convert_VkAttachmentReference2(uint32_t p_count, const VkAttachmentReference2 *p_refs);
 
 protected:
-	virtual const char *_get_platform_surface_extension() const { return nullptr; }
+	virtual const char *_get_platform_surface_extension() const = 0;
 
 	virtual Error _window_create(DisplayServer::WindowID p_window_id, DisplayServer::VSyncMode p_vsync_mode, VkSurfaceKHR p_surface, int p_width, int p_height);
 
@@ -273,10 +277,10 @@ public:
 	bool supports_renderpass2() const { return is_device_extension_enabled(VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME); }
 	VkResult vkCreateRenderPass2KHR(VkDevice p_device, const VkRenderPassCreateInfo2 *p_create_info, const VkAllocationCallbacks *p_allocator, VkRenderPass *p_render_pass);
 
-	virtual const char *get_api_name() const override final { return "Vulkan"; };
-	virtual RenderingDevice::Capabilities get_device_capabilities() const override final;
+	uint32_t get_vulkan_major() const { return VK_API_VERSION_MAJOR(device_api_version); };
+	uint32_t get_vulkan_minor() const { return VK_API_VERSION_MINOR(device_api_version); };
 	const SubgroupCapabilities &get_subgroup_capabilities() const { return subgroup_capabilities; };
-	virtual const RDD::MultiviewCapabilities &get_multiview_capabilities() const override final { return multiview_capabilities; };
+	const MultiviewCapabilities &get_multiview_capabilities() const { return multiview_capabilities; };
 	const VRSCapabilities &get_vrs_capabilities() const { return vrs_capabilities; };
 	const ShaderCapabilities &get_shader_capabilities() const { return shader_capabilities; };
 	const StorageBufferCapabilities &get_storage_buffer_capabilities() const { return storage_buffer_capabilities; };
@@ -286,7 +290,7 @@ public:
 	VkDevice get_device();
 	VkPhysicalDevice get_physical_device();
 	VkInstance get_instance() { return inst; }
-	virtual int get_swapchain_image_count() const override final;
+	int get_swapchain_image_count() const;
 	VkQueue get_graphics_queue() const;
 	uint32_t get_graphics_queue_family_index() const;
 
@@ -302,44 +306,44 @@ public:
 		return enabled_device_extension_names.has(extension_name);
 	}
 
-	virtual void window_resize(DisplayServer::WindowID p_window_id, int p_width, int p_height) override final;
-	virtual int window_get_width(DisplayServer::WindowID p_window = 0) override final;
-	virtual int window_get_height(DisplayServer::WindowID p_window = 0) override final;
-	virtual bool window_is_valid_swapchain(DisplayServer::WindowID p_window = 0) override final;
-	virtual void window_destroy(DisplayServer::WindowID p_window_id) override final;
-	virtual RDD::RenderPassID window_get_render_pass(DisplayServer::WindowID p_window = 0) override final;
-	virtual RDD::FramebufferID window_get_framebuffer(DisplayServer::WindowID p_window = 0) override final;
+	void window_resize(DisplayServer::WindowID p_window_id, int p_width, int p_height);
+	int window_get_width(DisplayServer::WindowID p_window = 0);
+	int window_get_height(DisplayServer::WindowID p_window = 0);
+	bool window_is_valid_swapchain(DisplayServer::WindowID p_window = 0);
+	void window_destroy(DisplayServer::WindowID p_window_id);
+	VkFramebuffer window_get_framebuffer(DisplayServer::WindowID p_window = 0);
+	VkRenderPass window_get_render_pass(DisplayServer::WindowID p_window = 0);
 
-	virtual RID local_device_create() override final;
-	virtual void local_device_push_command_buffers(RID p_local_device, const RDD::CommandBufferID *p_buffers, int p_count) override final;
-	virtual void local_device_sync(RID p_local_device) override final;
-	virtual void local_device_free(RID p_local_device) override final;
+	RID local_device_create();
+	VkDevice local_device_get_vk_device(RID p_local_device);
+	void local_device_push_command_buffers(RID p_local_device, const VkCommandBuffer *p_buffers, int p_count);
+	void local_device_sync(RID p_local_device);
+	void local_device_free(RID p_local_device);
 
 	VkFormat get_screen_format() const;
-	const VkPhysicalDeviceLimits &get_device_limits() const;
+	VkPhysicalDeviceLimits get_device_limits() const;
 
-	virtual void set_setup_buffer(RDD::CommandBufferID p_command_buffer) override final;
-	virtual void append_command_buffer(RDD::CommandBufferID p_command_buffer) override final;
+	void set_setup_buffer(VkCommandBuffer p_command_buffer);
+	void append_command_buffer(VkCommandBuffer p_command_buffer);
 	void resize_notify();
-	virtual void flush(bool p_flush_setup = false, bool p_flush_pending = false, bool p_sync = true) override final;
-	virtual Error prepare_buffers(RDD::CommandBufferID p_command_buffer) override final;
-	virtual void postpare_buffers(RDD::CommandBufferID p_command_buffer) override final;
-	virtual Error swap_buffers() override final;
-	virtual Error initialize() override final;
+	void flush(bool p_flush_setup = false, bool p_flush_pending = false);
+	Error prepare_buffers();
+	Error swap_buffers();
+	Error initialize();
 
+	void command_begin_label(VkCommandBuffer p_command_buffer, String p_label_name, const Color p_color);
+	void command_insert_label(VkCommandBuffer p_command_buffer, String p_label_name, const Color p_color);
+	void command_end_label(VkCommandBuffer p_command_buffer);
 	void set_object_name(VkObjectType p_object_type, uint64_t p_object_handle, String p_object_name);
 
-	virtual String get_device_vendor_name() const override final;
-	virtual String get_device_name() const override final;
-	virtual RDD::DeviceType get_device_type() const override final;
-	virtual String get_device_api_version() const override final;
-	virtual String get_device_pipeline_cache_uuid() const override final;
+	String get_device_vendor_name() const;
+	String get_device_name() const;
+	RenderingDevice::DeviceType get_device_type() const;
+	String get_device_api_version() const;
+	String get_device_pipeline_cache_uuid() const;
 
-	virtual void set_vsync_mode(DisplayServer::WindowID p_window, DisplayServer::VSyncMode p_mode) override final;
-	virtual DisplayServer::VSyncMode get_vsync_mode(DisplayServer::WindowID p_window = 0) const override final;
-
-	virtual RenderingDeviceDriver *get_driver(RID p_local_device = RID()) override final;
-	virtual bool is_debug_utils_enabled() const override final;
+	void set_vsync_mode(DisplayServer::WindowID p_window, DisplayServer::VSyncMode p_mode);
+	DisplayServer::VSyncMode get_vsync_mode(DisplayServer::WindowID p_window = 0) const;
 
 	VulkanContext();
 	virtual ~VulkanContext();

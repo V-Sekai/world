@@ -39,8 +39,8 @@
 #include "editor/editor_undo_redo_manager.h"
 #include "editor/export/editor_export.h"
 #include "editor/gui/editor_title_bar.h"
-#include "editor/import/3d/resource_importer_scene.h"
 #include "editor/import/editor_import_plugin.h"
+#include "editor/import/resource_importer_scene.h"
 #include "editor/inspector_dock.h"
 #include "editor/plugins/canvas_item_editor_plugin.h"
 #include "editor/plugins/editor_debugger_plugin.h"
@@ -402,13 +402,13 @@ void EditorPlugin::remove_translation_parser_plugin(const Ref<EditorTranslationP
 void EditorPlugin::add_import_plugin(const Ref<EditorImportPlugin> &p_importer, bool p_first_priority) {
 	ERR_FAIL_COND(!p_importer.is_valid());
 	ResourceFormatImporter::get_singleton()->add_importer(p_importer, p_first_priority);
-	callable_mp(EditorFileSystem::get_singleton(), &EditorFileSystem::scan).call_deferred();
+	EditorFileSystem::get_singleton()->call_deferred(SNAME("scan"));
 }
 
 void EditorPlugin::remove_import_plugin(const Ref<EditorImportPlugin> &p_importer) {
 	ERR_FAIL_COND(!p_importer.is_valid());
 	ResourceFormatImporter::get_singleton()->remove_importer(p_importer);
-	callable_mp(EditorFileSystem::get_singleton(), &EditorFileSystem::scan).call_deferred();
+	EditorFileSystem::get_singleton()->call_deferred(SNAME("scan"));
 }
 
 void EditorPlugin::add_export_plugin(const Ref<EditorExportPlugin> &p_exporter) {

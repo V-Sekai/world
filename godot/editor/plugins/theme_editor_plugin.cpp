@@ -2247,7 +2247,6 @@ ThemeTypeDialog::ThemeTypeDialog() {
 	add_type_vb->add_child(add_type_options_label);
 
 	add_type_options = memnew(ItemList);
-	add_type_options->set_auto_translate(false);
 	add_type_options->set_v_size_flags(Control::SIZE_EXPAND_FILL);
 	add_type_vb->add_child(add_type_options);
 	add_type_options->connect("item_selected", callable_mp(this, &ThemeTypeDialog::_add_type_options_cbk));
@@ -2374,7 +2373,7 @@ void ThemeTypeEditor::_update_type_list_debounced() {
 	update_debounce_timer->start();
 }
 
-HashMap<StringName, bool> ThemeTypeEditor::_get_type_items(String p_type_name, void (Theme::*get_list_func)(const StringName &, List<StringName> *) const, bool include_default) {
+HashMap<StringName, bool> ThemeTypeEditor::_get_type_items(String p_type_name, void (Theme::*get_list_func)(StringName, List<StringName> *) const, bool include_default) {
 	HashMap<StringName, bool> items;
 	List<StringName> names;
 

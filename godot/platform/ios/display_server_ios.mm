@@ -62,46 +62,34 @@ DisplayServerIOS::DisplayServerIOS(const String &p_rendering_driver, WindowMode 
 		tts = [[TTS_IOS alloc] init];
 	}
 
-#if defined(RD_ENABLED)
-	context_rd = nullptr;
-	rendering_device = nullptr;
-
-	CALayer *layer = nullptr;
-
-	union {
-#ifdef VULKAN_ENABLED
-		VulkanContextIOS::WindowPlatformData vulkan;
-#endif
-	} wpd;
-
 #if defined(VULKAN_ENABLED)
+	context_vulkan = nullptr;
+	rendering_device_vulkan = nullptr;
+
 	if (rendering_driver == "vulkan") {
-		layer = [AppDelegate.viewController.godotView initializeRenderingForDriver:@"vulkan"];
+		context_vulkan = memnew(VulkanContextIOS);
+		if (context_vulkan->initialize() != OK) {
+			memdelete(context_vulkan);
+			context_vulkan = nullptr;
+			ERR_FAIL_MSG("Failed to initialize Vulkan context");
+		}
+
+		CALayer *layer = [AppDelegate.viewController.godotView initializeRenderingForDriver:@"vulkan"];
+
 		if (!layer) {
 			ERR_FAIL_MSG("Failed to create iOS Vulkan rendering layer.");
 		}
-		wpd.vulkan.layer_ptr = &layer;
-		context_rd = memnew(VulkanContextIOS);
-	}
-#endif
-
-	if (context_rd) {
-		if (context_rd->initialize() != OK) {
-			memdelete(context_rd);
-			context_rd = nullptr;
-			ERR_FAIL_MSG(vformat("Failed to initialize %s context", context_rd->get_api_name()));
-		}
 
 		Size2i size = Size2i(layer.bounds.size.width, layer.bounds.size.height) * screen_get_max_scale();
-		if (context_rd->window_create(MAIN_WINDOW_ID, p_vsync_mode, size.width, size.height, &wpd) != OK) {
-			memdelete(context_rd);
-			context_rd = nullptr;
+		if (context_vulkan->window_create(MAIN_WINDOW_ID, p_vsync_mode, layer, size.width, size.height) != OK) {
+			memdelete(context_vulkan);
+			context_vulkan = nullptr;
 			r_error = ERR_UNAVAILABLE;
-			ERR_FAIL_MSG(vformat("Failed to create %s window.", context_rd->get_api_name()));
+			ERR_FAIL_MSG("Failed to create Vulkan window.");
 		}
 
-		rendering_device = memnew(RenderingDevice);
-		rendering_device->initialize(context_rd);
+		rendering_device_vulkan = memnew(RenderingDeviceVulkan);
+		rendering_device_vulkan->initialize(context_vulkan);
 
 		RendererCompositorRD::make_current();
 	}
@@ -128,17 +116,17 @@ DisplayServerIOS::DisplayServerIOS(const String &p_rendering_driver, WindowMode 
 }
 
 DisplayServerIOS::~DisplayServerIOS() {
-#if defined(RD_ENABLED)
-	if (rendering_device) {
-		rendering_device->finalize();
-		memdelete(rendering_device);
-		rendering_device = nullptr;
+#if defined(VULKAN_ENABLED)
+	if (rendering_device_vulkan) {
+		rendering_device_vulkan->finalize();
+		memdelete(rendering_device_vulkan);
+		rendering_device_vulkan = nullptr;
 	}
 
-	if (context_rd) {
-		context_rd->window_destroy(MAIN_WINDOW_ID);
-		memdelete(context_rd);
-		context_rd = nullptr;
+	if (context_vulkan) {
+		context_vulkan->window_destroy(MAIN_WINDOW_ID);
+		memdelete(context_vulkan);
+		context_vulkan = nullptr;
 	}
 #endif
 }
@@ -709,9 +697,9 @@ bool DisplayServerIOS::screen_is_kept_on() const {
 void DisplayServerIOS::resize_window(CGSize viewSize) {
 	Size2i size = Size2i(viewSize.width, viewSize.height) * screen_get_max_scale();
 
-#if defined(RD_ENABLED)
-	if (context_rd) {
-		context_rd->window_resize(MAIN_WINDOW_ID, size.x, size.y);
+#if defined(VULKAN_ENABLED)
+	if (context_vulkan) {
+		context_vulkan->window_resize(MAIN_WINDOW_ID, size.x, size.y);
 	}
 #endif
 
@@ -721,18 +709,18 @@ void DisplayServerIOS::resize_window(CGSize viewSize) {
 
 void DisplayServerIOS::window_set_vsync_mode(DisplayServer::VSyncMode p_vsync_mode, WindowID p_window) {
 	_THREAD_SAFE_METHOD_
-#if defined(RD_ENABLED)
-	if (context_rd) {
-		context_rd->set_vsync_mode(p_window, p_vsync_mode);
+#if defined(VULKAN_ENABLED)
+	if (context_vulkan) {
+		context_vulkan->set_vsync_mode(p_window, p_vsync_mode);
 	}
 #endif
 }
 
 DisplayServer::VSyncMode DisplayServerIOS::window_get_vsync_mode(WindowID p_window) const {
 	_THREAD_SAFE_METHOD_
-#if defined(RD_ENABLED)
-	if (context_rd) {
-		return context_rd->get_vsync_mode(p_window);
+#if defined(VULKAN_ENABLED)
+	if (context_vulkan) {
+		return context_vulkan->get_vsync_mode(p_window);
 	}
 #endif
 	return DisplayServer::VSYNC_ENABLED;

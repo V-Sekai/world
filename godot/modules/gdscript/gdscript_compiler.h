@@ -45,19 +45,19 @@ class GDScriptCompiler {
 	GDScript *main_script = nullptr;
 
 	struct FunctionLambdaInfo {
-		GDScriptFunction *function = nullptr;
-		GDScriptFunction *parent = nullptr;
-		GDScript *script = nullptr;
+		GDScriptFunction *function;
+		GDScriptFunction *parent;
+		Ref<GDScript> script;
 		StringName name;
-		int line = 0;
-		int index = 0;
-		int depth = 0;
+		int line;
+		int index;
+		int depth;
 		//uint64_t code_hash;
 		//int code_size;
-		int capture_count = 0;
-		bool use_self = false;
-		int arg_count = 0;
-		int default_arg_count = 0;
+		int capture_count;
+		int use_self;
+		int arg_count;
+		int default_arg_count;
 		//Vector<GDScriptDataType> argument_types;
 		//GDScriptDataType return_type;
 		Vector<FunctionLambdaInfo> sublambdas;

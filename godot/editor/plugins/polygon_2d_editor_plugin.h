@@ -35,7 +35,6 @@
 
 class AcceptDialog;
 class ButtonGroup;
-class EditorZoomWidget;
 class HScrollBar;
 class HSlider;
 class Label;
@@ -86,10 +85,12 @@ class Polygon2DEditor : public AbstractPolygon2DEditor {
 	Panel *uv_edit_background = nullptr;
 	Polygon2D *preview_polygon = nullptr;
 	Control *uv_edit_draw = nullptr;
-	EditorZoomWidget *zoom_widget = nullptr;
+	HSlider *uv_zoom = nullptr;
+	SpinBox *uv_zoom_value = nullptr;
 	HScrollBar *uv_hscroll = nullptr;
 	VScrollBar *uv_vscroll = nullptr;
 	MenuButton *uv_menu = nullptr;
+	TextureRect *uv_icon_zoom = nullptr;
 
 	Ref<ViewPanner> uv_panner;
 	void _uv_pan_callback(Vector2 p_scroll_vec, Ref<InputEvent> p_event);
@@ -128,6 +129,7 @@ class Polygon2DEditor : public AbstractPolygon2DEditor {
 	Vector<int> polygon_create;
 	UVMode uv_move_current;
 	Vector2 uv_drag_from;
+	bool updating_uv_scroll;
 
 	AcceptDialog *error = nullptr;
 
@@ -143,8 +145,7 @@ class Polygon2DEditor : public AbstractPolygon2DEditor {
 	void _cancel_editing();
 	void _update_polygon_editing_state();
 
-	void _center_view();
-	void _update_zoom_and_pan(bool p_zoom_at_center);
+	void _uv_scroll_changed(real_t);
 	void _uv_input(const Ref<InputEvent> &p_input);
 	void _uv_draw();
 	void _uv_mode(int p_mode);

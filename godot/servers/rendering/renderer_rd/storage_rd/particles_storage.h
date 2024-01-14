@@ -247,8 +247,6 @@ private:
 		ParticleEmissionBuffer *emission_buffer = nullptr;
 		RID emission_storage_buffer;
 
-		RID unused_storage_buffer;
-
 		HashSet<RID> collisions;
 
 		Dependency dependency;
@@ -265,7 +263,6 @@ private:
 
 	void _particles_process(Particles *p_particles, double p_delta);
 	void _particles_allocate_emission_buffer(Particles *particles);
-	void _particles_ensure_unused_buffer(Particles *particles);
 	void _particles_free_data(Particles *particles);
 	void _particles_update_buffers(Particles *particles);
 

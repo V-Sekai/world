@@ -1160,10 +1160,7 @@ void Window::_update_viewport_size() {
 		}
 	}
 
-	if (old_size != size) {
-		old_size = size;
-		notification(NOTIFICATION_WM_SIZE_CHANGED);
-	}
+	notification(NOTIFICATION_WM_SIZE_CHANGED);
 
 	if (embedder) {
 		embedder->_sub_window_update(this);
@@ -1516,7 +1513,7 @@ void Window::child_controls_changed() {
 	}
 
 	updating_child_controls = true;
-	callable_mp(this, &Window::_update_child_controls).call_deferred();
+	call_deferred(SNAME("_update_child_controls"));
 }
 
 void Window::_update_child_controls() {
@@ -1997,7 +1994,7 @@ void Window::_update_theme_item_cache() {
 	// Updating without a delay can cause a lot of lag.
 	if (!wrap_controls) {
 		updating_embedded_window = true;
-		callable_mp(this, &Window::_update_embedded_window).call_deferred();
+		call_deferred(SNAME("_update_embedded_window"));
 	} else {
 		child_controls_changed();
 	}
@@ -2800,6 +2797,9 @@ void Window::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("is_wrapping_controls"), &Window::is_wrapping_controls);
 	ClassDB::bind_method(D_METHOD("child_controls_changed"), &Window::child_controls_changed);
 
+	ClassDB::bind_method(D_METHOD("_update_child_controls"), &Window::_update_child_controls);
+	ClassDB::bind_method(D_METHOD("_update_embedded_window"), &Window::_update_embedded_window);
+
 	ClassDB::bind_method(D_METHOD("set_theme", "theme"), &Window::set_theme);
 	ClassDB::bind_method(D_METHOD("get_theme"), &Window::get_theme);
 
@@ -2929,7 +2929,6 @@ void Window::_bind_methods() {
 
 	BIND_CONSTANT(NOTIFICATION_VISIBILITY_CHANGED);
 	BIND_CONSTANT(NOTIFICATION_THEME_CHANGED);
-	BIND_CONSTANT(NOTIFICATION_POST_POPUP);
 
 	BIND_ENUM_CONSTANT(MODE_WINDOWED);
 	BIND_ENUM_CONSTANT(MODE_MINIMIZED);

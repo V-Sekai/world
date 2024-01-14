@@ -223,9 +223,6 @@ class SceneTreeDock : public VBoxContainer {
 	void _delete_dialog_closed();
 
 	void _toggle_editable_children_from_selection();
-
-	void _reparent_nodes_to_root(Node *p_root, const Array &p_nodes, Node *p_owner);
-	void _reparent_nodes_to_paths_with_transform_and_name(Node *p_root, const Array &p_nodes, const Array &p_paths, const Array &p_transforms, const Array &p_names, Node *p_owner);
 	void _toggle_editable_children(Node *p_node);
 
 	void _toggle_placeholder_from_selection();
@@ -237,7 +234,7 @@ class SceneTreeDock : public VBoxContainer {
 	virtual void shortcut_input(const Ref<InputEvent> &p_event) override;
 
 	void _new_scene_from(String p_file);
-	void _set_node_owner_recursive(Node *p_node, Node *p_owner, const HashMap<const Node *, Node *> &p_inverse_duplimap);
+	void _set_node_owner_recursive(Node *p_node, Node *p_owner);
 
 	bool _validate_no_foreign();
 	bool _validate_no_instance();

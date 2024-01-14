@@ -194,9 +194,9 @@ struct GDScriptUtilityFunctionsDefinitions {
 				// Calculate how many.
 				int count = 0;
 				if (incr > 0) {
-					count = Math::division_round_up(to - from, incr);
+					count = ((to - from - 1) / incr) + 1;
 				} else {
-					count = Math::division_round_up(from - to, -incr);
+					count = ((from - to - 1) / -incr) + 1;
 				}
 
 				Error err = arr.resize(count);
@@ -470,8 +470,7 @@ struct GDScriptUtilityFunctionsDefinitions {
 	static inline void len(Variant *r_ret, const Variant **p_args, int p_arg_count, Callable::CallError &r_error) {
 		VALIDATE_ARG_COUNT(1);
 		switch (p_args[0]->get_type()) {
-			case Variant::STRING:
-			case Variant::STRING_NAME: {
+			case Variant::STRING: {
 				String d = *p_args[0];
 				*r_ret = d.length();
 			} break;

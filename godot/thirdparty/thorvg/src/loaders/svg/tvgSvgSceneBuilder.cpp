@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2024 the ThorVG project. All rights reserved.
+ * Copyright (c) 2020 - 2023 the ThorVG project. All rights reserved.
 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -396,9 +396,10 @@ static bool _recognizeShape(SvgNode* node, Shape* shape)
     switch (node->type) {
         case SvgNodeType::Path: {
             if (node->node.path.path) {
-                if (!svgPathToShape(node->node.path.path, shape)) {
-                    TVGERR("SVG", "Invalid path information.");
-                    return false;
+                Array<PathCommand> cmds;
+                Array<Point> pts;
+                if (svgPathToTvgPath(node->node.path.path, cmds, pts)) {
+                    shape->appendPath(cmds.data, cmds.count, pts.data, pts.count);
                 }
             }
             break;
@@ -844,7 +845,7 @@ static void _updateInvalidViewSize(const Scene* scene, Box& vBox, float& w, floa
 /* External Class Implementation                                        */
 /************************************************************************/
 
-Scene* svgSceneBuild(SvgLoaderData& loaderData, Box vBox, float w, float h, AspectRatioAlign align, AspectRatioMeetOrSlice meetOrSlice, const string& svgPath, SvgViewFlag viewFlag)
+unique_ptr<Scene> svgSceneBuild(SvgLoaderData& loaderData, Box vBox, float w, float h, AspectRatioAlign align, AspectRatioMeetOrSlice meetOrSlice, const string& svgPath, SvgViewFlag viewFlag)
 {
     //TODO: aspect ratio is valid only if viewBox was set
 
@@ -862,7 +863,8 @@ Scene* svgSceneBuild(SvgLoaderData& loaderData, Box vBox, float w, float h, Aspe
     }
 
     auto viewBoxClip = Shape::gen();
-    viewBoxClip->appendRect(0, 0, w, h);
+    viewBoxClip->appendRect(0, 0, w, h, 0, 0);
+    viewBoxClip->fill(0, 0, 0);
 
     auto compositeLayer = Scene::gen();
     compositeLayer->composite(std::move(viewBoxClip), CompositeMethod::ClipPath);
@@ -878,5 +880,5 @@ Scene* svgSceneBuild(SvgLoaderData& loaderData, Box vBox, float w, float h, Aspe
     loaderData.doc->node.doc.w = w;
     loaderData.doc->node.doc.h = h;
 
-    return root.release();
+    return root;
 }

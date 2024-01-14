@@ -352,27 +352,27 @@ void TextEditor::_edit_option(int p_op) {
 	switch (p_op) {
 		case EDIT_UNDO: {
 			tx->undo();
-			callable_mp((Control *)tx, &Control::grab_focus).call_deferred();
+			tx->call_deferred(SNAME("grab_focus"));
 		} break;
 		case EDIT_REDO: {
 			tx->redo();
-			callable_mp((Control *)tx, &Control::grab_focus).call_deferred();
+			tx->call_deferred(SNAME("grab_focus"));
 		} break;
 		case EDIT_CUT: {
 			tx->cut();
-			callable_mp((Control *)tx, &Control::grab_focus).call_deferred();
+			tx->call_deferred(SNAME("grab_focus"));
 		} break;
 		case EDIT_COPY: {
 			tx->copy();
-			callable_mp((Control *)tx, &Control::grab_focus).call_deferred();
+			tx->call_deferred(SNAME("grab_focus"));
 		} break;
 		case EDIT_PASTE: {
 			tx->paste();
-			callable_mp((Control *)tx, &Control::grab_focus).call_deferred();
+			tx->call_deferred(SNAME("grab_focus"));
 		} break;
 		case EDIT_SELECT_ALL: {
 			tx->select_all();
-			callable_mp((Control *)tx, &Control::grab_focus).call_deferred();
+			tx->call_deferred(SNAME("grab_focus"));
 		} break;
 		case EDIT_MOVE_LINE_UP: {
 			code_editor->move_lines_up();

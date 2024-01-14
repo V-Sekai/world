@@ -1142,7 +1142,7 @@ namespace Godot.Collections
         /// </summary>
         /// <param name="from">The typed array to convert.</param>
         /// <returns>A new Godot Array, or <see langword="null"/> if <see paramref="from"/> was null.</returns>
-        [return: NotNullIfNotNull("from")]
+        [return: NotNullIfNotNull(nameof(from))]
         public static explicit operator Array?(Array<T>? from)
         {
             return from?._underlyingArray;

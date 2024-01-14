@@ -132,26 +132,17 @@ Files extracted from upstream source:
 - `include/D3D12MemAlloc.h`
 - `LICENSE.txt`, `NOTICES.txt`
 
-Important: Some files have Godot-made changes for use with MinGW.
-They are marked with `/* GODOT start */` and `/* GODOT end */`
-comments.
-
 
 ## directx_headers
 
 - Upstream: https://github.com/microsoft/DirectX-Headers
-- Version: 1.611.1 (48f23952bc08a6dce0727339c07cedbc4797356c, 2023)
+- Version: 1.606.3 (fd329244e62201bf959331d28514928fc1d45005, 2022)
 - License: MIT
 
 Files extracted from upstream source:
 
 - `include/directx/*.h`
-- `include/dxguids/*.h`
 - `LICENSE`
-
-Important: Some files have Godot-made changes for use with MinGW.
-They are marked with `/* GODOT start */` and `/* GODOT end */`
-comments.
 
 
 ## doctest
@@ -164,19 +155,6 @@ Files extracted from upstream source:
 
 - `doctest/doctest.h` as `doctest.h`
 - `LICENSE.txt`
-
-## eigen
-
-- Upstream: https://gitlab.com/libeigen/eigen/
-- Version: 3.3.7
-- License: Multiple* (BSD-3-Clause, GPLv3, LGPL 2.1, Minpack, MPL 2.0)
-
-Files extracted from upstream source:
-
-- All files in `Eigen/` except `CMakeLists.txt`
-- All `COPYING.*` files.
-
-\* Note that while eigen contains code under many licenses, godot WILL SET BUT DOESN'T CURRENTLY SET, FIXEME the `-DEIGEN_MPL2_ONLY` flag described in `COPYING.README`, which ensures that no code licensed under a more restrictive license than MPL 2.0 is included in godot binaries.
 
 
 ## embree
@@ -402,7 +380,7 @@ Files extracted from upstream source:
 ## icu4c
 
 - Upstream: https://github.com/unicode-org/icu
-- Version: 74.1 (9edac7b78327a1cb58db29e2714b15f9fa14e4d7, 2023)
+- Version: 73.2 (680f521746a3bd6a86f25f25ee50a62d88b489cf, 2023)
 - License: Unicode
 
 Files extracted from upstream source:
@@ -414,7 +392,7 @@ Files extracted from upstream source:
 
 Files generated from upstream source:
 
-- The `icudt74l.dat` built with the provided `godot_data.json` config file (see
+- The `icudt73l.dat` built with the provided `godot_data.json` config file (see
   https://github.com/unicode-org/icu/blob/master/docs/userguide/icu_data/buildtool.md
   for instructions).
 
@@ -424,7 +402,7 @@ Files generated from upstream source:
 3. Reconfigure ICU with custom data config:
    `ICU_DATA_FILTER_FILE={GODOT_SOURCE}/thirdparty/icu4c/godot_data.json ./runConfigureICU {PLATFORM} --with-data-packaging=common`
 4. Delete `data/out` folder and rebuild data: `cd data && rm -rf ./out && make`
-5. Copy `source/data/out/icudt74l.dat` to the `{GODOT_SOURCE}/thirdparty/icu4c/icudt74l.dat`
+5. Copy `source/data/out/icudt73l.dat` to the `{GODOT_SOURCE}/thirdparty/icu4c/icudt73l.dat`
 
 
 ## jpeg-compressor
@@ -740,7 +718,7 @@ with the provided patch.
 ## openxr
 
 - Upstream: https://github.com/KhronosGroup/OpenXR-SDK
-- Version: 1.0.33 (dc1e23937fe45eabcce80f6588cf47449edb29d1, 2024)
+- Version: 1.0.31 (95fe35ffb383710a6e0567e958ead9a3b66e930c, 2023)
 - License: Apache 2.0
 
 Files extracted from upstream source:
@@ -782,17 +760,6 @@ Files extracted from upstream source:
 
 A sljit patch from upstream was backported to fix macOS < 11.0 compilation
 in 10.40, it can be found in the `patches` folder.
-
-
-## pffft
-
-- Upstream: https://bitbucket.org/jpommier/pffft
-- Version: hg (29e4f76, 2016)
-- License: FFTPACK5 (BSD-like) 
-
-Files extracted from upstream source:
-
-- all files
 
 
 ## recastnavigation
@@ -853,20 +820,6 @@ They can be reapplied using the patches included in the `patches`
 folder.
 
 
-## resonanceaudio
-
-- Upstream: https://github.com/resonance-audio/resonance-audio
-- Version: git (1213ab78f00645fd2807285ccd4bed1375a50bfb, 2020)
-- License: Apache 2.0
-
-Files extracted from upstream source:
-
-- `resonance_audio/` and `platforms/common` folders without `*.test.cpp` and `*test.h`
-- `third_party/SADIE_hrtf_database` folder without `generate_hrtf_assets.py`, `WAV/*` and `hrtf_assets.iad`
-- LICENSE
-- AUTHORS
-
-
 ## squish
 
 - Upstream: https://sourceforge.net/projects/libsquish
@@ -899,25 +852,13 @@ instead of `miniz.h` as an external dependency.
 ## thorvg
 
 - Upstream: https://github.com/thorvg/thorvg
-- Version: 0.12.0 (25ea242d3867ed66807714f5a52d080984d3c8cc, 2024)
+- Version: 0.11.2 (b01fe9bf4461146304d3520d6dc699cf580a3744, 2023)
 - License: MIT
 
 Files extracted from upstream source:
 
 See `thorvg/update-thorvg.sh` for extraction instructions. Set the version
 number and run the script.
-
-
-## ufbx
-
-- Upstream: https://github.com/ufbx/ufbx
-- Version: git (6163260eb203ca3e6dd26306324b8e4946229523, 2024)
-- License: MIT
-
-Files extracted from upstream source:
-
-- `ufbx.{c,h}`
-- `LICENSE`
 
 
 ## vhacd

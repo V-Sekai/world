@@ -507,7 +507,7 @@ void TileSetAtlasSourceEditor::AtlasTileProxyObject::_get_property_list(List<Pro
 	}
 }
 
-void TileSetAtlasSourceEditor::AtlasTileProxyObject::edit(Ref<TileSetAtlasSource> p_tile_set_atlas_source, const RBSet<TileSelection> &p_tiles) {
+void TileSetAtlasSourceEditor::AtlasTileProxyObject::edit(Ref<TileSetAtlasSource> p_tile_set_atlas_source, RBSet<TileSelection> p_tiles) {
 	ERR_FAIL_COND(!p_tile_set_atlas_source.is_valid());
 	ERR_FAIL_COND(p_tiles.is_empty());
 	for (const TileSelection &E : p_tiles) {
@@ -954,7 +954,7 @@ void TileSetAtlasSourceEditor::_tile_data_editor_dropdown_button_pressed() {
 }
 
 void TileSetAtlasSourceEditor::_tile_data_editors_tree_selected() {
-	callable_mp((Window *)tile_data_editors_popup, &Window::hide).call_deferred();
+	tile_data_editors_popup->call_deferred(SNAME("hide"));
 	_update_current_tile_data_editor();
 	tile_atlas_control->queue_redraw();
 	tile_atlas_control_unscaled->queue_redraw();

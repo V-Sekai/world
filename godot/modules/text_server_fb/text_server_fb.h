@@ -76,7 +76,7 @@
 
 using namespace godot;
 
-#elif defined(GODOT_MODULE)
+#else
 // Headers for building as built-in module.
 
 #include "core/extension/ext_wrappers.gen.inc"

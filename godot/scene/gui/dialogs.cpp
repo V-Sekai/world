@@ -129,7 +129,7 @@ void AcceptDialog::_cancel_pressed() {
 		parent_visible = nullptr;
 	}
 
-	callable_mp((Window *)this, &Window::hide).call_deferred();
+	call_deferred(SNAME("hide"));
 
 	emit_signal(SNAME("canceled"));
 

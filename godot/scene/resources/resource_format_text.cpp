@@ -281,7 +281,7 @@ Ref<PackedScene> ResourceLoaderText::_parse_node_tag(VariantParser::ResourcePars
 					if (error == ERR_FILE_MISSING_DEPENDENCIES) {
 						// Resource loading error, just skip it.
 					} else if (error != ERR_FILE_EOF) {
-						ERR_PRINT(vformat("Parse Error: %s. [Resource file %s:%d]", error_names[error], res_path, lines));
+						_printerr();
 						return Ref<PackedScene>();
 					} else {
 						error = OK;
@@ -464,7 +464,7 @@ Error ResourceLoaderText::load() {
 
 		ext_resources[id].path = path;
 		ext_resources[id].type = type;
-		ext_resources[id].load_token = ResourceLoader::_load_start(path, type, use_sub_threads ? ResourceLoader::LOAD_THREAD_DISTRIBUTE : ResourceLoader::LOAD_THREAD_FROM_CURRENT, ResourceFormatLoader::CACHE_MODE_REUSE, false, Dictionary(), Dictionary());
+		ext_resources[id].load_token = ResourceLoader::_load_start(path, type, use_sub_threads ? ResourceLoader::LOAD_THREAD_DISTRIBUTE : ResourceLoader::LOAD_THREAD_FROM_CURRENT, ResourceFormatLoader::CACHE_MODE_REUSE);
 		if (!ext_resources[id].load_token.is_valid()) {
 			if (ResourceLoader::get_abort_on_missing_resources()) {
 				error = ERR_FILE_CORRUPT;
@@ -2289,10 +2289,10 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const Ref<Reso
 			}
 
 			String connstr = "[connection";
-			connstr += " signal=\"" + String(state->get_connection_signal(i)).c_escape() + "\"";
-			connstr += " from=\"" + String(state->get_connection_source(i).simplified()).c_escape() + "\"";
-			connstr += " to=\"" + String(state->get_connection_target(i).simplified()).c_escape() + "\"";
-			connstr += " method=\"" + String(state->get_connection_method(i)).c_escape() + "\"";
+			connstr += " signal=\"" + String(state->get_connection_signal(i)) + "\"";
+			connstr += " from=\"" + String(state->get_connection_source(i).simplified()) + "\"";
+			connstr += " to=\"" + String(state->get_connection_target(i).simplified()) + "\"";
+			connstr += " method=\"" + String(state->get_connection_method(i)) + "\"";
 			int flags = state->get_connection_flags(i);
 			if (flags != Object::CONNECT_PERSIST) {
 				connstr += " flags=" + itos(flags);
@@ -2319,7 +2319,7 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const Ref<Reso
 			if (i == 0) {
 				f->store_line("");
 			}
-			f->store_line("[editable path=\"" + editable_instances[i].operator String().c_escape() + "\"]");
+			f->store_line("[editable path=\"" + editable_instances[i].operator String() + "\"]");
 		}
 	}
 

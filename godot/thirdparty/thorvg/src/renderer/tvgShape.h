@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 - 2024 the ThorVG project. All rights reserved.
+ * Copyright (c) 2020 - 2023 the ThorVG project. All rights reserved.
 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,13 +20,16 @@
  * SOFTWARE.
  */
 
-#ifndef _TVG_SHAPE_H_
-#define _TVG_SHAPE_H_
+#ifndef _TVG_SHAPE_IMPL_H_
+#define _TVG_SHAPE_IMPL_H_
 
 #include <memory.h>
 #include "tvgMath.h"
 #include "tvgPaint.h"
 
+/************************************************************************/
+/* Internal Class Implementation                                        */
+/************************************************************************/
 
 struct Shape::Impl
 {
@@ -35,7 +38,7 @@ struct Shape::Impl
     Shape* shape;
     uint8_t flag = RenderUpdateFlag::None;
     uint8_t opacity;                    //for composition
-    bool needComp = false;              //composite or not
+    bool needComp;                      //composite or not
 
     Impl(Shape* s) : shape(s)
     {
@@ -56,7 +59,6 @@ struct Shape::Impl
         if (needComp) {
             cmp = renderer.target(bounds(renderer), renderer.colorSpace());
             renderer.beginComposite(cmp, CompositeMethod::None, opacity);
-            needComp = false;
         }
         ret = renderer.renderShape(rd);
         if (cmp) renderer.endComposite(cmp);
@@ -338,9 +340,9 @@ struct Shape::Impl
 
     Paint* duplicate()
     {
-        auto ret = Shape::gen().release();
-        auto dup = ret->pImpl;
+        auto ret = Shape::gen();
 
+        auto dup = ret.get()->pImpl;
         dup->rs.rule = rs.rule;
 
         //Color
@@ -376,7 +378,7 @@ struct Shape::Impl
             dup->flag |= RenderUpdateFlag::Gradient;
         }
 
-        return ret;
+        return ret.release();
     }
 
     Iterator* iterator()
@@ -385,4 +387,4 @@ struct Shape::Impl
     }
 };
 
-#endif //_TVG_SHAPE_H_
+#endif //_TVG_SHAPE_IMPL_H_

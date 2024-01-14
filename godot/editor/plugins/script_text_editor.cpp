@@ -788,7 +788,9 @@ static void _find_changed_scripts_for_external_editor(Node *p_base, Node *p_curr
 }
 
 void ScriptEditor::_update_modified_scripts_for_external_editor(Ref<Script> p_for_script) {
-	bool use_external_editor = bool(EDITOR_GET("text_editor/external/use_external_editor"));
+	if (!bool(EDITOR_GET("text_editor/external/use_external_editor"))) {
+		return;
+	}
 
 	ERR_FAIL_NULL(get_tree());
 
@@ -801,10 +803,6 @@ void ScriptEditor::_update_modified_scripts_for_external_editor(Ref<Script> p_fo
 
 	for (const Ref<Script> &E : scripts) {
 		Ref<Script> scr = E;
-
-		if (!use_external_editor && !scr->get_language()->overrides_external_editor()) {
-			continue; // We're not using an external editor for this script.
-		}
 
 		if (p_for_script.is_valid() && p_for_script != scr) {
 			continue;
@@ -886,7 +884,7 @@ void ScriptTextEditor::_breakpoint_item_pressed(int p_idx) {
 		_edit_option(breakpoints_menu->get_item_id(p_idx));
 	} else {
 		code_editor->goto_line(breakpoints_menu->get_item_metadata(p_idx));
-		callable_mp((TextEdit *)code_editor->get_text_editor(), &TextEdit::center_viewport_to_caret).call_deferred(0); // Needs to be deferred, because goto uses call_deferred().
+		code_editor->get_text_editor()->call_deferred(SNAME("center_viewport_to_caret")); //Need to be deferred, because goto uses call_deferred().
 	}
 }
 
@@ -1273,27 +1271,27 @@ void ScriptTextEditor::_edit_option(int p_op) {
 	switch (p_op) {
 		case EDIT_UNDO: {
 			tx->undo();
-			callable_mp((Control *)tx, &Control::grab_focus).call_deferred();
+			tx->call_deferred(SNAME("grab_focus"));
 		} break;
 		case EDIT_REDO: {
 			tx->redo();
-			callable_mp((Control *)tx, &Control::grab_focus).call_deferred();
+			tx->call_deferred(SNAME("grab_focus"));
 		} break;
 		case EDIT_CUT: {
 			tx->cut();
-			callable_mp((Control *)tx, &Control::grab_focus).call_deferred();
+			tx->call_deferred(SNAME("grab_focus"));
 		} break;
 		case EDIT_COPY: {
 			tx->copy();
-			callable_mp((Control *)tx, &Control::grab_focus).call_deferred();
+			tx->call_deferred(SNAME("grab_focus"));
 		} break;
 		case EDIT_PASTE: {
 			tx->paste();
-			callable_mp((Control *)tx, &Control::grab_focus).call_deferred();
+			tx->call_deferred(SNAME("grab_focus"));
 		} break;
 		case EDIT_SELECT_ALL: {
 			tx->select_all();
-			callable_mp((Control *)tx, &Control::grab_focus).call_deferred();
+			tx->call_deferred(SNAME("grab_focus"));
 		} break;
 		case EDIT_MOVE_LINE_UP: {
 			code_editor->move_lines_up();
@@ -1411,7 +1409,7 @@ void ScriptTextEditor::_edit_option(int p_op) {
 				PackedStringArray results;
 
 				for (int i = 0; i < lines.size(); i++) {
-					const String &line = lines[i];
+					String line = lines[i];
 					String whitespace = line.substr(0, line.size() - line.strip_edges(true, false).size()); // Extract the whitespace at the beginning.
 					if (expression.parse(line) == OK) {
 						Variant result = expression.execute(Array(), Variant(), false, true);
@@ -2449,7 +2447,7 @@ void ScriptTextEditor::register_editor() {
 
 	ED_SHORTCUT("script_text_editor/indent", TTR("Indent"), Key::NONE);
 	ED_SHORTCUT("script_text_editor/unindent", TTR("Unindent"), KeyModifierMask::SHIFT | Key::TAB);
-	ED_SHORTCUT_ARRAY("script_text_editor/toggle_comment", TTR("Toggle Comment"), { int32_t(KeyModifierMask::CMD_OR_CTRL | Key::K), int32_t(KeyModifierMask::CMD_OR_CTRL | Key::SLASH), int32_t(KeyModifierMask::CMD_OR_CTRL | Key::KP_DIVIDE), int32_t(KeyModifierMask::CMD_OR_CTRL | Key::NUMBERSIGN) });
+	ED_SHORTCUT_ARRAY("script_text_editor/toggle_comment", TTR("Toggle Comment"), { int32_t(KeyModifierMask::CMD_OR_CTRL | Key::K), int32_t(KeyModifierMask::CMD_OR_CTRL | Key::SLASH) });
 	ED_SHORTCUT("script_text_editor/toggle_fold_line", TTR("Fold/Unfold Line"), KeyModifierMask::ALT | Key::F);
 	ED_SHORTCUT_OVERRIDE("script_text_editor/toggle_fold_line", "macos", KeyModifierMask::CTRL | KeyModifierMask::META | Key::F);
 	ED_SHORTCUT("script_text_editor/fold_all_lines", TTR("Fold All Lines"), Key::NONE);

@@ -257,7 +257,7 @@ void EditorFileSystem::_scan_filesystem() {
 				if (l.begins_with("::")) {
 					Vector<String> split = l.split("::");
 					ERR_CONTINUE(split.size() != 3);
-					const String &name = split[1];
+					String name = split[1];
 
 					cpath = name;
 
@@ -290,7 +290,7 @@ void EditorFileSystem::_scan_filesystem() {
 					if (deps.length()) {
 						Vector<String> dp = deps.split("<>");
 						for (int i = 0; i < dp.size(); i++) {
-							const String &path = dp[i];
+							String path = dp[i];
 							fc.deps.push_back(path);
 						}
 					}
@@ -2436,13 +2436,7 @@ void EditorFileSystem::reimport_files(const Vector<String> &p_files) {
 
 Error EditorFileSystem::reimport_append(const String &p_file, const HashMap<StringName, Variant> &p_custom_options, const String &p_custom_importer, Variant p_generator_parameters) {
 	ERR_FAIL_COND_V_MSG(!importing, ERR_INVALID_PARAMETER, "Can only append files to import during a current reimport process.");
-	Error ret = _reimport_file(p_file, p_custom_options, p_custom_importer, &p_generator_parameters);
-
-	// Emit the resource_reimported signal for the single file we just reimported.
-	Vector<String> reloads;
-	reloads.append(p_file);
-	emit_signal(SNAME("resources_reimported"), reloads);
-	return ret;
+	return _reimport_file(p_file, p_custom_options, p_custom_importer, &p_generator_parameters);
 }
 
 Error EditorFileSystem::_resource_import(const String &p_path) {
@@ -2693,7 +2687,7 @@ EditorFileSystem::EditorFileSystem() {
 	using_fat32_or_exfat = (da->get_filesystem_type() == "FAT32" || da->get_filesystem_type() == "exFAT");
 
 	scan_total = 0;
-	callable_mp(ResourceUID::get_singleton(), &ResourceUID::clear).call_deferred(); // Will be updated on scan.
+	MessageQueue::get_singleton()->push_callable(callable_mp(ResourceUID::get_singleton(), &ResourceUID::clear)); // Will be updated on scan.
 	ResourceSaver::set_get_resource_id_for_path(_resource_saver_get_resource_id_for_path);
 }
 

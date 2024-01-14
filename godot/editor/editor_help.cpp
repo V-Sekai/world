@@ -1966,7 +1966,7 @@ void EditorHelp::_help_callback(const String &p_topic) {
 	}
 
 	if (class_desc->is_ready()) {
-		callable_mp(class_desc, &RichTextLabel::scroll_to_paragraph).call_deferred(line);
+		class_desc->call_deferred(SNAME("scroll_to_paragraph"), line);
 	} else {
 		scroll_to = line;
 	}
@@ -2867,10 +2867,10 @@ void EditorHelpTooltip::parse_tooltip(const String &p_text) {
 	PackedStringArray slices = p_text.split("|", true, 3);
 	ERR_FAIL_COND_MSG(slices.size() < 4, "Invalid tooltip formatting. The expect string should be formatted as 'type|class|property|args'.");
 
-	const String &type = slices[0];
-	const String &class_name = slices[1];
-	const String &property_name = slices[2];
-	const String &property_args = slices[3];
+	String type = slices[0];
+	String class_name = slices[1];
+	String property_name = slices[2];
+	String property_args = slices[3];
 
 	String title;
 	String description;

@@ -129,7 +129,7 @@ namespace GodotTools.OpenVisualStudio
             {
                 var mainWindow = dte.MainWindow;
                 mainWindow.Activate();
-                SetForegroundWindow(mainWindow.HWnd);
+                SetForegroundWindow(new IntPtr(mainWindow.HWnd));
 
                 MessageFilter.Revoke();
             }

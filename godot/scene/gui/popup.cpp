@@ -123,7 +123,7 @@ void Popup::_close_pressed() {
 
 	_deinitialize_visible_parents();
 
-	callable_mp((Window *)this, &Window::hide).call_deferred();
+	call_deferred(SNAME("hide"));
 }
 
 void Popup::_post_popup() {

@@ -65,7 +65,7 @@ void SceneCreateDialog::config(const String &p_dir) {
 	directory = p_dir;
 	root_name_edit->set_text("");
 	scene_name_edit->set_text("");
-	callable_mp((Control *)scene_name_edit, &Control::grab_focus).call_deferred();
+	scene_name_edit->call_deferred(SNAME("grab_focus"));
 	validation_panel->update();
 }
 

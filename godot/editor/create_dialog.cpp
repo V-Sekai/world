@@ -474,7 +474,7 @@ void CreateDialog::_notification(int p_what) {
 
 		case NOTIFICATION_VISIBILITY_CHANGED: {
 			if (is_visible()) {
-				callable_mp((Control *)search_box, &Control::grab_focus).call_deferred(); // Still not visible.
+				search_box->call_deferred(SNAME("grab_focus")); // still not visible
 				search_box->select_all();
 			} else {
 				EditorSettings::get_singleton()->set_project_metadata("dialog_bounds", "create_new_node", Rect2(get_position(), get_size()));
@@ -794,7 +794,6 @@ CreateDialog::CreateDialog() {
 	rec_vb->set_v_size_flags(Control::SIZE_EXPAND_FILL);
 
 	recent = memnew(ItemList);
-	recent->set_auto_translate(false);
 	rec_vb->add_margin_child(TTR("Recent:"), recent, true);
 	recent->set_allow_reselect(true);
 	recent->connect("item_selected", callable_mp(this, &CreateDialog::_history_selected));

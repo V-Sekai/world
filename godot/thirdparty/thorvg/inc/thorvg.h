@@ -1,3 +1,17 @@
+/*!
+ * @file thorvg.h
+ *
+ * The main APIs enabling the TVG initialization, preparation of the canvas and provisioning of its content:
+ * - drawing shapes: line, arc, curve, path, polygon...
+ * - drawing pictures: tvg, svg, png, jpg, bitmap...
+ * - drawing fillings: solid, linear and radial gradient...
+ * - drawing stroking: continuous stroking with arbitrary width, join, cap, dash styles.
+ * - drawing composition: blending, masking, path clipping...
+ * - drawing scene graph & affine transformation (translation, rotation, scale, ...)
+ * and finally drawing the canvas and TVG termination.
+ */
+
+
 #ifndef _THORVG_H_
 #define _THORVG_H_
 
@@ -158,10 +172,10 @@ enum class CompositeMethod
     InvAlphaMask,       ///< Alpha Masking using the complement to the compositing target's pixels as an alpha value.
     LumaMask,           ///< Alpha Masking using the grayscale (0.2125R + 0.7154G + 0.0721*B) of the compositing target's pixels. @since 0.9
     InvLumaMask,        ///< Alpha Masking using the grayscale (0.2125R + 0.7154G + 0.0721*B) of the complement to the compositing target's pixels.
-    AddMask,            ///< Combines the target and source objects pixels using target alpha. (T * TA) + (S * (255 - TA)) (Experimental API)
-    SubtractMask,       ///< Subtracts the source color from the target color while considering their respective target alpha. (T * TA) - (S * (255 - TA)) (Experimental API)
-    IntersectMask,      ///< Computes the result by taking the minimum value between the target alpha and the source alpha and multiplies it with the target color. (T * min(TA, SA)) (Experimental API)
-    DifferenceMask      ///< Calculates the absolute difference between the target color and the source color multiplied by the complement of the target alpha. abs(T - S * (255 - TA)) (Experimental API)
+    AddMask,            ///< Combines the target and source objects pixels using target alpha. (T * TA) + (S * (255 - TA)) @BETA_API
+    SubtractMask,       ///< Subtracts the source color from the target color while considering their respective target alpha. (T * TA) - (S * (255 - TA)) @BETA_API
+    IntersectMask,      ///< Computes the result by taking the minimum value between the target alpha and the source alpha and multiplies it with the target color. (T * min(TA, SA)) @BETA_API
+    DifferenceMask      ///< Calculates the absolute difference between the target color and the source color multiplied by the complement of the target alpha. abs(T - S * (255 - TA)) @BETA_API
 };
 
 
@@ -172,7 +186,7 @@ enum class CompositeMethod
  *
  * @see Paint::blend()
  *
- * @note Experimental API
+ * @BETA_API
  */
 enum class BlendMethod : uint8_t
 {
@@ -199,8 +213,7 @@ enum class BlendMethod : uint8_t
 enum class CanvasEngine
 {
     Sw = (1 << 1), ///< CPU rasterizer.
-    Gl = (1 << 2), ///< OpenGL rasterizer.
-    Wg = (1 << 3), ///< WebGPU rasterizer. (Experimental API)
+    Gl = (1 << 2)  ///< OpenGL rasterizer.
 };
 
 
@@ -234,7 +247,7 @@ struct Matrix
  * @param pt The vertex coordinate
  * @param uv The normalized texture coordinate in the range (0.0..1.0, 0.0..1.0)
  *
- * @note Experimental API
+ * @BETA_API
  */
 struct Vertex
 {
@@ -248,7 +261,7 @@ struct Vertex
  *
  * @param vertex The three vertices that make up the polygon
  *
- * @note Experimental API
+ * @BETA_API
  */
 struct Polygon
 {
@@ -278,7 +291,7 @@ public:
      *
      * @param[in] degree The value of the angle in degrees.
      *
-     * @retval Result::Success when succeed, Result::FailedAllocation otherwise.
+     * @return Result::Success when succeed, Result::FailedAllocation otherwise.
      */
     Result rotate(float degree) noexcept;
 
@@ -287,7 +300,7 @@ public:
      *
      * @param[in] factor The value of the scaling factor. The default value is 1.
      *
-     * @retval Result::Success when succeed, Result::FailedAllocation otherwise.
+     * @return Result::Success when succeed, Result::FailedAllocation otherwise.
      */
     Result scale(float factor) noexcept;
 
@@ -300,7 +313,7 @@ public:
      * @param[in] x The value of the horizontal shift.
      * @param[in] y The value of the vertical shift.
      *
-     * @retval Result::Success when succeed, Result::FailedAllocation otherwise.
+     * @return Result::Success when succeed, Result::FailedAllocation otherwise.
      */
     Result translate(float x, float y) noexcept;
 
@@ -311,7 +324,7 @@ public:
      *
      * @param[in] m The 3x3 augmented matrix.
      *
-     * @retval Result::Success when succeed, Result::FailedAllocation otherwise.
+     * @return Result::Success when succeed, Result::FailedAllocation otherwise.
      */
     Result transform(const Matrix& m) noexcept;
 
@@ -332,7 +345,7 @@ public:
      *
      * @param[in] o The opacity value in the range [0 ~ 255], where 0 is completely transparent and 255 is opaque.
      *
-     * @retval Result::Success when succeed.
+     * @return Result::Success when succeed.
      *
      * @note Setting the opacity with this API may require multiple render pass for composition. It is recommended to avoid changing the opacity if possible.
      * @note ClipPath won't use the opacity value. (see: enum class CompositeMethod::ClipPath)
@@ -345,7 +358,7 @@ public:
      * @param[in] target The paint of the target object.
      * @param[in] method The method used to composite the source object with the target.
      *
-     * @retval Result::Success when succeed, Result::InvalidArguments otherwise.
+     * @return Result::Success when succeed, Result::InvalidArguments otherwise.
      */
     Result composite(std::unique_ptr<Paint> target, CompositeMethod method) noexcept;
 
@@ -358,9 +371,9 @@ public:
      *
      * @param[in] method The blending method to be set.
      *
-     * @retval Result::Success when the blending method is successfully set.
+     * @return Result::Success when the blending method is successfully set.
      *
-     * @note Experimental API
+     * @BETA_API
      */
     Result blend(BlendMethod method) const noexcept;
 
@@ -391,7 +404,7 @@ public:
      * @param[out] h The height of the object.
      * @param[in] transformed If @c true, the paint's transformations are taken into account, otherwise they aren't.
      *
-     * @retval Result::Success when succeed, Result::InsufficientCondition otherwise.
+     * @return Result::Success when succeed, Result::InsufficientCondition otherwise.
      *
      * @note The bounding box doesn't indicate the actual drawing region. It's the smallest rectangle that encloses the object.
      */
@@ -429,7 +442,7 @@ public:
      *
      * @return The blending method
      *
-     * @note Experimental API
+     * @BETA_API
      */
     BlendMethod blend() const noexcept;
 
@@ -480,7 +493,7 @@ public:
      * @param[in] colorStops An array of ColorStop data structure.
      * @param[in] cnt The count of the @p colorStops array equal to the colors number used in the gradient.
      *
-     * @retval Result::Success when succeed.
+     * @return Result::Success when succeed.
      */
     Result colorStops(const ColorStop* colorStops, uint32_t cnt) noexcept;
 
@@ -489,7 +502,7 @@ public:
      *
      * @param[in] s The FillSpread value.
      *
-     * @retval Result::Success when succeed.
+     * @return Result::Success when succeed.
      */
     Result spread(FillSpread s) noexcept;
 
@@ -500,7 +513,7 @@ public:
      *
      * @param[in] m The 3x3 augmented matrix.
      *
-     * @retval Result::Success when succeed, Result::FailedAllocation otherwise.
+     * @return Result::Success when succeed, Result::FailedAllocation otherwise.
      */
     Result transform(const Matrix& m) noexcept;
 
@@ -525,7 +538,7 @@ public:
      *
      * In case no transformation was applied, the identity matrix is returned.
      *
-     * @return The augmented transformation matrix.
+     * @retval The augmented transformation matrix.
      */
     Matrix transform() const noexcept;
 
@@ -587,7 +600,7 @@ public:
      * @warning  Please avoid accessing the paints during Canvas update/draw. You can access them after calling sync().
      * @see Canvas::sync()
      *
-     * @note Experimental API
+     * @BETA_API
      */
     std::list<Paint*>& paints() noexcept;
 
@@ -618,7 +631,7 @@ public:
      *
      * @param[in] free If @c true, the memory occupied by paints is deallocated, otherwise it is not.
      *
-     * @retval Result::Success when succeed, Result::InsufficientCondition otherwise.
+     * @return Result::Success when succeed, Result::InsufficientCondition otherwise.
      *
      * @see Canvas::push()
      * @see Canvas::paints()
@@ -633,7 +646,7 @@ public:
      *
      * @param[in] paint A pointer to the Paint object or @c nullptr.
      *
-     * @retval Result::Success when succeed, Result::InsufficientCondition otherwise.
+     * @return Result::Success when succeed, Result::InsufficientCondition otherwise.
      *
      * @note The Update behavior can be asynchronous if the assigned thread number is greater than zero.
      */
@@ -642,7 +655,7 @@ public:
     /**
      * @brief Requests the canvas to draw the Paint objects.
      *
-     * @retval Result::Success when succeed, Result::InsufficientCondition otherwise.
+     * @return Result::Success when succeed, Result::InsufficientCondition otherwise.
      *
      * @note Drawing can be asynchronous if the assigned thread number is greater than zero. To guarantee the drawing is done, call sync() afterwards.
      * @see Canvas::sync()
@@ -655,7 +668,7 @@ public:
      * The Canvas rendering can be performed asynchronously. To make sure that rendering is finished,
      * the sync() must be called after the draw() regardless of threading.
      *
-     * @retval Result::Success when succeed, Result::InsufficientCondition otherwise.
+     * @return Result::Success when succeed, Result::InsufficientCondition otherwise.
      * @see Canvas::draw()
      */
     virtual Result sync() noexcept;
@@ -689,7 +702,7 @@ public:
      * @param[in] x2 The horizontal coordinate of the second point used to determine the gradient bounds.
      * @param[in] y2 The vertical coordinate of the second point used to determine the gradient bounds.
      *
-     * @retval Result::Success when succeed.
+     * @return Result::Success when succeed.
      *
      * @note In case the first and the second points are equal, an object filled with such a gradient fill is not rendered.
      */
@@ -707,7 +720,7 @@ public:
      * @param[out] x2 The horizontal coordinate of the second point used to determine the gradient bounds.
      * @param[out] y2 The vertical coordinate of the second point used to determine the gradient bounds.
      *
-     * @retval Result::Success when succeed.
+     * @return Result::Success when succeed.
      */
     Result linear(float* x1, float* y1, float* x2, float* y2) const noexcept;
 
@@ -751,7 +764,7 @@ public:
      * @param[in] cy The vertical coordinate of the center of the bounding circle.
      * @param[in] radius The radius of the bounding circle.
      *
-     * @retval Result::Success when succeed, Result::InvalidArguments in case the @p radius value is zero or less.
+     * @return Result::Success when succeed, Result::InvalidArguments in case the @p radius value is zero or less.
      */
     Result radial(float cx, float cy, float radius) noexcept;
 
@@ -764,7 +777,7 @@ public:
      * @param[out] cy The vertical coordinate of the center of the bounding circle.
      * @param[out] radius The radius of the bounding circle.
      *
-     * @retval Result::Success when succeed.
+     * @return Result::Success when succeed.
      */
     Result radial(float* cx, float* cy, float* radius) const noexcept;
 
@@ -810,7 +823,7 @@ public:
      *
      * The transformation matrix, the color, the fill and the stroke properties are retained.
      *
-     * @retval Result::Success when succeed.
+     * @return Result::Success when succeed.
      *
      * @note The memory, where the path data is stored, is not deallocated at this stage for caching effect.
      */
@@ -824,7 +837,7 @@ public:
      * @param[in] x The horizontal coordinate of the initial point of the sub-path.
      * @param[in] y The vertical coordinate of the initial point of the sub-path.
      *
-     * @retval Result::Success when succeed.
+     * @return Result::Success when succeed.
      */
     Result moveTo(float x, float y) noexcept;
 
@@ -836,7 +849,7 @@ public:
      * @param[in] x The horizontal coordinate of the end-point of the line.
      * @param[in] y The vertical coordinate of the end-point of the line.
      *
-     * @retval Result::Success when succeed.
+     * @return Result::Success when succeed.
      *
      * @note In case this is the first command in the path, it corresponds to the moveTo() call.
      */
@@ -855,7 +868,7 @@ public:
      * @param[in] x The horizontal coordinate of the end-point of the curve.
      * @param[in] y The vertical coordinate of the end-point of the curve.
      *
-     * @retval Result::Success when succeed.
+     * @return Result::Success when succeed.
      *
      * @note In case this is the first command in the path, no data from the path are rendered.
      */
@@ -866,7 +879,7 @@ public:
      *
      * The value of the current point is set to the initial point of the closed sub-path.
      *
-     * @retval Result::Success when succeed.
+     * @return Result::Success when succeed.
      *
      * @note In case the sub-path does not contain any points, this function has no effect.
      */
@@ -892,7 +905,7 @@ public:
      * @param[in] rx The x-axis radius of the ellipse defining the rounded corners of the rectangle.
      * @param[in] ry The y-axis radius of the ellipse defining the rounded corners of the rectangle.
      *
-     * @retval Result::Success when succeed.
+     * @return Result::Success when succeed.
      *
      * @note For @p rx and @p ry greater than or equal to the half of @p w and the half of @p h, respectively, the shape become an ellipse.
      */
@@ -912,7 +925,7 @@ public:
      * @param[in] rx The x-axis radius of the ellipse.
      * @param[in] ry The y-axis radius of the ellipse.
      *
-     * @retval Result::Success when succeed.
+     * @return Result::Success when succeed.
      */
     Result appendCircle(float cx, float cy, float rx, float ry) noexcept;
 
@@ -929,7 +942,7 @@ public:
      * @param[in] sweep The central angle of the arc given in degrees, measured counter-clockwise from @p startAngle.
      * @param[in] pie Specifies whether to draw radii from the arc's center to both of its end-point - drawn if @c true.
      *
-     * @retval Result::Success when succeed.
+     * @return Result::Success when succeed.
      *
      * @note Setting @p sweep value greater than 360 degrees, is equivalent to calling appendCircle(cx, cy, radius, radius).
      */
@@ -947,7 +960,7 @@ public:
      * @param[in] pts The array of the two-dimensional points.
      * @param[in] ptsCnt The number of the points in the @p pts array.
      *
-     * @retval Result::Success when succeed, Result::InvalidArguments otherwise.
+     * @return Result::Success when succeed, Result::InvalidArguments otherwise.
      *
      * @note The interface is designed for optimal path setting if the caller has a completed path commands already.
      */
@@ -958,7 +971,7 @@ public:
      *
      * @param[in] width The width of the stroke. The default value is 0.
      *
-     * @retval Result::Success when succeed, Result::FailedAllocation otherwise.
+     * @return Result::Success when succeed, Result::FailedAllocation otherwise.
      */
     Result stroke(float width) noexcept;
 
@@ -970,7 +983,7 @@ public:
      * @param[in] b The blue color channel value in the range [0 ~ 255]. The default value is 0.
      * @param[in] a The alpha channel value in the range [0 ~ 255], where 0 is completely transparent and 255 is opaque. The default value is 0.
      *
-     * @retval Result::Success when succeed, Result::FailedAllocation otherwise.
+     * @return Result::Success when succeed, Result::FailedAllocation otherwise.
      */
     Result stroke(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255) noexcept;
 
@@ -1005,7 +1018,7 @@ public:
      *
      * @param[in] cap The cap style value. The default value is @c StrokeCap::Square.
      *
-     * @retval Result::Success when succeed, Result::FailedAllocation otherwise.
+     * @return Result::Success when succeed, Result::FailedAllocation otherwise.
      */
     Result stroke(StrokeCap cap) noexcept;
 
@@ -1016,7 +1029,7 @@ public:
      *
      * @param[in] join The join style value. The default value is @c StrokeJoin::Bevel.
      *
-     * @retval Result::Success when succeed, Result::FailedAllocation otherwise.
+     * @return Result::Success when succeed, Result::FailedAllocation otherwise.
      */
     Result stroke(StrokeJoin join) noexcept;
 
@@ -1026,7 +1039,7 @@ public:
      *
      * @param[in] miterlimit The miterlimit imposes a limit on the extent of the stroke join, when the @c StrokeJoin::Miter join style is set. The default value is 4.
      *
-     * @retval Result::Success when succeed, Result::NonSupport unsupported value, Result::FailedAllocation otherwise.
+     * @return Result::Success when succeed, Result::NonSupport unsupported value, Result::FailedAllocation otherwise.
      * 
      * @since 0.11
      */
@@ -1042,7 +1055,7 @@ public:
      * @param[in] b The blue color channel value in the range [0 ~ 255]. The default value is 0.
      * @param[in] a The alpha channel value in the range [0 ~ 255], where 0 is completely transparent and 255 is opaque. The default value is 0.
      *
-     * @retval Result::Success when succeed.
+     * @return Result::Success when succeed.
      *
      * @note Either a solid color or a gradient fill is applied, depending on what was set as last.
      * @note ClipPath won't use the fill values. (see: enum class CompositeMethod::ClipPath)
@@ -1056,7 +1069,7 @@ public:
      *
      * @param[in] f The unique pointer to the gradient fill.
      *
-     * @retval Result::Success when succeed, Result::MemoryCorruption otherwise.
+     * @return Result::Success when succeed, Result::MemoryCorruption otherwise.
      *
      * @note Either a solid color or a gradient fill is applied, depending on what was set as last.
      */
@@ -1067,7 +1080,7 @@ public:
      *
      * @param[in] r The fill rule value. The default value is @c FillRule::Winding.
      *
-     * @retval Result::Success when succeed.
+     * @return Result::Success when succeed.
      */
     Result fill(FillRule r) noexcept;
 
@@ -1077,7 +1090,7 @@ public:
      *
      * @param[in] strokeFirst If @c true the stroke is rendered before the fill, otherwise the stroke is rendered as the second one (the default option).
      *
-     * @retval Result::Success when succeed, Result::FailedAllocation otherwise.
+     * @return Result::Success when succeed, Result::FailedAllocation otherwise.
      *
      * @since 0.10
      */
@@ -1143,7 +1156,7 @@ public:
      * @param[out] b The blue color channel value in the range [0 ~ 255].
      * @param[out] a The alpha channel value in the range [0 ~ 255], where 0 is completely transparent and 255 is opaque.
      *
-     * @retval Result::Success when succeed, Result::InsufficientCondition otherwise.
+     * @return Result::Success when succeed, Result::InsufficientCondition otherwise.
      */
     Result strokeColor(uint8_t* r, uint8_t* g, uint8_t* b, uint8_t* a = nullptr) const noexcept;
 
@@ -1282,7 +1295,7 @@ public:
      * @param[in] w A new width of the image in pixels.
      * @param[in] h A new height of the image in pixels.
      *
-     * @retval Result::Success when succeed, Result::InsufficientCondition otherwise.
+     * @return Result::Success when succeed, Result::InsufficientCondition otherwise.
      */
     Result size(float w, float h) noexcept;
 
@@ -1292,19 +1305,12 @@ public:
      * @param[out] w The width of the image in pixels.
      * @param[out] h The height of the image in pixels.
      *
-     * @retval Result::Success when succeed.
+     * @return Result::Success when succeed.
      */
     Result size(float* w, float* h) const noexcept;
 
     /**
      * @brief Loads a raw data from a memory block with a given size.
-     *
-     * @param[in] paint A Tvg_Paint pointer to the picture object.
-     * @param[in] data A pointer to a memory location where the content of the picture raw data is stored.
-     * @param[in] w The width of the image @p data in pixels.
-     * @param[in] h The height of the image @p data in pixels.
-     * @param[in] premultiplied If @c true, the given image data is alpha-premultiplied.
-     * @param[in] copy If @c true the data are copied into the engine local buffer, otherwise they are not.
      *
      * @retval Result::Success When succeed, Result::InsufficientCondition otherwise.
      * @retval Result::FailedAllocation An internal error possibly with memory allocation.
@@ -1333,7 +1339,7 @@ public:
      * @note The Polygons are copied internally, so modifying them after calling Mesh::mesh has no affect.
      * @warning Please do not use it, this API is not official one. It could be modified in the next version.
      *
-     * @note Experimental API
+     * @BETA_API
      */
     Result mesh(const Polygon* triangles, uint32_t triangleCnt) noexcept;
 
@@ -1342,12 +1348,12 @@ public:
      *
      * @param[out] triangles Optional. A pointer to the array of Polygons used by this mesh.
      *
-     * @return The number of polygons in the array.
+     * @return uint32_t The number of polygons in the array.
      *
      * @note Modifying the triangles returned by this method will modify them directly within the mesh.
      * @warning Please do not use it, this API is not official one. It could be modified in the next version.
      *
-     * @note Experimental API
+     * @BETA_API
      */
     uint32_t mesh(const Polygon** triangles) const noexcept;
 
@@ -1396,7 +1402,7 @@ public:
      *
      * @param[in] paint A Paint object to be drawn.
      *
-     * @retval Result::Success when succeed, Result::MemoryCorruption otherwise.
+     * @return Result::Success when succeed, Result::MemoryCorruption otherwise.
      *
      * @note The rendering order of the paints is the same as the order as they were pushed. Consider sorting the paints before pushing them if you intend to use layering.
      * @see Scene::paints()
@@ -1426,7 +1432,7 @@ public:
      * @see Scene::push()
      * @see Scene::clear()
      *
-     * @note Experimental API
+     * @BETA_API
      */
     std::list<Paint*>& paints() noexcept;
 
@@ -1436,7 +1442,7 @@ public:
      *
      * @param[in] free If @c true, the memory occupied by paints is deallocated, otherwise it is not.
      *
-     * @retval Result::Success when succeed
+     * @return Result::Success when succeed
      *
      * @warning If you don't free the paints they become dangled. They are supposed to be reused, otherwise you are responsible for their lives. Thus please use the @p free argument only when you know how it works, otherwise it's not recommended.
      *
@@ -1465,138 +1471,6 @@ public:
 
 
 /**
- * @class Text
- *
- * @brief A class to represent text objects in a graphical context, allowing for rendering and manipulation of unicode text.
- *
- * @note Experimental API
- */
-class TVG_API Text final : public Paint
-{
-public:
-    ~Text();
-
-    /**
-     * @brief Sets the font properties for the text.
-     *
-     * This function allows you to define the font characteristics used for text rendering.
-     * It sets the font name, size and optionally the style.
-     *
-     * @param[in] name The name of the font. This should correspond to a font available in the canvas.
-     * @param[in] size The size of the font in points. This determines how large the text will appear.
-     * @param[in] style The style of the font. It can be used to set the font to 'italic'.
-     *                  If not specified, the default style is used. Only 'italic' style is supported currently.
-     *
-     * @retval Result::Success when the font properties are set successfully.
-     * @retval Result::InsufficientCondition when the specified @p name cannot be found.
-     *
-     * @note Experimental API
-     */
-    Result font(const char* name, float size, const char* style = nullptr) noexcept;
-
-    /**
-     * @brief Assigns the given unicode text to be rendered.
-     *
-     * This function sets the unicode string that will be displayed by the rendering system.
-     * The text is set according to the specified UTF encoding method, which defaults to UTF-8.
-     *
-     * @param[in] text The multi-byte text encoded with utf8 string to be rendered.
-     *
-     * @retval Result::Success when succeed.
-     *
-     * @note Experimental API
-     */
-    Result text(const char* text) noexcept;
-
-    /**
-     * @brief Sets the text color.
-     *
-     * @param[in] r The red color channel value in the range [0 ~ 255]. The default value is 0.
-     * @param[in] g The green color channel value in the range [0 ~ 255]. The default value is 0.
-     * @param[in] b The blue color channel value in the range [0 ~ 255]. The default value is 0.
-     *
-     * @retval Result::Success when succeed.
-     * @retval Result::InsufficientCondition when the font has not been set up prior to this operation.
-     *
-     * @see Text::font()
-     *
-     * @note Experimental API
-     */
-    Result fill(uint8_t r, uint8_t g, uint8_t b) noexcept;
-
-    /**
-     * @brief Sets the gradient fill for all of the figures from the text.
-     *
-     * The parts of the text defined as inner are filled.
-     *
-     * @param[in] f The unique pointer to the gradient fill.
-     *
-     * @retval Result::Success when succeed, Result::MemoryCorruption otherwise.
-     * @retval Result::InsufficientCondition when the font has not been set up prior to this operation.
-     *
-     * @note Either a solid color or a gradient fill is applied, depending on what was set as last.
-     * @note Experimental API
-     *
-     * @see Text::font()
-     */
-    Result fill(std::unique_ptr<Fill> f) noexcept;
-
-    /**
-     * @brief Loads a scalable font data(ttf) from a file.
-     *
-     * @param[in] path The path to the font file.
-     *
-     * @retval Result::Success When succeed.
-     * @retval Result::InvalidArguments In case the @p path is invalid.
-     * @retval Result::NonSupport When trying to load a file with an unknown extension.
-     * @retval Result::Unknown If an error occurs at a later stage.
-     *
-     * @note Experimental API
-     *
-     * @see Text::unload(const std::string& path)
-     */
-    static Result load(const std::string& path) noexcept;
-
-    /**
-     * @brief Unloads the specified scalable font data (TTF) that was previously loaded.
-     *
-     * This function is used to release resources associated with a font file that has been loaded into memory.
-     *
-     * @param[in] path The file path of the loaded font.
-     *
-     * @retval Result::Success Successfully unloads the font data.
-     * @retval Result::InsufficientCondition Fails if the loader is not initialized.
-     *
-     * @note If the font data is currently in use, it will not be immediately unloaded.
-     * @note Experimental API
-     *
-     * @see Text::load(const std::string& path)
-     */
-    static Result unload(const std::string& path) noexcept;
-
-    /**
-     * @brief Creates a new Text object.
-     *
-     * @return A new Text object.
-     *
-     * @note Experimental API
-     */
-    static std::unique_ptr<Text> gen() noexcept;
-
-    /**
-     * @brief Return the unique id value of this class.
-     *
-     * This method can be referred for identifying the Text class type.
-     *
-     * @return The type id of the Text class.
-     */
-    static uint32_t identifier() noexcept;
-
-    _TVG_DECLARE_PRIVATE(Text);
-};
-
-
-/**
  * @class SwCanvas
  *
  * @brief A class for the rendering graphical elements with a software raster engine.
@@ -1613,8 +1487,8 @@ public:
     {
         ABGR8888 = 0,      ///< The channels are joined in the order: alpha, blue, green, red. Colors are alpha-premultiplied. (a << 24 | b << 16 | g << 8 | r)
         ARGB8888,          ///< The channels are joined in the order: alpha, red, green, blue. Colors are alpha-premultiplied. (a << 24 | r << 16 | g << 8 | b)
-        ABGR8888S,         ///< The channels are joined in the order: alpha, blue, green, red. Colors are un-alpha-premultiplied. @since 0.12
-        ARGB8888S,         ///< The channels are joined in the order: alpha, red, green, blue. Colors are un-alpha-premultiplied. @since 0.12
+        ABGR8888S,         ///< @BETA_API The channels are joined in the order: alpha, blue, green, red. Colors are un-alpha-premultiplied.
+        ARGB8888S,         ///< @BETA_API The channels are joined in the order: alpha, red, green, blue. Colors are un-alpha-premultiplied.
     };
 
     /**
@@ -1690,7 +1564,7 @@ public:
  *
  * @warning Please do not use it. This class is not fully supported yet.
  *
- * @note Experimental API
+ * @BETA_API
  */
 class TVG_API GlCanvas final : public Canvas
 {
@@ -1702,7 +1576,7 @@ public:
      *
      * @warning Please do not use it, this API is not official one. It could be modified in the next version.
      *
-     * @note Experimental API
+     * @BETA_API
      */
     Result target(uint32_t* buffer, uint32_t stride, uint32_t w, uint32_t h) noexcept;
 
@@ -1711,47 +1585,11 @@ public:
      *
      * @return A new GlCanvas object.
      *
-     * @note Experimental API
+     * @BETA_API
      */
     static std::unique_ptr<GlCanvas> gen() noexcept;
 
     _TVG_DECLARE_PRIVATE(GlCanvas);
-};
-
-
-/**
- * @class WgCanvas
- *
- * @brief A class for the rendering graphic elements with a WebGPU raster engine.
- *
- * @warning Please do not use it. This class is not fully supported yet.
- *
- * @note Experimental API
- */
-class TVG_API WgCanvas final : public Canvas
-{
-public:
-    ~WgCanvas();
-
-    /**
-     * @brief Sets the target window for the rasterization.
-     *
-     * @warning Please do not use it, this API is not official one. It could be modified in the next version.
-     *
-     * @note Experimental API
-     */
-    Result target(void* window, uint32_t w, uint32_t h) noexcept;
-
-    /**
-     * @brief Creates a new WgCanvas object.
-     *
-     * @return A new WgCanvas object.
-     *
-     * @note Experimental API
-     */
-    static std::unique_ptr<WgCanvas> gen() noexcept;
-
-    _TVG_DECLARE_PRIVATE(WgCanvas);
 };
 
 
@@ -1812,7 +1650,7 @@ public:
  *
  * This class supports the display and control of animation frames.
  *
- * @note Experimental API
+ * @BETA_API
  */
 
 class TVG_API Animation
@@ -1826,14 +1664,14 @@ public:
      * @param[in] no The index of the animation frame to be displayed. The index should be less than the totalFrame().
      *
      * @retval Result::Success Successfully set the frame.
-     * @retval Result::InsufficientCondition if the given @p no is the same as the current frame value.
-     * @retval Result::NonSupport The current Picture data does not support animations.
+     * @retval Result::InsufficientCondition No animatable data loaded from the Picture.
+     * @retval Result::NonSupport The Picture data does not support animations.
      *
      * @see totalFrame()
      *
-     * @note Experimental API
+     * @BETA_API
      */
-    Result frame(float no) noexcept;
+    Result frame(uint32_t no) noexcept;
 
     /**
      * @brief Retrieves a picture instance associated with this animation instance.
@@ -1846,7 +1684,7 @@ public:
      *
      * @warning The picture instance is owned by Animation. It should not be deleted manually.
      *
-     * @note Experimental API
+     * @BETA_API
      */
     Picture* picture() const noexcept;
 
@@ -1857,12 +1695,12 @@ public:
      *
      * @note If the Picture is not properly configured, this function will return 0.
      *
-     * @see Animation::frame(float no)
+     * @see Animation::frame(uint32_t no)
      * @see Animation::totalFrame()
      *
-     * @note Experimental API
+     * @BETA_API
      */
-    float curFrame() const noexcept;
+    uint32_t curFrame() const noexcept;
 
     /**
      * @brief Retrieves the total number of frames in the animation.
@@ -1872,9 +1710,9 @@ public:
      * @note Frame numbering starts from 0.
      * @note If the Picture is not properly configured, this function will return 0.
      *
-     * @note Experimental API
+     * @BETA_API
      */
-    float totalFrame() const noexcept;
+    uint32_t totalFrame() const noexcept;
 
     /**
      * @brief Retrieves the duration of the animation in seconds.
@@ -1883,7 +1721,7 @@ public:
      *
      * @note If the Picture is not properly configured, this function will return 0.
      *
-     * @% Experimental API
+     * @BETA_API
      */
     float duration() const noexcept;
 
@@ -1892,7 +1730,7 @@ public:
      *
      * @return A new Animation object.
      *
-     * @note Experimental API
+     * @BETA_API
      */
     static std::unique_ptr<Animation> gen() noexcept;
 
@@ -1923,15 +1761,6 @@ public:
     ~Saver();
 
     /**
-     * @brief Sets the base background content for the saved image.
-     *
-     * @param[in] paint The paint to be drawn as the background image for the saving paint.
-     *
-     * @note Experimental API
-     */
-    Result background(std::unique_ptr<Paint> paint) noexcept;
-
-    /**
      * @brief Exports the given @p paint data to the given @p path
      *
      * If the saver module supports any compression mechanism, it will optimize the data size.
@@ -1954,31 +1783,6 @@ public:
      * @since 0.5
      */
     Result save(std::unique_ptr<Paint> paint, const std::string& path, bool compress = true) noexcept;
-
-    /**
-     * @brief Export the provided animation data to the specified file path.
-     *
-     * This function exports the given animation data to the provided file path. You can also specify the desired frame rate in frames per second (FPS) by providing the fps parameter.
-     *
-     * @param[in] animation The animation to be saved, including all associated properties.
-     * @param[in] path The path to the file where the animation will be saved.
-     * @param[in] quality The encoded quality level. @c 0 is the minimum, @c 100 is the maximum value(recommended).
-     * @param[in] fps The desired frames per second (FPS). For example, to encode data at 60 FPS, pass 60. Pass 0 to keep the original frame data.
-     *
-     * @retval Result::Success if the export succeeds.
-     * @retval Result::InsufficientCondition if there are ongoing resource-saving operations.
-     * @retval Result::NonSupport if an attempt is made to save the file with an unknown extension or in an unsupported format.
-     * @retval Result::MemoryCorruption in case of an internal error.
-     * @retval Result::Unknown if attempting to save an empty paint.
-     *
-     * @note A higher frames per second (FPS) would result in a larger file size. It is recommended to use the default value.
-     * @note Saving can be asynchronous if the assigned thread number is greater than zero. To guarantee the saving is done, call sync() afterwards.
-     *
-     * @see Saver::sync()
-     *
-     * @note Experimental API
-     */
-    Result save(std::unique_ptr<Animation> animation, const std::string& path, uint32_t quality = 100, uint32_t fps = 0) noexcept;
 
     /**
      * @brief Guarantees that the saving task is finished.
@@ -2053,7 +1857,7 @@ public:
  * @brief The cast() function is a utility function used to cast a 'Paint' to type 'T'.
  * @since 0.11
  */
-template<typename T = tvg::Paint>
+template<typename T>
 std::unique_ptr<T> cast(Paint* paint)
 {
     return std::unique_ptr<T>(static_cast<T*>(paint));
@@ -2064,7 +1868,7 @@ std::unique_ptr<T> cast(Paint* paint)
  * @brief The cast() function is a utility function used to cast a 'Fill' to type 'T'.
  * @since 0.11
  */
-template<typename T = tvg::Fill>
+template<typename T>
 std::unique_ptr<T> cast(Fill* fill)
 {
     return std::unique_ptr<T>(static_cast<T*>(fill));

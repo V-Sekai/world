@@ -30,6 +30,7 @@
 
 #include "performance.h"
 
+#include "core/object/message_queue.h"
 #include "core/os/os.h"
 #include "core/variant/typed_array.h"
 #include "scene/main/node.h"

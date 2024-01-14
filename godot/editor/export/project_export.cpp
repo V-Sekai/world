@@ -1191,7 +1191,6 @@ ProjectExportDialog::ProjectExportDialog() {
 	preset_vb->add_child(mc);
 	mc->set_v_size_flags(Control::SIZE_EXPAND_FILL);
 	presets = memnew(ItemList);
-	presets->set_auto_translate(false);
 	SET_DRAG_FORWARDING_GCD(presets, ProjectExportDialog);
 	mc->add_child(presets);
 	presets->connect("item_selected", callable_mp(this, &ProjectExportDialog::_edit_preset));
@@ -1284,7 +1283,7 @@ ProjectExportDialog::ProjectExportDialog() {
 		ClassDB::get_inheriters_from_class("Resource", &resource_names);
 
 		PackedStringArray strippable;
-		for (const StringName &resource_name : resource_names) {
+		for (StringName resource_name : resource_names) {
 			if (ClassDB::has_method(resource_name, "create_placeholder", true)) {
 				strippable.push_back(resource_name);
 			}

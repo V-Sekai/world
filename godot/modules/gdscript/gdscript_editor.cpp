@@ -104,7 +104,7 @@ Ref<Script> GDScriptLanguage::make_template(const String &p_template, const Stri
 	return scr;
 }
 
-Vector<ScriptLanguage::ScriptTemplate> GDScriptLanguage::get_built_in_templates(const StringName &p_object) {
+Vector<ScriptLanguage::ScriptTemplate> GDScriptLanguage::get_built_in_templates(StringName p_object) {
 	Vector<ScriptLanguage::ScriptTemplate> templates;
 #ifdef TOOLS_ENABLED
 	for (int i = 0; i < TEMPLATES_ARRAY_SIZE; i++) {
@@ -537,7 +537,7 @@ struct GDScriptCompletionIdentifier {
 // appears. For example, if you are completing code in a class that inherits Node2D, a property found on Node2D
 // will have a "better" (lower) location "score" than a property that is found on CanvasItem.
 
-static int _get_property_location(const StringName &p_class, const StringName &p_property) {
+static int _get_property_location(StringName p_class, StringName p_property) {
 	if (!ClassDB::has_property(p_class, p_property)) {
 		return ScriptLanguage::LOCATION_OTHER;
 	}
@@ -552,7 +552,7 @@ static int _get_property_location(const StringName &p_class, const StringName &p
 	return depth | ScriptLanguage::LOCATION_PARENT_MASK;
 }
 
-static int _get_constant_location(const StringName &p_class, const StringName &p_constant) {
+static int _get_constant_location(StringName p_class, StringName p_constant) {
 	if (!ClassDB::has_integer_constant(p_class, p_constant)) {
 		return ScriptLanguage::LOCATION_OTHER;
 	}
@@ -567,7 +567,7 @@ static int _get_constant_location(const StringName &p_class, const StringName &p
 	return depth | ScriptLanguage::LOCATION_PARENT_MASK;
 }
 
-static int _get_signal_location(const StringName &p_class, const StringName &p_signal) {
+static int _get_signal_location(StringName p_class, StringName p_signal) {
 	if (!ClassDB::has_signal(p_class, p_signal)) {
 		return ScriptLanguage::LOCATION_OTHER;
 	}
@@ -582,7 +582,7 @@ static int _get_signal_location(const StringName &p_class, const StringName &p_s
 	return depth | ScriptLanguage::LOCATION_PARENT_MASK;
 }
 
-static int _get_method_location(const StringName &p_class, const StringName &p_method) {
+static int _get_method_location(StringName p_class, StringName p_method) {
 	if (!ClassDB::has_method(p_class, p_method)) {
 		return ScriptLanguage::LOCATION_OTHER;
 	}
@@ -597,7 +597,7 @@ static int _get_method_location(const StringName &p_class, const StringName &p_m
 	return depth | ScriptLanguage::LOCATION_PARENT_MASK;
 }
 
-static int _get_enum_constant_location(const StringName &p_class, const StringName &p_enum_constant) {
+static int _get_enum_constant_location(StringName p_class, StringName p_enum_constant) {
 	if (!ClassDB::get_integer_constant_enum(p_class, p_enum_constant)) {
 		return ScriptLanguage::LOCATION_OTHER;
 	}
@@ -620,9 +620,9 @@ static String _trim_parent_class(const String &p_class, const String &p_base_cla
 	}
 	Vector<String> names = p_class.split(".", false, 1);
 	if (names.size() == 2) {
-		const String &first = names[0];
+		String first = names[0];
+		String rest = names[1];
 		if (ClassDB::class_exists(p_base_class) && ClassDB::class_exists(first) && ClassDB::is_parent_class(p_base_class, first)) {
-			const String &rest = names[1];
 			return rest;
 		}
 	}
@@ -1210,8 +1210,6 @@ static void _find_identifiers_in_base(const GDScriptCompletionIdentifier &p_base
 					return;
 				}
 
-				int location = ScriptLanguage::LOCATION_OTHER;
-
 				if (!p_only_functions) {
 					List<PropertyInfo> members;
 					if (p_base.value.get_type() != Variant::NIL) {
@@ -1225,11 +1223,7 @@ static void _find_identifiers_in_base(const GDScriptCompletionIdentifier &p_base
 							continue;
 						}
 						if (!String(E.name).contains("/")) {
-							ScriptLanguage::CodeCompletionOption option(E.name, ScriptLanguage::CODE_COMPLETION_KIND_MEMBER, location);
-							if (base_type.kind == GDScriptParser::DataType::ENUM) {
-								// Sort enum members in their declaration order.
-								location += 1;
-							}
+							ScriptLanguage::CodeCompletionOption option(E.name, ScriptLanguage::CODE_COMPLETION_KIND_MEMBER);
 							if (GDScriptParser::theme_color_names.has(E.name)) {
 								option.theme_color_name = GDScriptParser::theme_color_names[E.name];
 							}
@@ -1245,7 +1239,7 @@ static void _find_identifiers_in_base(const GDScriptCompletionIdentifier &p_base
 						// Enum types are static and cannot change, therefore we skip non-const dictionary methods.
 						continue;
 					}
-					ScriptLanguage::CodeCompletionOption option(E.name, ScriptLanguage::CODE_COMPLETION_KIND_FUNCTION, location);
+					ScriptLanguage::CodeCompletionOption option(E.name, ScriptLanguage::CODE_COMPLETION_KIND_FUNCTION);
 					if (E.arguments.size()) {
 						option.insert_text += "(";
 					} else {
@@ -1500,8 +1494,11 @@ static bool _guess_expression_type(GDScriptParser::CompletionContext &p_context,
 			} break;
 			case GDScriptParser::Node::SELF: {
 				if (p_context.current_class) {
-					r_type.type = p_context.current_class->get_datatype();
-					r_type.type.is_meta_type = false;
+					if (p_context.type != GDScriptParser::COMPLETION_SUPER_METHOD) {
+						r_type.type = p_context.current_class->get_datatype();
+					} else {
+						r_type.type = p_context.current_class->base_type;
+					}
 					found = true;
 				}
 			} break;

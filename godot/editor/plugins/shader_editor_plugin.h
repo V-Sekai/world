@@ -55,7 +55,6 @@ class ShaderEditorPlugin : public EditorPlugin {
 		TextShaderEditor *shader_editor = nullptr;
 		VisualShaderEditor *visual_shader_editor = nullptr;
 		String path;
-		String name;
 	};
 
 	LocalVector<EditedShader> edited_shaders;

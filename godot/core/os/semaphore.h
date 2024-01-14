@@ -58,12 +58,10 @@ private:
 #endif
 
 public:
-	_ALWAYS_INLINE_ void post(uint32_t p_count = 1) const {
+	_ALWAYS_INLINE_ void post() const {
 		std::lock_guard lock(mutex);
-		count += p_count;
-		for (uint32_t i = 0; i < p_count; ++i) {
-			condition.notify_one();
-		}
+		count++;
+		condition.notify_one();
 	}
 
 	_ALWAYS_INLINE_ void wait() const {

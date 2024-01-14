@@ -38,18 +38,9 @@
 class TabContainer : public Container {
 	GDCLASS(TabContainer, Container);
 
-public:
-	enum TabPosition {
-		POSITION_TOP,
-		POSITION_BOTTOM,
-		POSITION_MAX,
-	};
-
-private:
 	TabBar *tab_bar = nullptr;
 	bool tabs_visible = true;
 	bool all_tabs_in_front = false;
-	TabPosition tabs_position = POSITION_TOP;
 	bool menu_hovered = false;
 	mutable ObjectID popup_obj_id;
 	bool use_hidden_tabs_for_min_size = false;
@@ -95,7 +86,7 @@ private:
 		int tab_font_size;
 	} theme_cache;
 
-	int _get_tab_height() const;
+	int _get_top_margin() const;
 	Vector<Control *> _get_tab_controls() const;
 	void _on_theme_changed();
 	void _repaint();
@@ -132,9 +123,6 @@ public:
 
 	void set_tab_alignment(TabBar::AlignmentMode p_alignment);
 	TabBar::AlignmentMode get_tab_alignment() const;
-
-	void set_tabs_position(TabPosition p_tab_position);
-	TabPosition get_tabs_position() const;
 
 	void set_tab_focus_mode(FocusMode p_focus_mode);
 	FocusMode get_tab_focus_mode() const;
@@ -196,7 +184,5 @@ public:
 
 	TabContainer();
 };
-
-VARIANT_ENUM_CAST(TabContainer::TabPosition);
 
 #endif // TAB_CONTAINER_H

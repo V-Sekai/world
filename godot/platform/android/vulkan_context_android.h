@@ -38,13 +38,10 @@
 struct ANativeWindow;
 
 class VulkanContextAndroid : public VulkanContext {
-	virtual const char *_get_platform_surface_extension() const override final;
+	virtual const char *_get_platform_surface_extension() const override;
 
 public:
-	struct WindowPlatformData {
-		ANativeWindow *window;
-	};
-	virtual Error window_create(DisplayServer::WindowID p_window_id, DisplayServer::VSyncMode p_vsync_mode, int p_width, int p_height, const void *p_platform_data) override final;
+	Error window_create(ANativeWindow *p_window, DisplayServer::VSyncMode p_vsync_mode, int p_width, int p_height);
 
 	VulkanContextAndroid() = default;
 	~VulkanContextAndroid() override = default;

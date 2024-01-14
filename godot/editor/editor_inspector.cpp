@@ -695,14 +695,15 @@ void EditorProperty::gui_input(const Ref<InputEvent> &p_event) {
 						new_coords.y++;
 					}
 					if (new_coords.x < int64_t(object->get("hframes")) && new_coords.y < int64_t(object->get("vframes"))) {
-						callable_mp(this, &EditorProperty::emit_changed).call_deferred(property, new_coords, "", false);
+						call_deferred(SNAME("emit_changed"), property, new_coords, "", false);
 					}
 				} else {
 					if (int64_t(object->get(property)) + 1 < (int64_t(object->get("hframes")) * int64_t(object->get("vframes")))) {
-						callable_mp(this, &EditorProperty::emit_changed).call_deferred(property, object->get(property).operator int64_t() + 1, "", false);
+						call_deferred(SNAME("emit_changed"), property, object->get(property).operator int64_t() + 1, "", false);
 					}
 				}
-				callable_mp(this, &EditorProperty::update_property).call_deferred();
+
+				call_deferred(SNAME("update_property"));
 			}
 		}
 		if (delete_rect.has_point(mpos)) {
@@ -3020,7 +3021,7 @@ void EditorInspector::update_tree() {
 
 		Vector<String> components = path.split("/");
 		for (int i = 0; i < components.size(); i++) {
-			const String &component = components[i];
+			String component = components[i];
 			acc_path += (i > 0) ? "/" + component : component;
 
 			if (!vbox_per_path[root_vbox].has(acc_path)) {
@@ -3979,7 +3980,7 @@ void EditorInspector::_notification(int p_what) {
 
 		case NOTIFICATION_PROCESS: {
 			if (update_scroll_request >= 0) {
-				callable_mp((Range *)get_v_scroll_bar(), &Range::set_value).call_deferred(update_scroll_request);
+				get_v_scroll_bar()->call_deferred(SNAME("set_value"), update_scroll_request);
 				update_scroll_request = -1;
 			}
 			if (update_tree_pending) {
@@ -4208,7 +4209,6 @@ EditorInspector::EditorInspector() {
 	main_vbox->add_theme_constant_override("separation", 0);
 	add_child(main_vbox);
 	set_horizontal_scroll_mode(SCROLL_MODE_DISABLED);
-	set_follow_focus(true);
 
 	changing = 0;
 	search_box = nullptr;

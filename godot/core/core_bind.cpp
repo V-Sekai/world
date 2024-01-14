@@ -52,10 +52,6 @@ Error ResourceLoader::load_threaded_request(const String &p_path, const String &
 	return ::ResourceLoader::load_threaded_request(p_path, p_type_hint, p_use_sub_threads, ResourceFormatLoader::CacheMode(p_cache_mode));
 }
 
-Error ResourceLoader::load_threaded_request_whitelisted(const String &p_path, Dictionary p_external_path_whitelist, Dictionary p_type_whitelist, const String &p_type_hint, bool p_use_sub_threads, CacheMode p_cache_mode) {
-	return ::ResourceLoader::load_threaded_request_whitelisted(p_path, p_external_path_whitelist, p_type_whitelist, p_type_hint, p_use_sub_threads, ResourceFormatLoader::CacheMode(p_cache_mode));
-}
-
 ResourceLoader::ThreadLoadStatus ResourceLoader::load_threaded_get_status(const String &p_path, Array r_progress) {
 	float progress = 0;
 	::ResourceLoader::ThreadLoadStatus tls = ::ResourceLoader::load_threaded_get_status(p_path, &progress);
@@ -73,14 +69,6 @@ Ref<Resource> ResourceLoader::load_threaded_get(const String &p_path) {
 Ref<Resource> ResourceLoader::load(const String &p_path, const String &p_type_hint, CacheMode p_cache_mode) {
 	Error err = OK;
 	Ref<Resource> ret = ::ResourceLoader::load(p_path, p_type_hint, ResourceFormatLoader::CacheMode(p_cache_mode), &err);
-
-	ERR_FAIL_COND_V_MSG(err != OK, ret, "Error loading resource: '" + p_path + "'.");
-	return ret;
-}
-
-Ref<Resource> ResourceLoader::load_whitelisted(const String &p_path, Dictionary p_external_path_whitelist, Dictionary p_type_whitelist, const String &p_type_hint, CacheMode p_cache_mode) {
-	Error err = OK;
-	Ref<Resource> ret = ::ResourceLoader::load_whitelisted(p_path, p_external_path_whitelist, p_type_whitelist, p_type_hint, ResourceFormatLoader::CacheMode(p_cache_mode), &err);
 
 	ERR_FAIL_COND_V_MSG(err != OK, ret, "Error loading resource: '" + p_path + "'.");
 	return ret;
@@ -136,12 +124,10 @@ ResourceUID::ID ResourceLoader::get_resource_uid(const String &p_path) {
 
 void ResourceLoader::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("load_threaded_request", "path", "type_hint", "use_sub_threads", "cache_mode"), &ResourceLoader::load_threaded_request, DEFVAL(""), DEFVAL(false), DEFVAL(CACHE_MODE_REUSE));
-	ClassDB::bind_method(D_METHOD("load_threaded_request_whitelisted", "path", "external_path_whitelist", "type_whitelist", "type_hint", "use_sub_threads", "cache_mode"), &ResourceLoader::load_threaded_request_whitelisted, DEFVAL(""), DEFVAL(false), DEFVAL(CACHE_MODE_REUSE));
 	ClassDB::bind_method(D_METHOD("load_threaded_get_status", "path", "progress"), &ResourceLoader::load_threaded_get_status, DEFVAL(Array()));
 	ClassDB::bind_method(D_METHOD("load_threaded_get", "path"), &ResourceLoader::load_threaded_get);
 
 	ClassDB::bind_method(D_METHOD("load", "path", "type_hint", "cache_mode"), &ResourceLoader::load, DEFVAL(""), DEFVAL(CACHE_MODE_REUSE));
-	ClassDB::bind_method(D_METHOD("load_whitelisted", "path", "external_path_whitelist", "type_whitelist", "type_hint", "cache_mode"), &ResourceLoader::load_whitelisted, DEFVAL(""), DEFVAL(CACHE_MODE_REUSE));
 	ClassDB::bind_method(D_METHOD("get_recognized_extensions_for_type", "type"), &ResourceLoader::get_recognized_extensions_for_type);
 	ClassDB::bind_method(D_METHOD("add_resource_format_loader", "format_loader", "at_front"), &ResourceLoader::add_resource_format_loader, DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("remove_resource_format_loader", "format_loader"), &ResourceLoader::remove_resource_format_loader);
@@ -1054,10 +1040,6 @@ Vector<Vector3> Geometry3D::clip_polygon(const Vector<Vector3> &p_points, const 
 	return ::Geometry3D::clip_polygon(p_points, p_plane);
 }
 
-Vector<int32_t> Geometry3D::tetrahedralize_delaunay(const Vector<Vector3> &p_points) {
-	return ::Geometry3D::tetrahedralize_delaunay(p_points);
-}
-
 void Geometry3D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("compute_convex_mesh_points", "planes"), &Geometry3D::compute_convex_mesh_points);
 	ClassDB::bind_method(D_METHOD("build_box_planes", "extents"), &Geometry3D::build_box_planes);
@@ -1079,7 +1061,6 @@ void Geometry3D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("segment_intersects_convex", "from", "to", "planes"), &Geometry3D::segment_intersects_convex);
 
 	ClassDB::bind_method(D_METHOD("clip_polygon", "points", "plane"), &Geometry3D::clip_polygon);
-	ClassDB::bind_method(D_METHOD("tetrahedralize_delaunay", "points"), &Geometry3D::tetrahedralize_delaunay);
 }
 
 ////// Marshalls //////
@@ -1389,11 +1370,11 @@ Variant ClassDB::instantiate(const StringName &p_class) const {
 	}
 }
 
-bool ClassDB::class_has_signal(const StringName &p_class, const StringName &p_signal) const {
+bool ClassDB::class_has_signal(StringName p_class, StringName p_signal) const {
 	return ::ClassDB::has_signal(p_class, p_signal);
 }
 
-Dictionary ClassDB::class_get_signal(const StringName &p_class, const StringName &p_signal) const {
+Dictionary ClassDB::class_get_signal(StringName p_class, StringName p_signal) const {
 	MethodInfo signal;
 	if (::ClassDB::get_signal(p_class, p_signal, &signal)) {
 		return signal.operator Dictionary();
@@ -1402,7 +1383,7 @@ Dictionary ClassDB::class_get_signal(const StringName &p_class, const StringName
 	}
 }
 
-TypedArray<Dictionary> ClassDB::class_get_signal_list(const StringName &p_class, bool p_no_inheritance) const {
+TypedArray<Dictionary> ClassDB::class_get_signal_list(StringName p_class, bool p_no_inheritance) const {
 	List<MethodInfo> signals;
 	::ClassDB::get_signal_list(p_class, &signals, p_no_inheritance);
 	TypedArray<Dictionary> ret;
@@ -1414,7 +1395,7 @@ TypedArray<Dictionary> ClassDB::class_get_signal_list(const StringName &p_class,
 	return ret;
 }
 
-TypedArray<Dictionary> ClassDB::class_get_property_list(const StringName &p_class, bool p_no_inheritance) const {
+TypedArray<Dictionary> ClassDB::class_get_property_list(StringName p_class, bool p_no_inheritance) const {
 	List<PropertyInfo> plist;
 	::ClassDB::get_property_list(p_class, &plist, p_no_inheritance);
 	TypedArray<Dictionary> ret;
@@ -1442,11 +1423,11 @@ Error ClassDB::class_set_property(Object *p_object, const StringName &p_property
 	return OK;
 }
 
-bool ClassDB::class_has_method(const StringName &p_class, const StringName &p_method, bool p_no_inheritance) const {
+bool ClassDB::class_has_method(StringName p_class, StringName p_method, bool p_no_inheritance) const {
 	return ::ClassDB::has_method(p_class, p_method, p_no_inheritance);
 }
 
-TypedArray<Dictionary> ClassDB::class_get_method_list(const StringName &p_class, bool p_no_inheritance) const {
+TypedArray<Dictionary> ClassDB::class_get_method_list(StringName p_class, bool p_no_inheritance) const {
 	List<MethodInfo> methods;
 	::ClassDB::get_method_list(p_class, &methods, p_no_inheritance);
 	TypedArray<Dictionary> ret;
@@ -1527,7 +1508,7 @@ StringName ClassDB::class_get_integer_constant_enum(const StringName &p_class, c
 	return ::ClassDB::get_integer_constant_enum(p_class, p_name, p_no_inheritance);
 }
 
-bool ClassDB::is_class_enabled(const StringName &p_class) const {
+bool ClassDB::is_class_enabled(StringName p_class) const {
 	return ::ClassDB::is_class_enabled(p_class);
 }
 
@@ -1735,16 +1716,6 @@ void Engine::set_print_error_messages(bool p_enabled) {
 
 bool Engine::is_printing_error_messages() const {
 	return ::Engine::get_singleton()->is_printing_error_messages();
-}
-
-void Engine::get_argument_options(const StringName &p_function, int p_idx, List<String> *r_options) const {
-	String pf = p_function;
-	if (p_idx == 0 && (pf == "has_singleton" || pf == "get_singleton" || pf == "unregister_singleton")) {
-		for (const String &E : get_singleton_list()) {
-			r_options->push_back(E.quote());
-		}
-	}
-	Object::get_argument_options(p_function, p_idx, r_options);
 }
 
 void Engine::_bind_methods() {

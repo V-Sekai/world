@@ -105,6 +105,7 @@ private:
 
 protected:
 	static EditorToaster *singleton;
+	static void _bind_methods();
 
 	void _notification(int p_what);
 

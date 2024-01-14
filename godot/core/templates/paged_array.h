@@ -53,12 +53,7 @@ class PagedArrayPool {
 	SpinLock spin_lock;
 
 public:
-	struct PageInfo {
-		T *page = nullptr;
-		uint32_t page_id = 0;
-	};
-
-	PageInfo alloc_page() {
+	uint32_t alloc_page() {
 		spin_lock.lock();
 		if (unlikely(pages_available == 0)) {
 			uint32_t pages_used = pages_allocated;
@@ -74,11 +69,13 @@ public:
 		}
 
 		pages_available--;
-		uint32_t page_id = available_page_pool[pages_available];
-		T *page = page_pool[page_id];
+		uint32_t page = available_page_pool[pages_available];
 		spin_lock.unlock();
 
-		return PageInfo{ page, page_id };
+		return page;
+	}
+	T *get_page(uint32_t p_page_id) {
+		return page_pool[p_page_id];
 	}
 
 	void free_page(uint32_t p_page_id) {
@@ -193,9 +190,9 @@ public:
 				_grow_page_array(); //keep out of inline
 			}
 
-			typename PagedArrayPool<T>::PageInfo page_info = page_pool->alloc_page();
-			page_data[page_count] = page_info.page;
-			page_ids[page_count] = page_info.page_id;
+			uint32_t page_id = page_pool->alloc_page();
+			page_data[page_count] = page_pool->get_page(page_id);
+			page_ids[page_count] = page_id;
 		}
 
 		// place the new value
