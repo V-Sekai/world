@@ -504,12 +504,6 @@ bool OS::has_feature(const String &p_feature) {
 	}
 #endif
 
-#ifdef THREADS_ENABLED
-	if (p_feature == "threads") {
-		return true;
-	}
-#endif
-
 	if (_check_internal_feature_support(p_feature)) {
 		return true;
 	}

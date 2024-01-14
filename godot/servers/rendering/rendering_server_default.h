@@ -78,7 +78,7 @@ class RenderingServerDefault : public RenderingServer {
 	static void _thread_callback(void *_instance);
 	void _thread_loop();
 
-	Thread::ID server_thread = 0;
+	Thread::ID server_thread;
 	SafeFlag exit;
 	Thread thread;
 	SafeFlag draw_thread_up;
