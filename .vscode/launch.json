@@ -40,7 +40,7 @@
       ],            
       "type": "lldb",
       "request": "launch",
-      "args": ["--path", "../TEST_fbx_mocap_market", "-e"],
+      "args": ["--path", "game", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
@@ -55,7 +55,7 @@
       "request": "launch",
       "args": ["--path", "tools/task_goal_planner", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/godot/bin/godot.macos.editor.dev.double.arm64",
+      "program": "${workspaceFolder}/godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
     },
     {
