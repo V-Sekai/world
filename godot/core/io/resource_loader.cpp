@@ -199,6 +199,7 @@ void ResourceFormatLoader::_bind_methods() {
 	GDVIRTUAL_BIND(_exists, "path");
 	GDVIRTUAL_BIND(_get_classes_used, "path");
 	GDVIRTUAL_BIND(_load, "path", "original_path", "use_sub_threads", "cache_mode");
+	//GDVIRTUAL_BIND(_load_whitelisted, "path", "external_path_whitelist", "type_Whitelist", "original_path", "use_sub_threads", "cache_mode");
 }
 
 ///////////////////////////////////
@@ -238,7 +239,7 @@ ResourceLoader::LoadToken::~LoadToken() {
 	clear();
 }
 
-Ref<Resource> ResourceLoader::_load(const String &p_path, const String &p_original_path, const String &p_type_hint, ResourceFormatLoader::CacheMode p_cache_mode, Error *r_error, bool p_use_sub_threads, float *r_progress) {
+Ref<Resource> ResourceLoader::_load(const String &p_path, const String &p_original_path, const String &p_type_hint, ResourceFormatLoader::CacheMode p_cache_mode, bool p_using_whitelist, Dictionary p_external_path_whitelist, Dictionary p_type_whitelist, Error *r_error, bool p_use_sub_threads, float *r_progress) {
 	load_nesting++;
 	if (load_paths_stack->size()) {
 		thread_load_mutex.lock();
@@ -258,7 +259,11 @@ Ref<Resource> ResourceLoader::_load(const String &p_path, const String &p_origin
 			continue;
 		}
 		found = true;
-		res = loader[i]->load(p_path, !p_original_path.is_empty() ? p_original_path : p_path, r_error, p_use_sub_threads, r_progress, p_cache_mode);
+		if (p_using_whitelist) {
+			res = loader[i]->load_whitelisted(p_path, p_external_path_whitelist, p_type_whitelist, !p_original_path.is_empty() ? p_original_path : p_path, r_error, p_use_sub_threads, r_progress, p_cache_mode);
+		} else {
+			res = loader[i]->load(p_path, !p_original_path.is_empty() ? p_original_path : p_path, r_error, p_use_sub_threads, r_progress, p_cache_mode);
+		}
 		if (!res.is_null()) {
 			break;
 		}
@@ -316,8 +321,8 @@ void ResourceLoader::_thread_load_function(void *p_userdata) {
 		set_current_thread_safe_for_nodes(true);
 	}
 
-	Ref<Resource> res = _load(load_task.remapped_path, load_task.remapped_path != load_task.local_path ? load_task.local_path : String(), load_task.type_hint, load_task.cache_mode, &load_task.error, load_task.use_sub_threads, &load_task.progress);
-	if (mq_override) {
+	Ref<Resource> res = _load(load_task.remapped_path, load_task.remapped_path != load_task.local_path ? load_task.local_path : String(), load_task.type_hint, load_task.cache_mode, load_task.using_whitelist, load_task.external_path_whitelist, load_task.type_whitelist, &load_task.error, load_task.use_sub_threads, &load_task.progress);
+    if (mq_override) {
 		mq_override->flush();
 	}
 
@@ -340,7 +345,7 @@ void ResourceLoader::_thread_load_function(void *p_userdata) {
 
 	if (load_task.resource.is_valid()) {
 		if (load_task.cache_mode != ResourceFormatLoader::CACHE_MODE_IGNORE) {
-			load_task.resource->set_path(load_task.local_path, load_task.cache_mode == ResourceFormatLoader::CACHE_MODE_REPLACE);
+			load_task.resource->set_path(load_task.local_path);
 		} else if (!load_task.local_path.is_resource_file()) {
 			load_task.resource->set_path_cache(load_task.local_path);
 		}
@@ -360,17 +365,6 @@ void ResourceLoader::_thread_load_function(void *p_userdata) {
 
 		if (_loaded_callback) {
 			_loaded_callback(load_task.resource, load_task.local_path);
-		}
-	} else if (load_task.cache_mode != ResourceFormatLoader::CACHE_MODE_IGNORE) {
-		Ref<Resource> existing = ResourceCache::get_ref(load_task.local_path);
-		if (existing.is_valid()) {
-			load_task.resource = existing;
-			load_task.status = THREAD_LOAD_LOADED;
-			load_task.progress = 1.0;
-
-			if (_loaded_callback) {
-				_loaded_callback(load_task.resource, load_task.local_path);
-			}
 		}
 	}
 
@@ -396,6 +390,14 @@ static String _validate_local_path(const String &p_path) {
 }
 
 Error ResourceLoader::load_threaded_request(const String &p_path, const String &p_type_hint, bool p_use_sub_threads, ResourceFormatLoader::CacheMode p_cache_mode) {
+	return _load_threaded_request_whitelisted_int(p_path, p_type_hint, p_use_sub_threads, p_cache_mode, false, Dictionary(), Dictionary());
+}
+
+Error ResourceLoader::load_threaded_request_whitelisted(const String &p_path, Dictionary p_external_path_whitelist, Dictionary p_type_whitelist, const String &p_type_hint, bool p_use_sub_threads, ResourceFormatLoader::CacheMode p_cache_mode) {
+	return _load_threaded_request_whitelisted_int(p_path, p_type_hint, p_use_sub_threads, p_cache_mode, true, p_external_path_whitelist, p_type_whitelist);
+}
+
+Error ResourceLoader::_load_threaded_request_whitelisted_int(const String &p_path, const String &p_type_hint, bool p_use_sub_threads, ResourceFormatLoader::CacheMode p_cache_mode, bool p_use_whitelist, Dictionary p_external_path_whitelist, Dictionary p_type_whitelist) {
 	thread_load_mutex.lock();
 	if (user_load_tokens.has(p_path)) {
 		print_verbose("load_threaded_request(): Another threaded load for resource path '" + p_path + "' has been initiated. Not an error.");
@@ -406,7 +408,7 @@ Error ResourceLoader::load_threaded_request(const String &p_path, const String &
 	user_load_tokens[p_path] = nullptr;
 	thread_load_mutex.unlock();
 
-	Ref<ResourceLoader::LoadToken> token = _load_start(p_path, p_type_hint, p_use_sub_threads ? LOAD_THREAD_DISTRIBUTE : LOAD_THREAD_SPAWN_SINGLE, p_cache_mode);
+	Ref<ResourceLoader::LoadToken> token = _load_start(p_path, p_type_hint, p_use_sub_threads ? LOAD_THREAD_DISTRIBUTE : LOAD_THREAD_SPAWN_SINGLE, p_cache_mode, p_use_whitelist, p_external_path_whitelist, p_type_whitelist);
 	if (token.is_valid()) {
 		thread_load_mutex.lock();
 		token->user_path = p_path;
@@ -425,7 +427,7 @@ Ref<Resource> ResourceLoader::load(const String &p_path, const String &p_type_hi
 		*r_error = OK;
 	}
 
-	Ref<LoadToken> load_token = _load_start(p_path, p_type_hint, LOAD_THREAD_FROM_CURRENT, p_cache_mode);
+	Ref<LoadToken> load_token = _load_start(p_path, p_type_hint, LOAD_THREAD_FROM_CURRENT, p_cache_mode, false, Dictionary(), Dictionary());
 	if (!load_token.is_valid()) {
 		if (r_error) {
 			*r_error = FAILED;
@@ -437,7 +439,24 @@ Ref<Resource> ResourceLoader::load(const String &p_path, const String &p_type_hi
 	return res;
 }
 
-Ref<ResourceLoader::LoadToken> ResourceLoader::_load_start(const String &p_path, const String &p_type_hint, LoadThreadMode p_thread_mode, ResourceFormatLoader::CacheMode p_cache_mode) {
+Ref<Resource> ResourceLoader::load_whitelisted(const String &p_path, Dictionary p_external_path_whitelist, Dictionary p_type_whitelist, const String &p_type_hint, ResourceFormatLoader::CacheMode p_cache_mode, Error *r_error) {
+	if (r_error) {
+		*r_error = OK;
+	}
+
+	Ref<LoadToken> load_token = _load_start(p_path, p_type_hint, LOAD_THREAD_FROM_CURRENT, p_cache_mode, true, p_external_path_whitelist, p_type_whitelist);
+	if (!load_token.is_valid()) {
+		if (r_error) {
+			*r_error = FAILED;
+		}
+		return Ref<Resource>();
+	}
+
+	Ref<Resource> res = _load_complete(*load_token.ptr(), r_error);
+	return res;
+}
+
+Ref<ResourceLoader::LoadToken> ResourceLoader::_load_start(const String &p_path, const String &p_type_hint, LoadThreadMode p_thread_mode, ResourceFormatLoader::CacheMode p_cache_mode, bool p_use_whitelist, Dictionary p_external_path_whitelist, Dictionary p_type_whitelist) {
 	String local_path = _validate_local_path(p_path);
 
 	Ref<LoadToken> load_token;
@@ -474,7 +493,10 @@ Ref<ResourceLoader::LoadToken> ResourceLoader::_load_start(const String &p_path,
 			load_task.type_hint = p_type_hint;
 			load_task.cache_mode = p_cache_mode;
 			load_task.use_sub_threads = p_thread_mode == LOAD_THREAD_DISTRIBUTE;
-			if (p_cache_mode == ResourceFormatLoader::CACHE_MODE_REUSE) {
+			load_task.using_whitelist = p_use_whitelist;
+			load_task.external_path_whitelist = p_external_path_whitelist;
+			load_task.type_whitelist = p_type_whitelist;
+			if (p_cache_mode != ResourceFormatLoader::CACHE_MODE_IGNORE) {
 				Ref<Resource> existing = ResourceCache::get_ref(local_path);
 				if (existing.is_valid()) {
 					//referencing is fine
@@ -641,19 +663,20 @@ Ref<Resource> ResourceLoader::_load_complete_inner(LoadToken &p_load_token, Erro
 
 			if (load_task.task_id != 0) {
 				// Loading thread is in the worker pool.
-				load_task.awaited = true;
 				thread_load_mutex.unlock();
 				Error err = WorkerThreadPool::get_singleton()->wait_for_task_completion(load_task.task_id);
 				if (err == ERR_BUSY) {
-					// The WorkerThreadPool has scheduled tasks in a way that the current load depends on
-					// another one in a lower stack frame. Restart such load here. When the stack is eventually
-					// unrolled, the original load will have been notified to go on.
+					// The WorkerThreadPool has reported that the current task wants to await on an older one.
+					// That't not allowed for safety, to avoid deadlocks. Fortunately, though, in the context of
+					// resource loading that means that the task to wait for can be restarted here to break the
+					// cycle, with as much recursion into this process as needed.
+					// When the stack is eventually unrolled, the original load will have been notified to go on.
 #ifdef DEV_ENABLED
-					print_verbose("ResourceLoader: Load task happened to wait on another one deep in the call stack. Attempting to avoid deadlock by re-issuing the load now.");
+					print_verbose("ResourceLoader: Potential for deadlock detected in task dependency. Attempting to avoid it by re-issuing the load now.");
 #endif
 					// CACHE_MODE_IGNORE is needed because, otherwise, the new request would just see there's
 					// an ongoing load for that resource and wait for it again. This value forces a new load.
-					Ref<ResourceLoader::LoadToken> token = _load_start(load_task.local_path, load_task.type_hint, LOAD_THREAD_DISTRIBUTE, ResourceFormatLoader::CACHE_MODE_IGNORE);
+					Ref<ResourceLoader::LoadToken> token = _load_start(load_task.local_path, load_task.type_hint, LOAD_THREAD_DISTRIBUTE, ResourceFormatLoader::CACHE_MODE_IGNORE, load_task.using_whitelist, load_task.external_path_whitelist, load_task.type_whitelist);
 					Ref<Resource> resource = _load_complete(*token.ptr(), &err);
 					if (r_error) {
 						*r_error = err;
@@ -663,6 +686,7 @@ Ref<Resource> ResourceLoader::_load_complete_inner(LoadToken &p_load_token, Erro
 				} else {
 					DEV_ASSERT(err == OK);
 					thread_load_mutex.lock();
+					load_task.awaited = true;
 				}
 			} else {
 				// Loading thread is main or user thread.

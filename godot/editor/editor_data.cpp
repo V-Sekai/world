@@ -431,7 +431,7 @@ int EditorData::get_scene_history_id_from_path(const String &p_path) const {
 }
 
 int EditorData::get_current_edited_scene_history_id() const {
-	if (current_edited_scene != -1) {
+	if (current_edited_scene != -1 && !(current_edited_scene < 0 && current_edited_scene < edited_scene.size())) {
 		return edited_scene[current_edited_scene].history_id;
 	}
 	return 0;
@@ -1242,7 +1242,6 @@ void EditorSelection::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("remove_node", "node"), &EditorSelection::remove_node);
 	ClassDB::bind_method(D_METHOD("get_selected_nodes"), &EditorSelection::get_selected_nodes);
 	ClassDB::bind_method(D_METHOD("get_transformable_selected_nodes"), &EditorSelection::_get_transformable_selected_nodes);
-	ClassDB::bind_method(D_METHOD("_emit_change"), &EditorSelection::_emit_change);
 	ADD_SIGNAL(MethodInfo("selection_changed"));
 }
 
@@ -1290,7 +1289,7 @@ void EditorSelection::update() {
 	changed = false;
 	if (!emitted) {
 		emitted = true;
-		call_deferred(SNAME("_emit_change"));
+		callable_mp(this, &EditorSelection::_emit_change).call_deferred();
 	}
 }
 

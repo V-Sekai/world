@@ -386,6 +386,9 @@
 		<member name="audio/driver/output_latency.web" type="int" setter="" getter="" default="50">
 			Safer override for [member audio/driver/output_latency] in the Web platform, to avoid audio issues especially on mobile devices.
 		</member>
+		<member name="audio/enable_resonance_audio" type="bool" setter="" getter="" default="true">
+			Use spatialized audio for a more immersive playback.
+		</member>
 		<member name="audio/general/2d_panning_strength" type="float" setter="" getter="" default="0.5">
 			The base strength of the panning effect for all [AudioStreamPlayer2D] nodes. The panning strength can be further scaled on each Node using [member AudioStreamPlayer2D.panning_strength]. A value of [code]0.0[/code] disables stereo panning entirely, leaving only volume attenuation in place. A value of [code]1.0[/code] completely mutes one of the channels if the sound is located exactly to the left (or right) of the listener.
 			The default value of [code]0.5[/code] is tuned for headphones. When using speakers, you may find lower values to sound better as speakers have a lower stereo separation compared to headphones.
@@ -810,7 +813,9 @@
 			Main window can't be focused. No-focus window will ignore all input, except mouse clicks.
 		</member>
 		<member name="display/window/size/resizable" type="bool" setter="" getter="" default="true">
-			Allows the window to be resizable by default.
+			If [code]true[/code], allows the window to be resizable by default.
+			[b]Note:[/b] This property is only read when the project starts. To change whether the window is resizable at runtime, set [member Window.unresizable] instead on the root Window, which can be retrieved using [code]get_viewport().get_window()[/code]. [member Window.unresizable] takes the opposite value of this setting.
+			[b]Note:[/b] Certain window managers can be configured to ignore the non-resizable status of a window. Do not rely on this setting as a guarantee that the window will [i]never[/i] be resizable.
 			[b]Note:[/b] This setting is ignored on iOS.
 		</member>
 		<member name="display/window/size/transparent" type="bool" setter="" getter="" default="false">
@@ -2534,8 +2539,6 @@
 			Decreasing this value may improve GPU performance on certain setups, even if the maximum number of clustered elements is never reached in the project.
 			[b]Note:[/b] This setting is only effective when using the Forward+ rendering method, not Mobile and Compatibility.
 		</member>
-		<member name="rendering/limits/forward_renderer/threaded_render_minimum_instances" type="int" setter="" getter="" default="500">
-		</member>
 		<member name="rendering/limits/global_shader_variables/buffer_size" type="int" setter="" getter="" default="65536">
 		</member>
 		<member name="rendering/limits/opengl/max_lights_per_object" type="int" setter="" getter="" default="8">
@@ -2767,8 +2770,6 @@
 		</member>
 		<member name="threading/worker_pool/max_threads" type="int" setter="" getter="" default="-1">
 			Maximum number of threads to be used by [WorkerThreadPool]. Value of [code]-1[/code] means no limit.
-		</member>
-		<member name="threading/worker_pool/use_system_threads_for_low_priority_tasks" type="bool" setter="" getter="" default="true">
 		</member>
 		<member name="xr/openxr/default_action_map" type="String" setter="" getter="" default="&quot;res://openxr_action_map.tres&quot;">
 			Action map configuration to load by default.
