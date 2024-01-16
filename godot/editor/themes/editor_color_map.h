@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  editor_themes.h                                                       */
+/*  editor_color_map.h                                                    */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,11 +28,13 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef EDITOR_THEMES_H
-#define EDITOR_THEMES_H
+#ifndef EDITOR_COLOR_MAP_H
+#define EDITOR_COLOR_MAP_H
 
-#include "scene/resources/texture.h"
-#include "scene/resources/theme.h"
+#include "core/math/color.h"
+#include "core/string/string_name.h"
+#include "core/templates/hash_map.h"
+#include "core/templates/hash_set.h"
 
 // The default icon theme is designed to be used for a dark theme. This map stores
 // Color values to convert to other colors for better readability on a light theme.
@@ -55,27 +57,4 @@ public:
 	static void finish();
 };
 
-class EditorTheme : public Theme {
-	GDCLASS(EditorTheme, Theme);
-
-	static Vector<StringName> editor_theme_types;
-
-public:
-	virtual Color get_color(const StringName &p_name, const StringName &p_theme_type) const override;
-	virtual int get_constant(const StringName &p_name, const StringName &p_theme_type) const override;
-	virtual Ref<Font> get_font(const StringName &p_name, const StringName &p_theme_type) const override;
-	virtual int get_font_size(const StringName &p_name, const StringName &p_theme_type) const override;
-	virtual Ref<Texture2D> get_icon(const StringName &p_name, const StringName &p_theme_type) const override;
-	virtual Ref<StyleBox> get_stylebox(const StringName &p_name, const StringName &p_theme_type) const override;
-
-	static void initialize();
-	static void finalize();
-};
-
-Ref<Theme> create_editor_theme(Ref<Theme> p_theme = nullptr);
-
-Ref<Theme> create_custom_theme(Ref<Theme> p_theme = nullptr);
-
-String get_default_project_icon();
-
-#endif // EDITOR_THEMES_H
+#endif // EDITOR_COLOR_MAP_H

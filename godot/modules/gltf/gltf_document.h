@@ -43,8 +43,6 @@
 
 class GLTFDocument : public Resource {
 	GDCLASS(GLTFDocument, Resource);
-	static Vector<Ref<GLTFDocumentExtension>> all_document_extensions;
-	Vector<Ref<GLTFDocumentExtension>> document_extensions;
 
 public:
 	const int32_t JOINT_GROUP_SIZE = 4;
@@ -87,6 +85,9 @@ private:
 
 protected:
 	static void _bind_methods();
+	String _gen_unique_name(Ref<GLTFState> p_state, const String &p_name);
+	static Vector<Ref<GLTFDocumentExtension>> all_document_extensions;
+	Vector<Ref<GLTFDocumentExtension>> document_extensions;
 
 public:
 	static void register_gltf_document_extension(Ref<GLTFDocumentExtension> p_extension, bool p_first_priority = false);
@@ -102,6 +103,7 @@ public:
 	float get_lossy_quality() const;
 	void set_root_node_mode(RootNodeMode p_root_node_mode);
 	RootNodeMode get_root_node_mode() const;
+	static String _gen_unique_name_static(HashSet<String> &r_unique_names, const String &p_name);
 
 private:
 	void _build_parent_hierachy(Ref<GLTFState> p_state);
@@ -112,7 +114,6 @@ private:
 	Error _parse_nodes(Ref<GLTFState> p_state);
 	String _get_type_name(const GLTFType p_component);
 	String _get_accessor_type_name(const GLTFType p_type);
-	String _gen_unique_name(Ref<GLTFState> p_state, const String &p_name);
 	String _sanitize_animation_name(const String &p_name);
 	String _gen_unique_animation_name(Ref<GLTFState> p_state, const String &p_name);
 	String _sanitize_bone_name(const String &p_name);
@@ -302,14 +303,14 @@ private:
 	static float get_max_component(const Color &p_color);
 
 public:
-	Error append_from_file(String p_path, Ref<GLTFState> p_state, uint32_t p_flags = 0, String p_base_path = String());
-	Error append_from_buffer(PackedByteArray p_bytes, String p_base_path, Ref<GLTFState> p_state, uint32_t p_flags = 0);
-	Error append_from_scene(Node *p_node, Ref<GLTFState> p_state, uint32_t p_flags = 0);
+	virtual Error append_from_file(String p_path, Ref<GLTFState> p_state, uint32_t p_flags = 0, String p_base_path = String());
+	virtual Error append_from_buffer(PackedByteArray p_bytes, String p_base_path, Ref<GLTFState> p_state, uint32_t p_flags = 0);
+	virtual Error append_from_scene(Node *p_node, Ref<GLTFState> p_state, uint32_t p_flags = 0);
 
 public:
-	Node *generate_scene(Ref<GLTFState> p_state, float p_bake_fps = 30.0f, bool p_trimming = false, bool p_remove_immutable_tracks = true);
-	PackedByteArray generate_buffer(Ref<GLTFState> p_state);
-	Error write_to_filesystem(Ref<GLTFState> p_state, const String &p_path);
+	virtual Node *generate_scene(Ref<GLTFState> p_state, float p_bake_fps = 30.0f, bool p_trimming = false, bool p_remove_immutable_tracks = true);
+	virtual PackedByteArray generate_buffer(Ref<GLTFState> p_state);
+	virtual Error write_to_filesystem(Ref<GLTFState> p_state, const String &p_path);
 
 public:
 	Error _parse_gltf_state(Ref<GLTFState> p_state, const String &p_search_path);

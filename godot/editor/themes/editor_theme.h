@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  fbx_document_extension.cpp                                            */
+/*  editor_theme.h                                                        */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,51 +28,26 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#include "fbx_document_extension.h"
+#ifndef EDITOR_THEME_H
+#define EDITOR_THEME_H
 
-void FBXDocumentExtension::_bind_methods() {
-	// Import process.
-	GDVIRTUAL_BIND(_import_preflight, "state", "extensions");
-	GDVIRTUAL_BIND(_get_supported_extensions);
-	GDVIRTUAL_BIND(_generate_scene_node, "state", "fbx_node", "scene_parent");
-	GDVIRTUAL_BIND(_import_post_parse, "state");
-	GDVIRTUAL_BIND(_import_post, "state", "root");
-}
+#include "scene/resources/theme.h"
 
-// Import process.
-Error FBXDocumentExtension::import_preflight(Ref<FBXState> p_state, Vector<String> p_extensions) {
-	ERR_FAIL_NULL_V(p_state, ERR_INVALID_PARAMETER);
-	Error err = OK;
-	GDVIRTUAL_CALL(_import_preflight, p_state, p_extensions, err);
-	return err;
-}
+class EditorTheme : public Theme {
+	GDCLASS(EditorTheme, Theme);
 
-Vector<String> FBXDocumentExtension::get_supported_extensions() {
-	Vector<String> ret;
-	GDVIRTUAL_CALL(_get_supported_extensions, ret);
-	return ret;
-}
+	static Vector<StringName> editor_theme_types;
 
-Node3D *FBXDocumentExtension::generate_scene_node(Ref<FBXState> p_state, Ref<GLTFNode> p_gltf_node, Node *p_scene_parent) {
-	ERR_FAIL_NULL_V(p_state, nullptr);
-	ERR_FAIL_NULL_V(p_gltf_node, nullptr);
-	ERR_FAIL_NULL_V(p_scene_parent, nullptr);
-	Node3D *ret_node = nullptr;
-	GDVIRTUAL_CALL(_generate_scene_node, p_state, p_gltf_node, p_scene_parent, ret_node);
-	return ret_node;
-}
+public:
+	virtual Color get_color(const StringName &p_name, const StringName &p_theme_type) const override;
+	virtual int get_constant(const StringName &p_name, const StringName &p_theme_type) const override;
+	virtual Ref<Font> get_font(const StringName &p_name, const StringName &p_theme_type) const override;
+	virtual int get_font_size(const StringName &p_name, const StringName &p_theme_type) const override;
+	virtual Ref<Texture2D> get_icon(const StringName &p_name, const StringName &p_theme_type) const override;
+	virtual Ref<StyleBox> get_stylebox(const StringName &p_name, const StringName &p_theme_type) const override;
 
-Error FBXDocumentExtension::import_post_parse(Ref<FBXState> p_state) {
-	ERR_FAIL_NULL_V(p_state, ERR_INVALID_PARAMETER);
-	Error err = OK;
-	GDVIRTUAL_CALL(_import_post_parse, p_state, err);
-	return err;
-}
+	static void initialize();
+	static void finalize();
+};
 
-Error FBXDocumentExtension::import_post(Ref<FBXState> p_state, Node *p_root) {
-	ERR_FAIL_NULL_V(p_root, ERR_INVALID_PARAMETER);
-	ERR_FAIL_NULL_V(p_state, ERR_INVALID_PARAMETER);
-	Error err = OK;
-	GDVIRTUAL_CALL(_import_post, p_state, p_root, err);
-	return err;
-}
+#endif // EDITOR_THEME_H
