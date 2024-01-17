@@ -277,6 +277,8 @@ void CanvasItem::_notification(int p_what) {
 			ERR_MAIN_THREAD_GUARD;
 			ERR_FAIL_COND(!is_inside_tree());
 
+			_set_global_invalid(true);
+
 			Node *parent = get_parent();
 			if (parent) {
 				CanvasItem *ci = Object::cast_to<CanvasItem>(parent);
@@ -314,6 +316,7 @@ void CanvasItem::_notification(int p_what) {
 				}
 			}
 
+			_set_global_invalid(true);
 			_enter_canvas();
 
 			RenderingServer::get_singleton()->canvas_item_set_visible(canvas_item, is_visible_in_tree()); // The visibility of the parent may change.

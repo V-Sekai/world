@@ -170,11 +170,11 @@ void EditorExportPlatformWeb::_fix_html(Vector<uint8_t> &p_html, const Ref<Edito
 	replaces["$GODOT_HEAD_INCLUDE"] = head_include + custom_head_include;
 	replaces["$GODOT_CONFIG"] = str_config;
 
-#ifdef THREADS_ENABLED
-	replaces["$GODOT_THREADS_ENABLED"] = "true";
-#else
-	replaces["$GODOT_THREADS_ENABLED"] = "false";
-#endif
+	if (p_preset->get("variant/thread_support")) {
+		replaces["$GODOT_THREADS_ENABLED"] = "true";
+	} else {
+		replaces["$GODOT_THREADS_ENABLED"] = "false";
+	}
 
 	_replace_strings(replaces, p_html);
 }
