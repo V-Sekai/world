@@ -47,11 +47,8 @@ func _run():
 	for bone_name_i in skeleton.get_bone_count():
 		var bone_name = skeleton.get_bone_name(bone_name_i)
 		var swing_limit_cones = []
-		var bone_i = skeleton_profile.find_bone(bone_name)
-		if bone_i == -1:
-			continue
-		var forward_axis_twist_range = PI * 2
 		var forward_axis_twist_from = 0
+		var forward_axis_twist_range = deg_to_rad(360.0)
 		var resistance = 0
 
 		# The humanoid is T-pose
@@ -77,7 +74,7 @@ func _run():
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0.0)))
 		elif bone_name == "Spine":
 			forward_axis_twist_from = deg_to_rad(4.0)
-			forward_axis_twist_range = deg_to_rad(360)
+			forward_axis_twist_range = deg_to_rad(5)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(3.0)))
 			resistance = 0.5
 		elif bone_name == "Chest":
@@ -168,7 +165,7 @@ func _run():
 	many_bone_ik.set_pin_count(0)
 	many_bone_ik.set_pin_count(bones.size())
 
-	var children: Array[Node] = root.find_children("*", "Marker3D")
+	var children: Array[Node] = root.find_children("*", "BoneAttachment3D")
 	for i in range(children.size()):
 		var node: Node = children[i] as Node
 		node.queue_free()
