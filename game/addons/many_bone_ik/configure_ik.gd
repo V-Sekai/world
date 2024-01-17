@@ -76,12 +76,12 @@ func _run():
 			forward_axis_twist_from = deg_to_rad(4.0)
 			forward_axis_twist_range = deg_to_rad(5)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(3.0)))
-			resistance = 0.5
+			resistance = 1
 		elif bone_name == "Chest":
 			forward_axis_twist_from = deg_to_rad(5.0)
 			forward_axis_twist_range = deg_to_rad(-10.0)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(3.0)))
-			resistance = 0.5
+			resistance = 1
 		elif bone_name == "UpperChest":
 			forward_axis_twist_from = deg_to_rad(10.0)
 			forward_axis_twist_range = deg_to_rad(40.0)
@@ -91,7 +91,7 @@ func _run():
 			forward_axis_twist_from = deg_to_rad(15.0)
 			forward_axis_twist_range = deg_to_rad(15.0)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(10.0)))
-			resistance = 0.6
+			resistance = 1
 		elif bone_name == "Head":
 			forward_axis_twist_from = deg_to_rad(15.0)
 			forward_axis_twist_range = deg_to_rad(15.0)
@@ -102,15 +102,21 @@ func _run():
 		elif bone_name == "LeftUpperLeg":
 			forward_axis_twist_from = deg_to_rad(0.0)
 			forward_axis_twist_range = deg_to_rad(5.0)
-		elif bone_name == "LeftLowerLeg":
-			forward_axis_twist_from = deg_to_rad(-90)
-			forward_axis_twist_range = deg_to_rad(5.0)
+			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(60.0)))
+			resistance = 1
 		elif bone_name == "RightUpperLeg":
 			forward_axis_twist_from = deg_to_rad(0.0)
 			forward_axis_twist_range = deg_to_rad(5.0)
+			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(60.0)))
+			resistance = 1
+		elif bone_name == "LeftLowerLeg":
+			forward_axis_twist_from = deg_to_rad(-90)
+			forward_axis_twist_range = deg_to_rad(5.0)
+			resistance = 0.7
 		elif bone_name == "RightLowerLeg":
 			forward_axis_twist_from = deg_to_rad(-90)
 			forward_axis_twist_range = deg_to_rad(5.0)
+			resistance = 0.7
 		elif bone_name in ["LeftShoulder", "RightShoulder"]:
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(30.0)))
 		elif bone_name in ["LeftUpperArm", "RightUpperArm"]:
