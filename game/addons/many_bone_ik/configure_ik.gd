@@ -56,18 +56,9 @@ func _run():
 		if bone_name == "Hips":
 			twist_from = deg_to_rad(0.0)
 			twist_range = deg_to_rad(360)
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(3.0)))
+			#swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(3.0)))
 			resistance = 0.5
 		elif bone_name in ["LeftFoot", "RightFoot"]:
-			# up down 2.5
-			# left 23
-			# right 24
-			# MODEL_REAR is front
-			# MODEL_FRONT is back
-			# MODEL_BOTTOM is up
-			# MODEL_TOP is down
-			# MODEL_LEFT is right
-			# MODEL_RIGHT is left
 			swing_limit_cones.append(LimitCone.new(((Vector3.MODEL_BOTTOM + Vector3.MODEL_REAR) / 2.0).normalized(), deg_to_rad(2.5)))
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0)))
 			swing_limit_cones.append(LimitCone.new(((Vector3.MODEL_TOP + Vector3.MODEL_REAR) / 2.0).normalized(), deg_to_rad(2.5)))
@@ -195,7 +186,7 @@ func _run():
 		marker_3d.global_transform = pose
 		many_bone_ik.set_pin_nodepath(pin_i, many_bone_ik.get_path_to(marker_3d))
 		many_bone_ik.set_pin_bone_name(pin_i, bone_name)
-		if bone_name == "Root":
+		if bone_name in ["Root", "Hips"]:
 			continue
 		many_bone_ik.set_pin_passthrough_factor(pin_i, 1.0)
 
