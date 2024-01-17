@@ -10,14 +10,14 @@ class LimitCone:
 		self.angle = angle
 
 class BoneConstraint:
-	var twist_from: float
-	var twist_range: float
+	var forward_axis_twist_from: float
+	var forward_axis_twist_range: float
 	var swing_limit_cones: Array
 	var resistance: float
 
-	func _init(twist_from: float = 0, twist_range : float = TAU, swing_limit_cones: Array = [], resistance: float = 0):
-		self.twist_from = twist_from
-		self.twist_range = twist_range
+	func _init(forward_axis_twist_from: float = 0, forward_axis_twist_range : float = TAU, swing_limit_cones: Array = [], resistance: float = 0):
+		self.forward_axis_twist_from = forward_axis_twist_from
+		self.forward_axis_twist_range = forward_axis_twist_range
 		self.swing_limit_cones = swing_limit_cones
 		self.resistance = resistance
 
@@ -50,14 +50,21 @@ func _run():
 		var bone_i = skeleton_profile.find_bone(bone_name)
 		if bone_i == -1:
 			continue
-		var twist_range = PI * 2
-		var twist_from = 0
+		var forward_axis_twist_range = PI * 2
+		var forward_axis_twist_from = 0
 		var resistance = 0
+
+		# The humanoid is T-pose
+		#	
+		# The humanoid is facing +Z in the Right-Handed Y-UP Coordinate System
+		# The humanoid should not have a Transform as Node
+		# Directs the +Y axis from the parent joint to the child joint
+		# +X rotation bends the joint like a muscle contracting
+	
 		if bone_name == "Hips":
-			twist_from = deg_to_rad(0.0)
-			twist_range = deg_to_rad(360)
-			#swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(3.0)))
-			resistance = 0.5
+			forward_axis_twist_from = deg_to_rad(0.0)
+			forward_axis_twist_range = deg_to_rad(360)
+			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(3.0)))
 		elif bone_name in ["LeftFoot", "RightFoot"]:
 			swing_limit_cones.append(LimitCone.new(((Vector3.MODEL_BOTTOM + Vector3.MODEL_REAR) / 2.0).normalized(), deg_to_rad(2.5)))
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0)))
@@ -69,67 +76,61 @@ func _run():
 			swing_limit_cones.append(LimitCone.new(((Vector3.MODEL_LEFT + Vector3.MODEL_REAR) / 2.0).normalized(), deg_to_rad(24.0)))
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0.0)))
 		elif bone_name == "Spine":
-			twist_from = deg_to_rad(4.0)
-			twist_range = deg_to_rad(360)
+			forward_axis_twist_from = deg_to_rad(4.0)
+			forward_axis_twist_range = deg_to_rad(360)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(3.0)))
 			resistance = 0.5
 		elif bone_name == "Chest":
-			twist_from = deg_to_rad(5.0)
-			twist_range = deg_to_rad(-10.0)
+			forward_axis_twist_from = deg_to_rad(5.0)
+			forward_axis_twist_range = deg_to_rad(-10.0)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(3.0)))
 			resistance = 0.5
 		elif bone_name == "UpperChest":
-			twist_from = deg_to_rad(10.0)
-			twist_range = deg_to_rad(40.0)
+			forward_axis_twist_from = deg_to_rad(10.0)
+			forward_axis_twist_range = deg_to_rad(40.0)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(10.0)))
 			resistance = 0.6
 		elif bone_name == "Neck":
-			twist_from = deg_to_rad(15.0)
-			twist_range = deg_to_rad(15.0)
+			forward_axis_twist_from = deg_to_rad(15.0)
+			forward_axis_twist_range = deg_to_rad(15.0)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(10.0)))
 			resistance = 0.6
 		elif bone_name == "Head":
-			twist_from = deg_to_rad(15.0)
-			twist_range = deg_to_rad(15.0)
+			forward_axis_twist_from = deg_to_rad(15.0)
+			forward_axis_twist_range = deg_to_rad(15.0)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(15.0)))
 			resistance = 0.7
 		elif bone_name.find("Eye") != -1:
 			continue
 		elif bone_name == "LeftUpperLeg":
-			twist_from = deg_to_rad(300.0)
-			twist_range = deg_to_rad(10.0)
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(25.0)))
-			resistance = 0.8
+			forward_axis_twist_from = deg_to_rad(0.0)
+			forward_axis_twist_range = deg_to_rad(5.0)
 		elif bone_name == "LeftLowerLeg":
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)))
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_TOP, deg_to_rad(2.5)))
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5)))
+			forward_axis_twist_from = deg_to_rad(-90)
+			forward_axis_twist_range = deg_to_rad(5.0)
 		elif bone_name == "RightUpperLeg":
-			twist_from = deg_to_rad(300.0)
-			twist_range = deg_to_rad(10.0)
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(25.0)))
-			resistance = 0.8
+			forward_axis_twist_from = deg_to_rad(0.0)
+			forward_axis_twist_range = deg_to_rad(5.0)
 		elif bone_name == "RightLowerLeg":
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)))
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_TOP, deg_to_rad(2.5)))
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5)))
+			forward_axis_twist_from = deg_to_rad(-90)
+			forward_axis_twist_range = deg_to_rad(5.0)
 		elif bone_name in ["LeftShoulder", "RightShoulder"]:
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(30.0)))
 		elif bone_name in ["LeftUpperArm", "RightUpperArm"]:
-			twist_from = deg_to_rad(80.0)
-			twist_range = deg_to_rad(12.0)
+			forward_axis_twist_from = deg_to_rad(80.0)
+			forward_axis_twist_range = deg_to_rad(12.0)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0)))
 			resistance = 0.3
 		elif bone_name == "LeftLowerArm":
-			twist_from = deg_to_rad(-55.0)
-			twist_range = deg_to_rad(50.0)
+			forward_axis_twist_from = deg_to_rad(-55.0)
+			forward_axis_twist_range = deg_to_rad(50.0)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)))
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(2.5)))
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5)))
 			resistance = 0.4
 		elif bone_name == "RightLowerArm":
-			twist_from = deg_to_rad(-145.0)
-			twist_range = deg_to_rad(50.0)
+			forward_axis_twist_from = deg_to_rad(-145.0)
+			forward_axis_twist_range = deg_to_rad(50.0)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)))
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)))
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5)))
@@ -143,11 +144,11 @@ func _run():
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)))
 			swing_limit_cones.append(LimitCone.new(((Vector3.MODEL_RIGHT + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(45.0)))
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)))
-		#elif bone_name in ["LeftThumb", "RightThumb"]:
-			#swing_limit_cones.append(LimitCone.new(y_up, deg_to_rad(90.0)))
+		elif bone_name in ["LeftThumb", "RightThumb"]:
+			pass
 		else:
 			continue
-		#set_bone_constraint(many_bone_ik, bone_name, twist_from, twist_range, swing_limit_cones, resistance)
+		set_bone_constraint(many_bone_ik, bone_name, forward_axis_twist_from, forward_axis_twist_range, swing_limit_cones, resistance)
 
 	var bones: Array = [
 		"Root",
