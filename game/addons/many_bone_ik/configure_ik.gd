@@ -168,18 +168,9 @@ func _run():
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)))
 			swing_limit_cones.append(LimitCone.new(((Vector3.MODEL_RIGHT + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(45.0)))
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)))
-		#elif bone_name in ["LeftThumb", "RightThumb"]:
-			#swing_limit_cones.append(LimitCone.new(y_up, deg_to_rad(90.0)))
+		elif bone_name in ["LeftThumb", "RightThumb"]:
+			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0)))
 		elif bone_name in ["LeftFoot", "RightFoot"]:
-			# up down 2.5
-			# left 23
-			# right 24
-			# MODEL_REAR is front
-			# MODEL_FRONT is back
-			# MODEL_BOTTOM is up
-			# MODEL_TOP is down
-			# MODEL_LEFT is right
-			# MODEL_RIGHT is left
 			swing_limit_cones.append(LimitCone.new(((Vector3.MODEL_BOTTOM + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(2.5)))
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0)))
 			swing_limit_cones.append(LimitCone.new(((Vector3.MODEL_TOP + Vector3.MODEL_REAR) / 2.0).normalized(), deg_to_rad(2.5)))
