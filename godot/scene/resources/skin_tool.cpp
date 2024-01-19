@@ -244,7 +244,7 @@ Error SkinTool::_verify_skin(Vector<Ref<GLTFNode>> &r_nodes, Ref<GLTFSkin> p_ski
 
 	out_roots.sort();
 
-	ERR_FAIL_COND_V(out_roots.size() == 0, FAILED);
+	ERR_FAIL_COND_V(out_roots.is_empty(), FAILED);
 
 	// Make sure the roots are the exact same (they better be)
 	ERR_FAIL_COND_V(out_roots.size() != p_skin->roots.size(), FAILED);
@@ -722,7 +722,7 @@ void SkinTool::_remove_duplicate_skins(Vector<Ref<GLTFSkin>> &r_skins) {
 	}
 }
 
-String SkinTool::_gen_unique_bone_name(HashSet<String> unique_names, const String &p_name) {
+String SkinTool::_gen_unique_bone_name(HashSet<String> &r_unique_names, const String &p_name) {
 	String s_name = _sanitize_bone_name(p_name);
 	if (s_name.is_empty()) {
 		s_name = "bone";
@@ -735,23 +735,23 @@ String SkinTool::_gen_unique_bone_name(HashSet<String> unique_names, const Strin
 		if (index > 1) {
 			u_name += "_" + itos(index);
 		}
-		if (!unique_names.has(u_name)) {
+		if (!r_unique_names.has(u_name)) {
 			break;
 		}
 		index++;
 	}
 
-	unique_names.insert(u_name);
+	r_unique_names.insert(u_name);
 
 	return u_name;
 }
 
 Error SkinTool::_asset_parse_skins(
 		const Vector<SkinNodeIndex> &input_skin_indices, // Input indices of the skins
-		const TypedArray<Dictionary> &input_skins, // Input skins as an array of dictionaries
-		const TypedArray<Dictionary> &input_nodes, // Input nodes as an array of dictionaries
+		const Vector<Dictionary> &input_skins, // Input skins as an array of dictionaries
+		const Vector<Dictionary> &input_nodes, // Input nodes as an array of dictionaries
 		Vector<SkinNodeIndex> &output_skin_indices, // Output indices that will hold the valid skin indices
-		TypedArray<Dictionary> &output_skins, // Output skins that will hold the corresponding skins for the valid indices
+		Vector<Dictionary> &output_skins, // Output skins that will hold the corresponding skins for the valid indices
 		HashMap<GLTFNodeIndex, bool> &joint_mapping) { // Mapping of joint indices to a boolean indicating whether they exist or not
 
 	output_skin_indices.clear();

@@ -31,7 +31,6 @@
 #ifndef FBX_STATE_H
 #define FBX_STATE_H
 
-#include "modules/fbx/fbx_defines.h"
 #include "modules/gltf/gltf_defines.h"
 #include "modules/gltf/gltf_state.h"
 #include "modules/gltf/structures/gltf_animation.h"
@@ -41,8 +40,6 @@
 #include "modules/gltf/structures/gltf_skin.h"
 #include "modules/gltf/structures/gltf_texture.h"
 #include "scene/3d/importer_mesh_instance_3d.h"
-#include "structures/fbx_camera.h"
-#include "structures/fbx_light.h"
 
 #include "thirdparty/ufbx/ufbx.h"
 

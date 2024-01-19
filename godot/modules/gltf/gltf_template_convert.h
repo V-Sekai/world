@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  fbx_camera.h                                                          */
+/*  gltf_template_convert.h                                               */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,49 +28,68 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef FBX_CAMERA_H
-#define FBX_CAMERA_H
+#ifndef GLTF_TEMPLATE_CONVERT_H
+#define GLTF_TEMPLATE_CONVERT_H
 
-#include "core/io/resource.h"
-#include "modules/gltf/structures/gltf_camera.h"
+#include "core/templates/hash_set.h"
+#include "core/variant/array.h"
+#include "core/variant/dictionary.h"
+#include "core/variant/typed_array.h"
 
-class Camera3D;
+namespace GLTFTemplateConvert {
+template <class T>
+static Array to_array(const Vector<T> &p_inp) {
+	Array ret;
+	for (int i = 0; i < p_inp.size(); i++) {
+		ret.push_back(p_inp[i]);
+	}
+	return ret;
+}
 
-// Reference and test file:
-// https://github.com/KhronosGroup/glTF-Tutorials/blob/master/gltfTutorial/gltfTutorial_015_SimpleCameras.md
+template <class T>
+static TypedArray<T> to_array(const HashSet<T> &p_inp) {
+	TypedArray<T> ret;
+	typename HashSet<T>::Iterator elem = p_inp.begin();
+	while (elem) {
+		ret.push_back(*elem);
+		++elem;
+	}
+	return ret;
+}
 
-class FBXCamera : public GLTFCamera {
-	GDCLASS(FBXCamera, GLTFCamera);
+template <class T>
+static void set_from_array(Vector<T> &r_out, const Array &p_inp) {
+	r_out.clear();
+	for (int i = 0; i < p_inp.size(); i++) {
+		r_out.push_back(p_inp[i]);
+	}
+}
 
-private:
-	// GLTF has no default camera values, they should always be specified in
-	// the GLTF file. Here we default to Godot's default camera settings.
-	bool perspective = true;
-	real_t fov = Math::deg_to_rad(75.0);
-	real_t size_mag = 0.5;
-	real_t depth_far = 4000.0;
-	real_t depth_near = 0.05;
+template <class T>
+static void set_from_array(HashSet<T> &r_out, const TypedArray<T> &p_inp) {
+	r_out.clear();
+	for (int i = 0; i < p_inp.size(); i++) {
+		r_out.insert(p_inp[i]);
+	}
+}
 
-protected:
-	static void _bind_methods();
+template <class K, class V>
+static Dictionary to_dictionary(const HashMap<K, V> &p_inp) {
+	Dictionary ret;
+	for (const KeyValue<K, V> &E : p_inp) {
+		ret[E.key] = E.value;
+	}
+	return ret;
+}
 
-public:
-	bool get_perspective() const { return perspective; }
-	void set_perspective(bool p_val) { perspective = p_val; }
-	real_t get_fov() const { return fov; }
-	void set_fov(real_t p_val) { fov = p_val; }
-	real_t get_size_mag() const { return size_mag; }
-	void set_size_mag(real_t p_val) { size_mag = p_val; }
-	real_t get_depth_far() const { return depth_far; }
-	void set_depth_far(real_t p_val) { depth_far = p_val; }
-	real_t get_depth_near() const { return depth_near; }
-	void set_depth_near(real_t p_val) { depth_near = p_val; }
+template <class K, class V>
+static void set_from_dictionary(HashMap<K, V> &r_out, const Dictionary &p_inp) {
+	r_out.clear();
+	Array keys = p_inp.keys();
+	for (int i = 0; i < keys.size(); i++) {
+		r_out[keys[i]] = p_inp[keys[i]];
+	}
+}
+} //namespace GLTFTemplateConvert
 
-	static Ref<FBXCamera> from_node(const Camera3D *p_camera);
-	Camera3D *to_node() const;
-
-	static Ref<FBXCamera> from_dictionary(const Dictionary p_dictionary);
-	Dictionary to_dictionary() const;
-};
-
-#endif // FBX_CAMERA_H
+#endif // GLTF_TEMPLATE_CONVERT_H

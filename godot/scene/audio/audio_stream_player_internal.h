@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  fbx_defines.h                                                         */
+/*  audio_stream_player_internal.h                                        */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,15 +28,78 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef FBX_DEFINES_H
-#define FBX_DEFINES_H
+#ifndef AUDIO_STREAM_PLAYER_INTERNAL_H
+#define AUDIO_STREAM_PLAYER_INTERNAL_H
 
-// GLTF index aliases.
-using FBXAnimationIndex = int;
-using FBXBufferIndex = int;
-using FBXCameraIndex = int;
-using FBXLightIndex = int;
-using FBXImageIndex = int;
-using FBXMaterialIndex = int;
+#include "core/object/ref_counted.h"
+#include "core/templates/safe_refcount.h"
 
-#endif // FBX_DEFINES_H
+class AudioStream;
+class AudioStreamPlayback;
+class Node;
+
+class AudioStreamPlayerInternal : public Object {
+	GDCLASS(AudioStreamPlayerInternal, Object);
+
+	struct ParameterData {
+		StringName path;
+		Variant value;
+	};
+
+	static inline const String PARAM_PREFIX = "parameters/";
+
+	Node *node = nullptr;
+	Callable play_callable;
+	bool physical = false;
+
+	HashMap<StringName, ParameterData> playback_parameters;
+
+	void _set_process(bool p_enabled);
+	void _update_stream_parameters();
+
+public:
+	Vector<Ref<AudioStreamPlayback>> stream_playbacks;
+	Ref<AudioStream> stream;
+
+	SafeFlag active;
+
+	float pitch_scale = 1.0;
+	float volume_db = 0.0;
+	bool autoplay = false;
+	StringName bus;
+	int max_polyphony = 1;
+
+	void process();
+	void ensure_playback_limit();
+
+	void notification(int p_what);
+	void validate_property(PropertyInfo &p_property) const;
+	bool set(const StringName &p_name, const Variant &p_value);
+	bool get(const StringName &p_name, Variant &r_ret) const;
+	void get_property_list(List<PropertyInfo> *p_list) const;
+
+	void set_stream(Ref<AudioStream> p_stream);
+	void set_pitch_scale(float p_pitch_scale);
+	void set_max_polyphony(int p_max_polyphony);
+
+	StringName get_bus() const;
+
+	Ref<AudioStreamPlayback> play_basic();
+	void seek(float p_seconds);
+	void stop();
+	bool is_playing() const;
+	float get_playback_position();
+
+	void set_playing(bool p_enable);
+	bool is_active() const;
+
+	void set_stream_paused(bool p_pause);
+	bool get_stream_paused() const;
+
+	bool has_stream_playback();
+	Ref<AudioStreamPlayback> get_stream_playback();
+
+	AudioStreamPlayerInternal(Node *p_node, const Callable &p_play_callable, bool p_physical);
+};
+
+#endif // AUDIO_STREAM_PLAYER_INTERNAL_H

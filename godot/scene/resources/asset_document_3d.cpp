@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  template_convert.h                                                    */
+/*  asset_document_3d.cpp                                                 */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,66 +28,19 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef TEMPLATE_CONVERT_H
-#define TEMPLATE_CONVERT_H
+#include "scene/resources/asset_document_3d.h"
 
-#include "core/templates/hash_set.h"
-#include "core/variant/array.h"
-#include "core/variant/dictionary.h"
-#include "core/variant/typed_array.h"
-
-template <class T>
-static Array to_array(const Vector<T> &p_inp) {
-	Array ret;
-	for (int i = 0; i < p_inp.size(); i++) {
-		ret.push_back(p_inp[i]);
-	}
-	return ret;
+void AssetDocument3D::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("append_data_from_file", "path", "state", "flags", "base_path"),
+			&AssetDocument3D::append_data_from_file, DEFVAL(0), DEFVAL(String()));
+	ClassDB::bind_method(D_METHOD("append_data_from_buffer", "bytes", "base_path", "state", "flags"),
+			&AssetDocument3D::append_data_from_buffer, DEFVAL(0));
+	ClassDB::bind_method(D_METHOD("append_data_from_scene", "node", "state", "flags"),
+			&AssetDocument3D::append_data_from_scene, DEFVAL(0));
+	ClassDB::bind_method(D_METHOD("create_scene", "state", "bake_fps", "trimming", "remove_immutable_tracks"),
+			&AssetDocument3D::create_scene, DEFVAL(30), DEFVAL(false), DEFVAL(true));
+	ClassDB::bind_method(D_METHOD("create_buffer", "state"),
+			&AssetDocument3D::create_buffer);
+	ClassDB::bind_method(D_METHOD("write_asset_to_filesystem", "state", "path"),
+			&AssetDocument3D::write_asset_to_filesystem);
 }
-
-template <class T>
-static TypedArray<T> to_array(const HashSet<T> &p_inp) {
-	TypedArray<T> ret;
-	typename HashSet<T>::Iterator elem = p_inp.begin();
-	while (elem) {
-		ret.push_back(*elem);
-		++elem;
-	}
-	return ret;
-}
-
-template <class T>
-static void set_from_array(Vector<T> &r_out, const Array &p_inp) {
-	r_out.clear();
-	for (int i = 0; i < p_inp.size(); i++) {
-		r_out.push_back(p_inp[i]);
-	}
-}
-
-template <class T>
-static void set_from_array(HashSet<T> &r_out, const TypedArray<T> &p_inp) {
-	r_out.clear();
-	for (int i = 0; i < p_inp.size(); i++) {
-		r_out.insert(p_inp[i]);
-	}
-}
-
-template <class K, class V>
-static Dictionary to_dictionary(const HashMap<K, V> &p_inp) {
-	Dictionary ret;
-	for (const KeyValue<K, V> &E : p_inp) {
-		ret[E.key] = E.value;
-	}
-	return ret;
-}
-
-template <class K, class V>
-static void set_from_dictionary(HashMap<K, V> &r_out, const Dictionary &p_inp) {
-	r_out.clear();
-	Array keys = p_inp.keys();
-	for (int i = 0; i < keys.size(); i++) {
-		r_out[keys[i]] = p_inp[keys[i]];
-	}
-}
-
-#endif // TEMPLATE_CONVERT_H

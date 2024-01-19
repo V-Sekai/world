@@ -30,7 +30,7 @@
 
 #include "fbx_state.h"
 
-#include "core/templates/template_convert.h"
+#include "modules/gltf/gltf_template_convert.h"
 #include "modules/gltf/structures/gltf_animation.h"
 
 void FBXState::_bind_methods() {

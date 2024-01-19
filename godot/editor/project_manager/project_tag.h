@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  fbx_light.h                                                           */
+/*  project_tag.h                                                         */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,53 +28,29 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef FBX_LIGHT_H
-#define FBX_LIGHT_H
+#ifndef PROJECT_TAG_H
+#define PROJECT_TAG_H
 
-#include "modules/gltf/extensions/gltf_light.h"
-#include "scene/3d/light_3d.h"
+#include "scene/gui/box_container.h"
 
-class Light3D;
+class Button;
 
-class FBXLight : public GLTFLight {
-	GDCLASS(FBXLight, GLTFLight);
+class ProjectTag : public HBoxContainer {
+	GDCLASS(ProjectTag, HBoxContainer);
 
-private:
-	Vector3 local_direction = Vector3(0, 1, 0);
-	int type = -1;
-	int decay = 0;
-	int area_shape = -1;
-	float inner_angle = 0.0f;
-	float outer_angle = 0.0f;
-	bool cast_light = true;
-	bool cast_shadows = true;
+	String tag_string;
+	bool display_close = false;
+
+	Button *button = nullptr;
 
 protected:
-	static void _bind_methods();
+	void _notification(int p_what);
 
 public:
-	static Ref<FBXLight> from_node(const Light3D *p_camera);
-	Light3D *to_node() const;
+	void connect_button_to(const Callable &p_callable);
+	const String get_tag() const;
 
-	static Ref<FBXLight> from_dictionary(const Dictionary p_dictionary);
-	Dictionary to_dictionary() const;
-
-	void set_local_direction(Vector3 p_local_direction) { local_direction = p_local_direction; }
-	void set_type(int p_type) { type = p_type; }
-	void set_decay(int p_decay) { decay = p_decay; }
-	void set_area_shape(int p_area_shape) { area_shape = p_area_shape; }
-	void set_inner_angle(float p_inner_angle) { inner_angle = p_inner_angle; }
-	void set_outer_angle(float p_outer_angle) { outer_angle = p_outer_angle; }
-	void set_cast_light(bool p_cast_light) { cast_light = p_cast_light; }
-	void set_cast_shadows(bool p_cast_shadows) { cast_shadows = p_cast_shadows; }
-	Vector3 get_local_direction() const { return local_direction; }
-	int get_type() const { return type; }
-	int get_decay() const { return decay; }
-	int get_area_shape() const { return area_shape; }
-	float get_inner_angle() const { return inner_angle; }
-	float get_outer_angle() const { return outer_angle; }
-	bool is_casting_light() const { return cast_light; }
-	bool is_casting_shadows() const { return cast_shadows; }
+	ProjectTag(const String &p_text, bool p_display_close = false);
 };
 
-#endif // FBX_LIGHT_H
+#endif // PROJECT_TAG_H

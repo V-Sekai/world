@@ -8,6 +8,7 @@ def configure(env):
 
 def get_doc_classes():
     return [
+        "AssetState3D",
         "AssetDocument3D",
         "EditorSceneFormatImporterBlend",
         "EditorSceneFormatImporterFBX",

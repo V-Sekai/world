@@ -36,6 +36,7 @@
 #include "extensions/gltf_spec_gloss.h"
 #include "extensions/physics/gltf_document_extension_physics.h"
 #include "gltf_document.h"
+#include "modules/gltf/gltf_state.h"
 
 #ifdef TOOLS_ENABLED
 #include "editor/editor_import_blend_runner.h"
@@ -99,7 +100,6 @@ void initialize_gltf_module(ModuleInitializationLevel p_level) {
 		GDREGISTER_CLASS(GLTFAnimation);
 		GDREGISTER_CLASS(GLTFBufferView);
 		GDREGISTER_CLASS(GLTFCamera);
-		GDREGISTER_CLASS(AssetDocument3D);
 		GDREGISTER_CLASS(GLTFDocument);
 		GDREGISTER_CLASS(GLTFDocumentExtension);
 		GDREGISTER_CLASS(GLTFDocumentExtensionConvertImporterMesh);

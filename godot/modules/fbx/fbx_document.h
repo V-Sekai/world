@@ -32,10 +32,8 @@
 #define FBX_DOCUMENT_H
 
 #include "modules/fbx/fbx_state.h"
-#include "modules/fbx/structures/fbx_light.h"
-#include "modules/gltf/asset_document_3d.h"
 #include "modules/gltf/gltf_defines.h"
-#include "modules/gltf/gltf_state.h"
+#include "scene/resources/asset_document_3d.h"
 
 #include "thirdparty/ufbx/ufbx.h"
 
@@ -52,23 +50,20 @@ public:
 		TEXTURE_TYPE_NORMAL = 1,
 	};
 
-	static Transform3D _as_xform(const ufbx_matrix &p_mat) {
-		Transform3D xform;
-		xform.basis.set_column(Vector3::AXIS_X, _as_vec3(p_mat.cols[0]));
-		xform.basis.set_column(Vector3::AXIS_Y, _as_vec3(p_mat.cols[1]));
-		xform.basis.set_column(Vector3::AXIS_Z, _as_vec3(p_mat.cols[2]));
-		xform.set_origin(_as_vec3(p_mat.cols[3]));
-		return xform;
-	}
-
-	static String _as_string(const ufbx_string &p_string) {
-		return String::utf8(p_string.data, (int)p_string.length);
-	}
-
-	static Vector3 _as_vec3(const ufbx_vec3 &p_vector) {
-		return Vector3(real_t(p_vector.x), real_t(p_vector.y), real_t(p_vector.z));
-	}
+	static Transform3D _as_xform(const ufbx_matrix &p_mat);
+	static String _as_string(const ufbx_string &p_string);
+	static Vector3 _as_vec3(const ufbx_vec3 &p_vector);
 	static String _gen_unique_name(HashSet<String> &unique_names, const String &p_name);
+
+public:
+	virtual Error append_data_from_file(String p_path, Ref<AssetState3D> p_state, uint32_t p_flags = 0, String p_base_path = String()) override;
+	virtual Error append_data_from_buffer(PackedByteArray p_bytes, String p_base_path, Ref<AssetState3D> p_state, uint32_t p_flags = 0) override;
+	virtual Error append_data_from_scene(Node *p_node, Ref<AssetState3D> p_state, uint32_t p_flags = 0) override;
+
+public:
+	virtual Node *create_scene(Ref<AssetState3D> p_state, float p_bake_fps = 30.0f, bool p_trimming = false, bool p_remove_immutable_tracks = true) override;
+	virtual PackedByteArray create_buffer(Ref<AssetState3D> p_state) override;
+	virtual Error write_asset_to_filesystem(Ref<AssetState3D> p_state, const String &p_path) override;
 
 protected:
 	static void _bind_methods();
@@ -86,7 +81,7 @@ private:
 			const GLTFTextureIndex p_texture, int p_texture_type);
 	Error _parse_meshes(Ref<FBXState> p_state);
 	Ref<Image> _parse_image_bytes_into_image(Ref<FBXState> p_state, const Vector<uint8_t> &p_bytes, const String &p_filename, int p_index);
-	FBXImageIndex _parse_image_save_image(Ref<FBXState> p_state, const Vector<uint8_t> &p_bytes, const String &p_file_extension, int p_index, Ref<Image> p_image);
+	GLTFImageIndex _parse_image_save_image(Ref<FBXState> p_state, const Vector<uint8_t> &p_bytes, const String &p_file_extension, int p_index, Ref<Image> p_image);
 	Error _parse_images(Ref<FBXState> p_state, const String &p_base_path);
 	Error _parse_materials(Ref<FBXState> p_state);
 	Error _parse_skins(Ref<FBXState> p_state);
@@ -104,28 +99,12 @@ private:
 	Error _parse_lights(Ref<FBXState> p_state);
 
 public:
-	virtual Error append_from_file(String p_path, Ref<GLTFState> p_state, uint32_t p_flags = 0, String p_base_path = String()) override;
-	virtual Error append_from_buffer(PackedByteArray p_bytes, String p_base_path, Ref<GLTFState> p_state, uint32_t p_flags = 0) override;
-	virtual Error append_from_scene(Node *p_node, Ref<GLTFState> p_state, uint32_t p_flags = 0) override {
-		return ERR_UNAVAILABLE;
-	}
-
-public:
-	virtual Node *generate_scene(Ref<GLTFState> p_state, float p_bake_fps = 30.0f, bool p_trimming = false, bool p_remove_immutable_tracks = true) override;
-	virtual PackedByteArray generate_buffer(Ref<GLTFState> p_state) override {
-		return PackedByteArray();
-	}
-	virtual Error write_to_filesystem(Ref<GLTFState> p_state, const String &p_path) override {
-		return ERR_UNAVAILABLE;
-	}
-
-public:
 	Error _parse_fbx_state(Ref<FBXState> p_state, const String &p_search_path);
 	void _process_mesh_instances(Ref<FBXState> p_state, Node *p_scene_root);
 	void _generate_scene_node(Ref<FBXState> p_state, const GLTFNodeIndex p_node_index, Node *p_scene_parent, Node *p_scene_root);
 	void _generate_skeleton_bone_node(Ref<FBXState> p_state, const GLTFNodeIndex p_node_index, Node *p_scene_parent, Node *p_scene_root);
 	void _import_animation(Ref<FBXState> p_state, AnimationPlayer *p_animation_player,
-			const FBXAnimationIndex p_index, const float p_bake_fps, const bool p_trimming, const bool p_remove_immutable_tracks);
+			const GLTFAnimationIndex p_index, const float p_bake_fps, const bool p_trimming, const bool p_remove_immutable_tracks);
 	Error _parse(Ref<FBXState> p_state, String p_path, Ref<FileAccess> p_file);
 };
 
