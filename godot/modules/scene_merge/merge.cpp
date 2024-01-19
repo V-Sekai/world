@@ -49,7 +49,7 @@ Copyright NVIDIA Corporation 2006 -- Ignacio Castano <icastano@nvidia.com>
 #include "core/math/vector2.h"
 #include "core/math/vector3.h"
 #include "core/os/os.h"
-#include "editor/editor_file_dialog.h"
+#include "editor/gui/editor_file_dialog.h"
 #include "editor/editor_file_system.h"
 #include "editor/editor_node.h"
 #include "scene/3d/node_3d.h"

@@ -2,10 +2,10 @@
 
 #ifdef TOOLS_ENABLED
 
-#include "editor/editor_file_dialog.h"
 #include "editor/editor_file_system.h"
 #include "editor/editor_node.h"
 #include "editor/editor_plugin.h"
+#include "scene/gui/editor_file_dialog.h"
 
 #include "scene/resources/packed_scene.h"
 
@@ -79,7 +79,7 @@ void SceneMergePlugin::_notification(int notification) {
 
 SceneMergePlugin::SceneMergePlugin() {
 	file_export_lib->set_title(TTR("Export Library"));
-	file_export_lib->set_file_mode(EditorFileDialog::FILE_MODE_SAVE_FILE);
+	file_export_lib->set_file_mode(FileDialog::FILE_MODE_SAVE_FILE);
 	file_export_lib->connect("file_selected", callable_mp(this, &SceneMergePlugin::_dialog_action));
 	file_export_lib_merge->set_text(TTR("Merge With Existing"));
 	file_export_lib->get_vbox()->add_child(file_export_lib_merge, true);
