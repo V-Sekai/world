@@ -79,10 +79,10 @@ public:
 	static Error _verify_skin(Vector<Ref<GLTFNode>> &r_nodes, Ref<GLTFSkin> p_skin);
 	static Error _asset_parse_skins(
 			const Vector<SkinNodeIndex> &p_input_skin_indices,
-			const Vector<Dictionary> &p_input_skins,
-			const Vector<Dictionary> &p_input_nodes,
+			const Vector<Ref<GLTFSkin>> &p_input_skins,
+			const Vector<Ref<GLTFNode>> &p_input_nodes,
 			Vector<SkinNodeIndex> &r_output_skin_indices,
-			Vector<Dictionary> &r_output_skins,
+			Vector<Ref<GLTFSkin>> &r_output_skins,
 			HashMap<GLTFNodeIndex, bool> &r_joint_mapping);
 	static Error _determine_skeletons(
 			Vector<Ref<GLTFSkin>> &r_skins,

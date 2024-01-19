@@ -2301,44 +2301,16 @@ Error FBXDocument::_parse_skins(Ref<FBXState> p_state) {
 			}
 		}
 	}
-	Vector<Dictionary> skins;
-	for (Ref<GLTFSkin> skin : p_state->skins) {
-		Dictionary new_skin_dictionary;
-		if (skin.is_valid()) {
-			new_skin_dictionary = skin->to_dictionary();
-		}
-		skins.push_back(new_skin_dictionary);
-	}
-
-	Vector<Dictionary> nodes;
-	for (Ref<GLTFNode> node : p_state->nodes) {
-		Dictionary new_node_dictionary;
-		if (node.is_valid()) {
-			new_node_dictionary = node->to_dictionary();
-		}
-		nodes.push_back(new_node_dictionary);
-	}
 	Error err = SkinTool::_asset_parse_skins(
 			p_state->skin_indices.duplicate(),
-			skins,
-			nodes,
+			p_state->skins.duplicate(),
+			p_state->nodes.duplicate(),
 			p_state->skin_indices,
-			skins,
+			p_state->skins,
 			joint_mapping);
 	if (err != OK) {
 		return err;
 	}
-	p_state->skins.clear();
-	for (int32_t skin_i = 0; skin_i < skins.size(); skin_i++) {
-		Dictionary skin_dictionary = skins[skin_i];
-		Ref<GLTFSkin> new_skin;
-		new_skin.instantiate();
-		err = new_skin->from_dictionary(skin_dictionary);
-		if (err == OK) {
-			p_state->skins.push_back(new_skin);
-		}
-	}
-
 	for (int i = 0; i < p_state->skins.size(); ++i) {
 		Ref<GLTFSkin> skin = p_state->skins.write[i];
 		ERR_FAIL_COND_V(skin.is_null(), ERR_PARSE_ERROR);

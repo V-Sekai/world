@@ -748,10 +748,10 @@ String SkinTool::_gen_unique_bone_name(HashSet<String> &r_unique_names, const St
 
 Error SkinTool::_asset_parse_skins(
 		const Vector<SkinNodeIndex> &input_skin_indices, // Input indices of the skins
-		const Vector<Dictionary> &input_skins, // Input skins as an array of dictionaries
-		const Vector<Dictionary> &input_nodes, // Input nodes as an array of dictionaries
+		const Vector<Ref<GLTFSkin>> &input_skins, // Input skins as an array of dictionaries
+		const Vector<Ref<GLTFNode>> &input_nodes, // Input nodes as an array of dictionaries
 		Vector<SkinNodeIndex> &output_skin_indices, // Output indices that will hold the valid skin indices
-		Vector<Dictionary> &output_skins, // Output skins that will hold the corresponding skins for the valid indices
+		Vector<Ref<GLTFSkin>> &output_skins, // Output skins that will hold the corresponding skins for the valid indices
 		HashMap<GLTFNodeIndex, bool> &joint_mapping) { // Mapping of joint indices to a boolean indicating whether they exist or not
 
 	output_skin_indices.clear();
@@ -763,9 +763,7 @@ Error SkinTool::_asset_parse_skins(
 		if (skin_index >= 0 && skin_index < input_skins.size()) {
 			output_skin_indices.push_back(skin_index);
 			output_skins.push_back(input_skins[skin_index]);
-			Ref<GLTFSkin> skin;
-			skin.instantiate();
-			skin->from_dictionary(input_skins[skin_index]);
+			Ref<GLTFSkin> skin = input_skins[skin_index];
 			Vector<SkinNodeIndex> skin_joints = skin->get_joints();
 			for (int j = 0; j < skin_joints.size(); ++j) {
 				SkinNodeIndex joint_index = skin_joints[j];
