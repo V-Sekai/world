@@ -1,3 +1,4 @@
+@uid("uid://d32516hkodad7") # Generated automatically, do not modify.
 @tool
 extends EditorScript
 
@@ -120,21 +121,16 @@ func _run():
 			resistance = 0.7
 		elif bone_name.ends_with("Eye"):
 			continue
-		elif bone_name == "LeftUpperLeg":
-			twist_from = deg_to_rad(300.0)
-			twist_range = deg_to_rad(10.0)
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(25.0)))
-			resistance = 0.8
 		elif bone_name == "LeftLowerLeg":
+			twist_from = deg_to_rad(-45.0)
+			twist_range = deg_to_rad(2.0)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)))
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_TOP, deg_to_rad(2.5)))
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5)))
-		elif bone_name == "RightUpperLeg":
-			twist_from = deg_to_rad(300.0)
-			twist_range = deg_to_rad(10.0)
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(25.0)))
 			resistance = 0.8
 		elif bone_name == "RightLowerLeg":
+			twist_from = deg_to_rad(-45.0)
+			twist_range = deg_to_rad(2.0)
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)))
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_TOP, deg_to_rad(2.5)))
 			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5)))
