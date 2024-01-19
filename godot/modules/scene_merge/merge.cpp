@@ -54,6 +54,7 @@ Copyright NVIDIA Corporation 2006 -- Ignacio Castano <icastano@nvidia.com>
 #include "editor/editor_node.h"
 #include "scene/3d/node_3d.h"
 #include "scene/animation/animation_player.h"
+#include "scene/resources/image_texture.h"
 #include "scene/resources/mesh_data_tool.h"
 #include "scene/resources/packed_scene.h"
 #include "scene/resources/surface_tool.h"
