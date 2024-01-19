@@ -4,9 +4,9 @@
 ; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
 ;
 [subrepo]
-	remote = https://github.com/V-Sekai/godot.git
-	branch = groups-staging-4.3
-	commit = 0702bdc699d933e9abb6f2d5ee5633618a32b248
-	parent = d95baf16a90daad766ad8a7bb281202b04861785
+	remote = https://github.com/V-Sekai/godot_scene_merge.git
+	branch = main
+	commit = 2a0439811be52c699e068f877ac002fab2c7656b
+	parent = 7827c8e37010241b376748b22db85847c8614dbd
 	method = merge
 	cmdver = 0.4.6
