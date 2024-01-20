@@ -10,7 +10,7 @@ on:
 
 env:
   GAME_NAME: vsekai_game_
-  GODOT_REF: groups-4.3.2023-12-31T184944Z
+  GODOT_REF: groups-4.3.2024-01-20T181514Z
   GODOT_REPOSITORY: v-sekai/godot
   SCONSFLAGS: verbose=yes warnings=extra werror=no module_text_server_fb_enabled=yes use_thinlto=yes
   DOTNET_NOLOGO: true
@@ -218,7 +218,7 @@ jobs:
 
       - name: Upload Godot Artifact Export
         if: ${{ matrix.deploy }}
-        uses: actions/upload-artifact@c7d193f32edcb7bfad88892161225aeda64e9392 # v4.0.0
+        uses: actions/upload-artifact@694cdabd8bdb0f10b2cea11669e1bf5453eed0a6 # v4.2.0
         with:
           name: ${{ env.GAME_NAME }}${{ matrix.deploy-platform }}
           path: |
@@ -287,7 +287,7 @@ jobs:
           egress-policy: audit
 
       - name: Download Artifacts
-        uses: actions/download-artifact@f44cd7b40bfd40b6aa1cc1b9b5b7bf03d3c67110 # v4.1.0
+        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
 
       - name: List files
         run: |
