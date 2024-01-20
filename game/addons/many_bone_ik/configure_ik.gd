@@ -178,7 +178,7 @@ func _run():
 	var bones: Array = [
 		"Hips",
 		"Chest",
-		"RightLowerArm",
+		"LeftLowerArm",
 		"LeftHand",
 		#"LeftThumbProximal",
 		#"LeftIndexProximal",
