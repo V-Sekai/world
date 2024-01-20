@@ -86,12 +86,6 @@ Node *EditorSceneFormatImporterUFBX::import_scene(const String &p_path, uint32_t
 Variant EditorSceneFormatImporterUFBX::get_option_visibility(const String &p_path, bool p_for_animation,
 		const String &p_option, const HashMap<StringName, Variant> &p_options) {
 	String file_extension = p_path.get_extension().to_lower();
-	if (file_extension != "gltf" && p_option.begins_with("gltf/")) {
-		return false;
-	}
-	if (p_options.has("fbx/importer") && int(p_options["fbx/importer"]) == FBX_IMPORTER_FBX2GLTF && p_option == "fbx/embedded_image_handling") {
-		return false;
-	}
 	if (file_extension != "fbx" && p_option.begins_with("fbx/")) {
 		return false;
 	}
