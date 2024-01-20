@@ -20,6 +20,19 @@
       "preLaunchTask": "Godot Engine Windows Clang"
     },
     {
+      "name": "Run the Macos editor with task_goal_planner",
+      "preRunCommands": [
+          "command script import ${workspaceFolder}/.vscode/GodotFormatters.py",
+          "command source ${workspaceFolder}/.vscode/GodotFormatters.lldb"
+      ],            
+      "type": "lldb",
+      "request": "launch",
+      "args": ["--path", "tools/task_goal_planner", "-e"],
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/godot/bin/godot.windows.editor.double.x86_64.llvm.exe",
+      "preLaunchTask": "Godot Engine Windows Clang"
+    },
+    {
       "name": "Run the Linux editor",
       "type": "lldb",
       "request": "launch",
