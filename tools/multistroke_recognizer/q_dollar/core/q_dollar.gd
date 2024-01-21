@@ -77,7 +77,10 @@ class RecognizerPoint:
 	var id: StringName
 	var int_x = 0; # for indexing into the LUT
 	var int_y = 0; # for indexing into the LUT
-
+	
+	func _to_string() -> String:
+		return "RecognizerPoint(int_x: %d x: %f int_y: %d y: %f id: %s)" % [int_x, x, int_y, y, id]
+		
 	func _init(p_x, p_y, p_id):
 		x = p_x
 		y = p_y
@@ -148,7 +151,8 @@ class QDollarRecognizer:
 				newpoints[point_i] = RecognizerPoint.new(qx, qy, point.id)
 			return newpoints
 
-		func path_length(points: Array[RecognizerPoint]) -> float:  # length traversed by a point path
+
+		func path_length(points: Array[RecognizerPoint]) -> float:
 			if points.size() < 2:
 				return 0.0
 			var d: float = 0.0
@@ -159,35 +163,38 @@ class QDollarRecognizer:
 					)
 			return d
 
-		func resample(p_points: Array[RecognizerPoint], n: int) -> Array[RecognizerPoint]:
-			var I = path_length(p_points) / (n - 1)  # interval length
-			var D = 0.0
-			var new_points: Array[RecognizerPoint]
-			new_points.resize(n)
-			new_points.fill(p_points[0])
-			for point_i in range(1, n):
-				if p_points.size() < 0 or point_i >= p_points.size():
-					continue 
-				if p_points[point_i].id == p_points[point_i - 1].id:
-					var d = Vector2(p_points[point_i - 1].x, p_points[point_i - 1].y).distance_to(
-						Vector2(p_points[point_i].x, p_points[point_i].y)
-					)
-					if (D + d) >= I:
-						var qx = p_points[point_i - 1].x + ((I - D) / d) * (p_points[point_i].x - p_points[point_i - 1].x)
-						var qy = p_points[point_i - 1].y + ((I - D) / d) * (p_points[point_i].y - p_points[point_i - 1].y)
-						var q = RecognizerPoint.new(qx, qy, p_points[point_i].id)
-						new_points[point_i] = q
-						p_points.insert(point_i, q)  # insert 'q' at position i in points s.t. 'q' will be the next i
-						D = 0.0
-					else:
-						D += d
-			if new_points.size() == n - 1:  # Sometimes we fall a rounding-error short of adding the last point, so add it if so
-				new_points.push_back(
-					RecognizerPoint.new(
-						p_points[p_points.size() - 1].x, p_points[p_points.size() - 1].y, p_points[p_points.size() - 1].id
-					)
-				)
+
+		func resample(points: Array, n: int) -> Array[RecognizerPoint]:
+			var I: float = path_length(points) / (n - 1) # Interval length
+			var D: float = 0.0
+			var new_points : Array[RecognizerPoint] = [points[0]]
+			
+			var i: int = 1 # The index of the original point to look ahead in the array
+			
+			while new_points.size() < n and i < points.size():
+				var prev_point: RecognizerPoint = points[i - 1]
+				var current_point: RecognizerPoint = points[i]
+				var d: float = Vector2(prev_point.x, prev_point.y).distance_to(Vector2(current_point.x, current_point.y))
+				
+				if (D + d) >= I:
+					while (D + d) >= I and new_points.size() < n:
+						var ratio: float = (I - D) / d
+						var qx: float = prev_point.x + ratio * (current_point.x - prev_point.x)
+						var qy: float = prev_point.y + ratio * (current_point.y - prev_point.y)
+						var q: RecognizerPoint = RecognizerPoint.new(qx, qy, current_point.id)
+						
+						new_points.append(q)
+						D += I
+		
+				D += d - ((D + d) / I) * I  # Subtract full intervals, retain remainder
+				i += 1
+		
+			# Sometimes we may fall a rounding-error short of adding the last point, so add it if so
+			if new_points.size() < n:
+				var last_point: RecognizerPoint = points[points.size() - 1]
+				new_points.append(RecognizerPoint.new(last_point.x, last_point.y, last_point.id))            
 			return new_points
+		
 
 		func _make_integer_coordinates(points: Array[RecognizerPoint]) -> Array[RecognizerPoint]:
 			for point in points:

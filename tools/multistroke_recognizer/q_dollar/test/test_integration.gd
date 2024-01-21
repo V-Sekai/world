@@ -6,6 +6,18 @@ var gestures = preload("res://q_dollar/core/gestures.gd").new()
 
 var predefined_point_cloud: Dictionary = gestures.predefined_point_cloud
 
+# Converts the captured points into a format suitable for the recognizer
+func convert_points_for_recognition(gesture_points_strokes: Array) -> Array:
+	var recognizer_points: Array[dollar.RecognizerPoint] = []
+	for point in gesture_points_strokes:
+		recognizer_points.append(dollar.RecognizerPoint.new(point.int_x, point.int_y, point.id))
+	if recognizer_points.is_empty():
+		print("Not enough points to resample for gesture recognition.")
+		return []
+	var point_cloud_id = str(Time.get_ticks_msec())
+	var point_cloud = dollar.QDollarRecognizer.PointCloud.new(point_cloud_id, recognizer_points)
+	return point_cloud._points
+	
 func test_assert_eq_integration_recognize_equal():
 	var recognizer: dollar.QDollarRecognizer = dollar.QDollarRecognizer.new()
 	
@@ -21,7 +33,7 @@ func test_assert_eq_integration_recognize_equal():
 		var new_points: Array[dollar.RecognizerPoint]
 		for point in points:
 			new_points.push_back(point)
-		recognizer.add_gesture(gesture, new_points)
+		recognizer.add_gesture(gesture, convert_points_for_recognition(new_points))
 
 	for gesture_key in predefined_point_cloud.keys():
 		var gestures = predefined_point_cloud[gesture_key]
