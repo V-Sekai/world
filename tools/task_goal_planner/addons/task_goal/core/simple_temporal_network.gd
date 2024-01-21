@@ -47,6 +47,31 @@ func check_overlap(new_constraint: TemporalConstraint) -> bool:
 	return false
 
 
+func is_free_at(time: int) -> bool:
+	for constraint in constraints:
+		# Check if time falls within any existing constraint's time interval
+		if (constraint.time_interval.x <= time and time <= constraint.time_interval.y):
+			return false  # Time is within an existing constraint's interval
+	return true  # No overlapping constraints found
+
+
+## Adds a new task that can be rescheduled within a certain time interval.
+func reschedule_task(
+	task_name: String,
+	min_start_time: int, max_start_time: int,
+	duration: float, temporal_qualifier: TemporalConstraint.TemporalQualifier,
+) -> bool:
+	var reschedule_constraint = TemporalConstraint.new(
+		min_start_time, max_start_time,
+		duration,
+		temporal_qualifier,
+		task_name
+	)
+
+	# Adds the constraint and updates the network unless it overlaps with existing ones.
+	return add_temporal_constraint(reschedule_constraint)
+
+
 func add_temporal_constraint(
 	from_constraint: TemporalConstraint,
 	to_constraint: TemporalConstraint = null,
