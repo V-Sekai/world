@@ -1,4 +1,5 @@
-extends Node
+@uid("uid://c1hfwsya7pb38") # Generated automatically, do not modify.
+extends RefCounted
 
 #/**
 # * The $Q Super-Quick Recognizer (JavaScript version)
@@ -165,6 +166,8 @@ class QDollarRecognizer:
 			new_points.resize(n)
 			new_points.fill(p_points[0])
 			for point_i in range(1, n):
+				if p_points.size() < 0 or point_i >= p_points.size():
+					continue 
 				if p_points[point_i].id == p_points[point_i - 1].id:
 					var d = Vector2(p_points[point_i - 1].x, p_points[point_i - 1].y).distance_to(
 						Vector2(p_points[point_i].x, p_points[point_i].y)
