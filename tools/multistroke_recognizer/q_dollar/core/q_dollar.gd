@@ -79,7 +79,7 @@ class RecognizerPoint:
 	var int_y: int = 0; # for indexing into the LUT
 
 	func _to_string() -> String:
-		return "RecognizerPoint(int_x: %d x: %f int_y: %d y: %f id: %s)" % [int_x, x, int_y, y, id]
+		return "RecognizerPoint(x: %d y: %d id: %s)" % [x, y, id]
 
 	func _init(p_x: float, p_y: float, p_id: StringName):
 		x = p_x
@@ -103,7 +103,7 @@ class QDollarRecognizer:
 
 	## A point-cloud template
 	class PointCloud:
-		const NUMBER_POINTS = 32
+		const NUMBER_POINTS = 64
 		const MAX_INTEGER_COORDINATE = 1024; # (IntX, IntY) range from [0, MAX_INTEGER_COORDINATE - 1]
 		const LUT_SIZE = 64; # default size of the lookup table is 64 x 64
 		const LUT_SCALE_FACTOR = MAX_INTEGER_COORDINATE / LUT_SIZE; # used to scale from (IntX, IntY) to LUT
@@ -130,23 +130,29 @@ class QDollarRecognizer:
 				newpoints.push_back(RecognizerPoint.new(qx, qy, point.id))
 			return newpoints
 
+
 		func centroid(points) -> RecognizerPoint:
 			var x: float = 0.0
 			var y: float = 0.0
+			var count: int = 0
 			for point in points:
-				x += point.x
-				y += point.y
-			x /= points.size()
-			y /= points.size()
-			return RecognizerPoint.new(x, y, str(-1))
+				if not is_nan(point.x) and not is_nan(point.y):
+					x += point.x
+					y += point.y
+					count += 1
+			if count > 0:
+				x /= count
+				y /= count
+			return RecognizerPoint.new(x, y, str(0))
+
 
 		func translate_to(points: Array[RecognizerPoint], pt: RecognizerPoint) -> Array[RecognizerPoint]:
 			var c: RecognizerPoint = centroid(points)
 			var newpoints: Array[RecognizerPoint] = []
 			for point_i in range(points.size()):
 				var point = points[point_i]
-				var qx = point.x + pt.x - c.x
-				var qy = point.y + pt.y - c.y
+				var qx = point.x - c.x + pt.x
+				var qy = point.y - c.y + pt.y
 				newpoints.append(RecognizerPoint.new(qx, qy, point.id))
 			return newpoints
 
@@ -183,18 +189,14 @@ class QDollarRecognizer:
 
 						new_points.append(q)
 						D = 0 # Reset D as we've added a new point
-
+		
 				else:
 					D += d # Increment D by the distance between prev_point and current_point
-
+		
 				i += 1
-
-			# Sometimes we may fall a rounding-error short of adding the last point, so add it if so
-			if new_points.size() < n:
-				var last_point: RecognizerPoint = points[points.size() - 1]
-				new_points.append(last_point)
+		
 			return new_points
-
+		
 
 		func _make_integer_coordinates(points: Array[RecognizerPoint]) -> Array[RecognizerPoint]:
 			for point in points:

@@ -20,7 +20,7 @@ func _ready():
 	initialize_gestures()
 
 	debounce_timer = Timer.new()
-	debounce_timer.wait_time = 0.8
+	debounce_timer.wait_time = 1.
 	debounce_timer.one_shot = true
 	add_child(debounce_timer)
 	debounce_timer.owner = self
@@ -69,7 +69,8 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch and event.pressed:
 		start_new_stroke()
 	elif event is InputEventScreenDrag:
-		current_stroke.append(event.position)
+		var position = Vector2(event.position.x, event.position.y)
+		current_stroke.append(position)
 		update_gesture_path()
 	elif event is InputEventScreenTouch and not event.pressed:
 		gesture_points.append(current_stroke.duplicate())
@@ -89,12 +90,14 @@ func update_gesture_path() -> void:
 func _on_debounce_timeout() -> void:
 	recognize_gesture()
 
+
 # Converts the captured points into a format suitable for the recognizer
-func convert_points_for_recognition(recognizer, gesture_points_strokes: Array[Array]) -> Array:
+func convert_points_for_recognition(gesture_points_strokes: Array[Array]) -> Array:
 	var recognizer_points: Array[q_dollar.RecognizerPoint] = []
+	var screen_height = DisplayServer.window_get_size().y
 	for stroke_i in range(gesture_points_strokes.size()):
 		for point in gesture_points_strokes[stroke_i]:
-			recognizer_points.append(q_dollar.RecognizerPoint.new(point.x, point.y, str(stroke_i)))
+			recognizer_points.append(q_dollar.RecognizerPoint.new(point.x, point.y, str(stroke_i + 1)))
 
 	if recognizer_points.is_empty():
 		print("Not enough points to resample for gesture recognition.")
@@ -102,6 +105,7 @@ func convert_points_for_recognition(recognizer, gesture_points_strokes: Array[Ar
 	var point_cloud_id = str(Time.get_ticks_msec())
 	var point_cloud: q_dollar.QDollarRecognizer.PointCloud = q_dollar.QDollarRecognizer.PointCloud.new(point_cloud_id, recognizer_points)
 	return point_cloud._points
+
 
 # Displays the name of the recognized gesture on the screen
 func display_recognized_gesture(result_name: String) -> void:
@@ -114,7 +118,7 @@ func display_recognized_gesture(result_name: String) -> void:
 
 # Processes the gesture points to attempt to recognize the gesture
 func recognize_gesture() -> void:
-	var points_for_recognition: Array = convert_points_for_recognition(recognizer, gesture_points)
+	var points_for_recognition: Array = convert_points_for_recognition(gesture_points)
 	if not (points_for_recognition.size() != recognizer.PointCloud.NUMBER_POINTS):
 		var result: q_dollar.RecognizerResult = recognizer.recognize(points_for_recognition)
 		if not result.name.is_empty():

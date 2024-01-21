@@ -4,7 +4,7 @@ extends GutTest
 const dollar = preload("res://q_dollar/core/q_dollar.gd")
 var gestures = preload("res://q_dollar/core/gestures.gd").new()
 
-var predefined_point_cloud: Dictionary = gestures.predefined_point_cloud
+var predefined_point_cloud = gestures.predefined_point_cloud
 
 var recognizer = null
 
@@ -23,6 +23,53 @@ func convert_points_for_recognition(gesture_points_strokes: Array) -> Array[doll
 	var point_cloud = dollar.QDollarRecognizer.PointCloud.new(point_cloud_id, recognizer_points)
 	return point_cloud._points
 	
+	
+func test_resample():
+	var gesture_points: Array[dollar.RecognizerPoint] = [dollar.RecognizerPoint.new(0, 0, str(0)), dollar.RecognizerPoint.new(1, 1, str(1))]
+	var point_cloud = dollar.QDollarRecognizer.PointCloud.new("test", gesture_points)
+	point_cloud._points = gesture_points
+	point_cloud._points = point_cloud.resample(point_cloud._points, dollar.QDollarRecognizer.PointCloud.NUMBER_POINTS)
+	assert_eq(point_cloud._points.size(), dollar.QDollarRecognizer.PointCloud.NUMBER_POINTS, "Resample method does not produce correct number of points")
+
+
+func test_scale():
+	var gesture_points: Array[dollar.RecognizerPoint] = [dollar.RecognizerPoint.new(0, 0, str(0)), dollar.RecognizerPoint.new(2, 2, str(2))]
+	var point_cloud = dollar.QDollarRecognizer.PointCloud.new("test", gesture_points)
+	point_cloud._points = gesture_points
+	point_cloud._points = point_cloud.scale(gesture_points)
+	var max_x = -INF
+	var max_y = -INF
+	for point in point_cloud._points:
+		if point.x > max_x:
+			max_x = point.x
+		if point.y > max_y:
+			max_y = point.y
+	assert_eq(max_x, 1.0, "Scale method does not correctly scale x coordinates")
+	assert_eq(max_y, 1.0, "Scale method does not correctly scale y coordinates")
+
+
+func test_translate_to():
+	var gesture_points: Array[dollar.RecognizerPoint] = [dollar.RecognizerPoint.new(1, 1, str(0)), dollar.RecognizerPoint.new(2, 2, str(2))]
+	var point_cloud = dollar.QDollarRecognizer.PointCloud.new("test", gesture_points)
+	point_cloud._points = gesture_points
+	point_cloud._points = point_cloud.translate_to(point_cloud._points, dollar.RecognizerPoint.new(0, 0, str(0)))
+	var min_x = INF
+	var min_y = INF
+	var max_x = -INF
+	var max_y = -INF
+	for point in point_cloud._points:
+		if point.x < min_x:
+			min_x = point.x
+		if point.y < min_y:
+			min_y = point.y
+		if point.x > max_x:
+			max_x = point.x
+		if point.y > max_y:
+			max_y = point.y
+	assert_eq((min_x + max_x) / 2, 0.0, "Translate_to method does not correctly translate x coordinates")
+	assert_eq((min_y + max_y) / 2, 0.0, "Translate_to method does not correctly translate y coordinates")
+
+
 func test_assert_eq_integration_recognize_equal():
 	var recognizer: dollar.QDollarRecognizer = dollar.QDollarRecognizer.new()
 	
@@ -39,11 +86,11 @@ func test_assert_eq_integration_recognize_equal():
 		recognizer.add_gesture(gesture_key, gestures)
 		
 	for gesture_key in predefined_point_cloud.keys():
-		var gestures: Array[dollar.RecognizerPoint] = []
-		for gesture in predefined_point_cloud[gesture_key]:
-			gestures.append(gesture)
-		var result: dollar.RecognizerResult = recognizer.recognize(gestures)
-		assert_eq(gesture_key, result.name, "Test gesture %s: score: %f time: %f" %[result.name, result.score, result.time])
+		var points: Array[dollar.RecognizerPoint]
+		for p in predefined_point_cloud[gesture_key]:
+			points.push_back(p)
+		var result: dollar.RecognizerResult = recognizer.recognize(points)
+		assert_eq(result.name, gesture_key, "Gesture %s doesn't match result %s: score: %f time: %f" %[gesture_key, result.name, result.score, result.time])
 
 
 func test_recognizer():
@@ -182,18 +229,7 @@ func test_cloud_match():
 	# Assert that the match distance is less than the minimum set (if applicable)
 	assert_true(match_distance < minimum_so_far, "The match distance should be less than the initial minimum.")
 	
-#func test_point_cloud_scale_normalizes_points():
-	#var points = [dollar.RecognizerPoint.new(0, 0, "0"), dollar.RecognizerPoint.new(100, 100, "0")]
-	#var expected = [dollar.RecognizerPoint.new(0, 0, "0"), dollar.RecognizerPoint.new(1, 1, "0")]
-	#var scaled_points = recognizer.PointCloud.new().scale(points)
-	#assert_eq(scaled_points, expected, "The points should be normalized between 0 and 1")
-	#
-#func test_point_cloud_centroid_calculates_center():
-	#var points = [dollar.RecognizerPoint.new(0, 0, "0"), dollar.RecognizerPoint.new(2, 0, "0"), dollar.RecognizerPoint.new(1, 1, "0")]
-	#var expected = dollar.RecognizerPoint.new(1, 1/3, "-1")
-	#var centroid = recognizer.PointCloud.new().centroid(points)
-	#assert_eq(centroid, expected, "The centroid should be the average of all points")
-
+	
 func test_point_cloud_resample_returns_n_points():
 	var points: Array[dollar.RecognizerPoint] = [
 		dollar.RecognizerPoint.new(0, 0, "0"),
@@ -203,6 +239,7 @@ func test_point_cloud_resample_returns_n_points():
 	]
 	var resampled_points: Array[dollar.RecognizerPoint] = recognizer.PointCloud.new("point_cloud", points)._points
 	assert_eq(resampled_points.size(), dollar.QDollarRecognizer.PointCloud.NUMBER_POINTS, "Resampled points should have 'n' points")
+
 
 func test_point_cloud_translate_moves_origin():
 	var points: Array[dollar.RecognizerPoint] = [dollar.RecognizerPoint.new(1, 1, "0"), dollar.RecognizerPoint.new(2, 2, "0")]
