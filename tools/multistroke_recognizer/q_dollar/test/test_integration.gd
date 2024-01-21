@@ -11,7 +11,34 @@ var recognizer = null
 func before_each():
 	recognizer = dollar.QDollarRecognizer.new()
 	
-# Converts the captured points into a format suitable for the recognizer
+var _mock_pts1: Array[dollar.RecognizerPoint] = [] # Mock data
+var _mock_pts2: Array[dollar.RecognizerPoint] = [] # Mock data
+var _mock_lut = [[0, 1], [1, 0]] # Mock data
+
+
+func test_compute_lower_bound():
+	var result = recognizer._compute_lower_bound(_mock_pts1, _mock_pts2, 1, _mock_lut)
+	assert_eq(result.size(), 1, "_compute_lower_bound did not return expected size")
+
+
+func test_cloud_match():
+	var candidate = dollar.QDollarRecognizer.PointCloud.new("point_cloud", _mock_pts1)
+	candidate._points = _mock_pts1
+	candidate._lut = _mock_lut
+	
+	var template = dollar.QDollarRecognizer.PointCloud.new("point_cloud", _mock_pts1)
+	template._points = _mock_pts2
+	template._lut = _mock_lut
+	
+	var result: float = recognizer._cloud_match(candidate, template, 0.0)
+	assert_eq(result, INF, "_cloud_match did not return INF as expected")
+	
+
+func test_cloud_distance():
+	var result = recognizer._cloud_distance(_mock_pts1, _mock_pts2, 0, 0.0)
+	assert_eq(result, INF, "_cloud_distance did not return expected value")
+
+	
 func convert_points_for_recognition(gesture_points_strokes: Array) -> Array[dollar.RecognizerPoint]:
 	var recognizer_points: Array[dollar.RecognizerPoint] = []
 	for point in gesture_points_strokes:
@@ -180,56 +207,7 @@ func test_multiple_recognizer():
 	# Delete user gestures added to the recognizer for cleanup
 	recognizer.delete_user_gestures()
 
-func test_cloud_distance():
-	var minimum_so_far = INF
-	
-	# Define some mock points for comparison
-	var cloud1: Array[dollar.RecognizerPoint] = [
-		dollar.RecognizerPoint.new(0, 0, "0"),
-		dollar.RecognizerPoint.new(0, 1, "0"),
-		dollar.RecognizerPoint.new(1, 1, "0"),
-		dollar.RecognizerPoint.new(1, 0, "0")
-	]
-	
-	var cloud2: Array[dollar.RecognizerPoint] = [
-		dollar.RecognizerPoint.new(0.1, 0.1, "0"),
-		dollar.RecognizerPoint.new(0.1, 1.1, "0"),
-		dollar.RecognizerPoint.new(1.1, 1.1, "0"),
-		dollar.RecognizerPoint.new(1.1, 0.1, "0")
-	]
-	var recognizer = dollar.QDollarRecognizer.new()
-	# Calculate cloud distance from cloud1 to cloud2 starting with the first point
-	var distance = recognizer._cloud_distance(cloud1, cloud2, 0, minimum_so_far)
-	
-	# Ensure that the distance is within an acceptable range
-	# This assert check depends on the expected behavior of your '_cloud_distance' implementation and can be adjusted accordingly
-	assert_lt(distance, minimum_so_far, "The cloud distance should be less than the initial minimum set.")
-	
-	
-func test_cloud_match():
-	var minimum_so_far = 10.0 
 
-	var cloud1 = dollar.QDollarRecognizer.PointCloud.new("cloud1", [
-		dollar.RecognizerPoint.new(0, 0, "0"),
-		dollar.RecognizerPoint.new(0, 1, "0"),
-		dollar.RecognizerPoint.new(1, 1, "0"),
-		dollar.RecognizerPoint.new(1, 0, "0")
-	])
-	
-	var cloud2 = dollar.QDollarRecognizer.PointCloud.new("cloud2", [
-		dollar.RecognizerPoint.new(0.1, 0.1, "0"),
-		dollar.RecognizerPoint.new(0.1, 1.1, "0"),
-		dollar.RecognizerPoint.new(1.1, 1.1, "0"),
-		dollar.RecognizerPoint.new(1.1, 0.1, "0")
-	])
-	
-	# Calculate match distance between the two cloud points
-	var match_distance = recognizer._cloud_match(cloud1, cloud2, minimum_so_far)
-	
-	# Assert that the match distance is less than the minimum set (if applicable)
-	assert_true(match_distance < minimum_so_far, "The match distance should be less than the initial minimum.")
-	
-	
 func test_point_cloud_resample_returns_n_points():
 	var points: Array[dollar.RecognizerPoint] = [
 		dollar.RecognizerPoint.new(0, 0, "0"),

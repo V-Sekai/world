@@ -157,28 +157,30 @@ class QDollarRecognizer:
 			return newpoints
 
 
-		func path_length(points: Array[RecognizerPoint]) -> float:
-			if points.size() < 2:
-				return 0.0
+		func euclidean_distance(p1: RecognizerPoint, p2: RecognizerPoint) -> float:
+			return sqrt(pow(p2.x - p1.x, 2) + pow(p2.y - p1.y, 2))
+
+		# Function to calculate the path length of a set of points
+		func path_length(points: Array) -> float:
 			var d: float = 0.0
-			for point_i in range(1, points.size()):
-				if points[point_i].id == points[point_i - 1].id:
-					d += Vector2(points[point_i - 1].x, points[point_i - 1].y).distance_to(
-						Vector2(points[point_i].x, points[point_i].y)
-					)
+			for i in range(1, points.size()):
+				d += euclidean_distance(points[i-1], points[i])
 			return d
 
+		# Function to resample a set of points into n evenly spaced points
 		func resample(points: Array[RecognizerPoint], n: int) -> Array[RecognizerPoint]:
 			var I: float = path_length(points) / (n - 1) # Interval length
 			var D: float = 0.0
-			var new_points : Array[RecognizerPoint] = [points[0]] # Start with a copy of the first point
+			if points.is_empty():
+				return []
+			var new_points: Array[RecognizerPoint] = [points[0]] # Start with a copy of the first point
 
 			var i: int = 1 # The index of the original point to look ahead in the array
 
 			while new_points.size() < n and i < points.size():
 				var prev_point: RecognizerPoint = points[i - 1]
 				var current_point: RecognizerPoint = points[i]
-				var d: float = Vector2(prev_point.x, prev_point.y).distance_to(Vector2(current_point.x, current_point.y))
+				var d: float = euclidean_distance(prev_point, current_point)
 
 				if (D + d) >= I:
 					while (D + d) >= I and new_points.size() < n:
@@ -189,14 +191,16 @@ class QDollarRecognizer:
 
 						new_points.append(q)
 						D = 0 # Reset D as we've added a new point
-		
+
 				else:
 					D += d # Increment D by the distance between prev_point and current_point
-		
+
 				i += 1
-		
+			if new_points.size() < n:
+				new_points.append(points[points.size() - 1])
+
 			return new_points
-		
+
 
 		func _make_integer_coordinates(points: Array[RecognizerPoint]) -> Array[RecognizerPoint]:
 			for point in points:
@@ -246,7 +250,7 @@ class QDollarRecognizer:
 
 		for i in range(n):
 			var x: int = round(pts1[i].int_x / PointCloud.LUT_SCALE_FACTOR)
-			if x < 0 or x > PointCloud.LUT_SIZE:
+			if x < 0 or x >= PointCloud.LUT_SIZE:
 				return []
 			var y: int = round(pts1[i].int_y / PointCloud.LUT_SCALE_FACTOR)
 			if y < 0 or y > PointCloud.LUT_SIZE:
@@ -271,6 +275,8 @@ class QDollarRecognizer:
 
 	func _cloud_match(candidate: PointCloud, template: PointCloud, minimum_so_far: float) -> float:
 		var n: int = candidate._points.size()
+		if n == 0:
+			return INF
 		var step: int = floor(pow(n, 0.5))
 		var LB1: Array = _compute_lower_bound(candidate._points, template._points, step, template._lut)
 		if LB1.is_empty():
@@ -289,9 +295,11 @@ class QDollarRecognizer:
 
 	func _cloud_distance(pts1: Array[RecognizerPoint], pts2: Array[RecognizerPoint], start: int, minimum_so_far: float) -> float:
 		var n: int = pts1.size();
+		if n == 0:
+			return INF
 		var unmatched: Array = Array(); # indices for pts2 that are not matched
 		unmatched.resize(n)
-		for j in n:
+		for j in range(n):
 			unmatched[j] = j;
 		var i: int = start;  # start matching with point 'start' from pts1
 		var weight: float = n; # weights decrease from n to 1
@@ -304,7 +312,7 @@ class QDollarRecognizer:
 				if (d < b):
 					b = d
 					u = j
-			unmatched.insert(u, 1) # remove item at index 'u'
+			unmatched.remove_at(u) # remove item at index 'u'
 			sum += weight * b;
 			if sum >= minimum_so_far:
 				return sum; # early abandoning
