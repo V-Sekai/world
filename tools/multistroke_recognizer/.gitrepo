@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai/godot-point-cloud-multistroke-recognizer.git
 	branch = main
-	commit = 6684fb6865d156c03dcb002d665baddc8bfffcf6
-	parent = 83153f1ae0dd88250dcddb761a7ada9f27277cc4
+	commit = 9edcaa63e3ad6cfb7c192144140a4ffed0c7368e
+	parent = cde317771f70a29904b0e7bd8dab4d4d75c0da98
 	method = merge
 	cmdver = 0.4.6
