@@ -18,7 +18,7 @@
  "inner_class": null,
  "junit_xml_file": "",
  "junit_xml_timestamp": false,
- "log_level": 1,
+ "log_level": 3,
  "opacity": 100,
  "paint_after": 0.1,
  "panel_options": {
@@ -41,5 +41,5 @@
  "show_help": false,
  "suffix": ".gd",
  "tests": [],
- "unit_test_name": "test_assert_eq_integration_recognize_equal"
+ "unit_test_name": null
 }
