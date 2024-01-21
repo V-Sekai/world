@@ -117,15 +117,9 @@ func recognize_gesture() -> void:
 	var points_for_recognition: Array = convert_points_for_recognition(recognizer, gesture_points)
 	if not (points_for_recognition.size() != recognizer.PointCloud.NUMBER_POINTS):
 		var result: q_dollar.RecognizerResult = recognizer.recognize(points_for_recognition)
-		if not result.name.is_empty() and result.name != "No match." and result.score > .6:
+		if not result.name.is_empty():
 			print("Gesture recognized: %s with score: %f" % [result.name, result.score])
 			display_recognized_gesture(result.name)
-		else:
-			var output = "\"No match:\":\t\t[\n"
-			for point in points_for_recognition:
-				output += "\t\t\tq_dollar.RecognizerPoint.new(%d, %d, \"%s\"),\n" % [point.x, point.y, point.id]
-			output += "\t\t],"
-			print(output)
 
 	if debounce_timer.has_signal("timeout"):
 		debounce_timer.disconnect("timeout", Callable(self, "_on_debounce_timeout"))
