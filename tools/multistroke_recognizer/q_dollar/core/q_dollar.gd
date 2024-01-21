@@ -163,38 +163,39 @@ class QDollarRecognizer:
 					)
 			return d
 
-
-		func resample(points: Array, n: int) -> Array[RecognizerPoint]:
+		func resample(points: Array[RecognizerPoint], n: int) -> Array[RecognizerPoint]:
 			var I: float = path_length(points) / (n - 1) # Interval length
 			var D: float = 0.0
-			var new_points : Array[RecognizerPoint] = [points[0]]
-			
+			var new_points : Array[RecognizerPoint] = [points[0]] # Start with a copy of the first point
+
 			var i: int = 1 # The index of the original point to look ahead in the array
-			
+
 			while new_points.size() < n and i < points.size():
 				var prev_point: RecognizerPoint = points[i - 1]
 				var current_point: RecognizerPoint = points[i]
 				var d: float = Vector2(prev_point.x, prev_point.y).distance_to(Vector2(current_point.x, current_point.y))
-				
+
 				if (D + d) >= I:
 					while (D + d) >= I and new_points.size() < n:
 						var ratio: float = (I - D) / d
 						var qx: float = prev_point.x + ratio * (current_point.x - prev_point.x)
 						var qy: float = prev_point.y + ratio * (current_point.y - prev_point.y)
 						var q: RecognizerPoint = RecognizerPoint.new(qx, qy, current_point.id)
-						
+
 						new_points.append(q)
-						D += I
-		
-				D += d - ((D + d) / I) * I  # Subtract full intervals, retain remainder
+						D = 0 # Reset D as we've added a new point
+
+				else:
+					D += d # Increment D by the distance between prev_point and current_point
+
 				i += 1
-		
+
 			# Sometimes we may fall a rounding-error short of adding the last point, so add it if so
 			if new_points.size() < n:
 				var last_point: RecognizerPoint = points[points.size() - 1]
-				new_points.append(RecognizerPoint.new(last_point.x, last_point.y, last_point.id))            
+				new_points.append(last_point)
 			return new_points
-		
+
 
 		func _make_integer_coordinates(points: Array[RecognizerPoint]) -> Array[RecognizerPoint]:
 			for point in points:

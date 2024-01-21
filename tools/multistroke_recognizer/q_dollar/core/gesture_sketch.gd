@@ -61,7 +61,6 @@ func end_stroke():
 		}
 	strokes.append(stroke_data) # Append the dictionary created for the current stroke
 	line_2d = null
-	label = null
 
 
 var current_stroke: Array[Vector2] = []
@@ -124,7 +123,7 @@ func recognize_gesture() -> void:
 		else:
 			var output = "\"No match:\":\t\t[\n"
 			for point in points_for_recognition:
-				output += "\t\t\tq_dollar.RecognizerPoint.new(%d, %d, \"%s\"),\n" % [point.int_x, point.int_y, point.id]
+				output += "\t\t\tq_dollar.RecognizerPoint.new(%d, %d, \"%s\"),\n" % [point.x, point.y, point.id]
 			output += "\t\t],"
 			print(output)
 
@@ -138,12 +137,9 @@ func clear_paths():
 	for stroke_dict in strokes:
 		if stroke_dict["line"]:
 			stroke_dict["line"].queue_free()
-		if stroke_dict["label"]:
-			stroke_dict["label"].queue_free()
 	strokes.clear()
 	if debounce_timer.has_signal("timeout"):
 		debounce_timer.disconnect("timeout", Callable(self, "clear_paths"))
 	debounce_timer.connect("timeout", Callable(self, "_on_debounce_timeout"))
 	gesture_points.clear()
-	if label:
-		label.text = ""
+	label.text = ""
