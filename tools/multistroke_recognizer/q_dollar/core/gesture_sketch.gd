@@ -49,7 +49,6 @@ func start_new_stroke():
 	line_2d.default_color = LINE_COLOR
 	add_child(line_2d)
 	line_2d.owner = self
-	current_stroke.clear()
 
 
 # Ends the current stroke and prepares for possible recognition
@@ -57,10 +56,11 @@ func end_stroke():
 	var stroke_data: Dictionary = {
 			"line": line_2d,
 			"label": label,
-			"stroke_id": gesture_points.size() + 1
+			"stroke_id": strokes.size() + 1
 		}
 	strokes.append(stroke_data) # Append the dictionary created for the current stroke
 	line_2d = null
+	current_stroke.clear()
 
 
 var current_stroke: Array[Vector2] = []
@@ -69,8 +69,8 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch and event.pressed:
 		start_new_stroke()
 	elif event is InputEventScreenDrag:
-		update_gesture_path()
 		current_stroke.append(event.position)
+		update_gesture_path()
 	elif event is InputEventScreenTouch and not event.pressed:
 		gesture_points.append(current_stroke.duplicate())
 		end_stroke()

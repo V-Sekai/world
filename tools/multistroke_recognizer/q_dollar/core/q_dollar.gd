@@ -75,13 +75,13 @@ class RecognizerPoint:
 	var x: float = 0
 	var y: float = 0
 	var id: StringName
-	var int_x = 0; # for indexing into the LUT
-	var int_y = 0; # for indexing into the LUT
-	
+	var int_x: int = 0; # for indexing into the LUT
+	var int_y: int = 0; # for indexing into the LUT
+
 	func _to_string() -> String:
 		return "RecognizerPoint(int_x: %d x: %f int_y: %d y: %f id: %s)" % [int_x, x, int_y, y, id]
-		
-	func _init(p_x, p_y, p_id):
+
+	func _init(p_x: float, p_y: float, p_id: StringName):
 		x = p_x
 		y = p_y
 		id = str(p_id)  # stroke ID to which this point belongs (1,2,3,etc.)
@@ -109,7 +109,7 @@ class QDollarRecognizer:
 		const LUT_SCALE_FACTOR = MAX_INTEGER_COORDINATE / LUT_SIZE; # used to scale from (IntX, IntY) to LUT
 		var _name: StringName = ""
 		var _points: Array[RecognizerPoint] = []
-		var _origin: RecognizerPoint = RecognizerPoint.new(0, 0, 0)
+		var _origin: RecognizerPoint = RecognizerPoint.new(0, 0, str(0))
 		var _lut: Array
 
 		func scale(points: Array[RecognizerPoint]) -> Array[RecognizerPoint]:
@@ -138,17 +138,16 @@ class QDollarRecognizer:
 				y += point.y
 			x /= points.size()
 			y /= points.size()
-			return RecognizerPoint.new(x, y, 0)
+			return RecognizerPoint.new(x, y, str(-1))
 
-		func translate_to(points: Array[RecognizerPoint], pt: RecognizerPoint) -> Array[RecognizerPoint]:  # translates points' centroid to points
-			var c = centroid(points)
-			var newpoints: Array[RecognizerPoint]
-			newpoints.resize(points.size())
+		func translate_to(points: Array[RecognizerPoint], pt: RecognizerPoint) -> Array[RecognizerPoint]:
+			var c: RecognizerPoint = centroid(points)
+			var newpoints: Array[RecognizerPoint] = []
 			for point_i in range(points.size()):
 				var point = points[point_i]
 				var qx = point.x + pt.x - c.x
 				var qy = point.y + pt.y - c.y
-				newpoints[point_i] = RecognizerPoint.new(qx, qy, point.id)
+				newpoints.append(RecognizerPoint.new(qx, qy, point.id))
 			return newpoints
 
 
@@ -202,7 +201,7 @@ class QDollarRecognizer:
 				point.int_x = round((point.x + 1.0) / 2.0 * (MAX_INTEGER_COORDINATE - 1))
 				point.int_y = round((point.y + 1.0) / 2.0 * (MAX_INTEGER_COORDINATE - 1))
 			return points;
-			
+
 		func _compute_lut(points) -> Array:
 			var _lut: Array
 			_lut.resize(LUT_SIZE)
@@ -224,7 +223,7 @@ class QDollarRecognizer:
 							u = points_i;
 					_lut[x][y] = u;
 			return _lut;
-			
+
 		func _init(p_name: StringName, p_points: Array[RecognizerPoint]):
 			_name = p_name
 			_points = p_points
@@ -236,33 +235,47 @@ class QDollarRecognizer:
 
 
 	func _compute_lower_bound(pts1: Array[RecognizerPoint], pts2: Array[RecognizerPoint], step: int, _lut: Array) -> Array:
-		var n = pts1.size();
+		var n = pts1.size()
 		var LB: PackedFloat32Array
 		LB.resize(floor(n / step) + 1)
 		var SAT: PackedFloat32Array
 		SAT.resize(n)
-		LB[0] = 0.0;
-		for i in n:
-			var x: int = round(pts1[i].int_x / PointCloud.LUT_SCALE_FACTOR);
-			var y: int = round(pts1[i].int_y / PointCloud.LUT_SCALE_FACTOR);
-			var index: int = _lut[x][y];
+		LB[0] = 0.0
+
+		for i in range(n):
+			var x: int = round(pts1[i].int_x / PointCloud.LUT_SCALE_FACTOR)
+			if x < 0 or x > PointCloud.LUT_SIZE:
+				return []
+			var y: int = round(pts1[i].int_y / PointCloud.LUT_SCALE_FACTOR)
+			if y < 0 or y > PointCloud.LUT_SIZE:
+				return []
+			var index: int = _lut[x][y]
 			var d: float = Vector2(pts1[i].x, pts1[i].y).distance_squared_to(Vector2(pts2[index].x, pts2[index].y))
+
 			if i == 0:
 				SAT[i] = d
 			else:
-				SAT[i] = SAT[i - 1] + d;
-			LB[0] += (n - i) * d;
+				SAT[i] = SAT[i - 1] + d
+
+			LB[0] += (n - i) * d
+
 		var j = 1
 		for i in range(step, n, step):
-			LB[j] = LB[0] + i * SAT[n-1] - n * SAT[i-1];
-			j = j + 1
-		return LB;
+			# Prevent negative index access with proper bounds checking
+			LB[j] = LB[0] + i * SAT[n-1] - n * SAT[max(i-1, 0)]
+			j += 1
+
+		return LB
 
 	func _cloud_match(candidate: PointCloud, template: PointCloud, minimum_so_far: float) -> float:
 		var n: int = candidate._points.size()
 		var step: int = floor(pow(n, 0.5))
 		var LB1: Array = _compute_lower_bound(candidate._points, template._points, step, template._lut)
+		if LB1.is_empty():
+			return INF
 		var LB2: Array = _compute_lower_bound(template._points, candidate._points, step, candidate._lut)
+		if LB2.is_empty():
+			return INF
 		var j = 0
 		for i in range(0, n, step):
 			if LB1[j] < minimum_so_far:

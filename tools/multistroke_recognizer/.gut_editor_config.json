@@ -18,7 +18,7 @@
  "inner_class": null,
  "junit_xml_file": "",
  "junit_xml_timestamp": false,
- "log_level": 3,
+ "log_level": 1,
  "opacity": 100,
  "paint_after": 0.1,
  "panel_options": {
@@ -35,7 +35,7 @@
  "pre_run_script": "",
  "prefix": "test_",
  "selected": "test_integration.gd",
- "should_exit": false,
+ "should_exit": true,
  "should_exit_on_success": false,
  "should_maximize": false,
  "show_help": false,
