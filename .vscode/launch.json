@@ -11,10 +11,10 @@
   },
   "configurations": [
     {
-      "name": "Run the Macos editor multistroke_recognizer",
+      "name": "Run the Macos editor tools/task_goal_planner",
       "type": "lldb",
       "request": "launch",
-      "args": ["--path", "tools/multistroke_recognizer", "-e", "-e"],
+      "args": ["--path", "tools/task_goal_planner", "-e", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
