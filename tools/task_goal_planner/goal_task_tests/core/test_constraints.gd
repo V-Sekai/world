@@ -1,3 +1,4 @@
+@uid("uid://b8u2iahohddu1") # Generated automatically, do not modify.
 # Copyright (c) 2023-present. This file is part of V-Sekai https://v-sekai.org/.
 # K. S. Ernest (Fire) Lee & Contributors (see .all-contributorsrc).
 # test_constraints.gd
@@ -9,7 +10,6 @@ var stn: SimpleTemporalNetwork = null
 
 
 func before_each():
-	stn = null
 	stn = SimpleTemporalNetwork.new()
 
 
@@ -59,9 +59,14 @@ func test_non_overlapping_constraints_on_different_resources() -> void:
 	var constraint2 = TemporalConstraint.new(
 		5, 15, 10, TemporalConstraint.TemporalQualifier.AT_START, "resource2"
 	)
+	var constraint3 = TemporalConstraint.new(
+		5, 15, 10, TemporalConstraint.TemporalQualifier.AT_START, "resource3"
+	)
+
 	stn.add_temporal_constraint(constraint1)
 	stn.add_temporal_constraint(constraint2)
-	assert_true(
-		stn.has_no_overlap(),
+
+	assert_false(
+		stn.check_overlap(constraint3),
 		"An STN with non-overlapping constraints on different resources should not have overlap"
 	)
