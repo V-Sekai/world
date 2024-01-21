@@ -11,6 +11,15 @@
   },
   "configurations": [
     {
+      "name": "Run the Macos editor multistroke_recognizer",
+      "type": "lldb",
+      "request": "launch",
+      "args": ["--path", "tools/multistroke_recognizer", "-e", "-e"],
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/godot/bin/godot.macos.editor.double.arm64",
+      "preLaunchTask": "Godot Engine"
+    },
+    {
       "name": "Run the Windows editor",
       "type": "lldb",
       "request": "launch",
