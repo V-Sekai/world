@@ -1,3 +1,4 @@
+@uid("uid://di3aopewv1ylm") # Generated automatically, do not modify.
 extends GutTest
 
 const dollar = preload("res://q_dollar/core/q_dollar.gd")
@@ -255,6 +256,7 @@ func test_assert_eq_integration_recognize_equal():
 
 	for gesture in predefined_point_cloud.keys():
 		var points = predefined_point_cloud[gesture]
+		@warning_ignore("unassigned_variable")
 		var new_points: Array[dollar.RecognizerPoint]
 		for point in points:
 			new_points.push_back(point)
@@ -262,6 +264,7 @@ func test_assert_eq_integration_recognize_equal():
 
 	for gesture_key in predefined_point_cloud.keys():
 		var gestures = predefined_point_cloud[gesture_key]
+		@warning_ignore("unassigned_variable")
 		var new_points: Array[dollar.RecognizerPoint]
 		new_points.resize(gestures.size())
 		for point_i in range(gestures.size()):

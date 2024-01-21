@@ -11,8 +11,12 @@ config_version=5
 [application]
 
 config/name="Point Cloud Multistroke Recognizer Project"
-config/features=PackedStringArray("4.0", "Double Precision", "Forward Plus")
+config/features=PackedStringArray("4.3", "Double Precision", "Forward Plus")
 config/icon="res://icon.svg"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/gut/plugin.cfg")
 
 [rendering]
 
