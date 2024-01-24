@@ -92,10 +92,10 @@ void AudioStreamInteractiveTransitionEditor::_update_selection() {
 	selected.clear();
 	Vector2i editing;
 	int editing_order = -1;
-	for (int i = -1; i < clip_count; i++) {
-		for (int j = -1; j < clip_count; j++) {
-			if (rows[i + 1]->is_selected(j + 1)) {
-				Vector2i meta = rows[i + 1]->get_metadata(j + 1);
+	for (int i = 0; i <= clip_count; i++) {
+		for (int j = 0; j <= clip_count; j++) {
+			if (rows[i]->is_selected(j)) {
+				Vector2i meta = rows[i]->get_metadata(j);
 				if (selection_order.has(meta)) {
 					int order = selection_order[meta];
 					if (order > editing_order) {
@@ -146,7 +146,7 @@ void AudioStreamInteractiveTransitionEditor::_update_selection() {
 
 void AudioStreamInteractiveTransitionEditor::_cell_selected(TreeItem *p_item, int p_column, bool p_selected) {
 	int to = p_item->get_meta("to");
-	int from = p_column - 1;
+	int from = p_column == audio_stream_interactive->get_clip_count() ? AudioStreamInteractive::CLIP_ANY : p_column;
 	if (p_selected) {
 		selection_order[Vector2i(from, to)] = order_counter++;
 	}
@@ -172,24 +172,25 @@ void AudioStreamInteractiveTransitionEditor::_update_transitions() {
 		get_editor_theme_icon(SNAME("FadeCross")),
 		get_editor_theme_icon(SNAME("AutoPlay"))
 	};
-	for (int i = -1; i < clip_count; i++) {
-		for (int j = -1; j < clip_count; j++) {
+	for (int i = 0; i <= clip_count; i++) {
+		for (int j = 0; j <= clip_count; j++) {
 			String txt;
-			int from = i;
-			int to = j;
-			bool exists = audio_stream_interactive->has_transition(i, j);
+			int from = i == clip_count ? AudioStreamInteractive::CLIP_ANY : i;
+			int to = j == clip_count ? AudioStreamInteractive::CLIP_ANY : j;
+
+			bool exists = audio_stream_interactive->has_transition(from, to);
 			String tooltip;
 			Ref<Texture> icon;
 			if (!exists) {
-				if (audio_stream_interactive->has_transition(-1, j)) {
-					from = -1;
-					tooltip = "Using All Clips -> " + audio_stream_interactive->get_clip_name(to) + ".";
-				} else if (audio_stream_interactive->has_transition(i, -1)) {
-					to = -1;
-					tooltip = "Using " + audio_stream_interactive->get_clip_name(from) + " -> All Clips.";
-				} else if (audio_stream_interactive->has_transition(-1, -1)) {
-					from = to = -1;
-					tooltip = "Using All CLips -> All Clips.";
+				if (audio_stream_interactive->has_transition(AudioStreamInteractive::CLIP_ANY, to)) {
+					from = AudioStreamInteractive::CLIP_ANY;
+					tooltip = "Using Any Clip -> " + audio_stream_interactive->get_clip_name(to) + ".";
+				} else if (audio_stream_interactive->has_transition(from, AudioStreamInteractive::CLIP_ANY)) {
+					to = AudioStreamInteractive::CLIP_ANY;
+					tooltip = "Using " + audio_stream_interactive->get_clip_name(from) + " -> Any Clip.";
+				} else if (audio_stream_interactive->has_transition(AudioStreamInteractive::CLIP_ANY, AudioStreamInteractive::CLIP_ANY)) {
+					from = to = AudioStreamInteractive::CLIP_ANY;
+					tooltip = "Using All CLips -> Any Clip.";
 				} else {
 					tooltip = "No transition available.";
 				}
@@ -229,15 +230,15 @@ void AudioStreamInteractiveTransitionEditor::_update_transitions() {
 				}
 			}
 
-			rows[j + 1]->set_icon(i + 1, icon);
-			rows[j + 1]->set_text(i + 1, txt);
-			rows[j + 1]->set_tooltip_text(i + 1, tooltip);
+			rows[j]->set_icon(i, icon);
+			rows[j]->set_text(i, txt);
+			rows[j]->set_tooltip_text(i, tooltip);
 			if (exists) {
-				rows[j + 1]->set_custom_color(i + 1, font_color);
-				rows[j + 1]->set_icon_modulate(i + 1, Color(1, 1, 1, 1));
+				rows[j]->set_custom_color(i, font_color);
+				rows[j]->set_icon_modulate(i, Color(1, 1, 1, 1));
 			} else {
-				rows[j + 1]->set_custom_color(i + 1, font_color_default);
-				rows[j + 1]->set_icon_modulate(i + 1, Color(1, 1, 1, 0.5));
+				rows[j]->set_custom_color(i, font_color_default);
+				rows[j]->set_icon_modulate(i, Color(1, 1, 1, 0.5));
 			}
 		}
 	}
@@ -272,8 +273,9 @@ void AudioStreamInteractiveTransitionEditor::edit(Object *p_obj) {
 	int max_w = 0;
 
 	updating = true;
-	for (int i = -1; i < clip_count; i++) {
-		int cell_index = i + 1;
+	for (int i = 0; i <= clip_count; i++) {
+		int cell_index = i;
+		int clip_i = i == clip_count ? AudioStreamInteractive::CLIP_ANY : i;
 		header->set_editable(cell_index, false);
 		header->set_selectable(cell_index, false);
 		header->set_custom_font(cell_index, header_font);
@@ -281,8 +283,8 @@ void AudioStreamInteractiveTransitionEditor::edit(Object *p_obj) {
 		header->set_custom_bg_color(cell_index, header_color);
 
 		String name;
-		if (i == -1) {
-			name = TTR("All Clips");
+		if (i == clip_count) {
+			name = TTR("Any Clip");
 		} else {
 			name = audio_stream_interactive->get_clip_name(i);
 		}
@@ -300,13 +302,14 @@ void AudioStreamInteractiveTransitionEditor::edit(Object *p_obj) {
 		row->set_custom_font(header_index, header_font);
 		row->set_custom_font_size(header_index, header_font_size);
 		row->set_custom_bg_color(header_index, header_color);
-		row->set_meta("to", i);
-		for (int j = -1; j < clip_count; j++) {
-			row->set_metadata(j + 1, Vector2i(j, i));
+		row->set_meta("to", clip_i);
+		for (int j = 0; j <= clip_count; j++) {
+			int clip_j = j == clip_count ? AudioStreamInteractive::CLIP_ANY : j;
+			row->set_metadata(j, Vector2i(clip_j, clip_i));
 		}
 		rows.push_back(row);
 
-		if (i == -1) {
+		if (i == clip_count) {
 			filler_clip->add_item("Disabled", i);
 		} else {
 			filler_clip->add_item(name, i);

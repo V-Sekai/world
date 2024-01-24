@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  gltf_physics_shape.h                                                  */
+/*  openxr_local_floor_extension.cpp                                      */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,63 +28,32 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef GLTF_PHYSICS_SHAPE_H
-#define GLTF_PHYSICS_SHAPE_H
+#include "openxr_local_floor_extension.h"
 
-#include "../../gltf_defines.h"
+#include "core/string/print_string.h"
 
-#include "scene/3d/collision_shape_3d.h"
+OpenXRLocalFloorExtension *OpenXRLocalFloorExtension::singleton = nullptr;
 
-class ImporterMesh;
+OpenXRLocalFloorExtension *OpenXRLocalFloorExtension::get_singleton() {
+	return singleton;
+}
 
-// GLTFPhysicsShape is an intermediary between Godot's collision shape nodes
-// and the OMI_physics_shape extension.
-// https://github.com/omigroup/gltf-extensions/tree/main/extensions/2.0/OMI_physics_shape
+OpenXRLocalFloorExtension::OpenXRLocalFloorExtension() {
+	singleton = this;
+}
 
-class GLTFPhysicsShape : public Resource {
-	GDCLASS(GLTFPhysicsShape, Resource)
+OpenXRLocalFloorExtension::~OpenXRLocalFloorExtension() {
+	singleton = nullptr;
+}
 
-protected:
-	static void _bind_methods();
+HashMap<String, bool *> OpenXRLocalFloorExtension::get_requested_extensions() {
+	HashMap<String, bool *> request_extensions;
 
-private:
-	String shape_type;
-	Vector3 size = Vector3(1.0, 1.0, 1.0);
-	real_t radius = 0.5;
-	real_t height = 2.0;
-	bool is_trigger = false;
-	GLTFMeshIndex mesh_index = -1;
-	Ref<ImporterMesh> importer_mesh = nullptr;
-	// Internal only, for caching Godot shape resources. Used in `to_node`.
-	Ref<Shape3D> _shape_cache = nullptr;
+	request_extensions[XR_EXT_LOCAL_FLOOR_EXTENSION_NAME] = &available;
 
-public:
-	String get_shape_type() const;
-	void set_shape_type(String p_shape_type);
+	return request_extensions;
+}
 
-	Vector3 get_size() const;
-	void set_size(Vector3 p_size);
-
-	real_t get_radius() const;
-	void set_radius(real_t p_radius);
-
-	real_t get_height() const;
-	void set_height(real_t p_height);
-
-	bool get_is_trigger() const;
-	void set_is_trigger(bool p_is_trigger);
-
-	GLTFMeshIndex get_mesh_index() const;
-	void set_mesh_index(GLTFMeshIndex p_mesh_index);
-
-	Ref<ImporterMesh> get_importer_mesh() const;
-	void set_importer_mesh(Ref<ImporterMesh> p_importer_mesh);
-
-	static Ref<GLTFPhysicsShape> from_node(const CollisionShape3D *p_shape_node);
-	CollisionShape3D *to_node(bool p_cache_shapes = false);
-
-	static Ref<GLTFPhysicsShape> from_dictionary(const Dictionary p_dictionary);
-	Dictionary to_dictionary() const;
-};
-
-#endif // GLTF_PHYSICS_SHAPE_H
+bool OpenXRLocalFloorExtension::is_available() {
+	return available;
+}

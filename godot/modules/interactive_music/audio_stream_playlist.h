@@ -114,11 +114,9 @@ public:
 	virtual void start(double p_from_pos = 0.0) override;
 	virtual void stop() override;
 	virtual bool is_playing() const override;
-	void clear_buffer(int samples);
 	virtual int get_loop_count() const override; // times it looped
 	virtual double get_playback_position() const override;
 	virtual void seek(double p_time) override;
-	void add_stream_to_buffer(Ref<AudioStreamPlayback> playback, int samples, float p_rate_scale, float initial_volume, float final_volume);
 	virtual int mix(AudioFrame *p_buffer, float p_rate_scale, int p_frames) override;
 
 	virtual void tag_used_streams() override;

@@ -71,7 +71,7 @@ public:
 	};
 
 	enum {
-		CLIP_ALL = -1
+		CLIP_ANY = -1
 	};
 
 private:

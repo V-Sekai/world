@@ -618,7 +618,7 @@ that file when upgrading.
 ## minizip
 
 - Upstream: https://www.zlib.net
-- Version: 1.3 (zlib contrib, 2023)
+- Version: 1.3.1 (zlib contrib, 2024)
 - License: zlib
 
 Files extracted from the upstream source:
@@ -630,8 +630,6 @@ Files extracted from the upstream source:
 Important: Some files have Godot-made changes for use in core/io.
 They are marked with `/* GODOT start */` and `/* GODOT end */`
 comments and a patch is provided in the `patches` folder.
-
-Another patch is included to fix CVE-2023-45853.
 
 
 ## misc
@@ -1012,7 +1010,7 @@ Files extracted from upstream source:
 ## zlib
 
 - Upstream: https://www.zlib.net
-- Version: 1.3 (2023)
+- Version: 1.3.1 (2024)
 - License: zlib
 
 Files extracted from upstream source:

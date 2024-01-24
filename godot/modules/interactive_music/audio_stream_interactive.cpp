@@ -33,8 +33,6 @@
 #include "core/math/math_funcs.h"
 #include "core/string/print_string.h"
 
-#include <iostream>
-
 AudioStreamInteractive::AudioStreamInteractive() {
 }
 
@@ -88,7 +86,7 @@ void AudioStreamInteractive::set_clip_count(int p_count) {
 }
 
 void AudioStreamInteractive::set_initial_clip(int p_clip) {
-	ERR_FAIL_COND(p_clip < 0 || p_clip >= clip_count);
+	ERR_FAIL_INDEX(p_clip, clip_count);
 	initial_clip = p_clip;
 }
 
@@ -101,20 +99,20 @@ int AudioStreamInteractive::get_clip_count() const {
 }
 
 void AudioStreamInteractive::set_clip_name(int p_clip, const StringName &p_name) {
-	ERR_FAIL_COND(p_clip < 0 || p_clip >= MAX_CLIPS);
+	ERR_FAIL_INDEX(p_clip, MAX_CLIPS);
 	clips[p_clip].name = p_name;
 }
 
 StringName AudioStreamInteractive::get_clip_name(int p_clip) const {
 	ERR_FAIL_COND_V(p_clip < -1 || p_clip >= MAX_CLIPS, StringName());
-	if (p_clip == CLIP_ALL) {
+	if (p_clip == CLIP_ANY) {
 		return RTR("All Clips");
 	}
 	return clips[p_clip].name;
 }
 
 void AudioStreamInteractive::set_clip_stream(int p_clip, const Ref<AudioStream> &p_stream) {
-	ERR_FAIL_COND(p_clip < 0 || p_clip >= MAX_CLIPS);
+	ERR_FAIL_INDEX(p_clip, MAX_CLIPS);
 	AudioServer::get_singleton()->lock();
 	if (clips[p_clip].stream.is_valid()) {
 		version++;
@@ -147,28 +145,29 @@ void AudioStreamInteractive::set_clip_stream(int p_clip, const Ref<AudioStream> 
 }
 
 Ref<AudioStream> AudioStreamInteractive::get_clip_stream(int p_clip) const {
-	ERR_FAIL_COND_V(p_clip < 0 || p_clip >= MAX_CLIPS, Ref<AudioStream>());
+	ERR_FAIL_INDEX_V(p_clip, MAX_CLIPS, Ref<AudioStream>());
 	return clips[p_clip].stream;
 }
 
 void AudioStreamInteractive::set_clip_auto_advance(int p_clip, AutoAdvanceMode p_mode) {
-	ERR_FAIL_COND(p_clip < 0 || p_clip >= MAX_CLIPS);
+	ERR_FAIL_INDEX(p_clip, MAX_CLIPS);
 	ERR_FAIL_INDEX(p_mode, 3);
 	clips[p_clip].auto_advance = p_mode;
 	notify_property_list_changed();
 }
 
 AudioStreamInteractive::AutoAdvanceMode AudioStreamInteractive::get_clip_auto_advance(int p_clip) const {
-	ERR_FAIL_COND_V(p_clip < 0 || p_clip >= MAX_CLIPS, AUTO_ADVANCE_DISABLED);
+	ERR_FAIL_INDEX_V(p_clip, MAX_CLIPS, AUTO_ADVANCE_DISABLED);
 	return clips[p_clip].auto_advance;
 }
 
 void AudioStreamInteractive::set_clip_auto_advance_next_clip(int p_clip, int p_index) {
-	ERR_FAIL_COND(p_clip < 0 || p_clip >= MAX_CLIPS);
+	ERR_FAIL_INDEX(p_clip, MAX_CLIPS);
 	clips[p_clip].auto_advance_next_clip = p_index;
 }
+
 int AudioStreamInteractive::get_clip_auto_advance_next_clip(int p_clip) const {
-	ERR_FAIL_COND_V(p_clip < 0 || p_clip >= MAX_CLIPS, -1);
+	ERR_FAIL_INDEX_V(p_clip, MAX_CLIPS, -1);
 	return clips[p_clip].auto_advance_next_clip;
 }
 
@@ -248,8 +247,8 @@ PackedInt32Array AudioStreamInteractive::get_transition_list() const {
 }
 
 void AudioStreamInteractive::add_transition(int p_from_clip, int p_to_clip, TransitionFromTime p_from_time, TransitionToTime p_to_time, FadeMode p_fade_mode, float p_fade_beats, bool p_use_filler_flip, int p_filler_clip, bool p_hold_previous) {
-	ERR_FAIL_COND(p_from_clip < CLIP_ALL || p_from_clip >= clip_count);
-	ERR_FAIL_COND(p_to_clip < CLIP_ALL || p_to_clip >= clip_count);
+	ERR_FAIL_COND(p_from_clip < CLIP_ANY || p_from_clip >= clip_count);
+	ERR_FAIL_COND(p_to_clip < CLIP_ANY || p_to_clip >= clip_count);
 	ERR_FAIL_UNSIGNED_INDEX(p_from_time, TRANSITION_FROM_TIME_MAX);
 	ERR_FAIL_UNSIGNED_INDEX(p_to_time, TRANSITION_TO_TIME_MAX);
 	ERR_FAIL_UNSIGNED_INDEX(p_fade_mode, FADE_MAX);
@@ -354,7 +353,7 @@ static void _test_and_swap(T &elem, uint32_t a, uint32_t b) {
 }
 void AudioStreamInteractive::_inspector_array_swap_clip(uint32_t p_item_a, uint32_t p_item_b) {
 	ERR_FAIL_INDEX(p_item_a, (uint32_t)clip_count);
-	ERR_FAIL_INDEX(p_item_b, (uint32_t)clip_count);
+	ERR_FAIL_UNSIGNED_INDEX(p_item_b, (uint32_t)clip_count);
 
 	for (int i = 0; i < clip_count; i++) {
 		_test_and_swap(clips[i].auto_advance_next_clip, p_item_a, p_item_b);
@@ -532,7 +531,7 @@ void AudioStreamInteractive::_bind_methods() {
 	BIND_ENUM_CONSTANT(AUTO_ADVANCE_ENABLED);
 	BIND_ENUM_CONSTANT(AUTO_ADVANCE_RETURN_TO_HOLD);
 
-	BIND_CONSTANT(CLIP_ALL);
+	BIND_CONSTANT(CLIP_ANY);
 }
 
 ///////////////////////////////////////////////////////////
@@ -643,9 +642,9 @@ void AudioStreamPlaybackInteractive::_queue(int p_to_clip_index, bool p_is_auto_
 
 	AudioStreamInteractive::TransitionKey tkeys[4] = {
 		AudioStreamInteractive::TransitionKey(playback_current, p_to_clip_index),
-		AudioStreamInteractive::TransitionKey(playback_current, AudioStreamInteractive::CLIP_ALL),
-		AudioStreamInteractive::TransitionKey(AudioStreamInteractive::CLIP_ALL, p_to_clip_index),
-		AudioStreamInteractive::TransitionKey(AudioStreamInteractive::CLIP_ALL, AudioStreamInteractive::CLIP_ALL)
+		AudioStreamInteractive::TransitionKey(playback_current, AudioStreamInteractive::CLIP_ANY),
+		AudioStreamInteractive::TransitionKey(AudioStreamInteractive::CLIP_ANY, p_to_clip_index),
+		AudioStreamInteractive::TransitionKey(AudioStreamInteractive::CLIP_ANY, AudioStreamInteractive::CLIP_ANY)
 	};
 
 	for (int i = 0; i < 4; i++) {

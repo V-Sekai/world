@@ -4,7 +4,7 @@
 		Audio stream that can playback music interactively, combining clips and a transition table.
 	</brief_description>
 	<description>
-		This is an audio stream that can playback music interactively, combining clips and a transition table. Clips must be added first, and the transition rules via the [method add_transition]. Additionally, this stream export a property parameter to control the playback via [AudioStreamPlayer], [AudioStreamPlayer2D] or [AudioStreamPlayer3D].
+		This is an audio stream that can playback music interactively, combining clips and a transition table. Clips must be added first, and the transition rules via the [method add_transition]. Additionally, this stream export a property parameter to control the playback via [AudioStreamPlayer], [AudioStreamPlayer2D], or [AudioStreamPlayer3D].
 		The way this is used is by filling a number of clips, then configuring the transition table. From there, clips are selected for playback and the music will smoothly go from the current to the new one while using the corresponding transition rule defined in the transition table.
 	</description>
 	<tutorials>
@@ -22,7 +22,7 @@
 			<param index="7" name="filler_clip" type="int" default="-1" />
 			<param index="8" name="hold_previous" type="bool" default="false" />
 			<description>
-				Add a transition between two clips. Provide the indices of the source and destination clips, or use the [constant CLIP_ALL] constant to indicate that transition happens to/from all clips.
+				Add a transition between two clips. Provide the indices of the source and destination clips, or use the [constant CLIP_ANY] constant to indicate that transition happens to/from any clip to this one.
 				* [b]from_time[/b] indicates the moment in the current clip the transition will begin after triggered.
 				* [b]to_time[/b] indicates the time in the next clip that the playback will start from.
 				* [b]fade_mode[/b] indicates how the fade will happen between clips. If unsure, just use [constant FADE_AUTOMATIC] which uses the most common type of fade for each situation.
@@ -37,7 +37,7 @@
 			<param index="0" name="from_clip" type="int" />
 			<param index="1" name="to_clip" type="int" />
 			<description>
-				Erase a transition by providing [i]from[/i] and [i]to[/i] clip indices. [constant CLIP_ALL] can be used for either argument or both.
+				Erase a transition by providing [i]from[/i] and [i]to[/i] clip indices. [constant CLIP_ANY] can be used for either argument or both.
 			</description>
 		</method>
 		<method name="get_clip_auto_advance" qualifiers="const">
@@ -224,7 +224,7 @@
 		<constant name="AUTO_ADVANCE_RETURN_TO_HOLD" value="2" enum="AutoAdvanceMode">
 			Enable auto-advance, but instead of specifying a clip, the playback will return to hold (see [method add_transition]).
 		</constant>
-		<constant name="CLIP_ALL" value="-1">
+		<constant name="CLIP_ANY" value="-1">
 		</constant>
 	</constants>
 </class>
