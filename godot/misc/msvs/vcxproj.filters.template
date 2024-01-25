@@ -21,6 +21,9 @@
   <ItemGroup>
     %%INCLUDES%%
   </ItemGroup>
+  <ItemGroup>
+    %%OTHERS%%
+  </ItemGroup>
 </Project>
 <!-- CHECKSUM
 %%HASH%%

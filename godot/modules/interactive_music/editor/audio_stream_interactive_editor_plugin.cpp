@@ -267,6 +267,7 @@ void AudioStreamInteractiveTransitionEditor::edit(Object *p_obj) {
 	header->set_editable(0, false);
 
 	filler_clip->clear();
+	filler_clip->add_item("Disabled", -1);
 
 	Color header_color = get_theme_color(SNAME("prop_subsection"), EditorStringName(Editor));
 
@@ -309,9 +310,7 @@ void AudioStreamInteractiveTransitionEditor::edit(Object *p_obj) {
 		}
 		rows.push_back(row);
 
-		if (i == clip_count) {
-			filler_clip->add_item("Disabled", i);
-		} else {
+		if (i < clip_count) {
 			filler_clip->add_item(name, i);
 		}
 	}

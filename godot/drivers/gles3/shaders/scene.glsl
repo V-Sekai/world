@@ -867,10 +867,16 @@ uniform highp sampler2DArray color_buffer; // texunit:-5
 vec3 multiview_uv(vec2 uv) {
 	return vec3(uv, ViewIndex);
 }
+ivec3 multiview_uv(ivec2 uv) {
+	return ivec3(uv, int(ViewIndex));
+}
 #else
 uniform highp sampler2D depth_buffer; // texunit:-6
 uniform highp sampler2D color_buffer; // texunit:-5
 vec2 multiview_uv(vec2 uv) {
+	return uv;
+}
+ivec2 multiview_uv(ivec2 uv) {
 	return uv;
 }
 #endif
@@ -936,7 +942,7 @@ void light_compute(vec3 N, vec3 L, vec3 V, float A, vec3 light_color, bool is_di
 #endif
 		inout vec3 diffuse_light, inout vec3 specular_light) {
 
-#if defined(USE_LIGHT_SHADER_CODE)
+#if defined(LIGHT_CODE_USED)
 	// light is written by the light shader
 
 	highp mat4 model_matrix = world_transform;
@@ -1072,7 +1078,7 @@ void light_compute(vec3 N, vec3 L, vec3 V, float A, vec3 light_color, bool is_di
 	alpha = min(alpha, clamp(1.0 - attenuation, 0.0, 1.0));
 #endif
 
-#endif // USE_LIGHT_SHADER_CODE
+#endif // LIGHT_CODE_USED
 }
 
 float get_omni_spot_attenuation(float distance, float inv_range, float decay) {

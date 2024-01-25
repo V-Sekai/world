@@ -163,7 +163,6 @@ def get_version_info(module_version_string="", silent=False):
         "status": str(version.status),
         "build": str(build_name),
         "module_config": str(version.module_config) + module_version_string,
-        "year": int(version.year),
         "website": str(version.website),
         "docs_branch": str(version.docs),
     }
@@ -232,7 +231,6 @@ def generate_version_header(module_version_string=""):
 #define VERSION_STATUS "{status}"
 #define VERSION_BUILD "{build}"
 #define VERSION_MODULE_CONFIG "{module_config}"
-#define VERSION_YEAR {year}
 #define VERSION_WEBSITE "{website}"
 #define VERSION_DOCS_BRANCH "{docs_branch}"
 #define VERSION_DOCS_URL "https://docs.godotengine.org/en/" VERSION_DOCS_BRANCH
@@ -776,161 +774,6 @@ def add_to_vs_project(env, sources):
                 env.vs_srcs += [basename + ".cpp"]
 
 
-def generate_vs_project(env, original_args, project_name="godot"):
-    batch_file = find_visual_c_batch_file(env)
-    filtered_args = original_args.copy()
-    # Ignore the "vsproj" option to not regenerate the VS project on every build
-    filtered_args.pop("vsproj", None)
-    # The "platform" option is ignored because only the Windows platform is currently supported for VS projects
-    filtered_args.pop("platform", None)
-    # The "target" option is ignored due to the way how targets configuration is performed for VS projects (there is a separate project configuration for each target)
-    filtered_args.pop("target", None)
-    # The "progress" option is ignored as the current compilation progress indication doesn't work in VS
-    filtered_args.pop("progress", None)
-
-    if batch_file:
-
-        class ModuleConfigs(Mapping):
-            # This version information (Win32, x64, Debug, Release) seems to be
-            # required for Visual Studio to understand that it needs to generate an NMAKE
-            # project. Do not modify without knowing what you are doing.
-            PLATFORMS = ["Win32", "x64"]
-            PLATFORM_IDS = ["x86_32", "x86_64"]
-            CONFIGURATIONS = ["editor", "template_release", "template_debug"]
-            DEV_SUFFIX = ".dev" if env["dev_build"] else ""
-
-            @staticmethod
-            def for_every_variant(value):
-                return [value for _ in range(len(ModuleConfigs.CONFIGURATIONS) * len(ModuleConfigs.PLATFORMS))]
-
-            def __init__(self):
-                shared_targets_array = []
-                self.names = []
-                self.arg_dict = {
-                    "variant": [],
-                    "runfile": shared_targets_array,
-                    "buildtarget": shared_targets_array,
-                    "cpppaths": [],
-                    "cppdefines": [],
-                    "cmdargs": [],
-                }
-                self.add_mode()  # default
-
-            def add_mode(
-                self,
-                name: str = "",
-                includes: str = "",
-                cli_args: str = "",
-                defines=None,
-            ):
-                if defines is None:
-                    defines = []
-                self.names.append(name)
-                self.arg_dict["variant"] += [
-                    f'{config}{f"_[{name}]" if name else ""}|{platform}'
-                    for config in ModuleConfigs.CONFIGURATIONS
-                    for platform in ModuleConfigs.PLATFORMS
-                ]
-                self.arg_dict["runfile"] += [
-                    f'bin\\godot.windows.{config}{ModuleConfigs.DEV_SUFFIX}{".double" if env["precision"] == "double" else ""}.{plat_id}{f".{name}" if name else ""}.exe'
-                    for config in ModuleConfigs.CONFIGURATIONS
-                    for plat_id in ModuleConfigs.PLATFORM_IDS
-                ]
-                self.arg_dict["cpppaths"] += ModuleConfigs.for_every_variant(env["CPPPATH"] + [includes])
-                self.arg_dict["cppdefines"] += ModuleConfigs.for_every_variant(list(env["CPPDEFINES"]) + defines)
-                self.arg_dict["cmdargs"] += ModuleConfigs.for_every_variant(cli_args)
-
-            def build_commandline(self, commands):
-                configuration_getter = (
-                    "$(Configuration"
-                    + "".join([f'.Replace("{name}", "")' for name in self.names[1:]])
-                    + '.Replace("_[]", "")'
-                    + ")"
-                )
-
-                common_build_prefix = [
-                    'cmd /V /C set "plat=$(PlatformTarget)"',
-                    '(if "$(PlatformTarget)"=="x64" (set "plat=x86_amd64"))',
-                    'call "' + batch_file + '" !plat!',
-                ]
-
-                # Windows allows us to have spaces in paths, so we need
-                # to double quote off the directory. However, the path ends
-                # in a backslash, so we need to remove this, lest it escape the
-                # last double quote off, confusing MSBuild
-                common_build_postfix = [
-                    "--directory=\"$(ProjectDir.TrimEnd('\\'))\"",
-                    "platform=windows",
-                    f"target={configuration_getter}",
-                    "progress=no",
-                ]
-
-                for arg, value in filtered_args.items():
-                    common_build_postfix.append(f"{arg}={value}")
-
-                result = " ^& ".join(common_build_prefix + [" ".join([commands] + common_build_postfix)])
-                return result
-
-            # Mappings interface definitions
-
-            def __iter__(self) -> Iterator[str]:
-                for x in self.arg_dict:
-                    yield x
-
-            def __len__(self) -> int:
-                return len(self.names)
-
-            def __getitem__(self, k: str):
-                return self.arg_dict[k]
-
-        add_to_vs_project(env, env.core_sources)
-        add_to_vs_project(env, env.drivers_sources)
-        add_to_vs_project(env, env.main_sources)
-        add_to_vs_project(env, env.modules_sources)
-        add_to_vs_project(env, env.scene_sources)
-        add_to_vs_project(env, env.servers_sources)
-        if env["tests"]:
-            add_to_vs_project(env, env.tests_sources)
-        if env.editor_build:
-            add_to_vs_project(env, env.editor_sources)
-
-        for header in glob_recursive("**/*.h"):
-            env.vs_incs.append(str(header))
-
-        module_configs = ModuleConfigs()
-
-        if env.get("module_mono_enabled"):
-            mono_defines = [("GD_MONO_HOT_RELOAD",)] if env.editor_build else []
-            module_configs.add_mode(
-                "mono",
-                cli_args="module_mono_enabled=yes",
-                defines=mono_defines,
-            )
-
-        scons_cmd = "scons"
-
-        path_to_venv = os.getenv("VIRTUAL_ENV")
-        path_to_scons_exe = Path(str(path_to_venv)) / "Scripts" / "scons.exe"
-        if path_to_venv and path_to_scons_exe.exists():
-            scons_cmd = str(path_to_scons_exe)
-
-        env["MSVSBUILDCOM"] = module_configs.build_commandline(scons_cmd)
-        env["MSVSREBUILDCOM"] = module_configs.build_commandline(f"{scons_cmd} vsproj=yes")
-        env["MSVSCLEANCOM"] = module_configs.build_commandline(f"{scons_cmd} --clean")
-        if not env.get("MSVS"):
-            env["MSVS"]["PROJECTSUFFIX"] = ".vcxproj"
-            env["MSVS"]["SOLUTIONSUFFIX"] = ".sln"
-        env.MSVSProject(
-            target=["#" + project_name + env["MSVSPROJECTSUFFIX"]],
-            incs=env.vs_incs,
-            srcs=env.vs_srcs,
-            auto_build_solution=1,
-            **module_configs,
-        )
-    else:
-        print("Could not locate Visual Studio batch file to set up the build environment. Not generating VS project.")
-
-
 def precious_program(env, program, sources, **args):
     program = env.ProgramOriginal(program, sources, **args)
     env.Precious(program)
@@ -1233,30 +1076,9 @@ def dump(env):
         dump(env.Dictionary(), f, indent=4, default=non_serializable)
 
 
-# Augmented glob_recursive that also fills the dirs argument with traversed directories that have content.
-def glob_recursive_2(pattern, dirs, node="."):
-    from SCons import Node
-    from SCons.Script import Glob
-
-    results = []
-    for f in Glob(str(node) + "/*", source=True):
-        if type(f) is Node.FS.Dir:
-            results += glob_recursive_2(pattern, dirs, f)
-    r = Glob(str(node) + "/" + pattern, source=True)
-    if len(r) > 0 and not str(node) in dirs:
-        d = ""
-        for part in str(node).split("\\"):
-            d += part
-            if not d in dirs:
-                dirs.append(d)
-            d += "\\"
-    results += r
-    return results
-
-
 # Custom Visual Studio project generation logic that supports any platform that has a msvs.py
 # script, so Visual Studio can be used to run scons for any platform, with the right defines per target.
-# Invoked with scons vsproj=yes use_vsproj2=yes
+# Invoked with scons vsproj=yes
 #
 # Only platforms that opt in to vs proj generation by having a msvs.py file in the platform folder are included.
 # Platforms with a msvs.py file will be added to the solution, but only the current active platform+target+arch
@@ -1267,10 +1089,50 @@ def glob_recursive_2(pattern, dirs, node="."):
 # but will have the files and configuration for the windows editor target.
 #
 # To generate build configuration files for all platforms+targets+arch combinations, users can call
-#   scons vsproj=yes use_vsproj2=yes vsproj_gen_only=yes
+#   scons vsproj=yes
 # for each combination of platform+target+arch. This will generate the relevant vs project files but
 # skip the build process. This lets project files be quickly generated even if there are build errors.
-def generate_vs_project_2(env, original_args, project_name="godot"):
+#
+# To generate AND build from the command line:
+#   scons vsproj=yes vsproj_gen_only=yes
+def generate_vs_project(env, original_args, project_name="godot"):
+    # Augmented glob_recursive that also fills the dirs argument with traversed directories that have content.
+    def glob_recursive_2(pattern, dirs, node="."):
+        from SCons import Node
+        from SCons.Script import Glob
+
+        results = []
+        for f in Glob(str(node) + "/*", source=True):
+            if type(f) is Node.FS.Dir:
+                results += glob_recursive_2(pattern, dirs, f)
+        r = Glob(str(node) + "/" + pattern, source=True)
+        if len(r) > 0 and not str(node) in dirs:
+            d = ""
+            for part in str(node).split("\\"):
+                d += part
+                if not d in dirs:
+                    dirs.append(d)
+                d += "\\"
+        results += r
+        return results
+
+    def get_bool(args, option, default):
+        from SCons.Variables.BoolVariable import _text2bool
+
+        val = args.get(option, default)
+        if val is not None:
+            try:
+                return _text2bool(val)
+            except:
+                return default
+        else:
+            return default
+
+    def format_key_value(v):
+        if type(v) in [tuple, list]:
+            return v[0] if len(v) == 1 else f"{v[0]}={v[1]}"
+        return v
+
     filtered_args = original_args.copy()
 
     # Ignore the "vsproj" option to not regenerate the VS project on every build
@@ -1287,9 +1149,6 @@ def generate_vs_project_2(env, original_args, project_name="godot"):
     filtered_args.pop("platform", None)
     filtered_args.pop("target", None)
     filtered_args.pop("arch", None)
-
-    # This one is set manually on the rebuild command, to regenerate the vcxproj files.
-    filtered_args.pop("use_vsproj2", None)
 
     platform = env["platform"]
     target = env["target"]
@@ -1344,12 +1203,21 @@ def generate_vs_project_2(env, original_args, project_name="godot"):
     for file in glob_recursive_2("*.c", sources_dirs):
         sources.append(str(file).replace("/", "\\"))
 
+    others = []
+    others_dirs = []
+    for file in glob_recursive_2("*.natvis", others_dirs):
+        others.append(str(file).replace("/", "\\"))
+    for file in glob_recursive_2("*.glsl", others_dirs):
+        others.append(str(file).replace("/", "\\"))
+
     skip_filters = False
     import hashlib
     import json
 
     md5 = hashlib.md5(
-        json.dumps(headers + headers_dirs + sources + sources_dirs, sort_keys=True).encode("utf-8")
+        json.dumps(headers + headers_dirs + sources + sources_dirs + others + others_dirs, sort_keys=True).encode(
+            "utf-8"
+        )
     ).hexdigest()
 
     if os.path.exists(f"{project_name}.vcxproj.filters"):
@@ -1374,11 +1242,12 @@ def generate_vs_project_2(env, original_args, project_name="godot"):
             filters += f'<Filter Include="Header Files\\{d}"><UniqueIdentifier>{{{str(uuid.uuid4())}}}</UniqueIdentifier></Filter>\n'
         for d in sources_dirs:
             filters += f'<Filter Include="Source Files\\{d}"><UniqueIdentifier>{{{str(uuid.uuid4())}}}</UniqueIdentifier></Filter>\n'
+        for d in others_dirs:
+            filters += f'<Filter Include="Other Files\\{d}"><UniqueIdentifier>{{{str(uuid.uuid4())}}}</UniqueIdentifier></Filter>\n'
 
         filters_template = filters_template.replace("%%FILTERS%%", filters)
 
         filters = ""
-        includes = ""
         for file in headers:
             filters += (
                 f'<ClInclude Include="{file}"><Filter>Header Files\\{os.path.dirname(file)}</Filter></ClInclude>\n'
@@ -1392,6 +1261,12 @@ def generate_vs_project_2(env, original_args, project_name="godot"):
             )
 
         filters_template = filters_template.replace("%%COMPILES%%", filters)
+
+        filters = ""
+        for file in others:
+            filters += f'<None Include="{file}"><Filter>Other Files\\{os.path.dirname(file)}</Filter></None>\n'
+        filters_template = filters_template.replace("%%OTHERS%%", filters)
+
         filters_template = filters_template.replace("%%HASH%%", md5)
 
         with open(f"{project_name}.vcxproj.filters", "w") as f:
@@ -1411,13 +1286,11 @@ def generate_vs_project_2(env, original_args, project_name="godot"):
 
     headers_active = []
     sources_active = []
+    others_active = []
     for x in envsources:
-        basename = ""
+        fname = ""
         if type(x) == type(""):
             fname = env.File(x).path
-            parts = fname.split(".")
-            if len(parts) > 0 and parts[-1] in ["h", "hpp", "c", "cpp"]:
-                basename = fname
         else:
             # Some object files might get added directly as a File object and not a list.
             try:
@@ -1425,31 +1298,41 @@ def generate_vs_project_2(env, original_args, project_name="godot"):
             except:
                 fname = x.path
                 pass
+
+        if fname:
+            fname = fname.replace("\\\\", "/")
+            parts = os.path.splitext(fname)
+            basename = parts[0]
+            ext = parts[1]
             idx = fname.find(env["OBJSUFFIX"])
-            if idx > 0:
+            if ext in [".h", ".hpp"]:
+                headers_active += [fname]
+            elif ext in [".c", ".cpp"]:
+                sources_active += [fname]
+            elif idx > 0:
                 basename = fname[:idx]
+                if os.path.isfile(basename + ".h"):
+                    headers_active += [basename + ".h"]
+                elif os.path.isfile(basename + ".hpp"):
+                    headers_active += [basename + ".hpp"]
+                elif basename.endswith(".gen") and os.path.isfile(basename[:-4] + ".h"):
+                    headers_active += [basename[:-4] + ".h"]
+                if os.path.isfile(basename + ".c"):
+                    sources_active += [basename + ".c"]
+                elif os.path.isfile(basename + ".cpp"):
+                    sources_active += [basename + ".cpp"]
+            else:
+                fname = os.path.relpath(os.path.abspath(fname), env.Dir("").abspath)
+                others_active += [fname]
 
-        if basename:
-            basename = basename.replace("\\\\", "/")
-            if os.path.isfile(basename + ".h"):
-                headers_active += [basename + ".h"]
-            elif os.path.isfile(basename + ".hpp"):
-                headers_active += [basename + ".hpp"]
-            elif basename.endswith(".gen") and os.path.isfile(basename[:-4] + ".h"):
-                headers_active += [basename[:-4] + ".h"]
-            if os.path.isfile(basename + ".c"):
-                sources_active += [basename + ".c"]
-            elif os.path.isfile(basename + ".cpp"):
-                sources_active += [basename + ".cpp"]
-
-    includes = []
-    compiles = []
     all_items = []
     properties = []
     activeItems = []
+    extraItems = []
 
     set_headers = set(headers_active)
     set_sources = set(sources_active)
+    set_others = set(others_active)
     for file in headers:
         all_items.append(f'<ClInclude Include="{file}">')
         all_items.append(
@@ -1468,6 +1351,15 @@ def generate_vs_project_2(env, original_args, project_name="godot"):
         if file in set_sources:
             activeItems.append(file)
 
+    for file in others:
+        all_items.append(f'<None Include="{file}">')
+        all_items.append(
+            f"  <ExcludedFromBuild Condition=\"!$(ActiveProjectItemList.Contains(';{file};'))\">true</ExcludedFromBuild>"
+        )
+        all_items.append("</None>")
+        if file in set_others:
+            activeItems.append(file)
+
     if vs_configuration:
         vsconf = ""
         for a in vs_configuration["arches"]:
@@ -1483,14 +1375,13 @@ def generate_vs_project_2(env, original_args, project_name="godot"):
 
         props_template = props_template.replace("%%VSCONF%%", vsconf)
         props_template = props_template.replace("%%CONDITION%%", condition)
-        props_template = props_template.replace("%%HEADERS%%", "\n    ".join(includes))
-        props_template = props_template.replace("%%SOURCES%%", "\n    ".join(compiles))
         props_template = props_template.replace("%%PROPERTIES%%", "\n    ".join(properties))
+        props_template = props_template.replace("%%EXTRA_ITEMS%%", "\n    ".join(extraItems))
 
         props_template = props_template.replace("%%OUTPUT%%", output)
+
         props_template = props_template.replace(
-            "%%DEFINES%%",
-            ";".join([f"{j[0]}={j[1]}" if type(j) is tuple or type(j) is list else j for j in list(env["CPPDEFINES"])]),
+            "%%DEFINES%%", ";".join([format_key_value(v) for v in list(env["CPPDEFINES"])])
         )
         props_template = props_template.replace("%%INCLUDES%%", ";".join([str(j) for j in env["CPPPATH"]]))
         props_template = props_template.replace(
@@ -1515,7 +1406,6 @@ def generate_vs_project_2(env, original_args, project_name="godot"):
 
         cmd_rebuild = [
             "vsproj=yes",
-            "use_vsproj2=yes",
             f"vsproj_name={project_name}",
         ] + common_build_postfix
 
@@ -1635,15 +1525,5 @@ def generate_vs_project_2(env, original_args, project_name="godot"):
     with open(f"{project_name}.sln", "w") as f:
         f.write(sln_template)
 
-    if original_args.get("vsproj_gen_only", False):
+    if get_bool(original_args, "vsproj_gen_only", True):
         sys.exit()
-
-
-# Check if the user wants to use the new vs project generation logic,
-# but if this script is being imported from another script that's not SConstruct,
-# this will throw and we'll know we don't need to do anything.
-try:
-    if get_cmdline_bool("use_vsproj2", False):
-        generate_vs_project = generate_vs_project_2
-except:
-    pass

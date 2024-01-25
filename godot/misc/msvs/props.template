@@ -16,7 +16,6 @@
     %%PROPERTIES%%
   </PropertyGroup>
   <ItemGroup Condition="%%CONDITION%%">
-    %%HEADERS%%
-    %%SOURCES%%
+    %%EXTRA_ITEMS%%
   </ItemGroup>
 </Project>
