@@ -231,6 +231,8 @@ IKBone3D::IKBone3D(StringName p_bone, Skeleton3D *p_skeleton, const Ref<IKBone3D
 		if (elem->get_name() == p_bone && !elem->get_target_node().is_empty() && p_many_bone_ik && p_many_bone_ik->get_node_or_null(elem->get_target_node())) {
 			create_pin();
 			Ref<IKEffector3D> effector = get_pin();
+			effector->set_name(String(p_bone));
+			effector->set_root_bone_name(elem->get_root_bone_name());
 			effector->set_target_node(p_skeleton, elem->get_target_node());
 			effector->set_passthrough_factor(elem->get_passthrough_factor());
 			effector->set_weight(elem->get_weight());

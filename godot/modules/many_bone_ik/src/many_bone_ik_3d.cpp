@@ -48,6 +48,7 @@ void ManyBoneIK3D::_set_pin_count(int32_t p_value) {
 		pins.write[pin_i].instantiate();
 	}
 	set_dirty();
+	notify_property_list_changed();
 }
 
 int32_t ManyBoneIK3D::get_pin_count() const {
@@ -277,7 +278,7 @@ bool ManyBoneIK3D::_get(const StringName &p_name, Variant &r_ret) const {
 			r_ret = effector_template->get_target_node();
 			return true;
 		} else if (what == "root_bone") {
-			r_ret = effector_template->get_root_bone();
+			r_ret = effector_template->get_root_bone_name();
 			return true;
 		} else if (what == "passthrough_factor") {
 			r_ret = get_pin_passthrough_factor(index);
@@ -360,7 +361,7 @@ bool ManyBoneIK3D::_set(const StringName &p_name, const Variant &p_value) {
 			}
 			return true;
 		} else if (what == "root_bone") {
-			_set_pin_root_bone(index, p_value);
+			set_pin_root_bone_name(index, p_value);
 			return true;
 		} else if (what == "passthrough_factor") {
 			set_pin_passthrough_factor(index, p_value);
@@ -1125,6 +1126,7 @@ void ManyBoneIK3D::reset_constraints() {
 		_set_bone_count(saved_constraint_count);
 	}
 	set_dirty();
+	notify_property_list_changed();
 }
 
 bool ManyBoneIK3D::get_constraint_mode() const {
@@ -1199,7 +1201,7 @@ void ManyBoneIK3D::add_constraint() {
 	set_dirty();
 }
 
-void ManyBoneIK3D::_set_pin_root_bone(int32_t p_pin_index, const String &p_root_bone) {
+void ManyBoneIK3D::set_pin_root_bone_name(int32_t p_pin_index, const String &p_root_bone) {
 	ERR_FAIL_INDEX(p_pin_index, pins.size());
 	Ref<IKEffectorTemplate3D> effector_template = pins[p_pin_index];
 	if (effector_template.is_null()) {
@@ -1230,11 +1232,11 @@ bool ManyBoneIK3D::_is_ancestor_of(int potential_ancestor, int bone_idx) const {
 	return false;
 }
 
-String ManyBoneIK3D::_get_pin_root_bone(int32_t p_pin_index) const {
+String ManyBoneIK3D::get_pin_root_bone_name(int32_t p_pin_index) const {
 	ERR_FAIL_INDEX_V(p_pin_index, pins.size(), String());
 	Ref<IKEffectorTemplate3D> effector_template = pins[p_pin_index];
 	if (effector_template.is_null()) {
 		return String();
 	}
-	return effector_template->get_root_bone();
+	return effector_template->get_root_bone_name();
 }
