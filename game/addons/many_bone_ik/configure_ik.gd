@@ -86,7 +86,7 @@ var bone_names = ["Root", "Hips", "Spine", "Chest", "UpperChest", "Neck", "Head"
 # | [Side]UpperArm  | The upper arm can swing forward and backward up to 110-120 degrees, allowing for reaching and swinging motions.                                                                             |
 # | [Side]LowerArm  | The elbow can bend and straighten up to 120-130 degrees, allowing the forearm to move towards or away from the upper arm during reaching and swinging motions.                                                                                       |
 # | [Side]Hand      | The wrist can tilt up and down up to 50-60 degrees, allowing the hand to move towards or away from the forearm.
-	
+
 func _run():
 	var root: Node = get_scene()
 	var nodes : Array[Node] = root.find_children("*", "ManyBoneIK3D")
@@ -106,109 +106,45 @@ func _run():
 	skeleton.reset_bone_poses()
 	many_bone_ik.set_constraint_count(0)
 	var skeleton_profile: SkeletonProfileHumanoid = SkeletonProfileHumanoid.new()
+	var bone_configurations = {
+		"Hips": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0))], "twist_from": deg_to_rad(0.0), "twist_range": deg_to_rad(0.0)},
+		"Root": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0))], "twist_from": deg_to_rad(0.0), "twist_range": deg_to_rad(0.0)},
+		"LeftShoulder": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(30.0))]},
+		"RightShoulder": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(30.0))]},
+		"LeftUpperArm": {"twist_from": deg_to_rad(80.0), "twist_range": deg_to_rad(12.0), "swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0))]},
+		"RightUpperArm": {"twist_from": deg_to_rad(80.0), "twist_range": deg_to_rad(12.0), "swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0))]},
+		"LeftLowerArm": {"twist_from": deg_to_rad(-55.0), "twist_range": deg_to_rad(50.0), "swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5))]},
+		"RightLowerArm": {"twist_from": deg_to_rad(-145.0), "twist_range": deg_to_rad(50.0), "swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5))]},
+		"LeftHand": {"swing_limit_cones": [LimitCone.new(((Vector3.MODEL_TOP + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(65.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_BOTTOM + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(70.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_LEFT + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(40.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_RIGHT + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(45.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0))]},
+		"RightHand": {"swing_limit_cones": [LimitCone.new(((Vector3.MODEL_TOP + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(65.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_BOTTOM + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(70.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_LEFT + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(40.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_RIGHT + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(45.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0))]},
+		"LeftThumb": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0))]},
+		"RightThumb": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0))]},
+		"LeftFoot": {"swing_limit_cones": [LimitCone.new(((Vector3.MODEL_BOTTOM + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0)), LimitCone.new(((Vector3.MODEL_TOP + Vector3.MODEL_REAR) / 2.0).normalized(), deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0))]},
+		"RightFoot": {"swing_limit_cones": [LimitCone.new(((Vector3.MODEL_BOTTOM + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0)), LimitCone.new(((Vector3.MODEL_TOP + Vector3.MODEL_REAR) / 2.0).normalized(), deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0))]}
+	}
+
 	for bone_name_i in skeleton.get_bone_count():
 		var bone_name = skeleton.get_bone_name(bone_name_i)
 		var swing_limit_cones = []
 		var bone_i = skeleton_profile.find_bone(bone_name)
-		if bone_i == -1:
+		if bone_i == -1 or bone_name.ends_with("Eye"):
 			continue
-		var twist_from = 0
-		var twist_range = TAU / 4
-		var resistance = 0
-		if bone_name == "Root":
-			twist_from = deg_to_rad(0.0)
-			twist_range = deg_to_rad(5)
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(3.0)))
-			# Cannot use resistance on root bones.
-		elif bone_name == "Hips":
-			twist_from = deg_to_rad(0.0)
-			twist_range = deg_to_rad(5)
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(3.0)))
-			# Cannot use resistance on root bones.
-		elif bone_name == "Spine":
-			twist_from = deg_to_rad(4.0)
-			twist_range = deg_to_rad(10)
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(3.0)))
-
-		elif bone_name == "Chest":
-			twist_from = deg_to_rad(5.0)
-			twist_range = deg_to_rad(-10.0)
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(3.0)))
-
-		elif bone_name == "UpperChest":
-			twist_from = deg_to_rad(10.0)
-			twist_range = deg_to_rad(40.0)
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(10.0)))
-
-		elif bone_name == "Neck":
-			twist_from = deg_to_rad(15.0)
-			twist_range = deg_to_rad(15.0)
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(10.0)))
-
-		elif bone_name == "Head":
-			twist_from = deg_to_rad(15.0)
-			twist_range = deg_to_rad(15.0)
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(15.0)))
-
-		elif bone_name.ends_with("Eye"):
-			continue
-		elif bone_name == "LeftLowerLeg":
-			twist_from = deg_to_rad(-45.0)
-			twist_range = deg_to_rad(2.0)
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)))
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_TOP, deg_to_rad(2.5)))
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5)))
-
-		elif bone_name == "RightLowerLeg":
-			twist_from = deg_to_rad(-45.0)
-			twist_range = deg_to_rad(2.0)
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)))
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_TOP, deg_to_rad(2.5)))
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5)))
-		elif bone_name in ["LeftShoulder", "RightShoulder"]:
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(30.0)))
-		elif bone_name in ["LeftUpperArm", "RightUpperArm"]:
-			twist_from = deg_to_rad(80.0)
-			twist_range = deg_to_rad(12.0)
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0)))
-
-		elif bone_name == "LeftLowerArm":
-			twist_from = deg_to_rad(-55.0)
-			twist_range = deg_to_rad(50.0)
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)))
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(2.5)))
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5)))
-
-		elif bone_name == "RightLowerArm":
-			twist_from = deg_to_rad(-145.0)
-			twist_range = deg_to_rad(50.0)
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)))
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)))
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5)))
-
-		elif bone_name in ["LeftHand", "RightHand"]:
-			swing_limit_cones.append(LimitCone.new(((Vector3.MODEL_TOP + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(65.0)))
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)))
-			swing_limit_cones.append(LimitCone.new(((Vector3.MODEL_BOTTOM + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(70.0)))
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)))
-			swing_limit_cones.append(LimitCone.new(((Vector3.MODEL_LEFT + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(40.0)))
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)))
-			swing_limit_cones.append(LimitCone.new(((Vector3.MODEL_RIGHT + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(45.0)))
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)))
-		elif bone_name in ["LeftThumb", "RightThumb"]:
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0)))
-		elif bone_name in ["LeftFoot", "RightFoot"]:
-			swing_limit_cones.append(LimitCone.new(((Vector3.MODEL_BOTTOM + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(2.5)))
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0)))
-			swing_limit_cones.append(LimitCone.new(((Vector3.MODEL_TOP + Vector3.MODEL_REAR) / 2.0).normalized(), deg_to_rad(2.5)))
-			swing_limit_cones.append(LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0)))
-		else:
-			continue
-		set_bone_constraint(many_bone_ik, bone_name, twist_from, twist_range, swing_limit_cones, resistance)
+		var bone_config = bone_configurations.get(bone_name)
+		if bone_config:
+			swing_limit_cones = bone_config["swing_limit_cones"]
+			var twist_from = 0
+			if bone_config.has("twist_from"):
+				twist_from = bone_config["twist_from"]
+			var twist_range = 0
+			if bone_config.has("twist_range"):
+				twist_range = bone_config["twist_range"]
+			set_bone_constraint(many_bone_ik, bone_name, twist_from, twist_range, swing_limit_cones)
 	many_bone_ik.queue_print_skeleton()
+
 	var bones: Array = [
 		"Root",
 		"Hips",
+		"Chest",
 		#"LeftLowerArm",
 		"LeftHand",
 		#"LeftThumbProximal",
@@ -239,7 +175,7 @@ func _run():
 		"RightFoot",
 		"Head",
 	]
-	
+
 	many_bone_ik.set_pin_count(0)
 	many_bone_ik.set_pin_count(bones.size())
 
@@ -247,7 +183,7 @@ func _run():
 	for i in range(children.size()):
 		var node: Node = children[i] as Node
 		node.queue_free()
-	
+
 	for pin_i in range(bones.size()):
 		var bone_name: String = bones[pin_i]
 		var marker_3d: BoneAttachment3D = BoneAttachment3D.new()
@@ -279,7 +215,7 @@ func _run():
 
 	var set_a: Array[Vector3] = []
 	var set_b: Array[Vector3] = []
-	
+
 	#var reference_skeleton = many_bone_ik.owner.get_node("vrm_1_vsekai_godot_engine_humanoid_08/Root/Skeleton3D")
 	#for bone_name in bones:
 		#var bone_id = reference_skeleton.find_bone(bone_name)
@@ -308,12 +244,11 @@ func get_bone_constraint(p_bone_name: String) -> BoneConstraint:
 	else:
 		return BoneConstraint.new()
 
-func set_bone_constraint(many_bone_ik: ManyBoneIK3D, p_bone_name: String, p_twist_from: float, p_twist_range: float, p_swing_limit_cones: Array, p_resistance: float = 0.0):
-	bone_constraints[p_bone_name] = BoneConstraint.new(p_twist_from, p_twist_range, p_swing_limit_cones, p_resistance)
+func set_bone_constraint(many_bone_ik: ManyBoneIK3D, p_bone_name: String, p_twist_from: float, p_twist_range: float, p_swing_limit_cones: Array):
+	bone_constraints[p_bone_name] = BoneConstraint.new(p_twist_from, p_twist_range, p_swing_limit_cones)
 	var constraint_count = many_bone_ik.get_constraint_count()
 	many_bone_ik.set_constraint_count(constraint_count + 1)
 	many_bone_ik.set_constraint_name(constraint_count, p_bone_name)
-	#many_bone_ik.set_kusudama_resistance(constraint_count, p_resistance)
 	many_bone_ik.set_kusudama_twist(constraint_count, Vector2(p_twist_from, p_twist_range))
 	many_bone_ik.set_kusudama_limit_cone_count(constraint_count, p_swing_limit_cones.size())
 	for cone_constraint_i: int in range(p_swing_limit_cones.size()):
