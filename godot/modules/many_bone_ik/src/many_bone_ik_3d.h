@@ -68,23 +68,28 @@ class ManyBoneIK3D : public Node3D {
 	bool is_dirty = true;
 	NodePath skeleton_node_path = NodePath("..");
 	int32_t ui_selected_bone = -1, stabilize_passes = 4;
+
 	void _on_timer_timeout();
-	void update_ik_bones_transform();
-	void update_skeleton_bones_transform();
-	Vector<Ref<IKEffectorTemplate3D>> get_bone_effectors() const;
-	void set_constraint_name(int32_t p_index, String p_name);
-	void set_pin_count(int32_t p_value);
-	void set_constraint_count(int32_t p_count);
+	void _update_ik_bones_transform();
+	void _update_skeleton_bones_transform();
+	Vector<Ref<IKEffectorTemplate3D>> _get_bone_effectors() const;
+	void _set_constraint_name(int32_t p_index, String p_name);
+	void _set_pin_count(int32_t p_value);
+	void _set_constraint_count(int32_t p_count);
 	void _remove_pin(int32_t p_index);
 	void _set_bone_count(int32_t p_count);
+	void _set_pin_root_bone(int32_t p_pin_index, const String &p_root_bone);
+	String _get_pin_root_bone(int32_t p_pin_index) const;
+	bool _is_descendant_of(int bone_i, int parent_bone_i) const;
+	bool _is_ancestor_of(int potential_ancestor, int bone_idx) const;
 
 protected:
 	bool _set(const StringName &p_name, const Variant &p_value);
 	bool _get(const StringName &p_name, Variant &r_ret) const;
 	void _get_property_list(List<PropertyInfo> *p_list) const;
 	static void _bind_methods();
-	virtual void skeleton_changed(Skeleton3D *skeleton);
-	virtual void execute(real_t delta);
+	virtual void _skeleton_changed(Skeleton3D *skeleton);
+	virtual void _execute(real_t delta);
 	void _notification(int p_what);
 
 public:
