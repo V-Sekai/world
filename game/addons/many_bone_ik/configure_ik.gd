@@ -142,7 +142,6 @@ func _run():
 	many_bone_ik.queue_print_skeleton()
 
 	var bones: Array = [
-		"Root",
 		"Hips",
 		"Chest",
 		#"LeftLowerArm",
