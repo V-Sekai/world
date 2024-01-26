@@ -47,7 +47,6 @@ class IKEffector3D : public Resource {
 	friend class IKBoneSegment3D;
 
 	Ref<IKBone3D> for_bone;
-	String root_bone_name;
 	bool use_target_node_rotation = true;
 	NodePath target_node_path;
 	ObjectID target_node_cache;
@@ -68,12 +67,6 @@ protected:
 
 public:
 	IKEffector3D() = default;
-	void set_root_bone_name(String p_root_bone_name) {
-		root_bone_name = p_root_bone_name;
-	} 
-	String get_root_bone() const {
-		return root_bone_name;
-	}
 	void set_weight(real_t p_weight);
 	real_t get_weight() const;
 	void set_direction_priorities(Vector3 p_direction_priorities);

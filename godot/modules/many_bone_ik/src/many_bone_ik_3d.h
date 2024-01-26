@@ -78,6 +78,8 @@ class ManyBoneIK3D : public Node3D {
 	void _set_constraint_count(int32_t p_count);
 	void _remove_pin(int32_t p_index);
 	void _set_bone_count(int32_t p_count);
+	void _set_pin_root_bone(int32_t p_pin_index, const String &p_root_bone);
+	String _get_pin_root_bone(int32_t p_pin_index) const;
 	bool _is_descendant_of(int bone_i, int parent_bone_i) const;
 	bool _is_ancestor_of(int potential_ancestor, int bone_idx) const;
 
@@ -91,8 +93,6 @@ protected:
 	void _notification(int p_what);
 
 public:
-	void set_pin_root_bone_name(int32_t p_pin_index, const String &p_root_bone);
-	String get_pin_root_bone_name(int32_t p_pin_index) const;
 	void set_pin_bone_name(int32_t p_effector_index, StringName p_name) const;
 	void set_state(Ref<ManyBoneIK3DState> p_state);
 	Ref<ManyBoneIK3DState> get_state() const;

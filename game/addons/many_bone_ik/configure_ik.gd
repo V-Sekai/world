@@ -207,7 +207,7 @@ func _run():
 		set_bone_constraint(many_bone_ik, bone_name, twist_from, twist_range, swing_limit_cones, resistance)
 	many_bone_ik.queue_print_skeleton()
 	var bones: Array = [
-		#"Root",
+		"Root",
 		"Hips",
 		#"LeftLowerArm",
 		"LeftHand",
@@ -249,7 +249,7 @@ func _run():
 		node.queue_free()
 	
 	for pin_i in range(bones.size()):
-		var bone_name: String = bones[pin_i]	
+		var bone_name: String = bones[pin_i]
 		var marker_3d: BoneAttachment3D = BoneAttachment3D.new()
 		marker_3d.name = bone_name
 		if bone_name == "Root":

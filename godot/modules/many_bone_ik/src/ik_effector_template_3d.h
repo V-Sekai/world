@@ -46,7 +46,7 @@ protected:
 	static void _bind_methods();
 
 public:
-	String get_root_bone_name() const;
+	String get_root_bone() const;
 	void set_root_bone(String p_root_bone);
 	NodePath get_target_node() const;
 	void set_target_node(NodePath p_node_path);

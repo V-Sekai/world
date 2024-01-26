@@ -33,7 +33,7 @@
 #include "many_bone_ik_3d.h"
 
 void IKEffectorTemplate3D::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("get_root_bone"), &IKEffectorTemplate3D::get_root_bone_name);
+	ClassDB::bind_method(D_METHOD("get_root_bone"), &IKEffectorTemplate3D::get_root_bone);
 	ClassDB::bind_method(D_METHOD("set_root_bone", "target_node"), &IKEffectorTemplate3D::set_root_bone);
 
 	ClassDB::bind_method(D_METHOD("get_target_node"), &IKEffectorTemplate3D::get_target_node);
@@ -74,7 +74,7 @@ void IKEffectorTemplate3D::set_passthrough_factor(float p_passthrough_factor) {
 IKEffectorTemplate3D::IKEffectorTemplate3D() {
 }
 
-String IKEffectorTemplate3D::get_root_bone_name() const {
+String IKEffectorTemplate3D::get_root_bone() const {
 	return root_bone;
 }
 
