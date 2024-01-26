@@ -313,7 +313,7 @@ func set_bone_constraint(many_bone_ik: ManyBoneIK3D, p_bone_name: String, p_twis
 	var constraint_count = many_bone_ik.get_constraint_count()
 	many_bone_ik.set_constraint_count(constraint_count + 1)
 	many_bone_ik.set_constraint_name(constraint_count, p_bone_name)
-	many_bone_ik.set_kusudama_resistance(constraint_count, p_resistance)
+	#many_bone_ik.set_kusudama_resistance(constraint_count, p_resistance)
 	many_bone_ik.set_kusudama_twist(constraint_count, Vector2(p_twist_from, p_twist_range))
 	many_bone_ik.set_kusudama_limit_cone_count(constraint_count, p_swing_limit_cones.size())
 	for cone_constraint_i: int in range(p_swing_limit_cones.size()):
