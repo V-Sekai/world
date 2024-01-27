@@ -1,0 +1,47 @@
+[gd_scene load_steps=4 format=3 uid="uid://clpij0u406tcu"]
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_q8ff0"]
+viewport_path = NodePath("SubViewport")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0ucpb"]
+resource_local_to_scene = true
+cull_mode = 2
+shading_mode = 0
+albedo_texture = SubResource("ViewportTexture_q8ff0")
+
+[sub_resource type="QuadMesh" id="QuadMesh_mtxr7"]
+resource_local_to_scene = true
+material = SubResource("StandardMaterial3D_0ucpb")
+size = Vector2(1, 2)
+
+[node name="Mirrors" type="Node3D"]
+
+[node name="CameraPosition" type="RemoteTransform3D" parent="."]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0, 0.3, -1)
+remote_path = NodePath("../SubViewport/Camera3D")
+
+[node name="SubViewport" type="SubViewport" parent="."]
+size = Vector2i(1024, 2048)
+
+[node name="Camera3D" type="Camera3D" parent="SubViewport"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0, 0.3, -1)
+cull_mask = 524287
+v_offset = -0.7
+size = 1.33
+frustum_offset = Vector2(0, -0.185)
+near = 1.0
+
+[node name="Mirror1" type="MeshInstance3D" parent="."]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0, 0, 0)
+layers = 524288
+mesh = SubResource("QuadMesh_mtxr7")
+
+[node name="Mirror2" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -1, 0, 1)
+layers = 524288
+mesh = SubResource("QuadMesh_mtxr7")
+
+[node name="Mirror3" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 1, 0, 1)
+layers = 524288
+mesh = SubResource("QuadMesh_mtxr7")

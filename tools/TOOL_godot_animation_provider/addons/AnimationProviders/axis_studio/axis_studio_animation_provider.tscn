@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://dsgb4ku6xs8u8"]
+
+[ext_resource type="Script" path="res://addons/AnimationProviders/axis_studio/axis_studio_animation_provider.gd" id="1_654gm"]
+
+[node name="AxisStudioAnimationProvider" type="Node"]
+script = ExtResource("1_654gm")
+port = null

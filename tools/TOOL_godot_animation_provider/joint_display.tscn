@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cryv72bwry8dm"]
+
+[ext_resource type="Script" path="res://joint_display.gd" id="1_j3aql"]
+
+[node name="JointDisplay" type="Node3D"]
+script = ExtResource("1_j3aql")
