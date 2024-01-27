@@ -43,6 +43,8 @@ sudo dnf install -y \
   gcc \
   unzip \
   curl
+sudo dnf copr enable vbatts/bazel -y && dnf install bazel5 -y
+sudo dnf install akmod-nvidia xorg-x11-drv-nvidia-cuda -y
 
 # As root or using sudo
 useradd --system --create-home --home-dir /opt/livebook livebook
