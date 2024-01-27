@@ -107,45 +107,77 @@ func _run():
 	many_bone_ik.set_constraint_count(0)
 	var skeleton_profile: SkeletonProfileHumanoid = SkeletonProfileHumanoid.new()
 	var bone_configurations = {
-		"Root": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0))], "twist_from": deg_to_rad(0.0), "twist_range": deg_to_rad(2)},
-		"Hips": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0.0))], "twist_from": deg_to_rad(0.0), "twist_range": deg_to_rad(2)},
-		"Spine": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(30.0))], "twist_from": deg_to_rad(-20.0), "twist_range": deg_to_rad(40.0)},
-		"Chest": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(20.0))], "twist_from": deg_to_rad(-15.0), "twist_range": deg_to_rad(30.0)},
-		"UpperChest": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(10.0))], "twist_from": deg_to_rad(-10.0), "twist_range": deg_to_rad(20.0)},
-		"Head": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(30.0))], "twist_from": deg_to_rad(-20.0), "twist_range": deg_to_rad(40.0)},
-		"Neck": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(20.0))], "twist_from": deg_to_rad(-15.0), "twist_range": deg_to_rad(30.0)},
-		"LeftShoulder": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(30.0))]},
-		"RightShoulder": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(30.0))]},
-		"LeftUpperArm": {"twist_from": deg_to_rad(80.0), "twist_range": deg_to_rad(12.0), "swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0))]},
-		"RightUpperArm": {"twist_from": deg_to_rad(80.0), "twist_range": deg_to_rad(12.0), "swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0))]},
-		"LeftLowerArm": {"twist_from": deg_to_rad(-55.0), "twist_range": deg_to_rad(50.0), "swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5))]},
-		"RightLowerArm": {"twist_from": deg_to_rad(-145.0), "twist_range": deg_to_rad(50.0), "swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5))]},
-		"LeftHand": {"swing_limit_cones": [LimitCone.new(((Vector3.MODEL_TOP + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(65.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_BOTTOM + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(70.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_LEFT + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(40.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_RIGHT + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(45.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0))]},
-		"RightHand": {"swing_limit_cones": [LimitCone.new(((Vector3.MODEL_TOP + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(65.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_BOTTOM + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(70.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_LEFT + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(40.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_RIGHT + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(45.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0))]},
-		"LeftThumb": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0))]},
-		"RightThumb": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0))]},
-		"LeftLowerLeg": {"twist_from": deg_to_rad(-55.0), "twist_range": deg_to_rad(50.0), "swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5))]},
-		"RightLowerLeg": {"twist_from": deg_to_rad(-145.0), "twist_range": deg_to_rad(50.0), "swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5))]},
+		"Root": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0))], "twist_from": deg_to_rad(0.0), "twist_range": deg_to_rad(2)},
+		"Hips": {"kususdama": [LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0.0))], "twist_from": deg_to_rad(0.0), "twist_range": deg_to_rad(2)},
+		"Spine": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(30.0))], "twist_from": deg_to_rad(-20.0), "twist_range": deg_to_rad(40.0)},
+		"Chest": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(20.0))], "twist_from": deg_to_rad(-15.0), "twist_range": deg_to_rad(30.0)},
+		"UpperChest": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(10.0))], "twist_from": deg_to_rad(-10.0), "twist_range": deg_to_rad(20.0)},
+		"Head": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(30.0))], "twist_from": deg_to_rad(-10.0), "twist_range": deg_to_rad(20.0)},
+		"Neck": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(20.0))], "twist_from": deg_to_rad(-15.0), "twist_range": deg_to_rad(30.0)},
+		"LeftShoulder": {
+			"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(10.0))],
+			"twist_from": deg_to_rad(-5.0),
+			"twist_range": deg_to_rad(10.0)
+		},
+		"RightShoulder": {
+			"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(10.0))],
+			"twist_from": deg_to_rad(-5.0),
+			"twist_range": deg_to_rad(10.0)
+		},
+		"LeftUpperArm": {
+			"twist_from": deg_to_rad(80.0),
+			"twist_range": deg_to_rad(30.0),
+			"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(120.0))]
+		},
+		"RightUpperArm": {
+			"twist_from": deg_to_rad(80.0),
+			"twist_range": deg_to_rad(30.0),
+			"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(120.0))]
+		},
+		"LeftLowerArm": {
+			"twist_from": deg_to_rad(-55.0),
+			"twist_range": deg_to_rad(70.0),
+			"kususdama": [
+				LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)),
+				LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(2.5)),
+				LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5))
+			]
+		},
+		"RightLowerArm": {
+			"twist_from": deg_to_rad(-145.0),
+			"twist_range": deg_to_rad(70.0),
+			"kususdama": [
+				LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)),
+				LimitCone.new(Vector3.MODEL_TOP, deg_to_rad(2.5)),
+				LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5))
+			]
+		},		
+		"LeftHand": {"kususdama": [LimitCone.new(((Vector3.MODEL_TOP + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(65.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_BOTTOM + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(70.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_LEFT + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(40.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_RIGHT + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(45.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0))]},
+		"RightHand": {"kususdama": [LimitCone.new(((Vector3.MODEL_TOP + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(65.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_BOTTOM + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(70.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_LEFT + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(40.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_RIGHT + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(45.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0))]},
+		"LeftThumb": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0))]},
+		"RightThumb": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0))]},
+		"LeftLowerLeg": {"twist_from": deg_to_rad(-55.0), "twist_range": deg_to_rad(50.0), "kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5))]},
+		"RightLowerLeg": {"twist_from": deg_to_rad(-145.0), "twist_range": deg_to_rad(50.0), "kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5))]},
 	}
 	var profile: SkeletonProfileHumanoid = SkeletonProfileHumanoid.new()
 	for bone_name_i in skeleton.get_bone_count():
 		var bone_name = skeleton.get_bone_name(bone_name_i)
 		if -1 == profile.find_bone(bone_name):
 			continue
-		var swing_limit_cones = []
+		var kususdama = []
 		var bone_i = skeleton_profile.find_bone(bone_name)
 		if bone_i == -1 or bone_name.ends_with("Eye"):
 			continue
 		var bone_config = bone_configurations.get(bone_name)
 		if bone_config:
-			swing_limit_cones = bone_config["swing_limit_cones"]
+			kususdama = bone_config["kususdama"]
 			var twist_from = 0
 			if bone_config.has("twist_from"):
 				twist_from = bone_config["twist_from"]
 			var twist_range = 0
 			if bone_config.has("twist_range"):
 				twist_range = bone_config["twist_range"]
-			set_bone_constraint(many_bone_ik, bone_name, twist_from, twist_range, swing_limit_cones)
+			set_bone_constraint(many_bone_ik, bone_name, twist_from, twist_range, kususdama)
 
 	many_bone_ik.queue_print_skeleton()
 
@@ -253,14 +285,14 @@ func get_bone_constraint(p_bone_name: String) -> BoneConstraint:
 	else:
 		return BoneConstraint.new()
 
-func set_bone_constraint(many_bone_ik: ManyBoneIK3D, p_bone_name: String, p_twist_from: float, p_twist_range: float, p_swing_limit_cones: Array):
-	bone_constraints[p_bone_name] = BoneConstraint.new(p_twist_from, p_twist_range, p_swing_limit_cones)
+func set_bone_constraint(many_bone_ik: ManyBoneIK3D, p_bone_name: String, p_twist_from: float, p_twist_range: float, p_kususdama: Array):
+	bone_constraints[p_bone_name] = BoneConstraint.new(p_twist_from, p_twist_range, p_kususdama)
 	var constraint_count = many_bone_ik.get_constraint_count()
 	many_bone_ik.set_constraint_count(constraint_count + 1)
 	many_bone_ik.set_constraint_name(constraint_count, p_bone_name)
 	many_bone_ik.set_kusudama_twist(constraint_count, Vector2(p_twist_from, p_twist_range))
-	many_bone_ik.set_kusudama_limit_cone_count(constraint_count, p_swing_limit_cones.size())
-	for cone_constraint_i: int in range(p_swing_limit_cones.size()):
-		var cone_constraint: LimitCone = p_swing_limit_cones[cone_constraint_i]
+	many_bone_ik.set_kusudama_limit_cone_count(constraint_count, p_kususdama.size())
+	for cone_constraint_i: int in range(p_kususdama.size()):
+		var cone_constraint: LimitCone = p_kususdama[cone_constraint_i]
 		many_bone_ik.set_kusudama_limit_cone_center(constraint_count, cone_constraint_i, cone_constraint.direction)
 		many_bone_ik.set_kusudama_limit_cone_radius(constraint_count, cone_constraint_i, cone_constraint.angle)
