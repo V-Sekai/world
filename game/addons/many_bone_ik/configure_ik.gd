@@ -107,8 +107,8 @@ func _run():
 	many_bone_ik.set_constraint_count(0)
 	var skeleton_profile: SkeletonProfileHumanoid = SkeletonProfileHumanoid.new()
 	var bone_configurations = {
-		"Hips": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0))], "twist_from": deg_to_rad(0.0), "twist_range": deg_to_rad(0.0)},
-		"Root": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0))], "twist_from": deg_to_rad(0.0), "twist_range": deg_to_rad(0.0)},
+		"Hips": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0))], "twist_from": deg_to_rad(0.0), "twist_range": deg_to_rad(2)},
+		"Root": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0.0))], "twist_from": deg_to_rad(0.0), "twist_range": deg_to_rad(2)},
 		"LeftShoulder": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(30.0))]},
 		"RightShoulder": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(30.0))]},
 		"LeftUpperArm": {"twist_from": deg_to_rad(80.0), "twist_range": deg_to_rad(12.0), "swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0))]},
@@ -119,12 +119,14 @@ func _run():
 		"RightHand": {"swing_limit_cones": [LimitCone.new(((Vector3.MODEL_TOP + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(65.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_BOTTOM + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(70.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_LEFT + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(40.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_RIGHT + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(45.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0))]},
 		"LeftThumb": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0))]},
 		"RightThumb": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0))]},
-		"LeftFoot": {"swing_limit_cones": [LimitCone.new(((Vector3.MODEL_BOTTOM + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0)), LimitCone.new(((Vector3.MODEL_TOP + Vector3.MODEL_REAR) / 2.0).normalized(), deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0))]},
-		"RightFoot": {"swing_limit_cones": [LimitCone.new(((Vector3.MODEL_BOTTOM + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0)), LimitCone.new(((Vector3.MODEL_TOP + Vector3.MODEL_REAR) / 2.0).normalized(), deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0))]}
+		"LeftLowerLeg": {"twist_from": deg_to_rad(-55.0), "twist_range": deg_to_rad(50.0), "swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5))]},
+		"RightLowerLeg": {"twist_from": deg_to_rad(-145.0), "twist_range": deg_to_rad(50.0), "swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5))]},
 	}
-
+	var profile: SkeletonProfileHumanoid = SkeletonProfileHumanoid.new()
 	for bone_name_i in skeleton.get_bone_count():
 		var bone_name = skeleton.get_bone_name(bone_name_i)
+		if -1 != profile.find_bone(bone_name):
+			continue
 		var swing_limit_cones = []
 		var bone_i = skeleton_profile.find_bone(bone_name)
 		if bone_i == -1 or bone_name.ends_with("Eye"):
@@ -139,6 +141,12 @@ func _run():
 			if bone_config.has("twist_range"):
 				twist_range = bone_config["twist_range"]
 			set_bone_constraint(many_bone_ik, bone_name, twist_from, twist_range, swing_limit_cones)
+		else:
+			var twist_from = 0
+			var twist_range = 0
+			swing_limit_cones = []
+			set_bone_constraint(many_bone_ik, bone_name, twist_from, twist_range, swing_limit_cones)
+			
 	many_bone_ik.queue_print_skeleton()
 
 	var bones: Array = [
@@ -203,6 +211,8 @@ func _run():
 		if bone_i == -1:
 			continue
 		var pose: Transform3D =  skeleton.get_bone_global_rest(bone_i)
+		if bone_name in ["LeftFoot", "RightFoot"]:
+			pose = pose.rotated(Vector3(1, 0, 0), -deg_to_rad(90))
 		marker_3d.global_transform = pose
 		many_bone_ik.set_pin_bone_name(pin_i, bone_name)
 		if bone_name in ["Root", "Hips", "LeftHand", "RightHand", "LeftFoot", "RightFoot", "Hips"]:
