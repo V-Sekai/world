@@ -107,8 +107,13 @@ func _run():
 	many_bone_ik.set_constraint_count(0)
 	var skeleton_profile: SkeletonProfileHumanoid = SkeletonProfileHumanoid.new()
 	var bone_configurations = {
-		"Hips": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0))], "twist_from": deg_to_rad(0.0), "twist_range": deg_to_rad(2)},
-		"Root": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0.0))], "twist_from": deg_to_rad(0.0), "twist_range": deg_to_rad(2)},
+		"Root": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0))], "twist_from": deg_to_rad(0.0), "twist_range": deg_to_rad(2)},
+		"Hips": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0.0))], "twist_from": deg_to_rad(0.0), "twist_range": deg_to_rad(2)},
+		"Spine": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(30.0))], "twist_from": deg_to_rad(-20.0), "twist_range": deg_to_rad(40.0)},
+		"Chest": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(20.0))], "twist_from": deg_to_rad(-15.0), "twist_range": deg_to_rad(30.0)},
+		"UpperChest": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(10.0))], "twist_from": deg_to_rad(-10.0), "twist_range": deg_to_rad(20.0)},
+		"Head": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(30.0))], "twist_from": deg_to_rad(-20.0), "twist_range": deg_to_rad(40.0)},
+		"Neck": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(20.0))], "twist_from": deg_to_rad(-15.0), "twist_range": deg_to_rad(30.0)},
 		"LeftShoulder": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(30.0))]},
 		"RightShoulder": {"swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(30.0))]},
 		"LeftUpperArm": {"twist_from": deg_to_rad(80.0), "twist_range": deg_to_rad(12.0), "swing_limit_cones": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0))]},
@@ -125,7 +130,7 @@ func _run():
 	var profile: SkeletonProfileHumanoid = SkeletonProfileHumanoid.new()
 	for bone_name_i in skeleton.get_bone_count():
 		var bone_name = skeleton.get_bone_name(bone_name_i)
-		if -1 != profile.find_bone(bone_name):
+		if -1 == profile.find_bone(bone_name):
 			continue
 		var swing_limit_cones = []
 		var bone_i = skeleton_profile.find_bone(bone_name)
@@ -141,12 +146,7 @@ func _run():
 			if bone_config.has("twist_range"):
 				twist_range = bone_config["twist_range"]
 			set_bone_constraint(many_bone_ik, bone_name, twist_from, twist_range, swing_limit_cones)
-		else:
-			var twist_from = 0
-			var twist_range = 0
-			swing_limit_cones = []
-			set_bone_constraint(many_bone_ik, bone_name, twist_from, twist_range, swing_limit_cones)
-			
+
 	many_bone_ik.queue_print_skeleton()
 
 	var bones: Array = [
