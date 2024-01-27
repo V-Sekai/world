@@ -147,8 +147,8 @@ func _run():
 		"LeftThumb": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0))]},
 		"RightThumb": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0))]},
 		"LeftUpperLeg": {
-			"twist_from": deg_to_rad(-30.0),
-			"twist_range": deg_to_rad(60.0),
+			"twist_from": deg_to_rad(-45.0),
+			"twist_range": deg_to_rad(90.0),
 			"kususdama": [
 				LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)),
 				LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(2.5)),
@@ -156,8 +156,8 @@ func _run():
 			]
 		},
 		"RightUpperLeg": {
-			"twist_from": deg_to_rad(-30.0),
-			"twist_range": deg_to_rad(60.0),
+			"twist_from": deg_to_rad(-45.0),
+			"twist_range": deg_to_rad(90.0),
 			"kususdama": [
 				LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)),
 				LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(2.5)),
@@ -192,7 +192,7 @@ func _run():
 	var bones: Array = [
 		"Hips",
 		"Chest",
-		#"LeftLowerArm",
+		"LeftLowerArm",
 		"LeftHand",
 		#"LeftThumbProximal",
 		#"LeftIndexProximal",
@@ -204,7 +204,7 @@ func _run():
 		#"LeftMiddleDistal",
 		#"LeftRingDistal",
 		#"LeftLittleDistal",
-		#"RightLowerArm",
+		"RightLowerArm",
 		"RightHand",
 		#"RightThumbProximal",
 		#"RightIndexProximal",
@@ -216,8 +216,8 @@ func _run():
 		#"RightMiddleDistal",
 		#"RightRingDistal",
 		#"RightLittleDistal",
-		#"LeftLowerLeg",
-		#"RightLowerLeg",
+		"LeftLowerLeg",
+		"RightLowerLeg",
 		"LeftFoot",
 		"RightFoot",
 		"Head",
