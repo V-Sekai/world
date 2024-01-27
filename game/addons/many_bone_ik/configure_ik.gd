@@ -146,6 +146,24 @@ func _run():
 		"RightHand": {"kususdama": [LimitCone.new(((Vector3.MODEL_TOP + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(65.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_BOTTOM + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(70.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_LEFT + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(40.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_RIGHT + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(45.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0))]},
 		"LeftThumb": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0))]},
 		"RightThumb": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0))]},
+		"LeftUpperLeg": {
+			"twist_from": deg_to_rad(-30.0),
+			"twist_range": deg_to_rad(60.0),
+			"kususdama": [
+				LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)),
+				LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(2.5)),
+				LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5))
+			]
+		},
+		"RightUpperLeg": {
+			"twist_from": deg_to_rad(-30.0),
+			"twist_range": deg_to_rad(60.0),
+			"kususdama": [
+				LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)),
+				LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(2.5)),
+				LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5))
+			]
+		},
 		"LeftLowerLeg": {"twist_from": deg_to_rad(-55.0), "twist_range": deg_to_rad(50.0), "kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5))]},
 		"RightLowerLeg": {"twist_from": deg_to_rad(-145.0), "twist_range": deg_to_rad(50.0), "kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5))]},
 	}
