@@ -114,16 +114,6 @@ func _run():
 		"UpperChest": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(10.0))], "twist_from": deg_to_rad(-10.0), "twist_range": deg_to_rad(20.0)},
 		"Head": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(30.0))], "twist_from": deg_to_rad(-10.0), "twist_range": deg_to_rad(20.0)},
 		"Neck": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(20.0))], "twist_from": deg_to_rad(-15.0), "twist_range": deg_to_rad(30.0)},
-		"LeftShoulder": {
-			"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(10.0))],
-			"twist_from": deg_to_rad(-5.0),
-			"twist_range": deg_to_rad(10.0)
-		},
-		"RightShoulder": {
-			"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(10.0))],
-			"twist_from": deg_to_rad(-5.0),
-			"twist_range": deg_to_rad(10.0)
-		},
 		"LeftUpperArm": {
 			"twist_from": deg_to_rad(80.0),
 			"twist_range": deg_to_rad(30.0),
