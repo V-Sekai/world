@@ -13,7 +13,7 @@
         "cwd": "${workspaceFolder}/godot"
       },
       "command": [
-        "scons warnings=no werror=yes dev_build=no precision=double compiledb=yes target=editor tests=yes debug_symbols=yes"
+        "scons werror=no dev_build=no precision=double compiledb=yes target=editor tests=yes debug_symbols=yes"
       ],
     },
     {
@@ -23,7 +23,7 @@
         "cwd": "${workspaceFolder}/godot"
       },
       "command": [
-        "scons warnings=no werror=yes dev_build=yes precision=double compiledb=yes target=editor tests=yes debug_symbols=yes"
+        "scons werror=no dev_build=yes precision=double compiledb=yes target=editor tests=yes debug_symbols=yes"
       ],
       "group": {
         "kind": "build",

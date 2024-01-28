@@ -11,15 +11,6 @@
   },
   "configurations": [
     {
-      "name": "Run the Macos editor tools/task_goal_planner",
-      "type": "lldb",
-      "request": "launch",
-      "args": ["--path", "tools/task_goal_planner", "-e", "-e"],
-      "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/godot/bin/godot.macos.editor.double.arm64",
-      "preLaunchTask": "Godot Engine"
-    },
-    {
       "name": "Run the Windows editor",
       "type": "lldb",
       "request": "launch",
@@ -27,6 +18,15 @@
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/godot/bin/godot.windows.editor.double.x86_64.llvm.exe",
       "preLaunchTask": "Godot Engine Windows Clang"
+    },
+    {
+      "name": "Run the Macos editor tools/task_goal_planner",
+      "type": "lldb",
+      "request": "launch",
+      "args": ["--path", "tools/task_goal_planner", "-e"],
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/godot/bin/godot.macos.editor.double.arm64",
+      "preLaunchTask": "Godot Engine"
     },
     {
       "name": "Run the Macos editor with task_goal_planner",
