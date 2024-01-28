@@ -241,9 +241,9 @@ public:
 	// IUnknown methods
 	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppv) {
 		static const QITAB qit[] = {
-			QITABENT(FileDialogEventHandler, IFileDialogEvents),
-			QITABENT(FileDialogEventHandler, IFileDialogControlEvents),
-			{ 0, 0 },
+			{ &__uuidof(IFileDialogEvents), static_cast<int>(OFFSETOFCLASS(IFileDialogEvents, FileDialogEventHandler)) },
+			{ &__uuidof(IFileDialogControlEvents), static_cast<int>(OFFSETOFCLASS(IFileDialogControlEvents, FileDialogEventHandler)) },
+			{ 0 },
 		};
 		return QISearch(this, qit, riid, ppv);
 	}
