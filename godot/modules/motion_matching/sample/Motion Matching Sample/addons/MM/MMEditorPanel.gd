@@ -2,7 +2,10 @@
 @tool
 extends Control
 
+@export
 var _current : MotionPlayer = null
+
+@export
 var _animplayer : AnimationPlayer = null
 
 @onready var rd : RichTextLabel = $TabContainer/Data/ScrollContainer/PoseData
