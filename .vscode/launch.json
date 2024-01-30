@@ -10,6 +10,7 @@
     }
   },
   "configurations": [
+
     {
       "name": "Run the Windows editor",
       "type": "lldb",
@@ -20,10 +21,10 @@
       "preLaunchTask": "Godot Engine Windows Clang"
     },
     {
-      "name": "Run the Macos editor tools/task_goal_planner",
+      "name": "Run the Macos editor tools/TOOL_godot_ik",
       "type": "lldb",
       "request": "launch",
-      "args": ["--path", "tools/task_goal_planner", "-e"],
+      "args": ["--path", "tools/TOOL_godot_ik", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
