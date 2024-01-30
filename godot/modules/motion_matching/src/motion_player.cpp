@@ -267,8 +267,9 @@ TypedArray<Dictionary> MotionPlayer::query_pose(int64_t included_category, int64
 	for (int64_t features_index = 0; features_index < motion_features.size(); ++features_index) {
 		MotionFeature *f = Object::cast_to<MotionFeature>(motion_features[features_index]);
 		auto f_query = f->broadphase_query_pose(blackboard, 0.016);
-		if (f_query.size() == f->get_dimension())
+		if (f_query.size() == f->get_dimension()) {
 			query.append_array(f_query);
+		}
 	}
 	// Normalization
 	for (int64_t i = 0; i < means.size(); ++i) {
