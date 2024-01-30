@@ -1,4 +1,3 @@
-@uid("uid://s0s73xvbqgar") # Generated automatically, do not modify.
 @tool
 extends EditorScript
 
