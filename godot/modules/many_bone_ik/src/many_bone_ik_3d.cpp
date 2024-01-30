@@ -769,13 +769,7 @@ void ManyBoneIK3D::_skeleton_changed(Skeleton3D *p_skeleton) {
 	if (roots.is_empty()) {
 		return;
 	}
-	for (Ref<IKBone3D> &bone : bone_list) {
-		bone.unref();
-	}
 	bone_list.clear();
-	for (Ref<IKBoneSegment3D> &skeleton : segmented_skeletons) {
-		skeleton.unref();
-	}
 	segmented_skeletons.clear();
 	for (BoneId root_bone_index : roots) {
 		String parentless_bone = p_skeleton->get_bone_name(root_bone_index);
