@@ -107,8 +107,8 @@ func _run():
 	var skeleton_profile: SkeletonProfileHumanoid = SkeletonProfileHumanoid.new()
 	var bone_configurations = {
 		"Root": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0))], "twist_from": deg_to_rad(0.0), "twist_range": deg_to_rad(2)},
-		"Hips": {"kususdama": [LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0.0))], "twist_from": deg_to_rad(0.0), "twist_range": deg_to_rad(2)},
-		"Spine": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(30.0))], "twist_from": deg_to_rad(-20.0), "twist_range": deg_to_rad(40.0)},
+		"Hips": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0))], "twist_from": deg_to_rad(0.0), "twist_range": deg_to_rad(2)},
+		"Spine": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(10.0))], "twist_from": deg_to_rad(-20.0), "twist_range": deg_to_rad(20.0)},
 		"Chest": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(20.0))], "twist_from": deg_to_rad(-15.0), "twist_range": deg_to_rad(30.0)},
 		"UpperChest": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(10.0))], "twist_from": deg_to_rad(-10.0), "twist_range": deg_to_rad(20.0)},
 		"Head": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(30.0))], "twist_from": deg_to_rad(-10.0), "twist_range": deg_to_rad(20.0)},
@@ -190,8 +190,8 @@ func _run():
 
 	var bones: Array = [
 		"Hips",
-		"Chest",
-		"LeftLowerArm",
+		#"Chest",
+		#"LeftLowerArm",
 		"LeftHand",
 		#"LeftThumbProximal",
 		#"LeftIndexProximal",
@@ -203,7 +203,7 @@ func _run():
 		#"LeftMiddleDistal",
 		#"LeftRingDistal",
 		#"LeftLittleDistal",
-		"RightLowerArm",
+		#"RightLowerArm",
 		"RightHand",
 		#"RightThumbProximal",
 		#"RightIndexProximal",
@@ -215,10 +215,10 @@ func _run():
 		#"RightMiddleDistal",
 		#"RightRingDistal",
 		#"RightLittleDistal",
-		"LeftLowerLeg",
-		"RightLowerLeg",
-		"LeftFoot",
-		"RightFoot",
+		#"LeftLowerLeg",
+		#"RightLowerLeg",
+		#"LeftFoot",
+		#"RightFoot",
 		"Head",
 	]
 
