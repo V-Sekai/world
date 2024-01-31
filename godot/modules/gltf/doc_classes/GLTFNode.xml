@@ -52,6 +52,9 @@
 		<member name="position" type="Vector3" setter="set_position" getter="get_position" default="Vector3(0, 0, 0)">
 			The position of the GLTF node relative to its parent.
 		</member>
+		<member name="rest_xform" type="Transform3D" setter="set_rest_xform" getter="get_rest_xform" default="Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)">
+		    The rest transform of the GLTF node relative to its parent.
+		</member>
 		<member name="rotation" type="Quaternion" setter="set_rotation" getter="get_rotation" default="Quaternion(0, 0, 0, 1)">
 			The rotation of the GLTF node relative to its parent.
 		</member>
