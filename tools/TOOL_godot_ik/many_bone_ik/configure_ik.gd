@@ -106,7 +106,7 @@ func _run():
 	many_bone_ik.set_constraint_count(0)
 	var skeleton_profile: SkeletonProfileHumanoid = SkeletonProfileHumanoid.new()
 	var bone_configurations = {
-		"Root": {"kususdama": [LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0.0))], "twist_from": deg_to_rad(0.0), "twist_range": deg_to_rad(2)},
+		"Root": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0))], "twist_from": deg_to_rad(0.0), "twist_range": deg_to_rad(2)},
 		"Hips": {"kususdama": [LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0.0))], "twist_from": deg_to_rad(0.0), "twist_range": deg_to_rad(2)},
 		"Spine": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(10.0))], "twist_from": deg_to_rad(-20.0), "twist_range": deg_to_rad(20.0)},
 		"Chest": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(20.0))], "twist_from": deg_to_rad(-15.0), "twist_range": deg_to_rad(30.0)},
