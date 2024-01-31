@@ -29,20 +29,25 @@
 /**************************************************************************/
 
 #include "motion_player.h"
+#include "core/error/error_macros.h"
 #include "scene/3d/physics_body_3d.h"
 #include "scene/3d/skeleton_3d.h"
+#include <climits>
 #include <cstdint>
 
 void MotionPlayer::set_skeleton_to_pose(Ref<Animation> animation, double time) {
+	ERR_FAIL_COND(animation.is_null());
 	CharacterBody3D *the_char = cast_to<CharacterBody3D>(get_node(main_node));
+	ERR_FAIL_NULL(the_char);
 	Skeleton3D *current_skeleton = cast_to<Skeleton3D>(the_char->get_node(NodePath("Armature/GeneralSkeleton")));
+	ERR_FAIL_NULL(current_skeleton);
 	for (auto bone_id = 0; bone_id < current_skeleton->get_bone_count(); ++bone_id) {
-		const auto bone_name = "%GeneralSkeleton:" + skeleton->get_bone_name(bone_id);
-		const auto pos_track = animation->find_track(NodePath(bone_name), Animation::TrackType::TYPE_POSITION_3D);
-		const auto rot_track = animation->find_track(NodePath(bone_name), Animation::TrackType::TYPE_ROTATION_3D);
+		const String bone_name = "%GeneralSkeleton:" + current_skeleton->get_bone_name(bone_id);
+		const int pos_track = animation->find_track(NodePath(bone_name), Animation::TrackType::TYPE_POSITION_3D);
+		const int rot_track = animation->find_track(NodePath(bone_name), Animation::TrackType::TYPE_ROTATION_3D);
 		if (pos_track >= 0) {
 			const Vector3 position = animation->position_track_interpolate(pos_track, time);
-			current_skeleton->set_bone_pose_position(bone_id, position * skeleton->get_motion_scale());
+			current_skeleton->set_bone_pose_position(bone_id, position * current_skeleton->get_motion_scale());
 		}
 		if (rot_track >= 0) {
 			const Quaternion rotation = animation->rotation_track_interpolate(rot_track, time);
@@ -52,25 +57,27 @@ void MotionPlayer::set_skeleton_to_pose(Ref<Animation> animation, double time) {
 }
 
 void MotionPlayer::reset_skeleton_poses() {
-	skeleton = cast_to<Skeleton3D>(get_node(skeleton_path));
-	print_line((skeleton == nullptr) ? "Skeleton error, path not found" : "Skeleton set");
+	Skeleton3D *current_skeleton = cast_to<Skeleton3D>(get_node(skeleton_path));
+	ERR_FAIL_NULL_MSG(current_skeleton, "Skeleton error, path not found");
 	print_line("Resetting the skeleton");
-	skeleton->reset_bone_poses();
+	current_skeleton->reset_bone_poses();
 	print_line("Skeleton reset");
 }
 
 void MotionPlayer::baking_data() {
-	skeleton = cast_to<Skeleton3D>(get_node(skeleton_path));
+	Skeleton3D *current_skeleton = cast_to<Skeleton3D>(get_node(skeleton_path));
+	ERR_FAIL_NULL_MSG(current_skeleton, "Skeleton error, path not found");
 
 	if (motion_features.size() == 0) {
 		print_line("Motions Features is empty");
 		return;
-	} else if (skeleton == nullptr) {
+	} else if (current_skeleton == nullptr) {
 		print_line("Skeleton isn't properly set");
 		return;
 	}
 	Node *character;
 	character = get_node(main_node);
+	ERR_FAIL_NULL_MSG(character, "Character not found");
 
 	if (kdt != nullptr) {
 		delete kdt;
@@ -223,7 +230,7 @@ void MotionPlayer::baking_data() {
 
 	print_line(vformat("Nb poses %d", int64_t(nodes.size())));
 
-	skeleton->reset_bone_poses();
+	current_skeleton->reset_bone_poses();
 }
 
 void MotionPlayer::recalculate_weights() {
@@ -322,7 +329,10 @@ TypedArray<Dictionary> MotionPlayer::query_pose(int64_t included_category, int64
 
 Array MotionPlayer::check_query_results(PackedFloat32Array query, int64_t nb_result) {
 	if (kdt == nullptr) {
-		auto nb_dimensions = query.size();
+		int64_t nb_dimensions = query.size();
+		if (!nb_dimensions) {
+			return Array();
+		}
 		Kdtree::KdNodeVector nodes{};
 		for (int64_t i = 0; i < MotionData.size() / nb_dimensions; ++i) {
 			auto begin = MotionData.ptr(), end = MotionData.ptr(); // We use the ptr as iterator.
@@ -349,7 +359,7 @@ Array MotionPlayer::check_query_results(PackedFloat32Array query, int64_t nb_res
 
 	kdt->set_distance(distance_type, &tmp_weight);
 
-	auto query_data = Kdtree::CoordPoint(query.ptr(), std::next(query.ptr(), query.size()));
+	Kdtree::CoordPoint query_data = Kdtree::CoordPoint(query.ptr(), std::next(query.ptr(), query.size()));
 
 	print_line("query Constructed");
 
@@ -365,9 +375,9 @@ Array MotionPlayer::check_query_results(PackedFloat32Array query, int64_t nb_res
 				i.index >= db_anim_category.size()) {
 			continue;
 		}
-		const auto anim_name = names[db_anim_index[i.index]];
-		const auto anim_time = db_anim_timestamp[i.index];
-		const auto anim_cat = db_anim_category[i.index];
+		const StringName anim_name = names[db_anim_index[i.index]];
+		const float anim_time = db_anim_timestamp[i.index];
+		const int anim_cat = db_anim_category[i.index];
 		Array anim_array;
 		anim_array.resize(3);
 		anim_array[0] = anim_name;
@@ -416,7 +426,7 @@ void MotionPlayer::_bind_methods() {
 		ClassDB::bind_method(D_METHOD("set_main_node", "path"), &MotionPlayer::set_main_node);
 		ClassDB::bind_method(D_METHOD("get_main_node"), &MotionPlayer::get_main_node);
 		ADD_PROPERTY(PropertyInfo(Variant::NODE_PATH, "main_node"), "set_main_node", "get_main_node");
-		ClassDB::bind_method(D_METHOD("set_skeleton_path", "skeleton path"), &MotionPlayer::set_skeleton);
+		ClassDB::bind_method(D_METHOD("set_skeleton_path", "skeleton_path"), &MotionPlayer::set_skeleton);
 		ClassDB::bind_method(D_METHOD("get_skeleton"), &MotionPlayer::get_skeleton);
 		ADD_PROPERTY(PropertyInfo(Variant::NODE_PATH, "skeleton_node_path"), "set_skeleton_path", "get_skeleton");
 
@@ -463,8 +473,8 @@ void MotionPlayer::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("recalculate_weights"), &MotionPlayer::recalculate_weights);
 	ClassDB::bind_method(D_METHOD("baking_data"), &MotionPlayer::baking_data);
-	ClassDB::bind_method(D_METHOD("query_pose", "include_category", "exclude_category"), &MotionPlayer::query_pose, DEFVAL(std::numeric_limits<int64_t>::max()), DEFVAL(0));
-	ClassDB::bind_method(D_METHOD("check_query_results", "Query", "Result count"), &MotionPlayer::check_query_results);
+	ClassDB::bind_method(D_METHOD("query_pose", "include_category", "exclude_category"), &MotionPlayer::query_pose, DEFVAL(INT64_MAX), DEFVAL(0));
+	ClassDB::bind_method(D_METHOD("check_query_results", "query", "result_count"), &MotionPlayer::check_query_results);
 }
 
 void MotionPlayer::_notification(int p_what) {
@@ -488,6 +498,9 @@ void MotionPlayer::_notification(int p_what) {
 			print_line(vformat("Total Dimension %d", nb_dimensions));
 			print_line("Constructing kdtree");
 			Kdtree::KdNodeVector nodes{};
+			if (!nb_dimensions) {
+				return;
+			}
 			for (int64_t i = 0; i < MotionData.size() / nb_dimensions; ++i) {
 				auto begin = MotionData.ptr(), end = MotionData.ptr(); // We use the ptr as iterator.
 				begin = std::next(begin, nb_dimensions * i);
@@ -519,9 +532,25 @@ void MotionPlayer::_notification(int p_what) {
 		} break;
 	}
 }
+
 void MotionPlayer::set_distance_type(int value) {
 	distance_type = value;
 	if (kdt != nullptr && 0 <= distance_type && distance_type <= 2)
 		kdt->set_distance(distance_type);
 }
+
 int MotionPlayer::get_distance_type() { return distance_type; }
+
+void MotionPlayer::set_skeleton(NodePath path) {
+	skeleton_path = path;
+}
+
+NodePath MotionPlayer::get_skeleton() { return skeleton_path; }
+
+bool MotionPlayer::Category_Pred::operator()(const Kdtree::KdNode &node) const {
+	static constexpr std::bitset<64> zero = {};
+	const std::bitset<64> node_category = *((int32_t *)node.data);
+	const bool include = (m_desired_category & node_category) == node_category;
+	const bool exclude = (m_exclude_category & node_category) == zero;
+	return include && exclude;
+}

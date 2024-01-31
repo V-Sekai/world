@@ -52,21 +52,7 @@
 #include "scene/resources/animation.h"
 #include "scene/resources/primitive_meshes.h"
 
-#define MAKE_RESOURCE_TYPE_HINT(m_type) vformat("%s/%s:%s", Variant::OBJECT, PROPERTY_HINT_RESOURCE_TYPE, m_type)
-#define GETSET(type, variable, ...)            \
-	type variable{ __VA_ARGS__ };              \
-	type get_##variable() { return variable; } \
-	void set_##variable(type value) { variable = value; }
-#define STR(x) #x
-#define STRING_PREFIX(prefix, s) STR(prefix##s)
-#define BINDER(type, variable, ...)                                                                             \
-	ClassDB::bind_method(D_METHOD(STRING_PREFIX(set_, variable), "value"), &type::set_##variable, __VA_ARGS__); \
-	ClassDB::bind_method(D_METHOD(STRING_PREFIX(get_, variable)), &type::get_##variable);
-#define BINDER_PROPERTY(type, variant_type, variable, ...) \
-	BINDER(type, variable, __VA_ARGS__)                    \
-	ADD_PROPERTY(PropertyInfo(variant_type, #variable), STRING_PREFIX(set_, variable), STRING_PREFIX(get_, variable));
-
-struct MotionFeature : public Resource {
+class MotionFeature : public Resource {
 	GDCLASS(MotionFeature, Resource)
 public:
 	static constexpr float delta = 0.016f;
@@ -96,7 +82,7 @@ protected:
 
 #include "scene/3d/physics_body_3d.h"
 
-struct RootVelocityMotionFeature : public MotionFeature {
+class RootVelocityMotionFeature : public MotionFeature {
 	GDCLASS(RootVelocityMotionFeature, MotionFeature)
 public:
 	CharacterBody3D *body;
@@ -114,7 +100,13 @@ public:
 		return 3;
 	}
 
-	GETSET(float, weight, 1.0f);
+	float weight{ 1.0f }; // Default value initialization with 1.0f
+	float get_weight() {
+		return weight;
+	}
+	void set_weight(float value) {
+		weight = value;
+	}
 	virtual PackedFloat32Array get_weights() override {
 		PackedFloat32Array weights{ weight, weight, weight };
 		return weights;
@@ -160,22 +152,7 @@ public:
 	}
 
 protected:
-	static void _bind_methods() {
-		ClassDB::bind_method(D_METHOD("set_weight", "value"), &RootVelocityMotionFeature::set_weight, DEFVAL(1.0f));
-		ClassDB::bind_method(D_METHOD("get_weight"), &RootVelocityMotionFeature::get_weight);
-		ClassDB::add_property(get_class_static(), PropertyInfo(Variant::FLOAT, "weight"), "set_weight", "get_weight");
-
-		// ClassDB::bind_method( D_METHOD("set_body","value"), &RootVelocityMotionFeature::set_body);
-		// ClassDB::bind_method( D_METHOD("get_body"), &RootVelocityMotionFeature::get_body);
-		// ADD_PROPERTY(PropertyInfo(Variant::NODE_PATH,"Character",godot::PROPERTY_HINT_NODE_PATH_VALID_TYPES,"CharacterBody3D"),"set_body","get_body");
-
-		ClassDB::bind_method(D_METHOD("set_root_bone_name", "value"), &RootVelocityMotionFeature::set_root_bone_name, DEFVAL("%GeneralSkeleton:Root"));
-		ClassDB::bind_method(D_METHOD("get_root_bone_name"), &RootVelocityMotionFeature::get_root_bone_name);
-		ADD_PROPERTY(PropertyInfo(Variant::STRING, "Root Bone"), "set_root_bone_name", "get_root_bone_name");
-		// ClassDB::bind_method( D_METHOD("setup_for_animation","animation"), &RootVelocityMotionFeature::setup_for_animation);
-		// ClassDB::bind_method( D_METHOD("bake_animation_pose","animation","time"), &RootVelocityMotionFeature::bake_animation_pose);
-		// ClassDB::bind_method( D_METHOD("narrowphase_evaluate_cost","data_to_evaluate"), &RootVelocityMotionFeature::narrowphase_evaluate_cost);
-	}
+	static void _bind_methods();
 
 	virtual void debug_pose_gizmo(Ref<RefCounted> p_gizmo, const PackedFloat32Array data, Transform3D tr = Transform3D{}) override {
 #ifdef TOOLS_ENABLED
@@ -190,18 +167,22 @@ protected:
 	}
 };
 
-struct BonePositionVelocityMotionFeature : public MotionFeature {
+class BonePositionVelocityMotionFeature : public MotionFeature {
 	GDCLASS(BonePositionVelocityMotionFeature, MotionFeature)
 	Skeleton3D *skeleton = nullptr;
+	PackedStringArray bone_names{};
+	PackedInt32Array bones_id{};
+	CharacterBody3D *the_char = nullptr;
+	HashMap<uint32_t, PackedInt32Array> bone_tracks{};
+	float last_time_queried = 0.0f;
+	float weight_bone_pos{ 1.0f };
+	float weight_bone_vel{ 1.0f };
+public:
 	NodePath to_skeleton{};
 	void set_to_skeleton(NodePath path);
 	NodePath get_to_skeleton();
-	PackedStringArray bone_names{};
 	void set_bone_names(PackedStringArray value);
 	PackedStringArray get_bone_names();
-	PackedInt32Array bones_id{};
-	HashMap<uint32_t, PackedInt32Array> bone_tracks{};
-	CharacterBody3D *the_char = nullptr;
 	virtual int get_dimension() override;
 	virtual void setup_nodes(Variant character) override;
 	virtual void setup_for_animation(Ref<Animation> animation) override;
@@ -210,40 +191,157 @@ struct BonePositionVelocityMotionFeature : public MotionFeature {
 	PackedVector3Array last_known_positions{};
 	PackedVector3Array last_known_velocities{};
 	PackedFloat32Array last_known_result{};
-	float last_time_queried = 0.0f;
 	virtual PackedFloat32Array broadphase_query_pose(Dictionary blackboard, float delta) override;
 	virtual float narrowphase_evaluate_cost(PackedFloat32Array to_convert) override;
-	GETSET(float, weight_bone_pos, 1.0f);
-	GETSET(float, weight_bone_vel, 1.0f);
+	float get_weight_bone_pos() const {
+		return weight_bone_pos;
+	}
+	void set_weight_bone_pos(float value) {
+		weight_bone_pos = value;
+	}
+	float get_weight_bone_vel() const {
+		return weight_bone_vel;
+	}
+	void set_weight_bone_vel(float value) {
+		weight_bone_vel = value;
+	}
 	virtual PackedFloat32Array get_weights() override;
-	float get_weight_bone_pos() const;
 
 protected:
 	static void _bind_methods();
 	virtual void debug_pose_gizmo(Ref<RefCounted> gizmo, const PackedFloat32Array data, Transform3D tr = Transform3D{}) override;
 };
 
-struct PredictionMotionFeature : public MotionFeature {
+class PredictionMotionFeature : public MotionFeature {
 	GDCLASS(PredictionMotionFeature, MotionFeature)
+public:
+	Skeleton3D *skeleton{ nullptr };
 
-	GETSET(Skeleton3D *, skeleton, nullptr);
-	GETSET(String, root_bone_name, "%GeneralSkeleton:Root")
+	Skeleton3D *get_skeleton() {
+		return skeleton;
+	}
 
-	GETSET(NodePath, character_path);
+	void set_skeleton(Skeleton3D *value) {
+		skeleton = value;
+	}
+	String root_bone_name{ "%GeneralSkeleton:Root" };
 
-	GETSET(float, halflife_velocity, 0.2);
-	GETSET(float, halflife_angular_velocity, 0.13);
+	String get_root_bone_name() const {
+		return root_bone_name;
+	}
 
-	GETSET(PackedFloat32Array, past_time_dt);
-	GETSET(PackedFloat32Array, future_time_dt);
-	GETSET(int, past_count, 4);
-	GETSET(float, past_delta, 0.7f / past_count);
-	GETSET(int, future_count, 6);
-	GETSET(float, future_delta, 1.2f / future_count);
+	void set_root_bone_name(const String &value) {
+		root_bone_name = value;
+	}
+	NodePath character_path;
 
-	GETSET(float, weight_history_pos, 1.0f);
-	GETSET(float, weight_prediction_pos, 1.0f);
-	GETSET(float, weight_prediction_angle, 1.0f);
+	NodePath get_character_path() const {
+		return character_path;
+	}
+
+	void set_character_path(const NodePath &value) {
+		character_path = value;
+	}
+	float halflife_velocity{ 0.2f };
+
+	float get_halflife_velocity() const {
+		return halflife_velocity;
+	}
+
+	void set_halflife_velocity(float value) {
+		halflife_velocity = value;
+	}
+	float halflife_angular_velocity{ 0.13f };
+
+	float get_halflife_angular_velocity() const {
+		return halflife_angular_velocity;
+	}
+
+	void set_halflife_angular_velocity(float value) {
+		halflife_angular_velocity = value;
+	}
+	PackedFloat32Array past_time_dt;
+
+	PackedFloat32Array get_past_time_dt() {
+		return past_time_dt;
+	}
+
+	void set_past_time_dt(const PackedFloat32Array &value) {
+		past_time_dt = value;
+	}
+	PackedFloat32Array future_time_dt;
+
+	PackedFloat32Array get_future_time_dt() {
+		return future_time_dt;
+	}
+
+	void set_future_time_dt(const PackedFloat32Array &value) {
+		future_time_dt = value;
+	}
+	int past_count{ 4 };
+
+	int get_past_count() const {
+		return past_count;
+	}
+
+	void set_past_count(int value) {
+		past_count = value;
+	}
+	float past_delta{ 0.7f / past_count };
+
+	float get_past_delta() const {
+		return past_delta;
+	}
+
+	void set_past_delta(float value) {
+		past_delta = value;
+	}
+	int future_count{ 6 };
+
+	int get_future_count() const {
+		return future_count;
+	}
+
+	void set_future_count(int value) {
+		future_count = value;
+	}
+	float future_delta{ 1.2f / future_count };
+
+	float get_future_delta() const {
+		return future_delta;
+	}
+
+	void set_future_delta(float value) {
+		future_delta = value;
+	}
+	float weight_history_pos{ 1.0f };
+
+	float get_weight_history_pos() const {
+		return weight_history_pos;
+	}
+
+	void set_weight_history_pos(float value) {
+		weight_history_pos = value;
+	}
+	float weight_prediction_pos{ 1.0f };
+
+	float get_weight_prediction_pos() const {
+		return weight_prediction_pos;
+	}
+
+	void set_weight_prediction_pos(float value) {
+		weight_prediction_pos = value;
+	}
+	float weight_prediction_angle{ 1.0f };
+
+	float get_weight_prediction_angle() const {
+		return weight_prediction_angle;
+	}
+
+	void set_weight_prediction_angle(float value) {
+		weight_prediction_angle = value;
+	}
+
 	virtual PackedFloat32Array get_weights() override;
 	PredictionMotionFeature();
 
@@ -268,11 +366,5 @@ protected:
 	static void _bind_methods();
 	virtual void debug_pose_gizmo(Ref<RefCounted> gizmo, const PackedFloat32Array data, Transform3D tr = Transform3D{}) override;
 };
-
-#undef MAKE_RESOURCE_TYPE_HINT
-#undef GETSET
-#undef STR
-#undef STRING_PREFIX
-#undef BINDER
 
 #endif // MOTION_FEATURES_H

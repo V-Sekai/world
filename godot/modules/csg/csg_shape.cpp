@@ -432,6 +432,7 @@ void CSGShape3D::_update_shape() {
 		for (int index_i = 0; index_i < surfaces[i].indices.size(); index_i++) {
 			surface_tool->add_index(surfaces[i].indices[index_i]);
 		}
+		surface_tool->index();
 		surface_tool->generate_tangents();
 
 		Array array = surface_tool->commit_to_arrays();
