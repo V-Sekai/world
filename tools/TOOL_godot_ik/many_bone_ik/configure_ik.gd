@@ -106,8 +106,8 @@ func _run():
 	many_bone_ik.set_constraint_count(0)
 	var skeleton_profile: SkeletonProfileHumanoid = SkeletonProfileHumanoid.new()
 	var bone_configurations = {
-		"Root": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0))], "twist_from": deg_to_rad(0.0), "twist_range": deg_to_rad(2)},
-		"Hips": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0))], "twist_from": deg_to_rad(0.0), "twist_range": deg_to_rad(2)},
+		"Root": {"kususdama": [LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0.0))], "twist_from": deg_to_rad(0.0), "twist_range": deg_to_rad(2)},
+		"Hips": {"kususdama": [LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0.0))], "twist_from": deg_to_rad(0.0), "twist_range": deg_to_rad(2)},
 		"Spine": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(10.0))], "twist_from": deg_to_rad(-20.0), "twist_range": deg_to_rad(20.0)},
 		"Chest": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(20.0))], "twist_from": deg_to_rad(-15.0), "twist_range": deg_to_rad(30.0)},
 		"UpperChest": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(10.0))], "twist_from": deg_to_rad(-10.0), "twist_range": deg_to_rad(20.0)},
@@ -190,6 +190,7 @@ func _run():
 
 	var bones: Array = [
 		"Hips",
+		#"Hips",
 		#"Chest",
 		#"LeftLowerArm",
 		"LeftHand",
@@ -217,8 +218,8 @@ func _run():
 		#"RightLittleDistal",
 		#"LeftLowerLeg",
 		#"RightLowerLeg",
-		#"LeftFoot",
-		#"RightFoot",
+		"LeftFoot",
+		"RightFoot",
 		"Head",
 	]
 
@@ -228,7 +229,7 @@ func _run():
 	var children: Array[Node] = root.find_children("*", "BoneAttachment3D")
 	for i in range(children.size()):
 		var node: Node = children[i] as Node
-		node.queue_free()
+		node.free()
 
 	for pin_i in range(bones.size()):
 		var bone_name: String = bones[pin_i]
@@ -239,12 +240,14 @@ func _run():
 		else:
 			marker_3d.bone_name = bone_name
 		marker_3d.set_external_skeleton("../..")
-		many_bone_ik.add_child(marker_3d, true)
+		many_bone_ik.add_child(marker_3d)
+		marker_3d.set_name(bone_name + "Pin")
 		many_bone_ik.set_pin_nodepath(pin_i, many_bone_ik.get_path_to(marker_3d))
 		marker_3d.owner = root
 		var targets_3d: Marker3D = Marker3D.new()
 		targets_3d.gizmo_extents =  .05
-		marker_3d.add_child(targets_3d, true)
+		marker_3d.add_child(targets_3d)
+		targets_3d.set_name(bone_name + "Marker3D")
 		targets_3d.owner = root
 		var bone_i: int = skeleton.find_bone(bone_name)
 		if bone_i == -1:
