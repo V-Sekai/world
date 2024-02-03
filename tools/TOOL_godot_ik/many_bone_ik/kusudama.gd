@@ -57,8 +57,20 @@ var bone_configurations = {
 	},
 	"LeftThumb": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0))]},
 	"RightThumb": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0))]},
-	"LeftUpperLeg": {},
-	"RightUpperLeg": {},
+	"LeftUpperLeg": {
+		"kususdama": [
+			LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0)),  # Allow forward kick
+			LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(45.0)),   # Allow backward motion
+			LimitCone.new(Vector3.MODEL_LEFT, deg_to_rad(45.0))    # Allow sidestep motion
+		]
+	},    
+	"RightUpperLeg": {
+		"kususdama": [
+			LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0)),  # Allow forward kick
+			LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(45.0)),   # Allow backward motion
+			LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(45.0))   # Allow sidestep motion
+		]
+	},
 	"LeftLowerLeg": {
 		"kususdama": [
 			LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)),
