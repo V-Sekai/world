@@ -66,27 +66,23 @@ func _run():
 	skeleton.reset_bone_poses()
 	many_bone_ik.set_constraint_count(0)
 	var skeleton_profile: SkeletonProfileHumanoid = SkeletonProfileHumanoid.new()
-	var bone_configurations = ik_config.new().bone_configurations
 	var profile: SkeletonProfileHumanoid = SkeletonProfileHumanoid.new()
-	for bone_name_i in skeleton.get_bone_count():
-		var bone_name = skeleton.get_bone_name(bone_name_i)
-		if -1 == profile.find_bone(bone_name):
-			continue
+	var bone_config = ik_config.new().bone_configurations
+	for bone_name in bone_config.keys():
 		var kususdama = []
-		var bone_i = skeleton_profile.find_bone(bone_name)
-		if bone_i == -1 or bone_name.ends_with("Eye"):
+		if bone_name.ends_with("Eye"):
 			continue
-		var bone_config = bone_configurations.get(bone_name)
-		if bone_config:
-			if bone_config.has("kususdama"):
-				kususdama = bone_config["kususdama"]
-			var twist_from = 0
-			if bone_config.has("twist_from"):
-				twist_from = bone_config["twist_from"]
-			var twist_range = 0
-			if bone_config.has("twist_range"):
-				twist_range = bone_config["twist_range"]
-			set_bone_constraint(many_bone_ik, bone_name, twist_from, twist_range, kususdama)
+		var config = bone_config[bone_name]
+		if config.has("kususdama"):
+			for element in config["kususdama"]:
+				kususdama.append(element)
+		var twist_from = 0
+		if config.has("twist_from"):
+			twist_from = config["twist_from"]
+		var twist_range = 0
+		if config.has("twist_range"):
+			twist_range = config["twist_range"]
+		set_bone_constraint(many_bone_ik, bone_name, twist_from, twist_range, kususdama)
 
 	many_bone_ik.queue_print_skeleton()
 
@@ -194,12 +190,12 @@ func get_bone_constraint(p_bone_name: String) -> BoneConstraint:
 
 func set_bone_constraint(many_bone_ik: ManyBoneIK3D, p_bone_name: String, p_twist_from: float, p_twist_range: float, p_kususdama: Array):
 	bone_constraints[p_bone_name] = BoneConstraint.new(p_twist_from, p_twist_range, p_kususdama)
-	var constraint_count = many_bone_ik.get_constraint_count()
-	many_bone_ik.set_constraint_count(constraint_count + 1)
-	many_bone_ik.set_constraint_name(constraint_count, p_bone_name)
-	many_bone_ik.set_kusudama_twist(constraint_count, Vector2(p_twist_from, p_twist_range))
-	many_bone_ik.set_kusudama_limit_cone_count(constraint_count, p_kususdama.size())
+	var constraint_i = many_bone_ik.get_constraint_count()
+	many_bone_ik.set_constraint_count(many_bone_ik.get_constraint_count() + 1)
+	many_bone_ik.set_constraint_name(constraint_i, p_bone_name)
+	many_bone_ik.set_kusudama_twist(constraint_i, Vector2(p_twist_from, p_twist_range))
+	many_bone_ik.set_kusudama_limit_cone_count(constraint_i, p_kususdama.size())
 	for cone_constraint_i: int in range(p_kususdama.size()):
-		var cone_constraint: ik_config.LimitCone = p_kususdama[cone_constraint_i]
-		many_bone_ik.set_kusudama_limit_cone_center(constraint_count, cone_constraint_i, cone_constraint.direction)
-		many_bone_ik.set_kusudama_limit_cone_radius(constraint_count, cone_constraint_i, cone_constraint.angle)
+		var cone_constraint = p_kususdama[cone_constraint_i]
+		many_bone_ik.set_kusudama_limit_cone_center(constraint_i, cone_constraint_i, cone_constraint.direction)
+		many_bone_ik.set_kusudama_limit_cone_radius(constraint_i, cone_constraint_i, cone_constraint.angle)
