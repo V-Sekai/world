@@ -84,7 +84,7 @@ func _run():
 			twist_range = config["twist_range"]
 		set_bone_constraint(many_bone_ik, bone_name, twist_from, twist_range, kususdama)
 
-	many_bone_ik.queue_print_skeleton()
+	#many_bone_ik.queue_print_skeleton()
 
 	var bones: Array = [
 		"Hips",
@@ -194,6 +194,7 @@ func set_bone_constraint(many_bone_ik: ManyBoneIK3D, p_bone_name: String, p_twis
 	many_bone_ik.set_constraint_count(many_bone_ik.get_constraint_count() + 1)
 	many_bone_ik.set_constraint_name(constraint_i, p_bone_name)
 	many_bone_ik.set_kusudama_twist(constraint_i, Vector2(p_twist_from, p_twist_range))
+	many_bone_ik.set_kusudama_limit_cone_count(constraint_i, 0)
 	many_bone_ik.set_kusudama_limit_cone_count(constraint_i, p_kususdama.size())
 	for cone_constraint_i: int in range(p_kususdama.size()):
 		var cone_constraint = p_kususdama[cone_constraint_i]
