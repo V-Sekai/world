@@ -87,6 +87,7 @@ func _run():
 	#many_bone_ik.queue_print_skeleton()
 
 	var bones: Array = [
+		"Root",
 		"Hips",
 		#"Hips",
 		#"Chest",
@@ -146,7 +147,7 @@ func _run():
 			pose = pose.rotated(Vector3(1, 0, 0), -deg_to_rad(90))
 		targets_3d.global_transform = pose
 		many_bone_ik.set_pin_bone_name(pin_i, bone_name)
-		if bone_name in ["Root", "Hips", "LeftHand", "RightHand", "LeftFoot", "RightFoot", "Hips"]:
+		if bone_name in ["Root", "LeftHand", "RightHand", "LeftFoot", "RightFoot"]:
 			many_bone_ik.set_pin_passthrough_factor(pin_i, 0)
 		else:
 			many_bone_ik.set_pin_passthrough_factor(pin_i, 1)
