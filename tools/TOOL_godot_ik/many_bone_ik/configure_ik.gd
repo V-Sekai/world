@@ -99,7 +99,7 @@ func _run():
 	many_bone_ik.set_process_thread_group(Node.PROCESS_THREAD_GROUP_SUB_THREAD)
 	many_bone_ik.set_process_thread_group_order(100)
 
-	var skeleton: Skeleton3D = many_bone_ik.get_node_or_null(many_bone_ik.get_skeleton_node_path()) as Skeleton3D
+	var skeleton: Skeleton3D = many_bone_ik.get_node("..")
 
 	skeleton.show_rest_only = true
 	skeleton.reset_bone_poses()
@@ -145,24 +145,24 @@ func _run():
 		"RightHand": {"kususdama": [LimitCone.new(((Vector3.MODEL_TOP + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(65.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_BOTTOM + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(70.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_LEFT + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(40.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0)), LimitCone.new(((Vector3.MODEL_RIGHT + Vector3.MODEL_FRONT) / 2.0).normalized(), deg_to_rad(45.0)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0))]},
 		"LeftThumb": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0))]},
 		"RightThumb": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0))]},
-		"LeftUpperLeg": {
-			"twist_from": deg_to_rad(-45.0),
-			"twist_range": deg_to_rad(90.0),
-			"kususdama": [
-				LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)),
-				LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(2.5)),
-				LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5))
-			]
-		},
-		"RightUpperLeg": {
-			"twist_from": deg_to_rad(-45.0),
-			"twist_range": deg_to_rad(90.0),
-			"kususdama": [
-				LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)),
-				LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(2.5)),
-				LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5))
-			]
-		},
+		#"LeftUpperLeg": {
+			#"twist_from": deg_to_rad(-45.0),
+			#"twist_range": deg_to_rad(90.0),
+			#"kususdama": [
+				#LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)),
+				#LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(2.5)),
+				#LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5))
+			#]
+		#},
+		#"RightUpperLeg": {
+			#"twist_from": deg_to_rad(-45.0),
+			#"twist_range": deg_to_rad(90.0),
+			#"kususdama": [
+				#LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)),
+				#LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(2.5)),
+				#LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5))
+			#]
+		#},
 		"LeftLowerLeg": {"twist_from": deg_to_rad(-55.0), "twist_range": deg_to_rad(50.0), "kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5))]},
 		"RightLowerLeg": {"twist_from": deg_to_rad(-145.0), "twist_range": deg_to_rad(50.0), "kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)), LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5))]},
 	}
@@ -226,42 +226,37 @@ func _run():
 	many_bone_ik.set_pin_count(0)
 	many_bone_ik.set_pin_count(bones.size())
 
-	var children: Array[Node] = root.find_children("*", "BoneAttachment3D")
+	var children: Array[Node] = root.find_children("*", "Marker3D")
 	for i in range(children.size()):
 		var node: Node = children[i] as Node
+		if node == null:
+			continue
 		node.free()
 
 	for pin_i in range(bones.size()):
-		var bone_name: String = bones[pin_i]
-		var marker_3d: BoneAttachment3D = BoneAttachment3D.new()
-		marker_3d.name = bone_name
-		if bone_name == "Root":
-			marker_3d.bone_name = "root"
-		else:
-			marker_3d.bone_name = bone_name
-		marker_3d.set_external_skeleton("../..")
-		many_bone_ik.add_child(marker_3d)
-		marker_3d.set_name(bone_name + "Pin")
-		many_bone_ik.set_pin_nodepath(pin_i, many_bone_ik.get_path_to(marker_3d))
-		marker_3d.owner = root
+		var bone_name = bones[pin_i]
 		var targets_3d: Marker3D = Marker3D.new()
 		targets_3d.gizmo_extents =  .05
-		marker_3d.add_child(targets_3d)
+		many_bone_ik.add_child(targets_3d)
+		targets_3d.owner = many_bone_ik.owner
 		targets_3d.set_name(bone_name + "Marker3D")
-		targets_3d.owner = root
 		var bone_i: int = skeleton.find_bone(bone_name)
 		if bone_i == -1:
 			continue
 		var pose: Transform3D =  skeleton.get_bone_global_rest(bone_i)
 		if bone_name in ["LeftFoot", "RightFoot"]:
 			pose = pose.rotated(Vector3(1, 0, 0), -deg_to_rad(90))
-		marker_3d.global_transform = pose
+		targets_3d.global_transform = pose
 		many_bone_ik.set_pin_bone_name(pin_i, bone_name)
 		if bone_name in ["Root", "Hips", "LeftHand", "RightHand", "LeftFoot", "RightFoot", "Hips"]:
 			many_bone_ik.set_pin_passthrough_factor(pin_i, 0)
 		else:
 			many_bone_ik.set_pin_passthrough_factor(pin_i, 1)
 
+	for pin_i in range(bones.size()):
+		var bone_name = bones[pin_i]
+		many_bone_ik.set_pin_nodepath(pin_i, NodePath(bone_name + "Marker3D"))
+		
 	skeleton.show_rest_only = false
 
 	var set_a: Array[Vector3] = []
