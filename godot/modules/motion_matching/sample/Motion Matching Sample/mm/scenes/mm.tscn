@@ -1,5 +1,0 @@
-[gd_scene format=3 uid="uid://ccsp80fltvjs1"]
-
-[node name="Node3D" type="Node3D"]
-
-[node name="MotionPlayer" type="MotionPlayer" parent="."]
