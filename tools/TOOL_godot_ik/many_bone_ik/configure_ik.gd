@@ -64,10 +64,6 @@ func _run():
 
 	skeleton.show_rest_only = true
 	skeleton.reset_bone_poses()
-	## DEBUG VALUES ## 
-	many_bone_ik.stabilization_passes = 1
-	many_bone_ik.default_damp = TAU
-	many_bone_ik.iterations_per_frame = 1
 	many_bone_ik.set_constraint_count(0)
 	var skeleton_profile: SkeletonProfileHumanoid = SkeletonProfileHumanoid.new()
 	var profile: SkeletonProfileHumanoid = SkeletonProfileHumanoid.new()
