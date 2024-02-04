@@ -10,17 +10,53 @@ class LimitCone:
 var bone_configurations = {
 	"Root": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0))]},
 	"Hips": {"kususdama": [LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0.0))]},
-	"Spine": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(10.0))]},
-	"Chest": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(20.0))]},
-	"UpperChest": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(10.0))]},
-	"Head": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(30.0))]},
-	"Neck": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(20.0))]},
+	"Spine": {
+		"kususdama": [
+			LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(5.0)),  # Allow forward flexion
+			LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(5.0)),   # Allow backward extension
+			LimitCone.new(Vector3.MODEL_LEFT, deg_to_rad(5.0)),   # Allow lateral flexion to the left
+			LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(5.0)),  # Allow lateral flexion to the right
+			LimitCone.new(Vector3.MODEL_TOP, deg_to_rad(5.0))     # Allow upward flexion
+		]
+	},
+	"Chest": {
+		"kususdama": [
+			LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(10.0)), # Allow forward flexion
+			LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(10.0)),  # Allow backward extension
+			LimitCone.new(Vector3.MODEL_LEFT, deg_to_rad(10.0)),  # Allow lateral flexion to the left
+			LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(10.0))  # Allow lateral flexion to the right
+		]
+	},
+	"UpperChest": {
+		"kususdama": [
+			LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(5.0)),  # Allow forward flexion
+			LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(5.0)),   # Allow backward extension
+			LimitCone.new(Vector3.MODEL_LEFT, deg_to_rad(5.0)),   # Allow lateral flexion to the left
+			LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(5.0))   # Allow lateral flexion to the right
+		]
+	},
+	"Neck": {
+		"kususdama": [
+			LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(15.0)), # Allow forward flexion
+			LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(10.0)),  # Allow backward extension
+			LimitCone.new(Vector3.MODEL_LEFT, deg_to_rad(10.0)),  # Allow lateral flexion to the left
+			LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(10.0))  # Allow lateral flexion to the right
+		]
+	},
+	"Head": {
+		"kususdama": [
+			LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(40.0)), # Allow forward flexion
+			LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(25.0)),  # Allow backward extension
+			LimitCone.new(Vector3.MODEL_LEFT, deg_to_rad(25.0)),  # Allow lateral flexion to the left
+			LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(25.0))  # Allow lateral flexion to the right
+		]
+	},
 	"LeftUpperArm": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(120.0))]},
 	"RightUpperArm": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(120.0))]},
 	"LeftLowerArm": {
 		"kususdama": [
 			LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)),
-			LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(2.5)),
+			LimitCone.new(Vector3.MODEL_TOP, deg_to_rad(2.5)),
 			LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5))
 		]
 	},
@@ -74,15 +110,15 @@ var bone_configurations = {
 	"LeftLowerLeg": {
 		"kususdama": [
 			LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)),
-			LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(2.5)),
+			LimitCone.new(Vector3.MODEL_TOP, deg_to_rad(2.5)),
 			LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5))
 		]
 	},
 	"RightLowerLeg": {
 		"kususdama": [
 			LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)),
-			LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)),
+			LimitCone.new(Vector3.MODEL_TOP, deg_to_rad(2.5)),
 			LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(2.5))
 		]
-	},
+	}
 }
