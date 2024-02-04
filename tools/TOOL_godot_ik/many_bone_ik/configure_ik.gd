@@ -167,9 +167,9 @@ func _run():
 		#label_3d.owner = targets_3d.owner
 
 
-	#for pin_i in range(bones.size()):
-		#var bone_name = bones[pin_i]
-		#many_bone_ik.set_pin_nodepath(pin_i, NodePath(bone_name + "Marker3D"))
+	for pin_i in range(bones.size()):
+		var bone_name = bones[pin_i]
+		many_bone_ik.set_pin_nodepath(pin_i, NodePath(bone_name + "Marker3D"))
 
 	skeleton.show_rest_only = false
 
