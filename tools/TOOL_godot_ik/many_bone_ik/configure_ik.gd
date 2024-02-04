@@ -157,14 +157,14 @@ func _run():
 			many_bone_ik.set_pin_passthrough_factor(pin_i, 0)
 		else:
 			many_bone_ik.set_pin_passthrough_factor(pin_i, 1)
-		var label_3d = preload("label_3d.gd").new()
-		label_3d.skeleton = skeleton
-		label_3d.font_size = 4
-		label_3d.no_depth_test = true
-		label_3d.bone_name = bone_name
-		label_3d.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
-		targets_3d.add_child(label_3d, true)
-		label_3d.owner = targets_3d.owner
+		#var label_3d = preload("label_3d.gd").new()
+		#label_3d.skeleton = skeleton
+		#label_3d.font_size = 4
+		#label_3d.no_depth_test = true
+		#label_3d.bone_name = bone_name
+		#label_3d.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
+		#targets_3d.add_child(label_3d, true)
+		#label_3d.owner = targets_3d.owner
 
 
 	for pin_i in range(bones.size()):
