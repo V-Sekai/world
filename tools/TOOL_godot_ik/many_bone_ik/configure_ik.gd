@@ -155,6 +155,7 @@ func _run():
 		label_3d.skeleton = skeleton
 		label_3d.font_size = 8
 		label_3d.no_depth_test = true
+		label_3d.bone_name = bone_name
 		label_3d.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
 		targets_3d.add_child(label_3d, true)
 		label_3d.owner = targets_3d.owner
