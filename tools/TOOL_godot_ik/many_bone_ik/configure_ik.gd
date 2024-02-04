@@ -136,6 +136,13 @@ func _run():
 
 	for pin_i in range(bones.size()):
 		var bone_name = bones[pin_i]
+		many_bone_ik.set_pin_bone_name(pin_i, bone_name)
+		if bone_name in ["Root", "LeftHand", "RightHand", "LeftFoot", "RightFoot"]:
+			many_bone_ik.set_pin_passthrough_factor(pin_i, 0)
+		else:
+			many_bone_ik.set_pin_passthrough_factor(pin_i, 1)
+		if bone_name in ["Root"]:
+			continue
 		var targets_3d: Marker3D = Marker3D.new()
 		targets_3d.gizmo_extents = .05
 		many_bone_ik.add_child(targets_3d)
@@ -148,11 +155,6 @@ func _run():
 		if bone_name in ["LeftFoot", "RightFoot"]:
 			pose = pose.rotated(Vector3(1, 0, 0), -deg_to_rad(90))
 		targets_3d.global_transform = pose
-		many_bone_ik.set_pin_bone_name(pin_i, bone_name)
-		if bone_name in ["Root", "LeftHand", "RightHand", "LeftFoot", "RightFoot"]:
-			many_bone_ik.set_pin_passthrough_factor(pin_i, 0)
-		else:
-			many_bone_ik.set_pin_passthrough_factor(pin_i, 1)
 		#var label_3d = preload("label_3d.gd").new()
 		#label_3d.skeleton = skeleton
 		#label_3d.font_size = 4
@@ -165,6 +167,8 @@ func _run():
 
 	for pin_i in range(bones.size()):
 		var bone_name = bones[pin_i]
+		if bone_name in ["Root"]:
+			continue
 		many_bone_ik.set_pin_nodepath(pin_i, NodePath(bone_name + "Marker3D"))
 
 	skeleton.show_rest_only = false
