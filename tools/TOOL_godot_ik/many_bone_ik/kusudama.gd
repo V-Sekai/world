@@ -1,10 +1,11 @@
 class LimitCone:
 	var direction: Vector3
-	var angle: float
+	var limit_angle: float
 	
-	func _init(direction: Vector3, angle: float):
+	func _init(direction: Vector3, limit_angle: float):
 		self.direction = direction
-		self.angle = angle
+		self.limit_angle = limit_angle
+
 
 @export
 var bone_configurations = {

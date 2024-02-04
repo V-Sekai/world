@@ -64,6 +64,10 @@ func _run():
 
 	skeleton.show_rest_only = true
 	skeleton.reset_bone_poses()
+	## DEBUG VALUES ## 
+	many_bone_ik.stabilization_passes = 1
+	many_bone_ik.default_damp = TAU
+	many_bone_ik.iterations_per_frame = 1
 	many_bone_ik.set_constraint_count(0)
 	var skeleton_profile: SkeletonProfileHumanoid = SkeletonProfileHumanoid.new()
 	var profile: SkeletonProfileHumanoid = SkeletonProfileHumanoid.new()
@@ -79,6 +83,8 @@ func _run():
 		var twist_from = 0
 		if config.has("twist_from"):
 			twist_from = config["twist_from"]
+		else:
+			twist_from = 0
 		var twist_range = 0
 		if config.has("twist_range"):
 			twist_range = config["twist_range"]
@@ -153,7 +159,7 @@ func _run():
 			many_bone_ik.set_pin_passthrough_factor(pin_i, 1)
 		var label_3d = preload("label_3d.gd").new()
 		label_3d.skeleton = skeleton
-		label_3d.font_size = 8
+		label_3d.font_size = 4
 		label_3d.no_depth_test = true
 		label_3d.bone_name = bone_name
 		label_3d.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
@@ -209,4 +215,4 @@ func set_bone_constraint(many_bone_ik: ManyBoneIK3D, p_bone_name: String, p_twis
 	for cone_constraint_i: int in range(p_kususdama.size()):
 		var cone_constraint = p_kususdama[cone_constraint_i]
 		many_bone_ik.set_kusudama_limit_cone_center(constraint_i, cone_constraint_i, cone_constraint.direction)
-		many_bone_ik.set_kusudama_limit_cone_radius(constraint_i, cone_constraint_i, cone_constraint.angle)
+		many_bone_ik.set_kusudama_limit_cone_radius(constraint_i, cone_constraint_i, cone_constraint.limit_angle)
