@@ -23,8 +23,6 @@ func _on_set_ik_range_from_pressed():
 	if selected_bone_name.is_empty():
 		return
 	print(selected_bone_name)
-	var bone_solver: LBFGSBSolver = preload("res://addons/calculate_twist_from/twist_from_solver.gd").new(selected_bone_name, skeleton, many_bone_ik)
-	bone_solver.minimize_pose_and_twist()
 
 
 func connect_skeleton_tree_signal():
