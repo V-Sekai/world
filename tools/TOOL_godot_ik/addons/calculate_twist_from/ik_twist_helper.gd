@@ -7,18 +7,17 @@ var set_ik_range_from_button: Button
 var selected_bone_name: String
 var many_bone_ik: ManyBoneIK3D
 
+
 func _enter_tree():
 	set_ik_range_from_button = Button.new()
 	set_ik_range_from_button.text = "Set IK Range From"
 	var callable = Callable(self, "_on_set_ik_range_from_pressed")
 	set_ik_range_from_button.pressed.connect(callable)
-
+	if not set_ik_range_from_button.get_parent():
+		add_control_to_container(CONTAINER_SPATIAL_EDITOR_MENU, set_ik_range_from_button)
 	connect_skeleton_tree_signal()
-	add_control_to_container(CONTAINER_SPATIAL_EDITOR_MENU, set_ik_range_from_button)
 
-func _exit_tree():
-	remove_control_from_container(CONTAINER_SPATIAL_EDITOR_MENU, set_ik_range_from_button)
-
+	
 func _on_set_ik_range_from_pressed():
 	print("_on_set_ik_range_from_pressed")
 	if selected_bone_name.is_empty():
@@ -35,7 +34,7 @@ func connect_skeleton_tree_signal():
 		for treenode in skeleton_editor.find_children("*", "Tree", true, false):
 			var joint_tree := treenode as Tree
 			if joint_tree != null:
-				joint_tree.connect("item_selected", joint_selected.bind(joint_tree))
+				joint_tree.connect("item_selected", Callable(self, "joint_selected").bind(joint_tree))
 				joint_tree.connect("nothing_selected", _on_nothing_selected)
 
 
