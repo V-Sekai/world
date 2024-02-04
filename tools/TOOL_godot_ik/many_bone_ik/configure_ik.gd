@@ -120,6 +120,3 @@ func _run():
 		many_bone_ik.set_pin_nodepath(pin_i, NodePath(bone_name + "Marker3D"))
 
 	skeleton.show_rest_only = false
-
-	var set_a: Array[Vector3] = []
-	var set_b: Array[Vector3] = []
