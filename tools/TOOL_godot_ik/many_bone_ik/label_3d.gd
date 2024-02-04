@@ -1,7 +1,5 @@
 extends Label3D
 
-class_name PinLabel3D
-
 @export var skeleton: Skeleton3D = null
 @export var bone_name: String
 
@@ -26,7 +24,20 @@ func _process(delta):
 
 
 func value_to_color(value: float) -> String:
-	return "%0.1f%%" % [value * 100]
+	if value < -1:
+		return "█" # Full block (large negative difference)
+	elif value < -0.5:
+		return "▓" # Dark shade (medium negative difference)
+	elif value < 0:
+		return "▒" # Medium shade (small negative difference)
+	elif value == 0:
+		return " " # Light shade (no difference)
+	elif value <= 0.5:
+		return "-" # Custom character for small positive difference
+	elif value <= 1:
+		return "+" # Custom character for medium positive difference
+	else:
+		return "*" # Custom character for large positive difference
 
 
 func vector_to_color_bars(vec: Vector3) -> String:

@@ -151,7 +151,7 @@ func _run():
 			many_bone_ik.set_pin_passthrough_factor(pin_i, 0)
 		else:
 			many_bone_ik.set_pin_passthrough_factor(pin_i, 1)
-		var label_3d: PinLabel3D = PinLabel3D.new()
+		var label_3d = preload("label_3d.gd").new()
 		label_3d.skeleton = skeleton
 		label_3d.font_size = 8
 		label_3d.no_depth_test = true
