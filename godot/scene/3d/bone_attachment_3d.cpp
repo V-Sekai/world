@@ -76,12 +76,6 @@ ObjectID BoneAttachment3D::_update_skeleton_path_extend() {
 
 void BoneAttachment3D::_skeleton_changed(Skeleton3D *p_old, Skeleton3D *p_new) {
 	bone_idx = -1;
-	if (p_old && p_old->is_connected(SNAME("bone_pose_changed"), callable_mp(this, &BoneAttachment3D::on_bone_pose_update))) {
-		p_old->disconnect(SNAME("bone_pose_changed"), callable_mp(this, &BoneAttachment3D::on_bone_pose_update));
-	}
-	if (p_new && !p_new->is_connected(SNAME("bone_pose_changed"), callable_mp(this, &BoneAttachment3D::on_bone_pose_update))) {
-		p_new->connect(SNAME("bone_pose_changed"), callable_mp(this, &BoneAttachment3D::on_bone_pose_update));
-	}
 	_update_bone();
 };
 
@@ -95,13 +89,10 @@ void BoneAttachment3D::_update_bone() {
 			bone_idx = sk->find_bone(bone_name);
 		}
 	}
-	if (bone_idx != -1) {
-		callable_mp(this, &BoneAttachment3D::on_bone_pose_update).call_deferred(bone_idx);
-	}
 }
 
 void BoneAttachment3D::_override_pose() {
-	if (!is_inside_tree() || !override_pose) {
+	if (!is_inside_tree()) {
 		return;
 	}
 
@@ -117,8 +108,28 @@ void BoneAttachment3D::_override_pose() {
 	sk->set_bone_global_pose(bone_idx, our_trans);
 }
 
+void BoneAttachment3D::_retrieve_pose() {
+	if (!is_inside_tree()) {
+		return;
+	}
+
+	Skeleton3D *sk = get_skeleton();
+	if (!sk) {
+		return;
+	}
+
+	ERR_FAIL_NULL_MSG(sk, "Cannot retrieve pose: Skeleton not found!");
+	ERR_FAIL_INDEX_MSG(bone_idx, sk->get_bone_count(), "Cannot override pose: Bone index is out of range!");
+
+	set_global_transform(sk->get_global_transform() * sk->get_bone_global_pose(bone_idx));
+}
+
 void BoneAttachment3D::_process_modification(double p_delta) {
-	_override_pose();
+	if (override_pose) {
+		_override_pose();
+	} else {
+		_retrieve_pose();
+	}
 }
 
 void BoneAttachment3D::set_bone_name(const String &p_name) {
@@ -170,22 +181,17 @@ void BoneAttachment3D::_notification(int p_what) {
 		case NOTIFICATION_PARENTED: {
 			_update_bone();
 		} break;
-		case NOTIFICATION_LOCAL_TRANSFORM_CHANGED: {
-			_override_pose();
-		} break;
 	}
 }
 
+#ifndef DISABLE_DEPRECATED
 void BoneAttachment3D::on_bone_pose_update(int p_bone_index) {
 	if (bone_idx == p_bone_index) {
-		Skeleton3D *sk = get_skeleton();
-		if (sk) {
-			if (!override_pose) {
-				set_global_transform(sk->get_global_transform() * sk->get_bone_global_pose(bone_idx));
-			}
-		}
+		_retrieve_pose();
 	}
 }
+#endif // DISABLE_DEPRECATED
+
 #ifdef TOOLS_ENABLED
 void BoneAttachment3D::notify_skeleton_bones_renamed(Node *p_base_scene, Skeleton3D *p_skeleton, Dictionary p_rename_map) {
 	const Skeleton3D *skeleton = get_skeleton();
@@ -208,10 +214,12 @@ void BoneAttachment3D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_bone_idx", "bone_idx"), &BoneAttachment3D::set_bone_idx);
 	ClassDB::bind_method(D_METHOD("get_bone_idx"), &BoneAttachment3D::get_bone_idx);
 
-	ClassDB::bind_method(D_METHOD("on_bone_pose_update", "bone_index"), &BoneAttachment3D::on_bone_pose_update);
-
 	ClassDB::bind_method(D_METHOD("set_override_pose", "override_pose"), &BoneAttachment3D::set_override_pose);
 	ClassDB::bind_method(D_METHOD("get_override_pose"), &BoneAttachment3D::get_override_pose);
+
+#ifndef DISABLE_DEPRECATED
+	ClassDB::bind_method(D_METHOD("on_bone_pose_update", "bone_index"), &BoneAttachment3D::on_bone_pose_update);
+#endif // DISABLE_DEPRECATED
 
 	ADD_PROPERTY(PropertyInfo(Variant::STRING_NAME, "bone_name"), "set_bone_name", "get_bone_name");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "bone_idx"), "set_bone_idx", "get_bone_idx");

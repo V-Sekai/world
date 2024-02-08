@@ -79,12 +79,20 @@ void PhysicalBoneSimulator3D::_pose_updated() {
 
 void PhysicalBoneSimulator3D::_set_active(bool p_active) {
 	if (Engine::get_singleton()->is_editor_hint() == false) {
-		for (int i = 0; i < bones.size(); i += 1) {
-			if (bones[i].physical_bone) {
-				bones[i].physical_bone->reset_physics_simulation_state();
-			}
+		_reset_physical_bones_state();
+	}
+}
+
+void PhysicalBoneSimulator3D::_reset_physical_bones_state() {
+	for (int i = 0; i < bones.size(); i += 1) {
+		if (bones[i].physical_bone) {
+			bones[i].physical_bone->reset_physics_simulation_state();
 		}
 	}
+}
+
+bool PhysicalBoneSimulator3D::is_simulating_physics() const {
+	return simulating;
 }
 
 void PhysicalBoneSimulator3D::set_interpolation(real_t p_interpolation) {
@@ -189,11 +197,30 @@ void PhysicalBoneSimulator3D::_rebuild_physical_bones_cache() {
 	}
 }
 
+#ifndef DISABLE_DEPRECATED
+void _pb_stop_simulation_compat(Node *p_node) {
+	PhysicalBoneSimulator3D *ps = Object::cast_to<PhysicalBoneSimulator3D>(p_node);
+	if (ps) {
+		return; // Prevent conflict.
+	}
+	for (int i = p_node->get_child_count() - 1; 0 <= i; --i) {
+		_pb_stop_simulation_compat(p_node->get_child(i));
+	}
+	PhysicalBone3D *pb = Object::cast_to<PhysicalBone3D>(p_node);
+	if (pb) {
+		pb->set_simulate_physics(false);
+	}
+}
+#endif // _DISABLE_DEPRECATED
+
 void _pb_stop_simulation(Node *p_node) {
 	for (int i = p_node->get_child_count() - 1; 0 <= i; --i) {
-		_pb_stop_simulation(p_node->get_child(i));
+		PhysicalBone3D *pb = Object::cast_to<PhysicalBone3D>(p_node->get_child(i));
+		if (!pb) {
+			continue;
+		}
+		_pb_stop_simulation(pb);
 	}
-
 	PhysicalBone3D *pb = Object::cast_to<PhysicalBone3D>(p_node);
 	if (pb) {
 		pb->set_simulate_physics(false);
@@ -201,11 +228,13 @@ void _pb_stop_simulation(Node *p_node) {
 }
 
 void PhysicalBoneSimulator3D::physical_bones_stop_simulation() {
+	simulating = false;
+	_reset_physical_bones_state();
 #ifndef DISABLE_DEPRECATED
 	if (is_compat) {
 		Skeleton3D *sk = get_skeleton();
 		if (sk) {
-			_pb_stop_simulation(sk);
+			_pb_stop_simulation_compat(sk);
 		}
 	} else {
 		_pb_stop_simulation(this);
@@ -213,14 +242,41 @@ void PhysicalBoneSimulator3D::physical_bones_stop_simulation() {
 #else
 	_pb_stop_simulation(this);
 #endif // _DISABLE_DEPRECATED
-	simulating = false;
 }
+
+#ifndef DISABLE_DEPRECATED
+void _pb_start_simulation_compat(const PhysicalBoneSimulator3D *p_simulator, Node *p_node, const Vector<int> &p_sim_bones) {
+	PhysicalBoneSimulator3D *ps = Object::cast_to<PhysicalBoneSimulator3D>(p_node);
+	if (ps) {
+		return; // Prevent conflict.
+	}
+	for (int i = p_node->get_child_count() - 1; 0 <= i; --i) {
+		_pb_start_simulation_compat(p_simulator, p_node->get_child(i), p_sim_bones);
+	}
+	PhysicalBone3D *pb = Object::cast_to<PhysicalBone3D>(p_node);
+	if (pb) {
+		if (p_sim_bones.is_empty()) { // If no bones is specified, activate ragdoll on full body.
+			pb->set_simulate_physics(true);
+		} else {
+			for (int i = p_sim_bones.size() - 1; 0 <= i; --i) {
+				if (p_sim_bones[i] == pb->get_bone_id() || p_simulator->is_bone_parent_of(pb->get_bone_id(), p_sim_bones[i])) {
+					pb->set_simulate_physics(true);
+					break;
+				}
+			}
+		}
+	}
+}
+#endif // _DISABLE_DEPRECATED
 
 void _pb_start_simulation(const PhysicalBoneSimulator3D *p_simulator, Node *p_node, const Vector<int> &p_sim_bones) {
 	for (int i = p_node->get_child_count() - 1; 0 <= i; --i) {
-		_pb_start_simulation(p_simulator, p_node->get_child(i), p_sim_bones);
+		PhysicalBone3D *pb = Object::cast_to<PhysicalBone3D>(p_node->get_child(i));
+		if (!pb) {
+			continue;
+		}
+		_pb_start_simulation(p_simulator, pb, p_sim_bones);
 	}
-
 	PhysicalBone3D *pb = Object::cast_to<PhysicalBone3D>(p_node);
 	if (pb) {
 		if (p_sim_bones.is_empty()) { // If no bones is specified, activate ragdoll on full body.
@@ -237,6 +293,9 @@ void _pb_start_simulation(const PhysicalBoneSimulator3D *p_simulator, Node *p_no
 }
 
 void PhysicalBoneSimulator3D::physical_bones_start_simulation_on(const TypedArray<StringName> &p_bones) {
+	simulating = true;
+	_reset_physical_bones_state();
+
 	_pose_updated();
 
 	Vector<int> sim_bones;
@@ -256,7 +315,7 @@ void PhysicalBoneSimulator3D::physical_bones_start_simulation_on(const TypedArra
 	if (is_compat) {
 		Skeleton3D *sk = get_skeleton();
 		if (sk) {
-			_pb_start_simulation(this, sk, sim_bones);
+			_pb_start_simulation_compat(this, sk, sim_bones);
 		}
 	} else {
 		_pb_start_simulation(this, this, sim_bones);
@@ -264,7 +323,6 @@ void PhysicalBoneSimulator3D::physical_bones_start_simulation_on(const TypedArra
 #else
 	_pb_start_simulation(this, this, sim_bones);
 #endif // _DISABLE_DEPRECATED
-	simulating = true;
 }
 
 void _physical_bones_add_remove_collision_exception(bool p_add, Node *p_node, RID p_exception) {
@@ -334,6 +392,8 @@ void PhysicalBoneSimulator3D::_process_modification(double p_delta) {
 }
 
 void PhysicalBoneSimulator3D::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("is_simulating_physics"), &PhysicalBoneSimulator3D::is_simulating_physics);
+
 	ClassDB::bind_method(D_METHOD("set_interpolation", "interpolation"), &PhysicalBoneSimulator3D::set_interpolation);
 	ClassDB::bind_method(D_METHOD("get_interpolation"), &PhysicalBoneSimulator3D::get_interpolation);
 

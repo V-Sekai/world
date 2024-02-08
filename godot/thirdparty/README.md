@@ -226,7 +226,7 @@ its functionality to IPv4 only.
 ## etcpak
 
 - Upstream: https://github.com/wolfpld/etcpak
-- Version: 1.0 (153f0e04a18b93c277684b577365210adcf8e11c, 2022)
+- Version: git (5380688660a3801aec4b25483366027fe0442d7b, 2024)
 - License: BSD-3-Clause
 
 Files extracted from upstream source:
@@ -237,12 +237,6 @@ Files extracted from upstream source:
   ProcessDxtc.{cpp,hpp} Tables.{cpp,hpp} Vector.hpp
   ```
 - `AUTHORS.txt` and `LICENSE.txt`
-
-Two files (`ProcessRGB.{cpp,hpp}`) have been modified to provide ETC2_R and ETC2_RG compression,
-the changes are based on the existing code.
-
-Two files (`ProcessRgtc.{cpp,hpp}`) have been added to provide RGTC compression implementation,
-based on library's `ProcessDxtc.{cpp,hpp}`.
 
 ## fonts
 
@@ -984,7 +978,7 @@ Patches in the `patches` directory should be re-applied after updates.
 ## wayland
 
 - Upstream: https://gitlab.freedesktop.org/wayland/wayland
-- Version: 1.21.0 (8135e856ebd79872f886466e9cee39affb7d9ee8, 2022)
+- Version: 1.22.0 (b2649cb3ee6bd70828a17e50beb16591e6066288, 2023)
 - License: MIT
 
 Files extracted from upstream source:
@@ -996,7 +990,7 @@ Files extracted from upstream source:
 # wayland-protocols
 
 - Upstream: https://gitlab.freedesktop.org/wayland/wayland-protocols
-- Version: 1.32 (681c33c8547d6aefe24455ba2bffe1c5ae11fee5, 2023)
+- Version: 1.33 (54346071a5f211f2c482889f2c8ee3b5ecda63ab, 2024)
 - License: MIT
 
 Files extracted from upstream source:
@@ -1009,6 +1003,8 @@ Files extracted from upstream source:
 - `staging/fractional-scale/fractional-scale-v1.xml`
 - `staging/xdg-activation/README`
 - `staging/xdg-activation/xdg-activation-v1.xml`
+- `unstable/idle-inhibit/README`
+- `unstable/idle-inhibit/idle-inhibit-unstable-v1.xml`
 - `unstable/pointer-constraints/README`
 - `unstable/pointer-constraints/pointer-constraints-unstable-v1.xml`
 - `unstable/pointer-gestures/README`

@@ -66,6 +66,7 @@ class PhysicalBoneSimulator3D : public SkeletonModifier3D {
 	/// This is a slow API, so it's cached
 	PhysicalBone3D *_get_physical_bone_parent(int p_bone);
 	void _rebuild_physical_bones_cache();
+	void _reset_physical_bones_state();
 
 protected:
 	static void _bind_methods();
@@ -83,6 +84,8 @@ public:
 #ifndef DISABLE_DEPRECATED
 	bool is_compat = false;
 #endif // _DISABLE_DEPRECATED
+	bool is_simulating_physics() const;
+
 	void set_interpolation(real_t p_interpolation);
 	real_t get_interpolation() const;
 

@@ -258,7 +258,11 @@ void Skeleton3D::setup_simulator() {
 	simulator = sim;
 	sim->is_compat = true;
 	sim->set_active(false); // Don't run unneeded process.
-	sim->set_process_priority((int)-INFINITY); // Hacky but might enough for compatibility.
+
+	// Hacky... but might enough for compatibility.
+	// INFINITY possibly used by BoneAttachment3D, so we will keep room here.
+	sim->set_process_priority((int)INFINITY - 1);
+
 	add_child(sim);
 }
 void Skeleton3D::remove_simulator() {
@@ -953,7 +957,7 @@ void Skeleton3D::set_animate_physical_bones(bool p_enabled) {
 	if (!sim) {
 		return;
 	}
-	sim->set_process_priority(p_enabled ? (int)-INFINITY : (int)INFINITY);
+	sim->set_active(p_enabled);
 }
 
 bool Skeleton3D::get_animate_physical_bones() const {
@@ -961,7 +965,7 @@ bool Skeleton3D::get_animate_physical_bones() const {
 	if (!sim) {
 		return false;
 	}
-	return sim->get_process_priority() == (int)-INFINITY;
+	return sim->is_active();
 }
 
 void Skeleton3D::physical_bones_stop_simulation() {

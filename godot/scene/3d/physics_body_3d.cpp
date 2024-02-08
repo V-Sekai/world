@@ -38,6 +38,7 @@
 void PhysicsBody3D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("move_and_collide", "motion", "test_only", "safe_margin", "recovery_as_collision", "max_collisions"), &PhysicsBody3D::_move, DEFVAL(false), DEFVAL(0.001), DEFVAL(false), DEFVAL(1));
 	ClassDB::bind_method(D_METHOD("test_move", "from", "motion", "collision", "safe_margin", "recovery_as_collision", "max_collisions"), &PhysicsBody3D::test_move, DEFVAL(Variant()), DEFVAL(0.001), DEFVAL(false), DEFVAL(1));
+	ClassDB::bind_method(D_METHOD("get_gravity"), &PhysicsBody3D::get_gravity);
 
 	ClassDB::bind_method(D_METHOD("set_axis_lock", "axis", "lock"), &PhysicsBody3D::set_axis_lock);
 	ClassDB::bind_method(D_METHOD("get_axis_lock", "axis"), &PhysicsBody3D::get_axis_lock);
@@ -188,6 +189,12 @@ bool PhysicsBody3D::test_move(const Transform3D &p_from, const Vector3 &p_motion
 	parameters.max_collisions = p_max_collisions;
 
 	return PhysicsServer3D::get_singleton()->body_test_motion(get_rid(), parameters, r);
+}
+
+Vector3 PhysicsBody3D::get_gravity() const {
+	PhysicsDirectBodyState3D *state = PhysicsServer3D::get_singleton()->body_get_direct_state(get_rid());
+	ERR_FAIL_NULL_V(state, Vector3());
+	return state->get_total_gravity();
 }
 
 void PhysicsBody3D::set_axis_lock(PhysicsServer3D::BodyAxis p_axis, bool p_lock) {
@@ -3501,19 +3508,18 @@ void PhysicalBone3D::_start_physics_simulation() {
 
 void PhysicalBone3D::_stop_physics_simulation() {
 	PhysicalBoneSimulator3D *simulator = get_simulator();
-	if (!simulator) {
-		return;
-	}
-	if (!simulator->is_active()) {
-		set_body_mode(PhysicsServer3D::BODY_MODE_KINEMATIC);
-		PhysicsServer3D::get_singleton()->body_set_collision_layer(get_rid(), get_collision_layer());
-		PhysicsServer3D::get_singleton()->body_set_collision_mask(get_rid(), get_collision_mask());
-		PhysicsServer3D::get_singleton()->body_set_collision_priority(get_rid(), get_collision_priority());
-	} else {
-		set_body_mode(PhysicsServer3D::BODY_MODE_STATIC);
-		PhysicsServer3D::get_singleton()->body_set_collision_layer(get_rid(), 0);
-		PhysicsServer3D::get_singleton()->body_set_collision_mask(get_rid(), 0);
-		PhysicsServer3D::get_singleton()->body_set_collision_priority(get_rid(), 1.0);
+	if (simulator) {
+		if (simulator->is_simulating_physics()) {
+			set_body_mode(PhysicsServer3D::BODY_MODE_KINEMATIC);
+			PhysicsServer3D::get_singleton()->body_set_collision_layer(get_rid(), get_collision_layer());
+			PhysicsServer3D::get_singleton()->body_set_collision_mask(get_rid(), get_collision_mask());
+			PhysicsServer3D::get_singleton()->body_set_collision_priority(get_rid(), get_collision_priority());
+		} else {
+			set_body_mode(PhysicsServer3D::BODY_MODE_STATIC);
+			PhysicsServer3D::get_singleton()->body_set_collision_layer(get_rid(), 0);
+			PhysicsServer3D::get_singleton()->body_set_collision_mask(get_rid(), 0);
+			PhysicsServer3D::get_singleton()->body_set_collision_priority(get_rid(), 1.0);
+		}
 	}
 	if (_internal_simulate_physics) {
 		PhysicsServer3D::get_singleton()->body_set_state_sync_callback(get_rid(), Callable());

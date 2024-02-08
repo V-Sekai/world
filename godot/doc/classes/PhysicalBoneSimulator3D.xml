@@ -9,6 +9,12 @@
 	<tutorials>
 	</tutorials>
 	<methods>
+		<method name="is_simulating_physics" qualifiers="const">
+			<return type="bool" />
+			<description>
+				Returns a boolean that indicates whether the [PhysicalBoneSimulator3D] is running and simulating.
+			</description>
+		</method>
 		<method name="physical_bones_add_collision_exception">
 			<return type="void" />
 			<param index="0" name="exception" type="RID" />

@@ -45,6 +45,7 @@ class BoneAttachment3D : public SkeletonModifier3D {
 
 	bool override_pose = false;
 	void _override_pose();
+	void _retrieve_pose();
 
 protected:
 	void _validate_property(PropertyInfo &p_property) const;
@@ -82,7 +83,9 @@ public:
 	void set_override_pose(bool p_override);
 	bool get_override_pose() const;
 
+#ifndef DISABLE_DEPRECATED
 	virtual void on_bone_pose_update(int p_bone_index);
+#endif // DISABLE_DEPRECATED
 
 	BoneAttachment3D();
 };
