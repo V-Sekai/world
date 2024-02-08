@@ -74,6 +74,7 @@ func _run():
 	var bones: Array = [
 		"Root",
 		"Hips",
+		"UpperChest",
 		"LeftHand",
 		"RightHand",
 		"LeftFoot",
