@@ -21,10 +21,10 @@
       "preLaunchTask": "Godot Engine Windows Clang"
     },
     {
-      "name": "Run the Macos editor tools/TOOL_godot_ik",
+      "name": "Run the Macos editor",
       "type": "lldb",
       "request": "launch",
-      "args": ["--path", "tools/TOOL_godot_ik", "-e"],
+      "args": ["--path", "game", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
