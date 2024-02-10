@@ -93,8 +93,6 @@ func _init(p_evec_prec: float):
 
 
 func _calculate_rotation() -> Quaternion:
-	var result: Quaternion
-
 	if moved.size() == 1:
 		var u = moved[0]
 		var v = target[0]
@@ -107,12 +105,12 @@ func _calculate_rotation() -> Quaternion:
 
 		if dot < ((2.0e-15 - 1.0) * norm_product):
 			var w = u.normalized()
-			result = Quaternion(-w.x, -w.y, -w.z, 0.0).normalized()
+			return Quaternion(-w.x, -w.y, -w.z, 0.0).normalized()
 		else:
 			var q0 = sqrt(0.5 * (1.0 + dot / norm_product))
 			var coeff = 1.0 / (2.0 * q0 * norm_product)
 			var q = v.cross(u).normalized()
-			result = Quaternion(coeff * q.x, coeff * q.y, coeff * q.z, q0).normalized()
+			return Quaternion(coeff * q.x, coeff * q.y, coeff * q.z, q0).normalized()
 	else:
 		var a13 = -sum_xz_minus_zx
 		var a14 = sum_xy_minus_yx
@@ -163,9 +161,7 @@ func _calculate_rotation() -> Quaternion:
 			quaternion_y /= min_value
 			quaternion_z /= min_value
 
-		result = Quaternion(quaternion_x, quaternion_y, quaternion_z, quaternion_w).normalized()
-
-	return result
+		return Quaternion(quaternion_x, quaternion_y, quaternion_z, quaternion_w).normalized()
 
 
 func _translate(translation_vector: Vector3, x: PackedVector3Array) -> void:
