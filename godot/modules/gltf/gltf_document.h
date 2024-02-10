@@ -78,26 +78,14 @@ public:
 	};
 
 public:
-	virtual Error append_data_from_file(String p_path, Ref<AssetState3D> p_state, uint32_t p_flags = 0, String p_base_path = String()) override {
-		return append_from_file(p_path, p_state, p_flags, p_base_path);
-	}
-	virtual Error append_data_from_buffer(PackedByteArray p_bytes, String p_base_path, Ref<AssetState3D> p_state, uint32_t p_flags = 0) override {
-		return append_from_buffer(p_bytes, p_base_path, p_state, p_flags);
-	}
-	virtual Error append_data_from_scene(Node *p_node, Ref<AssetState3D> p_state, uint32_t p_flags = 0) override {
-		return append_from_scene(p_node, p_state, p_flags);
-	}
+	virtual Error append_data_from_file(String p_path, Ref<AssetState3D> p_state, uint32_t p_flags = 0, String p_base_path = String()) override;
+	virtual Error append_data_from_buffer(PackedByteArray p_bytes, String p_base_path, Ref<AssetState3D> p_state, uint32_t p_flags = 0) override;
+	virtual Error append_data_from_scene(Node *p_node, Ref<AssetState3D> p_state, uint32_t p_flags = 0) override;
 
 public:
-	virtual Node *create_scene(Ref<AssetState3D> p_state, float p_bake_fps = 30.0f, bool p_trimming = false, bool p_remove_immutable_tracks = true) override {
-		return generate_scene(p_state, p_bake_fps, p_trimming, p_remove_immutable_tracks);
-	}
-	virtual PackedByteArray create_buffer(Ref<AssetState3D> p_state) override {
-		return generate_buffer(p_state);
-	}
-	virtual Error write_asset_to_filesystem(Ref<AssetState3D> p_state, const String &p_path) override {
-		return write_to_filesystem(p_state, p_path);
-	}
+	virtual Node *create_scene(Ref<AssetState3D> p_state, float p_bake_fps = 30.0f, bool p_trimming = false, bool p_remove_immutable_tracks = true) override;
+	virtual PackedByteArray create_buffer(Ref<AssetState3D> p_state) override;
+	virtual Error write_asset_to_filesystem(Ref<AssetState3D> p_state, const String &p_path) override;
 
 private:
 	const float BAKE_FPS = 30.0f;
@@ -326,15 +314,18 @@ private:
 	static float get_perceived_brightness(const Color p_color);
 	static float get_max_component(const Color &p_color);
 
-public:
-	virtual Error append_from_file(String p_path, Ref<GLTFState> p_state, uint32_t p_flags = 0, String p_base_path = String());
-	virtual Error append_from_buffer(PackedByteArray p_bytes, String p_base_path, Ref<GLTFState> p_state, uint32_t p_flags = 0);
-	virtual Error append_from_scene(Node *p_node, Ref<GLTFState> p_state, uint32_t p_flags = 0);
+#ifndef DISABLE_DEPRECATED
+protected:
+	Error append_from_file_81746(String p_path, Ref<GLTFState> p_state, uint32_t p_flags = 0, String p_base_path = String());
+	Error append_from_buffer_81746(PackedByteArray p_bytes, String p_base_path, Ref<GLTFState> p_state, uint32_t p_flags = 0);
+	Error append_from_scene_81746(Node *p_node, Ref<GLTFState> p_state, uint32_t p_flags = 0);
 
-public:
-	virtual Node *generate_scene(Ref<GLTFState> p_state, float p_bake_fps = 30.0f, bool p_trimming = false, bool p_remove_immutable_tracks = true);
-	virtual PackedByteArray generate_buffer(Ref<GLTFState> p_state);
-	virtual Error write_to_filesystem(Ref<GLTFState> p_state, const String &p_path);
+	Node *generate_scene_81746(Ref<GLTFState> p_state, float p_bake_fps = 30.0f, bool p_trimming = false, bool p_remove_immutable_tracks = true);
+	PackedByteArray generate_buffer_81746(Ref<GLTFState> p_state);
+	Error write_to_filesystem_81746(Ref<GLTFState> p_state, const String &p_path);
+
+	static void _bind_compatibility_methods();
+#endif
 
 public:
 	Error _parse_gltf_state(Ref<GLTFState> p_state, const String &p_search_path);

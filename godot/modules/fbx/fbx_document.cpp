@@ -30,6 +30,7 @@
 
 #include "fbx_document.h"
 
+#include "core/config/project_settings.h"
 #include "core/crypto/crypto_core.h"
 #include "core/io/config_file.h"
 #include "core/io/file_access.h"
@@ -331,12 +332,8 @@ Error FBXDocument::_parse_nodes(Ref<FBXState> p_state) {
 		}
 
 		{
-			node->position = _as_vec3(fbx_node->local_transform.translation);
-			node->rotation = _as_quaternion(fbx_node->local_transform.rotation);
-			node->scale = _as_vec3(fbx_node->local_transform.scale);
-
-			node->xform.basis.set_quaternion_scale(node->rotation, node->scale);
-			node->xform.origin = node->position;
+			node->transform.origin = _as_vec3(fbx_node->local_transform.translation);
+			node->transform.basis.set_quaternion_scale(_as_quaternion(fbx_node->local_transform.rotation), _as_vec3(fbx_node->local_transform.scale));
 
 			if (fbx_node->bind_pose) {
 				ufbx_bone_pose *pose = ufbx_get_bone_pose(fbx_node->bind_pose, fbx_node);
@@ -350,7 +347,7 @@ Error FBXDocument::_parse_nodes(Ref<FBXState> p_state) {
 				godot_rest_xform.origin = rest_position;
 				node->set_additional_data("GODOT_rest_transform", godot_rest_xform);
 			} else {
-				node->set_additional_data("GODOT_rest_transform", node->xform);
+				node->set_additional_data("GODOT_rest_transform", node->transform);
 			}
 		}
 
@@ -972,6 +969,7 @@ Error FBXDocument::_parse_images(Ref<FBXState> p_state, const String &p_base_pat
 	for (int texture_i = 0; texture_i < static_cast<int>(fbx_scene->texture_files.count); texture_i++) {
 		const ufbx_texture_file &fbx_texture_file = fbx_scene->texture_files[texture_i];
 		String path = _as_string(fbx_texture_file.filename);
+		path = ProjectSettings::get_singleton()->localize_path(path);
 
 		Vector<uint8_t> data;
 		if (fbx_texture_file.content.size > 0 && fbx_texture_file.content.size <= INT_MAX) {
@@ -1544,7 +1542,7 @@ void FBXDocument::_generate_scene_node(Ref<FBXState> p_state, const GLTFNodeInde
 		args.append(p_scene_root);
 		current_node->propagate_call(StringName("set_owner"), args);
 	}
-	current_node->set_transform(fbx_node->xform);
+	current_node->set_transform(fbx_node->transform);
 	current_node->set_name(fbx_node->get_name());
 
 	p_state->scene_nodes.insert(p_node_index, current_node);
@@ -1749,7 +1747,7 @@ void FBXDocument::_import_animation(Ref<FBXState> p_state, AnimationPlayer *p_an
 			if (track.position_track.values.size()) {
 				bool is_default = true; // Discard the track if all it contains is default values.
 				if (p_remove_immutable_tracks) {
-					Vector3 base_pos = p_state->nodes[track_i.key]->position;
+					Vector3 base_pos = p_state->nodes[track_i.key]->transform.origin;
 					for (int i = 0; i < track.position_track.times.size(); i++) {
 						Vector3 value = track.position_track.values[track.position_track.interpolation == GLTFAnimation::INTERP_CUBIC_SPLINE ? (1 + i * 3) : i];
 						if (!value.is_equal_approx(base_pos)) {
@@ -1769,7 +1767,7 @@ void FBXDocument::_import_animation(Ref<FBXState> p_state, AnimationPlayer *p_an
 			if (track.rotation_track.values.size()) {
 				bool is_default = true; // Discard the track if all the track contains is the default values.
 				if (p_remove_immutable_tracks) {
-					Quaternion base_rot = p_state->nodes[track_i.key]->rotation.normalized();
+					Quaternion base_rot = p_state->nodes[track_i.key]->transform.basis.get_rotation_quaternion();
 					for (int i = 0; i < track.rotation_track.times.size(); i++) {
 						Quaternion value = track.rotation_track.values[track.rotation_track.interpolation == GLTFAnimation::INTERP_CUBIC_SPLINE ? (1 + i * 3) : i].normalized();
 						if (!value.is_equal_approx(base_rot)) {
@@ -1789,7 +1787,7 @@ void FBXDocument::_import_animation(Ref<FBXState> p_state, AnimationPlayer *p_an
 			if (track.scale_track.values.size()) {
 				bool is_default = true; // Discard the track if all the track contains is the default values.
 				if (p_remove_immutable_tracks) {
-					Vector3 base_scale = p_state->nodes[track_i.key]->scale;
+					Vector3 base_scale = p_state->nodes[track_i.key]->transform.basis.get_scale();
 					for (int i = 0; i < track.scale_track.times.size(); i++) {
 						Vector3 value = track.scale_track.values[track.scale_track.interpolation == GLTFAnimation::INTERP_CUBIC_SPLINE ? (1 + i * 3) : i];
 						if (!value.is_equal_approx(base_scale)) {

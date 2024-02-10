@@ -594,9 +594,9 @@ Error SkinTool::_create_skeletons(
 			skeleton->add_bone(node->get_name());
 			Transform3D rest_transform = node->get_additional_data("GODOT_rest_transform");
 			skeleton->set_bone_rest(bone_index, rest_transform);
-			skeleton->set_bone_pose_position(bone_index, node->position);
-			skeleton->set_bone_pose_rotation(bone_index, node->rotation.normalized());
-			skeleton->set_bone_pose_scale(bone_index, node->scale);
+			skeleton->set_bone_pose_position(bone_index, node->transform.origin);
+			skeleton->set_bone_pose_rotation(bone_index, node->transform.basis.get_rotation_quaternion());
+			skeleton->set_bone_pose_scale(bone_index, node->transform.basis.get_scale());
 
 			if (node->parent >= 0 && nodes[node->parent]->skeleton == skel_i) {
 				const int bone_parent = skeleton->find_bone(nodes[node->parent]->get_name());

@@ -29,6 +29,7 @@
 /**************************************************************************/
 
 #include "audio_stream_player.h"
+#include "audio_stream_player.compat.inc"
 
 #include "scene/audio/audio_stream_player_internal.h"
 #include "servers/audio/audio_stream.h"
@@ -127,7 +128,7 @@ void AudioStreamPlayer::set_autoplay(bool p_enable) {
 	internal->autoplay = p_enable;
 }
 
-bool AudioStreamPlayer::is_autoplay_enabled() {
+bool AudioStreamPlayer::is_autoplay_enabled() const {
 	return internal->autoplay;
 }
 
