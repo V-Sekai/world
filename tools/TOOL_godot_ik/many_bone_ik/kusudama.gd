@@ -52,8 +52,6 @@ var bone_configurations = {
 			LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(25.0))
 		]
 	},
-	"LeftShoulder": {},
-	"RightShoulder": {},
 	"LeftUpperArm": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(120.0))]},
 	"RightUpperArm": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(120.0))]},
 	"LeftLowerArm": {
