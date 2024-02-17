@@ -213,7 +213,8 @@ private:
 	void _get_script_signal_list(List<MethodInfo> *r_list, bool p_include_base) const;
 
 	GDScript *_get_gdscript_from_variant(const Variant &p_variant);
-	void _get_dependencies(RBSet<GDScript *> &p_dependencies, const GDScript *p_except);
+	void _collect_function_dependencies(GDScriptFunction *p_func, RBSet<GDScript *> &p_dependencies, const GDScript *p_except);
+	void _collect_dependencies(RBSet<GDScript *> &p_dependencies, const GDScript *p_except);
 
 protected:
 	bool _get(const StringName &p_name, Variant &r_ret) const;
@@ -228,6 +229,8 @@ public:
 #ifdef DEBUG_ENABLED
 	static String debug_get_script_name(const Ref<Script> &p_script);
 #endif
+
+	static bool is_equal_gdscript_paths(const String &p_path_a, const String &p_path_b);
 
 	_FORCE_INLINE_ StringName get_local_name() const { return local_name; }
 
@@ -539,7 +542,7 @@ public:
 
 	/* EDITOR FUNCTIONS */
 	virtual void get_reserved_words(List<String> *p_words) const override;
-	virtual bool is_control_flow_keyword(String p_keywords) const override;
+	virtual bool is_control_flow_keyword(const String &p_keywords) const override;
 	virtual void get_comment_delimiters(List<String> *p_delimiters) const override;
 	virtual void get_doc_comment_delimiters(List<String> *p_delimiters) const override;
 	virtual void get_string_delimiters(List<String> *p_delimiters) const override;

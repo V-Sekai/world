@@ -59,6 +59,7 @@ class FBXState : public GLTFState {
 	Vector<GLTFSkinIndex> skin_indices;
 	HashMap<ObjectID, GLTFSkeletonIndex> skeleton3d_to_fbx_skeleton;
 	HashMap<ObjectID, HashMap<ObjectID, GLTFSkinIndex>> skin_and_skeleton3d_to_fbx_skin;
+	HashSet<String> unique_mesh_names; // Not in GLTFState because GLTFState prefixes mesh names with the scene name (or _)
 
 protected:
 	static void _bind_methods();

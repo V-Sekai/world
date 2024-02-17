@@ -318,6 +318,7 @@ Error FBXDocument::_parse_nodes(Ref<FBXState> p_state) {
 
 		if (fbx_node->name.length > 0) {
 			node->set_name(_as_string(fbx_node->name));
+			node->set_original_name(node->get_name());
 		} else if (fbx_node->is_root) {
 			node->set_name("Root");
 		}
@@ -376,6 +377,18 @@ Error FBXDocument::_parse_nodes(Ref<FBXState> p_state) {
 Error FBXDocument::_parse_meshes(Ref<FBXState> p_state) {
 	ufbx_scene *fbx_scene = p_state->scene.get();
 
+	LocalVector<int> nodes_by_mesh_id;
+	nodes_by_mesh_id.reserve(fbx_scene->meshes.count);
+	for (size_t i = 0; i < fbx_scene->meshes.count; i++) {
+		nodes_by_mesh_id.push_back(-1);
+	}
+	for (int i = 0; i < p_state->nodes.size(); i++) {
+		const Ref<GLTFNode> &node = p_state->nodes[i];
+		if (node->mesh >= 0 && (unsigned)node->mesh < nodes_by_mesh_id.size()) {
+			nodes_by_mesh_id[node->mesh] = i;
+		}
+	}
+
 	for (const ufbx_mesh *fbx_mesh : fbx_scene->meshes) {
 		print_verbose("FBX: Parsing mesh: " + itos(int64_t(fbx_mesh->typed_id)));
 
@@ -388,10 +401,16 @@ Error FBXDocument::_parse_meshes(Ref<FBXState> p_state) {
 		Ref<ImporterMesh> import_mesh;
 		import_mesh.instantiate();
 		String mesh_name = "mesh";
+		String original_name;
 		if (fbx_mesh->name.length > 0) {
 			mesh_name = _as_string(fbx_mesh->name);
+			original_name = mesh_name;
+		} else if (fbx_mesh->typed_id < (unsigned)p_state->nodes.size() && nodes_by_mesh_id[fbx_mesh->typed_id] != -1) {
+			const Ref<GLTFNode> &node = p_state->nodes[nodes_by_mesh_id[fbx_mesh->typed_id]];
+			original_name = node->get_original_name();
+			mesh_name = node->get_name();
 		}
-		import_mesh->set_name(_gen_unique_name(p_state->unique_names, mesh_name));
+		import_mesh->set_name(_gen_unique_name(p_state->unique_mesh_names, mesh_name));
 
 		bool use_blend_shapes = false;
 		if (fbx_mesh->blend_deformers.count > 0) {
@@ -815,6 +834,8 @@ Error FBXDocument::_parse_meshes(Ref<FBXState> p_state) {
 		mesh->set_additional_data("GODOT_mesh_blend_channels", additional_data);
 		mesh->set_blend_weights(blend_weights);
 		mesh->set_mesh(import_mesh);
+		mesh->set_name(import_mesh->get_name());
+		mesh->set_original_name(original_name);
 
 		p_state->meshes.push_back(mesh);
 	}
@@ -970,7 +991,13 @@ Error FBXDocument::_parse_images(Ref<FBXState> p_state, const String &p_base_pat
 		const ufbx_texture_file &fbx_texture_file = fbx_scene->texture_files[texture_i];
 		String path = _as_string(fbx_texture_file.filename);
 		path = ProjectSettings::get_singleton()->localize_path(path);
-
+		if (path.is_absolute_path() && !path.is_resource_file()) {
+			path = path.get_file();
+		}
+		if (!p_base_path.is_empty()) {
+			path = p_base_path.path_join(path);
+		}
+		path = path.simplify_path();
 		Vector<uint8_t> data;
 		if (fbx_texture_file.content.size > 0 && fbx_texture_file.content.size <= INT_MAX) {
 			data.resize(int(fbx_texture_file.content.size));
@@ -1269,6 +1296,7 @@ Error FBXDocument::_parse_animations(Ref<FBXState> p_state) {
 			if (anim_name_lower.begins_with("loop") || anim_name_lower.ends_with("loop") || anim_name_lower.begins_with("cycle") || anim_name_lower.ends_with("cycle")) {
 				animation->set_loop(true);
 			}
+			animation->set_original_name(anim_name);
 			animation->set_name(_gen_unique_animation_name(p_state, anim_name));
 		}
 
@@ -2016,7 +2044,7 @@ void FBXDocument::_build_parent_hierarchy(Ref<FBXState> p_state) {
 	}
 }
 
-Node *FBXDocument::create_scene(Ref<AssetState3D> p_state, float p_bake_fps, bool p_trimming, bool p_remove_immutable_tracks) {
+Node *FBXDocument::create_scene(Ref<ModelState3D> p_state, float p_bake_fps, bool p_trimming, bool p_remove_immutable_tracks) {
 	Ref<FBXState> state = p_state;
 	ERR_FAIL_COND_V(state.is_null(), nullptr);
 	ERR_FAIL_NULL_V(state, nullptr);
@@ -2041,7 +2069,7 @@ Node *FBXDocument::create_scene(Ref<AssetState3D> p_state, float p_bake_fps, boo
 	return root;
 }
 
-Error FBXDocument::append_data_from_buffer(PackedByteArray p_bytes, String p_base_path, Ref<AssetState3D> p_state, uint32_t p_flags) {
+Error FBXDocument::append_data_from_buffer(PackedByteArray p_bytes, String p_base_path, Ref<ModelState3D> p_state, uint32_t p_flags) {
 	Ref<FBXState> state = p_state;
 	ERR_FAIL_COND_V(state.is_null(), ERR_INVALID_PARAMETER);
 	ERR_FAIL_NULL_V(p_bytes.ptr(), ERR_INVALID_DATA);
@@ -2133,7 +2161,7 @@ Error FBXDocument::_parse_fbx_state(Ref<FBXState> p_state, const String &p_searc
 	return OK;
 }
 
-Error FBXDocument::append_data_from_file(String p_path, Ref<AssetState3D> p_state, uint32_t p_flags, String p_base_path) {
+Error FBXDocument::append_data_from_file(String p_path, Ref<ModelState3D> p_state, uint32_t p_flags, String p_base_path) {
 	Ref<FBXState> state = p_state;
 	ERR_FAIL_COND_V(state.is_null(), ERR_INVALID_PARAMETER);
 	ERR_FAIL_COND_V(p_path.is_empty(), ERR_FILE_NOT_FOUND);
@@ -2250,16 +2278,20 @@ String FBXDocument::_get_texture_path(const String &p_base_dir, const String &p_
 		"Images/", "materials/", "Materials/",
 		"maps/", "Maps/", "tex/", "Tex/"
 	};
-	String base_dir = p_base_dir.replace("res://", "");
-	const String source_file_name = tex_file_name.replace("res://", "");
+	String base_dir = p_base_dir;
+	const String source_file_name = tex_file_name;
 	while (!base_dir.is_empty()) {
+		String old_base_dir = base_dir;
 		for (int i = 0; i < subdirs.size(); ++i) {
-			String full_path = "res://" + base_dir.path_join(subdirs[i] + source_file_name);
+			String full_path = base_dir.path_join(subdirs[i] + source_file_name);
 			if (FileAccess::exists(full_path)) {
 				return full_path.strip_edges();
 			}
 		}
-		base_dir = base_dir.get_base_dir().replace("res://", "");
+		base_dir = base_dir.get_base_dir();
+		if (base_dir == old_base_dir) {
+			break;
+		}
 	}
 	return String();
 }
@@ -2309,6 +2341,7 @@ Error FBXDocument::_parse_skins(Ref<FBXState> p_state) {
 					skin->joints.push_back(node);
 					skin->joints_original.push_back(node);
 					skin->set_name(vformat("skin_%s", itos(p_state->skins.size())));
+					p_state->skin_indices.push_back(p_state->skins.size());
 					p_state->skins.push_back(skin);
 				}
 			}
@@ -2346,21 +2379,27 @@ Error FBXDocument::_parse_skins(Ref<FBXState> p_state) {
 
 	return OK;
 }
-PackedByteArray FBXDocument::create_buffer(Ref<AssetState3D> p_state) {
+
+PackedByteArray FBXDocument::create_buffer(Ref<ModelState3D> p_state) {
 	return PackedByteArray();
 }
-Error FBXDocument::write_asset_to_filesystem(Ref<AssetState3D> p_state, const String &p_path) {
+
+Error FBXDocument::write_asset_to_filesystem(Ref<ModelState3D> p_state, const String &p_path) {
 	return ERR_UNAVAILABLE;
 }
-Error FBXDocument::append_data_from_scene(Node *p_node, Ref<AssetState3D> p_state, uint32_t p_flags) {
+
+Error FBXDocument::append_data_from_scene(Node *p_node, Ref<ModelState3D> p_state, uint32_t p_flags) {
 	return ERR_UNAVAILABLE;
 }
+
 Vector3 FBXDocument::_as_vec3(const ufbx_vec3 &p_vector) {
 	return Vector3(real_t(p_vector.x), real_t(p_vector.y), real_t(p_vector.z));
 }
+
 String FBXDocument::_as_string(const ufbx_string &p_string) {
 	return String::utf8(p_string.data, (int)p_string.length);
 }
+
 Transform3D FBXDocument::_as_xform(const ufbx_matrix &p_mat) {
 	Transform3D xform;
 	xform.basis.set_column(Vector3::AXIS_X, _as_vec3(p_mat.cols[0]));

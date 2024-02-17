@@ -33,12 +33,12 @@
 
 #include "modules/fbx/fbx_state.h"
 #include "modules/gltf/gltf_defines.h"
-#include "scene/resources/asset_document_3d.h"
+#include "scene/resources/model_document_3d.h"
 
 #include "thirdparty/ufbx/ufbx.h"
 
-class FBXDocument : public AssetDocument3D {
-	GDCLASS(FBXDocument, AssetDocument3D);
+class FBXDocument : public ModelDocument3D {
+	GDCLASS(FBXDocument, ModelDocument3D);
 
 private:
 	const float BAKE_FPS = 30.0f;
@@ -56,14 +56,14 @@ public:
 	static String _gen_unique_name(HashSet<String> &unique_names, const String &p_name);
 
 public:
-	virtual Error append_data_from_file(String p_path, Ref<AssetState3D> p_state, uint32_t p_flags = 0, String p_base_path = String()) override;
-	virtual Error append_data_from_buffer(PackedByteArray p_bytes, String p_base_path, Ref<AssetState3D> p_state, uint32_t p_flags = 0) override;
-	virtual Error append_data_from_scene(Node *p_node, Ref<AssetState3D> p_state, uint32_t p_flags = 0) override;
+	virtual Error append_data_from_file(String p_path, Ref<ModelState3D> p_state, uint32_t p_flags = 0, String p_base_path = String()) override;
+	virtual Error append_data_from_buffer(PackedByteArray p_bytes, String p_base_path, Ref<ModelState3D> p_state, uint32_t p_flags = 0) override;
+	virtual Error append_data_from_scene(Node *p_node, Ref<ModelState3D> p_state, uint32_t p_flags = 0) override;
 
 public:
-	virtual Node *create_scene(Ref<AssetState3D> p_state, float p_bake_fps = 30.0f, bool p_trimming = false, bool p_remove_immutable_tracks = true) override;
-	virtual PackedByteArray create_buffer(Ref<AssetState3D> p_state) override;
-	virtual Error write_asset_to_filesystem(Ref<AssetState3D> p_state, const String &p_path) override;
+	virtual Node *create_scene(Ref<ModelState3D> p_state, float p_bake_fps = 30.0f, bool p_trimming = false, bool p_remove_immutable_tracks = true) override;
+	virtual PackedByteArray create_buffer(Ref<ModelState3D> p_state) override;
+	virtual Error write_asset_to_filesystem(Ref<ModelState3D> p_state, const String &p_path) override;
 
 protected:
 	static void _bind_methods();

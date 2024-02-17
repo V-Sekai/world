@@ -134,7 +134,6 @@ static InputMap *input_map = nullptr;
 static TranslationServer *translation_server = nullptr;
 static Performance *performance = nullptr;
 static PackedData *packed_data = nullptr;
-static Time *time_singleton = nullptr;
 #ifdef MINIZIP_ENABLED
 static ZipArchive *zip_packed_data = nullptr;
 #endif
@@ -487,6 +486,7 @@ void Main::print_help(const char *p_binary) {
 	print_help_option("--version", "Display the version string.\n");
 	print_help_option("-v, --verbose", "Use verbose stdout mode.\n");
 	print_help_option("--quiet", "Quiet mode, silences stdout messages. Errors are still displayed.\n");
+	print_help_option("--no-header", "Do not print engine version and rendering method header on startup.\n");
 
 	print_help_title("Run options");
 	print_help_option("--, ++", "Separator for user-provided arguments. Following arguments are not used by the engine, but can be read from `OS.get_cmdline_user_args()`.\n");
@@ -873,7 +873,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	MAIN_PRINT("Main: Initialize Globals");
 
 	input_map = memnew(InputMap);
-	time_singleton = memnew(Time);
 	globals = memnew(ProjectSettings);
 
 	register_core_settings(); //here globals are present
@@ -1027,6 +1026,9 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 		} else if (I->get() == "-q" || I->get() == "--quiet") { // quieter output
 
 			quiet_stdout = true;
+
+		} else if (I->get() == "--no-header") {
+			Engine::get_singleton()->_print_header = false;
 
 		} else if (I->get() == "--audio-driver") { // audio driver
 
@@ -1848,6 +1850,10 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	if (bool(GLOBAL_GET("application/run/disable_stderr"))) {
 		CoreGlobals::print_error_enabled = false;
 	}
+	if (!bool(GLOBAL_GET("application/run/print_header"))) {
+		// --no-header option for project settings.
+		Engine::get_singleton()->_print_header = false;
+	}
 
 	if (quiet_stdout) {
 		CoreGlobals::print_line_enabled = false;
@@ -1963,6 +1969,33 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 		BLOCK_DEVICE("AMD", "Radeon (TM) R7 M3");
 		BLOCK_DEVICE("ATI", "Radeon (TM) R9 M3");
 		BLOCK_DEVICE("AMD", "Radeon (TM) R9 M3");
+
+		// Intel GPUs.
+		BLOCK_DEVICE("0x8086", "0x0042"); // HD Graphics, Gen5, Clarkdale
+		BLOCK_DEVICE("0x8086", "0x0046"); // HD Graphics, Gen5, Arrandale
+		BLOCK_DEVICE("0x8086", "0x010A"); // HD Graphics, Gen6, Sandy Bridge
+		BLOCK_DEVICE("Intel", "Intel HD Graphics 2000");
+		BLOCK_DEVICE("Intel", "Intel(R) HD Graphics 2000");
+		BLOCK_DEVICE("0x8086", "0x0102"); // HD Graphics 2000, Gen6, Sandy Bridge
+		BLOCK_DEVICE("0x8086", "0x0116"); // HD Graphics 3000, Gen6, Sandy Bridge
+		BLOCK_DEVICE("Intel", "Intel HD Graphics 3000");
+		BLOCK_DEVICE("Intel", "Intel(R) HD Graphics 3000");
+		BLOCK_DEVICE("0x8086", "0x0126"); // HD Graphics 3000, Gen6, Sandy Bridge
+		BLOCK_DEVICE("Intel", "Intel HD Graphics P3000");
+		BLOCK_DEVICE("Intel", "Intel(R) HD Graphics P3000");
+		BLOCK_DEVICE("0x8086", "0x0112"); // HD Graphics P3000, Gen6, Sandy Bridge
+		BLOCK_DEVICE("0x8086", "0x0122"); // HD Graphics P3000, Gen6, Sandy Bridge
+		BLOCK_DEVICE("0x8086", "0x015A"); // HD Graphics, Gen7, Ivy Bridge
+		BLOCK_DEVICE("Intel", "Intel HD Graphics 2500");
+		BLOCK_DEVICE("Intel", "Intel(R) HD Graphics 2500");
+		BLOCK_DEVICE("0x8086", "0x0152"); // HD Graphics 2500, Gen7, Ivy Bridge
+		BLOCK_DEVICE("Intel", "Intel HD Graphics 4000");
+		BLOCK_DEVICE("Intel", "Intel(R) HD Graphics 4000");
+		BLOCK_DEVICE("0x8086", "0x0162"); // HD Graphics 4000, Gen7, Ivy Bridge
+		BLOCK_DEVICE("0x8086", "0x0166"); // HD Graphics 4000, Gen7, Ivy Bridge
+		BLOCK_DEVICE("Intel", "Intel HD Graphics P4000");
+		BLOCK_DEVICE("Intel", "Intel(R) HD Graphics P4000");
+		BLOCK_DEVICE("0x8086", "0x016A"); // HD Graphics P4000, Gen7, Ivy Bridge
 
 #undef BLOCK_DEVICE
 
@@ -2205,11 +2238,13 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 		OS::get_singleton()->set_environment("DISABLE_MANGOHUD", "1"); // GH-57403.
 		OS::get_singleton()->set_environment("DISABLE_RTSS_LAYER", "1"); // GH-57937.
 		OS::get_singleton()->set_environment("DISABLE_VKBASALT", "1");
+		OS::get_singleton()->set_environment("DISABLE_VK_LAYER_reshade_1", "1"); // GH-70849.
 	} else {
 		// Re-allow using Vulkan overlays, disabled while using the editor.
 		OS::get_singleton()->unset_environment("DISABLE_MANGOHUD");
 		OS::get_singleton()->unset_environment("DISABLE_RTSS_LAYER");
 		OS::get_singleton()->unset_environment("DISABLE_VKBASALT");
+		OS::get_singleton()->unset_environment("DISABLE_VK_LAYER_reshade_1");
 	}
 #endif
 
@@ -2387,9 +2422,6 @@ error:
 	if (input_map) {
 		memdelete(input_map);
 	}
-	if (time_singleton) {
-		memdelete(time_singleton);
-	}
 	if (translation_server) {
 		memdelete(translation_server);
 	}
@@ -2447,7 +2479,7 @@ Error Main::setup2() {
 	set_current_thread_safe_for_nodes(true);
 
 	// Print engine name and version
-	print_line(String(VERSION_NAME) + " v" + get_full_version_string() + " - " + String(VERSION_WEBSITE));
+	Engine::get_singleton()->print_header(String(VERSION_NAME) + " v" + get_full_version_string() + " - " + String(VERSION_WEBSITE));
 
 #ifdef TOOLS_ENABLED
 	if (editor || project_manager || cmdline_tool) {
@@ -2740,8 +2772,6 @@ Error Main::setup2() {
 
 		AudioDriverManager::initialize(audio_driver_idx);
 
-		print_line(" "); // Add a blank line for readability.
-
 		// Right moment to create and initialize the audio server.
 		audio_server = memnew(AudioServer);
 		audio_server->init();
@@ -2762,6 +2792,9 @@ Error Main::setup2() {
 	}
 
 	OS::get_singleton()->benchmark_end_measure("Startup", "Servers");
+
+	// Add a blank line for readability.
+	Engine::get_singleton()->print_header("");
 
 	register_core_singletons();
 
@@ -2881,7 +2914,7 @@ Error Main::setup2() {
 
 		GLOBAL_DEF_BASIC("input_devices/pointing/android/enable_long_press_as_right_click", false);
 		GLOBAL_DEF_BASIC("input_devices/pointing/android/enable_pan_and_scale_gestures", false);
-
+		GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "input_devices/pointing/android/rotary_input_scroll_axis", PROPERTY_HINT_ENUM, "Horizontal,Vertical"), 1);
 		OS::get_singleton()->benchmark_end_measure("Startup", "Setup Window and Boot");
 	}
 
@@ -4182,9 +4215,6 @@ void Main::cleanup(bool p_force) {
 	}
 	if (input_map) {
 		memdelete(input_map);
-	}
-	if (time_singleton) {
-		memdelete(time_singleton);
 	}
 	if (translation_server) {
 		memdelete(translation_server);

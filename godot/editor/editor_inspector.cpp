@@ -214,22 +214,6 @@ void EditorProperty::_notification(int p_what) {
 						text_size -= close->get_width() + 4 * EDSCALE;
 					}
 				}
-
-				if (!configuration_warning.is_empty() && !read_only) {
-					Ref<Texture2D> warning;
-
-					warning = get_theme_icon(SNAME("NodeWarning"), SNAME("EditorIcons"));
-
-					rect.size.x -= warning->get_width() + get_theme_constant(SNAME("hseparator"), SNAME("Tree"));
-
-					if (is_layout_rtl()) {
-						rect.position.x += warning->get_width() + get_theme_constant(SNAME("hseparator"), SNAME("Tree"));
-					}
-
-					if (no_children) {
-						text_size -= warning->get_width() + 4 * EDSCALE;
-					}
-				}
 			}
 
 			//set children
@@ -414,38 +398,6 @@ void EditorProperty::_notification(int p_what) {
 				}
 			} else {
 				delete_rect = Rect2();
-			}
-
-			if (!configuration_warning.is_empty() && !read_only) {
-				Ref<Texture2D> warning;
-
-				StringName warning_icon;
-				Node *node = Object::cast_to<Node>(object);
-				if (node) {
-					const int warning_num = node->get_configuration_warnings_of_property(property_path).size();
-					warning_icon = Node::get_configuration_warning_icon(warning_num);
-				} else {
-					// This shouldn't happen, but let's not crash over an icon.
-					warning_icon = "NodeWarning";
-				}
-				warning = get_theme_icon(warning_icon, SNAME("EditorIcons"));
-
-				ofs -= warning->get_width() + get_theme_constant(SNAME("hseparator"), SNAME("Tree"));
-
-				Color color2(1, 1, 1);
-				if (configuration_warning_hover) {
-					color2.r *= 1.2;
-					color2.g *= 1.2;
-					color2.b *= 1.2;
-				}
-				configuration_warning_rect = Rect2(ofs, ((size.height - warning->get_height()) / 2), warning->get_width(), warning->get_height());
-				if (rtl) {
-					draw_texture(warning, Vector2(size.width - configuration_warning_rect.position.x - warning->get_width(), configuration_warning_rect.position.y), color2);
-				} else {
-					draw_texture(warning, configuration_warning_rect.position, color2);
-				}
-			} else {
-				configuration_warning_rect = Rect2();
 			}
 		} break;
 	}
@@ -722,12 +674,6 @@ void EditorProperty::gui_input(const Ref<InputEvent> &p_event) {
 			check_hover = new_check_hover;
 			queue_redraw();
 		}
-
-		bool new_configuration_warning_hover = configuration_warning_rect.has_point(mpos) && !button_left;
-		if (new_configuration_warning_hover != configuration_warning_hover) {
-			configuration_warning_hover = new_configuration_warning_hover;
-			queue_redraw();
-		}
 	}
 
 	Ref<InputEventMouseButton> mb = p_event;
@@ -783,16 +729,6 @@ void EditorProperty::gui_input(const Ref<InputEvent> &p_event) {
 			checked = !checked;
 			queue_redraw();
 			emit_signal(SNAME("property_checked"), property, checked);
-		}
-
-		if (configuration_warning_rect.has_point(mpos)) {
-			if (warning_dialog == nullptr) {
-				warning_dialog = memnew(AcceptDialog);
-				add_child(warning_dialog);
-				warning_dialog->set_title(TTR("Node Configuration Warning!"));
-			}
-			warning_dialog->set_text(configuration_warning);
-			warning_dialog->popup_centered();
 		}
 	} else if (mb.is_valid() && mb->is_pressed() && mb->get_button_index() == MouseButton::RIGHT) {
 		accept_event();
@@ -919,16 +855,6 @@ float EditorProperty::get_name_split_ratio() const {
 	return split_ratio;
 }
 
-void EditorProperty::set_configuration_warning(const String &p_configuration_warning) {
-	configuration_warning = p_configuration_warning;
-	queue_redraw();
-	queue_sort();
-}
-
-String EditorProperty::get_configuration_warning() const {
-	return configuration_warning;
-}
-
 void EditorProperty::set_object_and_property(Object *p_object, const StringName &p_property) {
 	object = p_object;
 	property = p_property;
@@ -985,20 +911,17 @@ void EditorProperty::_update_pin_flags() {
 	}
 }
 
-void EditorProperty::_update_configuration_warnings() {
-	Node *node = Object::cast_to<Node>(object);
-	if (node) {
-		const PackedStringArray warnings = node->get_configuration_warnings_as_strings(true, property_path);
-		const String warning_lines = String("\n").join(warnings);
-		set_configuration_warning(warning_lines);
-	}
-}
-
 Control *EditorProperty::make_custom_tooltip(const String &p_text) const {
 	EditorHelpBit *tooltip = nullptr;
 
 	if (has_doc_tooltip) {
-		tooltip = memnew(EditorHelpTooltip(p_text));
+		String custom_description;
+
+		const EditorInspector *inspector = get_parent_inspector();
+		if (inspector) {
+			custom_description = inspector->get_custom_property_description(p_text);
+		}
+		tooltip = memnew(EditorHelpTooltip(p_text, custom_description));
 	}
 
 	if (object->has_method("_get_property_warning")) {
@@ -1063,9 +986,6 @@ void EditorProperty::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_deletable", "deletable"), &EditorProperty::set_deletable);
 	ClassDB::bind_method(D_METHOD("is_deletable"), &EditorProperty::is_deletable);
 
-	ClassDB::bind_method(D_METHOD("set_configuration_warning", "configuration_warning"), &EditorProperty::set_configuration_warning);
-	ClassDB::bind_method(D_METHOD("get_configuration_warning"), &EditorProperty::get_configuration_warning);
-
 	ClassDB::bind_method(D_METHOD("get_edited_property"), &EditorProperty::get_edited_property);
 	ClassDB::bind_method(D_METHOD("get_edited_object"), &EditorProperty::get_edited_object);
 
@@ -1083,7 +1003,6 @@ void EditorProperty::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "draw_warning"), "set_draw_warning", "is_draw_warning");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "keying"), "set_keying", "is_keying");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "deletable"), "set_deletable", "is_deletable");
-	ADD_PROPERTY(PropertyInfo(Variant::STRING, "configuration_warning"), "set_configuration_warning", "get_configuration_warning");
 
 	ADD_SIGNAL(MethodInfo("property_changed", PropertyInfo(Variant::STRING_NAME, "property"), PropertyInfo(Variant::NIL, "value", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NIL_IS_VARIANT), PropertyInfo(Variant::STRING_NAME, "field"), PropertyInfo(Variant::BOOL, "changing")));
 	ADD_SIGNAL(MethodInfo("multiple_properties_changed", PropertyInfo(Variant::PACKED_STRING_ARRAY, "properties"), PropertyInfo(Variant::ARRAY, "value")));
@@ -2886,7 +2805,9 @@ void EditorInspector::update_tree() {
 						(!filter.is_empty() || !restrict_to_basic || (N->get().usage & PROPERTY_USAGE_EDITOR_BASIC_SETTING))) {
 					break;
 				}
-				if (N->get().usage & PROPERTY_USAGE_CATEGORY) {
+				// Treat custom categories as second-level ones. Do not skip a normal category if it is followed by a custom one.
+				// Skip in the other 3 cases (normal -> normal, custom -> custom, custom -> normal).
+				if ((N->get().usage & PROPERTY_USAGE_CATEGORY) && (p.hint_string.is_empty() || !N->get().hint_string.is_empty())) {
 					valid = false;
 					break;
 				}
@@ -3401,7 +3322,6 @@ void EditorInspector::update_tree() {
 				ep->set_keying(keying);
 				ep->set_read_only(property_read_only || all_read_only);
 				ep->set_deletable(deletable_properties || p.name.begins_with("metadata/"));
-				ep->_update_configuration_warnings();
 			}
 
 			current_vbox->add_child(editors[i].property_editor);
@@ -4048,12 +3968,6 @@ void EditorInspector::_node_removed(Node *p_node) {
 	}
 }
 
-void EditorInspector::_warning_changed(Node *p_node) {
-	if (p_node == object) {
-		update_tree_pending = true;
-	}
-}
-
 void EditorInspector::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_READY: {
@@ -4065,7 +3979,6 @@ void EditorInspector::_notification(int p_what) {
 		case NOTIFICATION_ENTER_TREE: {
 			if (!sub_inspector) {
 				get_tree()->connect("node_removed", callable_mp(this, &EditorInspector::_node_removed));
-				get_tree()->connect("node_configuration_warning_changed", callable_mp(this, &EditorInspector::_warning_changed));
 			}
 		} break;
 
@@ -4076,7 +3989,6 @@ void EditorInspector::_notification(int p_what) {
 		case NOTIFICATION_EXIT_TREE: {
 			if (!sub_inspector) {
 				get_tree()->disconnect("node_removed", callable_mp(this, &EditorInspector::_node_removed));
-				get_tree()->disconnect("node_configuration_warning_changed", callable_mp(this, &EditorInspector::_warning_changed));
 			}
 			edit(nullptr);
 		} break;
@@ -4178,6 +4090,19 @@ void EditorInspector::set_property_prefix(const String &p_prefix) {
 
 String EditorInspector::get_property_prefix() const {
 	return property_prefix;
+}
+
+void EditorInspector::add_custom_property_description(const String &p_class, const String &p_property, const String &p_description) {
+	const String key = vformat("property|%s|%s|", p_class, p_property);
+	custom_property_descriptions[key] = p_description;
+}
+
+String EditorInspector::get_custom_property_description(const String &p_property) const {
+	HashMap<String, String>::ConstIterator E = custom_property_descriptions.find(p_property);
+	if (E) {
+		return E->value;
+	}
+	return "";
 }
 
 void EditorInspector::set_object_class(const String &p_class) {

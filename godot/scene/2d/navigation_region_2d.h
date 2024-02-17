@@ -59,6 +59,7 @@ private:
 	void _update_debug_mesh();
 	void _update_debug_edge_connections_mesh();
 	void _navigation_map_changed(RID p_map);
+	void _navigation_debug_changed();
 #endif // DEBUG_ENABLED
 
 protected:
@@ -113,7 +114,7 @@ public:
 	void set_avoidance_layer_value(int p_layer_number, bool p_value);
 	bool get_avoidance_layer_value(int p_layer_number) const;
 
-	Array get_configuration_warnings() const override;
+	PackedStringArray get_configuration_warnings() const override;
 
 	void bake_navigation_polygon(bool p_on_thread);
 	void _bake_finished(Ref<NavigationPolygon> p_navigation_polygon);

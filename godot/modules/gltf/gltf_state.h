@@ -33,7 +33,7 @@
 
 #include "extensions/gltf_light.h"
 #include "scene/3d/importer_mesh_instance_3d.h"
-#include "scene/resources/asset_state_3d.h"
+#include "scene/resources/model_state_3d.h"
 #include "structures/gltf_accessor.h"
 #include "structures/gltf_animation.h"
 #include "structures/gltf_buffer_view.h"
@@ -45,9 +45,9 @@
 #include "structures/gltf_texture.h"
 #include "structures/gltf_texture_sampler.h"
 
-class GLTFState : public AssetState3D {
-	GDCLASS(GLTFState, AssetState3D);
-	friend class AssetDocument3D;
+class GLTFState : public ModelState3D {
+	GDCLASS(GLTFState, ModelState3D);
+	friend class ModelDocument3D;
 	friend class GLTFDocument;
 
 protected:

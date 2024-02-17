@@ -135,12 +135,12 @@
 #include "scene/main/multiplayer_api.h"
 #include "scene/main/resource_preloader.h"
 #include "scene/main/scene_tree.h"
+#include "scene/main/status_indicator.h"
 #include "scene/main/timer.h"
 #include "scene/main/viewport.h"
 #include "scene/main/window.h"
 #include "scene/resources/animated_texture.h"
 #include "scene/resources/animation_library.h"
-#include "scene/resources/asset_state_3d.h"
 #include "scene/resources/atlas_texture.h"
 #include "scene/resources/audio_stream_polyphonic.h"
 #include "scene/resources/audio_stream_wav.h"
@@ -170,6 +170,7 @@
 #include "scene/resources/material.h"
 #include "scene/resources/mesh_data_tool.h"
 #include "scene/resources/mesh_texture.h"
+#include "scene/resources/model_state_3d.h"
 #include "scene/resources/multimesh.h"
 #include "scene/resources/navigation_mesh.h"
 #include "scene/resources/navigation_mesh_source_geometry_data_2d.h"
@@ -273,12 +274,12 @@
 #include "scene/3d/world_environment.h"
 #include "scene/3d/xr_nodes.h"
 #include "scene/animation/root_motion_view.h"
-#include "scene/resources/asset_document_3d.h"
-#include "scene/resources/asset_state_3d.h"
 #include "scene/resources/environment.h"
 #include "scene/resources/fog_material.h"
 #include "scene/resources/importer_mesh.h"
 #include "scene/resources/mesh_library.h"
+#include "scene/resources/model_document_3d.h"
+#include "scene/resources/model_state_3d.h"
 #endif // _3D_DISABLED
 
 static Ref<ResourceFormatSaverText> resource_saver_text;
@@ -353,6 +354,8 @@ void register_scene_types() {
 	GDREGISTER_CLASS(CanvasModulate);
 	GDREGISTER_CLASS(ResourcePreloader);
 	GDREGISTER_CLASS(Window);
+
+	GDREGISTER_CLASS(StatusIndicator);
 
 	/* REGISTER GUI */
 
@@ -509,8 +512,8 @@ void register_scene_types() {
 	GDREGISTER_CLASS(Skeleton3D);
 	GDREGISTER_CLASS(ImporterMesh);
 	GDREGISTER_CLASS(ImporterMeshInstance3D);
-	GDREGISTER_ABSTRACT_CLASS(AssetState3D);
-	GDREGISTER_ABSTRACT_CLASS(AssetDocument3D);
+	GDREGISTER_ABSTRACT_CLASS(ModelState3D);
+	GDREGISTER_ABSTRACT_CLASS(ModelDocument3D);
 	GDREGISTER_VIRTUAL_CLASS(VisualInstance3D);
 	GDREGISTER_VIRTUAL_CLASS(GeometryInstance3D);
 	GDREGISTER_CLASS(Camera3D);
@@ -787,6 +790,7 @@ void register_scene_types() {
 	GDREGISTER_CLASS(TileMapPattern);
 	GDREGISTER_CLASS(TileData);
 	GDREGISTER_CLASS(TileMap);
+	GDREGISTER_ABSTRACT_CLASS(TileMapLayerGroup);
 	GDREGISTER_CLASS(ParallaxBackground);
 	GDREGISTER_CLASS(ParallaxLayer);
 	GDREGISTER_CLASS(TouchScreenButton);

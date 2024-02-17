@@ -39,12 +39,12 @@
 #include "modules/gridmap/grid_map.h"
 #include "scene/3d/mesh_instance_3d.h"
 #include "scene/3d/multimesh_instance_3d.h"
-#include "scene/resources/asset_document_3d.h"
+#include "scene/resources/model_document_3d.h"
 
 #include "modules/modules_enabled.gen.h" // For csg, gridmap.
 
-class GLTFDocument : public AssetDocument3D {
-	GDCLASS(GLTFDocument, AssetDocument3D);
+class GLTFDocument : public ModelDocument3D {
+	GDCLASS(GLTFDocument, ModelDocument3D);
 
 public:
 	const int32_t JOINT_GROUP_SIZE = 4;
@@ -78,14 +78,14 @@ public:
 	};
 
 public:
-	virtual Error append_data_from_file(String p_path, Ref<AssetState3D> p_state, uint32_t p_flags = 0, String p_base_path = String()) override;
-	virtual Error append_data_from_buffer(PackedByteArray p_bytes, String p_base_path, Ref<AssetState3D> p_state, uint32_t p_flags = 0) override;
-	virtual Error append_data_from_scene(Node *p_node, Ref<AssetState3D> p_state, uint32_t p_flags = 0) override;
+	virtual Error append_data_from_file(String p_path, Ref<ModelState3D> p_state, uint32_t p_flags = 0, String p_base_path = String()) override;
+	virtual Error append_data_from_buffer(PackedByteArray p_bytes, String p_base_path, Ref<ModelState3D> p_state, uint32_t p_flags = 0) override;
+	virtual Error append_data_from_scene(Node *p_node, Ref<ModelState3D> p_state, uint32_t p_flags = 0) override;
 
 public:
-	virtual Node *create_scene(Ref<AssetState3D> p_state, float p_bake_fps = 30.0f, bool p_trimming = false, bool p_remove_immutable_tracks = true) override;
-	virtual PackedByteArray create_buffer(Ref<AssetState3D> p_state) override;
-	virtual Error write_asset_to_filesystem(Ref<AssetState3D> p_state, const String &p_path) override;
+	virtual Node *create_scene(Ref<ModelState3D> p_state, float p_bake_fps = 30.0f, bool p_trimming = false, bool p_remove_immutable_tracks = true) override;
+	virtual PackedByteArray create_buffer(Ref<ModelState3D> p_state) override;
+	virtual Error write_asset_to_filesystem(Ref<ModelState3D> p_state, const String &p_path) override;
 
 private:
 	const float BAKE_FPS = 30.0f;

@@ -92,7 +92,7 @@ public:
 	}
 };
 
-Error RemoteDebugger::_put_msg(String p_message, Array p_data) {
+Error RemoteDebugger::_put_msg(const String &p_message, const Array &p_data) {
 	Array msg;
 	msg.push_back(p_message);
 	msg.push_back(Thread::get_caller_id());
@@ -665,7 +665,7 @@ RemoteDebugger::RemoteDebugger(Ref<RemoteDebuggerPeer> p_peer) {
 	// Performance Profiler
 	Object *perf = Engine::get_singleton()->get_singleton_object("Performance");
 	if (perf) {
-		performance_profiler = Ref<PerformanceProfiler>(memnew(PerformanceProfiler(perf)));
+		performance_profiler.instantiate(perf);
 		performance_profiler->bind("performance");
 		profiler_enable("performance", true);
 	}

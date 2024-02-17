@@ -275,8 +275,16 @@ void NavigationRegion2D::_navigation_map_changed(RID p_map) {
 }
 #endif // DEBUG_ENABLED
 
-Array NavigationRegion2D::get_configuration_warnings() const {
-	Array warnings = Node2D::get_configuration_warnings();
+#ifdef DEBUG_ENABLED
+void NavigationRegion2D::_navigation_debug_changed() {
+	if (is_inside_tree()) {
+		queue_redraw();
+	}
+}
+#endif // DEBUG_ENABLED
+
+PackedStringArray NavigationRegion2D::get_configuration_warnings() const {
+	PackedStringArray warnings = Node2D::get_configuration_warnings();
 
 	if (is_visible_in_tree() && is_inside_tree()) {
 		if (!navigation_polygon.is_valid()) {
@@ -374,7 +382,7 @@ NavigationRegion2D::NavigationRegion2D() {
 
 #ifdef DEBUG_ENABLED
 	NavigationServer2D::get_singleton()->connect(SNAME("map_changed"), callable_mp(this, &NavigationRegion2D::_navigation_map_changed));
-	NavigationServer2D::get_singleton()->connect(SNAME("navigation_debug_changed"), callable_mp(this, &NavigationRegion2D::_navigation_map_changed));
+	NavigationServer2D::get_singleton()->connect(SNAME("navigation_debug_changed"), callable_mp(this, &NavigationRegion2D::_navigation_debug_changed));
 #endif // DEBUG_ENABLED
 }
 
@@ -391,7 +399,7 @@ NavigationRegion2D::~NavigationRegion2D() {
 
 #ifdef DEBUG_ENABLED
 	NavigationServer2D::get_singleton()->disconnect(SNAME("map_changed"), callable_mp(this, &NavigationRegion2D::_navigation_map_changed));
-	NavigationServer2D::get_singleton()->disconnect(SNAME("navigation_debug_changed"), callable_mp(this, &NavigationRegion2D::_navigation_map_changed));
+	NavigationServer2D::get_singleton()->disconnect(SNAME("navigation_debug_changed"), callable_mp(this, &NavigationRegion2D::_navigation_debug_changed));
 #endif // DEBUG_ENABLED
 }
 

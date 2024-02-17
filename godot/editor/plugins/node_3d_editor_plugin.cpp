@@ -969,13 +969,13 @@ void Node3DEditorViewport::_select_region() {
 		}
 	}
 
-	Plane near(-_get_camera_normal(), cam_pos);
-	near.d -= get_znear();
-	frustum.push_back(near);
+	Plane near_plane = Plane(-_get_camera_normal(), cam_pos);
+	near_plane.d -= get_znear();
+	frustum.push_back(near_plane);
 
-	Plane far = -near;
-	far.d += get_zfar();
-	frustum.push_back(far);
+	Plane far_plane = -near_plane;
+	far_plane.d += get_zfar();
+	frustum.push_back(far_plane);
 
 	if (spatial_editor->get_single_selected_node()) {
 		Node3D *single_selected = spatial_editor->get_single_selected_node();
@@ -1526,6 +1526,10 @@ Transform3D Node3DEditorViewport::_compute_transform(TransformMode p_mode, const
 }
 
 void Node3DEditorViewport::_surface_mouse_enter() {
+	if (Input::get_singleton()->get_mouse_mode() == Input::MOUSE_MODE_CAPTURED) {
+		return;
+	}
+
 	if (!surface->has_focus() && (!get_viewport()->gui_get_focus_owner() || !get_viewport()->gui_get_focus_owner()->is_text_field())) {
 		surface->grab_focus();
 	}
@@ -3337,8 +3341,10 @@ void Node3DEditorViewport::_menu_option(int p_option) {
 					xform.basis.rotate_local(Vector3(1, 0, 0), Math_TAU * 0.25);
 				}
 
-				undo_redo->add_do_method(sp, "set_global_transform", xform);
-				undo_redo->add_undo_method(sp, "set_global_transform", sp->get_global_gizmo_transform());
+				Node3D *parent = sp->get_parent_node_3d();
+				Transform3D local_xform = parent ? parent->get_global_transform().affine_inverse() * xform : xform;
+				undo_redo->add_do_method(sp, "set_transform", local_xform);
+				undo_redo->add_undo_method(sp, "set_transform", sp->get_local_gizmo_transform());
 			}
 			undo_redo->commit_action();
 
@@ -4394,6 +4400,7 @@ bool Node3DEditorViewport::_create_instance(Node *parent, String &path, const Po
 	undo_redo->add_do_method(instantiated_scene, "set_owner", EditorNode::get_singleton()->get_edited_scene());
 	undo_redo->add_do_reference(instantiated_scene);
 	undo_redo->add_undo_method(parent, "remove_child", instantiated_scene);
+	undo_redo->add_do_method(editor_selection, "add_node", instantiated_scene);
 
 	String new_name = parent->validate_child_name(instantiated_scene);
 	EditorDebuggerNode *ed = EditorDebuggerNode::get_singleton();
@@ -4402,16 +4409,17 @@ bool Node3DEditorViewport::_create_instance(Node *parent, String &path, const Po
 
 	Node3D *node3d = Object::cast_to<Node3D>(instantiated_scene);
 	if (node3d) {
-		Transform3D gl_transform;
+		Transform3D parent_tf;
 		Node3D *parent_node3d = Object::cast_to<Node3D>(parent);
 		if (parent_node3d) {
-			gl_transform = parent_node3d->get_global_gizmo_transform();
+			parent_tf = parent_node3d->get_global_gizmo_transform();
 		}
 
-		gl_transform.origin = preview_node_pos;
-		gl_transform.basis *= node3d->get_transform().basis;
+		Transform3D new_tf = node3d->get_transform();
+		new_tf.origin = parent_tf.affine_inverse().xform(preview_node_pos + node3d->get_position());
+		new_tf.basis = parent_tf.affine_inverse().basis * new_tf.basis;
 
-		undo_redo->add_do_method(instantiated_scene, "set_global_transform", gl_transform);
+		undo_redo->add_do_method(instantiated_scene, "set_transform", new_tf);
 	}
 
 	return true;
@@ -4442,7 +4450,8 @@ void Node3DEditorViewport::_perform_drop_data() {
 
 	Vector<String> error_files;
 
-	undo_redo->create_action(TTR("Create Node"));
+	undo_redo->create_action(TTR("Create Node"), UndoRedo::MERGE_DISABLE, target_node);
+	undo_redo->add_do_method(editor_selection, "clear");
 
 	for (int i = 0; i < selected_files.size(); i++) {
 		String path = selected_files[i];
@@ -4642,8 +4651,8 @@ void Node3DEditorViewport::commit_transform() {
 			continue;
 		}
 
-		undo_redo->add_do_method(sp, "set_global_transform", sp->get_global_gizmo_transform());
-		undo_redo->add_undo_method(sp, "set_global_transform", se->original);
+		undo_redo->add_do_method(sp, "set_transform", sp->get_local_gizmo_transform());
+		undo_redo->add_undo_method(sp, "set_transform", se->original_local);
 	}
 	undo_redo->commit_action();
 
@@ -6205,8 +6214,10 @@ void Node3DEditor::_xform_dialog_action() {
 			tr.origin += t.origin;
 		}
 
-		undo_redo->add_do_method(sp, "set_global_transform", tr);
-		undo_redo->add_undo_method(sp, "set_global_transform", sp->get_global_gizmo_transform());
+		Node3D *parent = sp->get_parent_node_3d();
+		Transform3D local_tr = parent ? parent->get_global_transform().affine_inverse() * tr : tr;
+		undo_redo->add_do_method(sp, "set_transform", local_tr);
+		undo_redo->add_undo_method(sp, "set_transform", sp->get_transform());
 	}
 	undo_redo->commit_action();
 }
@@ -7554,8 +7565,10 @@ void Node3DEditor::_snap_selected_nodes_to_floor() {
 					new_transform.origin.y = result.position.y;
 					new_transform.origin = new_transform.origin - position_offset;
 
-					undo_redo->add_do_method(sp, "set_global_transform", new_transform);
-					undo_redo->add_undo_method(sp, "set_global_transform", sp->get_global_transform());
+					Node3D *parent = sp->get_parent_node_3d();
+					Transform3D new_local_xform = parent ? parent->get_global_transform().affine_inverse() * new_transform : new_transform;
+					undo_redo->add_do_method(sp, "set_transform", new_local_xform);
+					undo_redo->add_undo_method(sp, "set_transform", sp->get_transform());
 				}
 			}
 

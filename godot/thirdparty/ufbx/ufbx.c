@@ -484,7 +484,7 @@
 	typedef double ufbxi_unaligned_f64;
 #endif
 
-#if defined(UFBXI_HAS_UNALIGNED) && ((defined(_M_IX86) || defined(__i386__) || defined(_M_X64) || defined(__x86_64__) || defined(_M_ARM64) || defined(__aarch64__) || defined(__wasm__) || defined(__EMSCRIPTEN__)) && !defined(UFBX_NO_UNALIGNED_LOADS) || defined(UFBX_USE_UNALIGNED_LOADS))
+#if (defined(UFBXI_HAS_UNALIGNED) && UFBX_LITTLE_ENDIAN && !defined(UFBX_NO_UNALIGNED_LOADS)) || defined(UFBX_USE_UNALIGNED_LOADS)
 	#define ufbxi_read_u16(ptr) (*(const ufbxi_unaligned ufbxi_unaligned_u16*)(ptr))
 	#define ufbxi_read_u32(ptr) (*(const ufbxi_unaligned ufbxi_unaligned_u32*)(ptr))
 	#define ufbxi_read_u64(ptr) (*(const ufbxi_unaligned ufbxi_unaligned_u64*)(ptr))
@@ -15506,6 +15506,16 @@ static ufbxi_forceinline size_t ufbxi_strblob_length(const ufbxi_strblob *strblo
 	return raw ? strblob->blob.size : strblob->str.length;
 }
 
+ufbxi_nodiscard ufbxi_noinline static bool ufbxi_is_absolute_path(const char *path, size_t length)
+{
+	if (length > 0 && (path[0] == '/' || path[0] == '\\')) {
+		return true;
+	} else if (length > 2 && path[1] == ':' && (path[2] == '\\' || path[2] == '/')) {
+		return true;
+	}
+	return false;
+}
+
 ufbxi_nodiscard ufbxi_noinline static int ufbxi_resolve_relative_filename(ufbxi_context *uc, ufbxi_strblob *p_dst, const ufbxi_strblob *p_src, bool raw)
 {
 	const char *src = ufbxi_strblob_data(p_src, raw);
@@ -15529,6 +15539,11 @@ ufbxi_nodiscard ufbxi_noinline static int ufbxi_resolve_relative_filename(ufbxi_
 	} else {
 		prefix_data = (const char*)uc->scene.metadata.relative_root.data;
 		prefix_length = uc->scene.metadata.relative_root.length;
+	}
+
+	// Retain absolute paths
+	if (ufbxi_is_absolute_path(src, src_length)) {
+		prefix_length = 0;
 	}
 
 	// Undo directories from `prefix` for every `..`

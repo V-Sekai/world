@@ -38,7 +38,7 @@
 struct GLTFAccessor : public Resource {
 	GDCLASS(GLTFAccessor, Resource);
 	friend class GLTFDocument;
-	friend class AssetDocument3D;
+	friend class ModelDocument3D;
 
 private:
 	GLTFBufferViewIndex buffer_view = -1;

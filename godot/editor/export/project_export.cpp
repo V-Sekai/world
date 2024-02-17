@@ -276,6 +276,9 @@ void ProjectExportDialog::_edit_preset(int p_index) {
 	export_path->update_property();
 	runnable->set_disabled(false);
 	runnable->set_pressed(current->is_runnable());
+	if (parameters->get_edited_object() != current.ptr()) {
+		current->update_value_overrides();
+	}
 	parameters->set_object_class(current->get_platform()->get_class_name());
 	parameters->edit(current.ptr());
 
@@ -1100,6 +1103,7 @@ void ProjectExportDialog::_export_project_to_path(const String &p_path) {
 	exporting = true;
 
 	platform->clear_messages();
+	current->update_value_overrides();
 	Error err = platform->export_project(current, export_debug->is_pressed(), current->get_export_path(), 0);
 	result_dialog_log->clear();
 	if (err != ERR_SKIP) {
@@ -1149,6 +1153,7 @@ void ProjectExportDialog::_export_all(bool p_debug) {
 			ep.step(preset->get_name(), i);
 
 			platform->clear_messages();
+			preset->update_value_overrides();
 			Error err = platform->export_project(preset, p_debug, preset->get_export_path(), 0);
 			if (err == ERR_SKIP) {
 				exporting = false;
@@ -1207,7 +1212,7 @@ ProjectExportDialog::ProjectExportDialog() {
 	preset_vb->add_child(mc);
 	mc->set_v_size_flags(Control::SIZE_EXPAND_FILL);
 	presets = memnew(ItemList);
-	presets->set_auto_translate(false);
+	presets->set_auto_translate_mode(AUTO_TRANSLATE_MODE_DISABLED);
 	SET_DRAG_FORWARDING_GCD(presets, ProjectExportDialog);
 	mc->add_child(presets);
 	presets->connect("item_selected", callable_mp(this, &ProjectExportDialog::_edit_preset));
