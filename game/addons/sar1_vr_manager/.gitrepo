@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/V-Sekai/sar1_vr_manager
+	branch = main
+	commit = e7fb2a26cc61f5652a34f66f783636c47a481f39
+	parent = 3af0390219805fd2a0bd344d6eb6c56292165d1c
+	method = merge
+	cmdver = 0.4.6
