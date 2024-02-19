@@ -40,11 +40,7 @@
 class FBXDocument : public ModelDocument3D {
 	GDCLASS(FBXDocument, ModelDocument3D);
 
-private:
-	const float BAKE_FPS = 30.0f;
-
 public:
-	const int32_t JOINT_GROUP_SIZE = 4;
 	enum {
 		TEXTURE_TYPE_GENERIC = 0,
 		TEXTURE_TYPE_NORMAL = 1,
@@ -61,8 +57,8 @@ public:
 	virtual Error append_data_from_scene(Node *p_node, Ref<ModelState3D> p_state, uint32_t p_flags = 0) override;
 
 public:
-	virtual Node *create_scene(Ref<ModelState3D> p_state, float p_bake_fps = 30.0f, bool p_trimming = false, bool p_remove_immutable_tracks = true) override;
-	virtual PackedByteArray create_buffer(Ref<ModelState3D> p_state) override;
+	virtual Node *generate_scene_from_data(Ref<ModelState3D> p_state, float p_bake_fps = 30.0f, bool p_trimming = false, bool p_remove_immutable_tracks = true) override;
+	virtual PackedByteArray generate_buffer_from_data(Ref<ModelState3D> p_state) override;
 	virtual Error write_asset_to_filesystem(Ref<ModelState3D> p_state, const String &p_path) override;
 
 protected:
@@ -72,7 +68,6 @@ private:
 	String _get_texture_path(const String &p_base_directory, const String &p_source_file_path) const;
 	void _process_uv_set(PackedVector2Array &uv_array);
 	void _zero_unused_elements(Vector<float> &cur_custom, int start, int end, int num_channels);
-	void _build_parent_hierarchy(Ref<FBXState> p_state);
 	Error _parse_scenes(Ref<FBXState> p_state);
 	Error _parse_nodes(Ref<FBXState> p_state);
 	String _sanitize_animation_name(const String &p_name);

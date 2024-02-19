@@ -299,9 +299,9 @@ Node *EditorSceneFormatImporterBlend::import_scene(const String &p_path, uint32_
 #ifndef DISABLE_DEPRECATED
 	bool trimming = p_options.has("animation/trimming") ? (bool)p_options["animation/trimming"] : false;
 	bool remove_immutable = p_options.has("animation/remove_immutable_tracks") ? (bool)p_options["animation/remove_immutable_tracks"] : true;
-	return gltf->create_scene(state, (float)p_options["animation/fps"], trimming, remove_immutable);
+	return gltf->generate_scene_from_data(state, (float)p_options["animation/fps"], trimming, remove_immutable);
 #else
-	return gltf->create_scene(state, (float)p_options["animation/fps"], (bool)p_options["animation/trimming"], (bool)p_options["animation/remove_immutable_tracks"]);
+	return gltf->generate_scene_from_data(state, (float)p_options["animation/fps"], (bool)p_options["animation/trimming"], (bool)p_options["animation/remove_immutable_tracks"]);
 #endif
 }
 

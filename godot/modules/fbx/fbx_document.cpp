@@ -196,7 +196,7 @@ static uint32_t _decode_vertex_index(const Vector3 &p_vertex) {
 	return uint32_t(p_vertex.x) | uint32_t(p_vertex.y) << 16;
 }
 
-struct ThreadPool {
+struct ThreadPoolFBX {
 	struct Group {
 		ufbx_thread_pool_context ctx = {};
 		WorkerThreadPool::GroupID task_id = {};
@@ -208,28 +208,28 @@ struct ThreadPool {
 };
 
 static void _thread_pool_task(void *user, uint32_t index) {
-	ThreadPool::Group *group = (ThreadPool::Group *)user;
+	ThreadPoolFBX::Group *group = (ThreadPoolFBX::Group *)user;
 	ufbx_thread_pool_run_task(group->ctx, group->start_index + index);
 }
 
 static bool _thread_pool_init_fn(void *user, ufbx_thread_pool_context ctx, const ufbx_thread_pool_info *info) {
-	ThreadPool *pool = (ThreadPool *)user;
-	for (ThreadPool::Group &group : pool->groups) {
+	ThreadPoolFBX *pool = (ThreadPoolFBX *)user;
+	for (ThreadPoolFBX::Group &group : pool->groups) {
 		group.ctx = ctx;
 	}
 	return true;
 }
 
 static bool _thread_pool_run_fn(void *user, ufbx_thread_pool_context ctx, uint32_t group, uint32_t start_index, uint32_t count) {
-	ThreadPool *pool = (ThreadPool *)user;
-	ThreadPool::Group &pool_group = pool->groups[group];
+	ThreadPoolFBX *pool = (ThreadPoolFBX *)user;
+	ThreadPoolFBX::Group &pool_group = pool->groups[group];
 	pool_group.start_index = start_index;
 	pool_group.task_id = pool->pool->add_native_group_task(_thread_pool_task, &pool_group, (int)count, -1, true, "ufbx");
 	return true;
 }
 
 static bool _thread_pool_wait_fn(void *user, ufbx_thread_pool_context ctx, uint32_t group, uint32_t max_index) {
-	ThreadPool *pool = (ThreadPool *)user;
+	ThreadPoolFBX *pool = (ThreadPoolFBX *)user;
 	pool->pool->wait_for_group_task_completion(pool->groups[group].task_id);
 	return true;
 }
@@ -1666,56 +1666,6 @@ void FBXDocument::_generate_skeleton_bone_node(Ref<FBXState> p_state, const GLTF
 	}
 }
 
-template <class T>
-struct SceneFormatImporterGLTFInterpolate {
-	T lerp(const T &a, const T &b, float c) const {
-		return a + (b - a) * c;
-	}
-
-	T catmull_rom(const T &p0, const T &p1, const T &p2, const T &p3, float t) {
-		const float t2 = t * t;
-		const float t3 = t2 * t;
-
-		return 0.5f * ((2.0f * p1) + (-p0 + p2) * t + (2.0f * p0 - 5.0f * p1 + 4.0f * p2 - p3) * t2 + (-p0 + 3.0f * p1 - 3.0f * p2 + p3) * t3);
-	}
-
-	T bezier(T start, T control_1, T control_2, T end, float t) {
-		/* Formula from Wikipedia article on Bezier curves. */
-		const real_t omt = (1.0 - t);
-		const real_t omt2 = omt * omt;
-		const real_t omt3 = omt2 * omt;
-		const real_t t2 = t * t;
-		const real_t t3 = t2 * t;
-
-		return start * omt3 + control_1 * omt2 * t * 3.0 + control_2 * omt * t2 * 3.0 + end * t3;
-	}
-};
-
-// thank you for existing, partial specialization
-template <>
-struct SceneFormatImporterGLTFInterpolate<Quaternion> {
-	Quaternion lerp(const Quaternion &a, const Quaternion &b, const float c) const {
-		ERR_FAIL_COND_V_MSG(!a.is_normalized(), Quaternion(), "The quaternion \"a\" must be normalized.");
-		ERR_FAIL_COND_V_MSG(!b.is_normalized(), Quaternion(), "The quaternion \"b\" must be normalized.");
-
-		return a.slerp(b, c).normalized();
-	}
-
-	Quaternion catmull_rom(const Quaternion &p0, const Quaternion &p1, const Quaternion &p2, const Quaternion &p3, const float c) {
-		ERR_FAIL_COND_V_MSG(!p1.is_normalized(), Quaternion(), "The quaternion \"p1\" must be normalized.");
-		ERR_FAIL_COND_V_MSG(!p2.is_normalized(), Quaternion(), "The quaternion \"p2\" must be normalized.");
-
-		return p1.slerp(p2, c).normalized();
-	}
-
-	Quaternion bezier(const Quaternion start, const Quaternion control_1, const Quaternion control_2, const Quaternion end, const float t) {
-		ERR_FAIL_COND_V_MSG(!start.is_normalized(), Quaternion(), "The start quaternion must be normalized.");
-		ERR_FAIL_COND_V_MSG(!end.is_normalized(), Quaternion(), "The end quaternion must be normalized.");
-
-		return start.slerp(end, t).normalized();
-	}
-};
-
 void FBXDocument::_import_animation(Ref<FBXState> p_state, AnimationPlayer *p_animation_player, const GLTFAnimationIndex p_index, const float p_bake_fps, const bool p_trimming, const bool p_remove_immutable_tracks) {
 	Ref<GLTFAnimation> anim = p_state->animations[p_index];
 
@@ -1999,7 +1949,7 @@ Error FBXDocument::_parse(Ref<FBXState> p_state, String p_path, Ref<FileAccess> 
 	}
 	opts.generate_missing_normals = true;
 
-	ThreadPool thread_pool;
+	ThreadPoolFBX thread_pool;
 	thread_pool.pool = WorkerThreadPool::get_singleton();
 
 	opts.thread_opts.pool.init_fn = &_thread_pool_init_fn;
@@ -2030,21 +1980,7 @@ Error FBXDocument::_parse(Ref<FBXState> p_state, String p_path, Ref<FileAccess> 
 void FBXDocument::_bind_methods() {
 }
 
-void FBXDocument::_build_parent_hierarchy(Ref<FBXState> p_state) {
-	// Build the hierarchy.
-	for (GLTFNodeIndex node_i = 0; node_i < p_state->nodes.size(); node_i++) {
-		for (int j = 0; j < p_state->nodes[node_i]->children.size(); j++) {
-			GLTFNodeIndex child_i = p_state->nodes[node_i]->children[j];
-			ERR_FAIL_INDEX(child_i, p_state->nodes.size());
-			if (p_state->nodes.write[child_i]->parent != -1) {
-				continue;
-			}
-			p_state->nodes.write[child_i]->parent = node_i;
-		}
-	}
-}
-
-Node *FBXDocument::create_scene(Ref<ModelState3D> p_state, float p_bake_fps, bool p_trimming, bool p_remove_immutable_tracks) {
+Node *FBXDocument::generate_scene_from_data(Ref<ModelState3D> p_state, float p_bake_fps, bool p_trimming, bool p_remove_immutable_tracks) {
 	Ref<FBXState> state = p_state;
 	ERR_FAIL_COND_V(state.is_null(), nullptr);
 	ERR_FAIL_NULL_V(state, nullptr);
@@ -2380,7 +2316,7 @@ Error FBXDocument::_parse_skins(Ref<FBXState> p_state) {
 	return OK;
 }
 
-PackedByteArray FBXDocument::create_buffer(Ref<ModelState3D> p_state) {
+PackedByteArray FBXDocument::generate_buffer_from_data(Ref<ModelState3D> p_state) {
 	return PackedByteArray();
 }
 

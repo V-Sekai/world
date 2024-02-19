@@ -37,10 +37,10 @@ void ModelDocument3D::_bind_methods() {
 			&ModelDocument3D::append_data_from_buffer, DEFVAL(0));
 	ClassDB::bind_method(D_METHOD("append_data_from_scene", "node", "state", "flags"),
 			&ModelDocument3D::append_data_from_scene, DEFVAL(0));
-	ClassDB::bind_method(D_METHOD("create_scene", "state", "bake_fps", "trimming", "remove_immutable_tracks"),
-			&ModelDocument3D::create_scene, DEFVAL(30), DEFVAL(false), DEFVAL(true));
-	ClassDB::bind_method(D_METHOD("create_buffer", "state"),
-			&ModelDocument3D::create_buffer);
+	ClassDB::bind_method(D_METHOD("generate_scene_from_data", "state", "bake_fps", "trimming", "remove_immutable_tracks"),
+			&ModelDocument3D::generate_scene_from_data, DEFVAL(30), DEFVAL(false), DEFVAL(true));
+	ClassDB::bind_method(D_METHOD("generate_buffer_from_data", "state"),
+			&ModelDocument3D::generate_buffer_from_data);
 	ClassDB::bind_method(D_METHOD("write_asset_to_filesystem", "state", "path"),
 			&ModelDocument3D::write_asset_to_filesystem);
 }

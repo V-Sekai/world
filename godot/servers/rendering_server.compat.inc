@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  version.h                                                             */
+/*  rendering_server.compat.inc                                           */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,48 +28,14 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef VERSION_H
-#define VERSION_H
+#ifndef DISABLE_DEPRECATED
 
-#include "core/version_generated.gen.h"
+void RenderingServer::_environment_set_fog_bind_compat_84792(RID p_env, bool p_enable, const Color &p_light_color, float p_light_energy, float p_sun_scatter, float p_density, float p_height, float p_height_density, float p_aerial_perspective, float p_sky_affect) {
+	environment_set_fog(p_env, p_enable, p_light_color, p_light_energy, p_sun_scatter, p_density, p_height, p_height_density, p_aerial_perspective, p_sky_affect, RS::EnvironmentFogMode::ENV_FOG_MODE_EXPONENTIAL);
+}
 
-// Copied from typedefs.h to stay lean.
-#ifndef _STR
-#define _STR(m_x) #m_x
-#define _MKSTR(m_x) _STR(m_x)
+void RenderingServer::_bind_compatibility_methods() {
+	ClassDB::bind_compatibility_method(D_METHOD("environment_set_fog", "env", "enable", "light_color", "light_energy", "sun_scatter", "density", "height", "height_density", "aerial_perspective", "sky_affect"), &RenderingServer::_environment_set_fog_bind_compat_84792);
+}
+
 #endif
-
-// Godot versions are of the form <major>.<minor> for the initial release,
-// and then <major>.<minor>.<patch> for subsequent bugfix releases where <patch> != 0
-// That's arbitrary, but we find it pretty and it's the current policy.
-
-// Defines the main "branch" version. Patch versions in this branch should be
-// forward-compatible.
-// Example: "3.1"
-#define VERSION_BRANCH _MKSTR(VERSION_MAJOR) "." _MKSTR(VERSION_MINOR)
-// Example: "3.1.4"
-#define VERSION_NUMBER VERSION_BRANCH "." _MKSTR(VERSION_PATCH)
-
-// Version number encoded as hexadecimal int with one byte for each number,
-// for easy comparison from code.
-// Example: 3.1.4 will be 0x030104, making comparison easy from script.
-#define VERSION_HEX 0x10000 * VERSION_MAJOR + 0x100 * VERSION_MINOR + VERSION_PATCH
-
-// Describes the full configuration of that Godot version, including the version number,
-// the status (beta, stable, etc.) and potential module-specific features (e.g. mono).
-// Example: "3.1.4.stable.mono"
-#define VERSION_FULL_CONFIG VERSION_NUMBER "." VERSION_STATUS VERSION_MODULE_CONFIG
-
-// Similar to VERSION_FULL_CONFIG, but also includes the (potentially custom) VERSION_BUILD
-// description (e.g. official, custom_build, etc.).
-// Example: "3.1.4.stable.mono.official"
-#define VERSION_FULL_BUILD VERSION_FULL_CONFIG "." VERSION_BUILD
-
-// Same as above, but prepended with Godot's name and a cosmetic "v" for "version".
-// Example: "Godot v3.1.4.stable.official.mono"
-#define VERSION_FULL_NAME VERSION_NAME " v" VERSION_FULL_BUILD
-
-// Git commit hash, generated at build time in `core/version_hash.gen.cpp`.
-extern const char *const VERSION_HASH;
-
-#endif // VERSION_H

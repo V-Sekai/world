@@ -80,7 +80,7 @@ Node *EditorSceneFormatImporterUFBX::import_scene(const String &p_path, uint32_t
 		}
 		return nullptr;
 	}
-	return fbx->create_scene(state, (float)p_options["animation/fps"], (bool)p_options["animation/trimming"], (bool)p_options["animation/remove_immutable_tracks"]);
+	return fbx->generate_scene_from_data(state, (float)p_options["animation/fps"], (bool)p_options["animation/trimming"], (bool)p_options["animation/remove_immutable_tracks"]);
 }
 
 Variant EditorSceneFormatImporterUFBX::get_option_visibility(const String &p_path, bool p_for_animation,

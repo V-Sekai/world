@@ -6947,7 +6947,7 @@ Error GLTFDocument::_parse_gltf_state(Ref<GLTFState> p_state, const String &p_se
 	return OK;
 }
 
-PackedByteArray GLTFDocument::create_buffer(Ref<ModelState3D> p_state) {
+PackedByteArray GLTFDocument::generate_buffer_from_data(Ref<ModelState3D> p_state) {
 	Ref<GLTFState> state = p_state;
 	ERR_FAIL_NULL_V(state, PackedByteArray());
 	// For buffers, set the state filename to an empty string, but
@@ -6975,7 +6975,7 @@ Error GLTFDocument::write_asset_to_filesystem(Ref<ModelState3D> p_state, const S
 	return OK;
 }
 
-Node *GLTFDocument::create_scene(Ref<ModelState3D> p_state, float p_bake_fps, bool p_trimming, bool p_remove_immutable_tracks) {
+Node *GLTFDocument::generate_scene_from_data(Ref<ModelState3D> p_state, float p_bake_fps, bool p_trimming, bool p_remove_immutable_tracks) {
 	Ref<GLTFState> state = p_state;
 	ERR_FAIL_NULL_V(state, nullptr);
 	ERR_FAIL_INDEX_V(0, state->root_nodes.size(), nullptr);

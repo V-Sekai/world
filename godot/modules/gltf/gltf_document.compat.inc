@@ -43,11 +43,11 @@ Error GLTFDocument::append_from_scene_81746(Node *p_node, Ref<GLTFState> p_state
 }
 
 Node *GLTFDocument::generate_scene_81746(Ref<GLTFState> p_state, float p_bake_fps, bool p_trimming, bool p_remove_immutable_tracks) {
-	return create_scene(p_state, p_bake_fps, p_trimming, p_remove_immutable_tracks);
+	return generate_scene_from_data(p_state, p_bake_fps, p_trimming, p_remove_immutable_tracks);
 }
 
 PackedByteArray GLTFDocument::generate_buffer_81746(Ref<GLTFState> p_state) {
-	return create_buffer(p_state);
+	return generate_buffer_from_data(p_state);
 }
 
 Error GLTFDocument::write_to_filesystem_81746(Ref<GLTFState> p_state, const String &p_path) {

@@ -46,9 +46,10 @@
 using SkinNodeIndex = int;
 using SkinSkeletonIndex = int;
 
-class SkinTool : public Resource {
+class SkinTool : Resource {
 	GDCLASS(SkinTool, Resource);
 
+public:
 	static String _sanitize_bone_name(const String &p_name);
 	static String _gen_unique_bone_name(HashSet<String> &r_unique_names, const String &p_name);
 	static SkinNodeIndex _find_highest_node(Vector<Ref<GLTFNode>> &r_nodes, const Vector<SkinNodeIndex> &p_subset);

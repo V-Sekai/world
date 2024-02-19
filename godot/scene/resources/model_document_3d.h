@@ -46,8 +46,8 @@ public:
 	virtual Error append_data_from_scene(Node *p_node, Ref<ModelState3D> p_state, uint32_t p_flags = 0) = 0;
 
 public:
-	virtual Node *create_scene(Ref<ModelState3D> p_state, float p_bake_fps = 30.0f, bool p_trimming = false, bool p_remove_immutable_tracks = true) = 0;
-	virtual PackedByteArray create_buffer(Ref<ModelState3D> p_state) = 0;
+	virtual Node *generate_scene_from_data(Ref<ModelState3D> p_state, float p_bake_fps = 30.0f, bool p_trimming = false, bool p_remove_immutable_tracks = true) = 0;
+	virtual PackedByteArray generate_buffer_from_data(Ref<ModelState3D> p_state) = 0;
 	virtual Error write_asset_to_filesystem(Ref<ModelState3D> p_state, const String &p_path) = 0;
 };
 

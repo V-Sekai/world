@@ -33,13 +33,13 @@
 			<description>
 			</description>
 		</method>
-		<method name="create_buffer">
+		<method name="generate_buffer_from_data">
 			<return type="PackedByteArray" />
 			<param index="0" name="state" type="ModelState3D" />
 			<description>
 			</description>
 		</method>
-		<method name="create_scene">
+		<method name="generate_scene_from_data">
 			<return type="Node" />
 			<param index="0" name="state" type="ModelState3D" />
 			<param index="1" name="bake_fps" type="float" default="30" />

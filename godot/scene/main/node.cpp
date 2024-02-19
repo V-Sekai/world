@@ -110,14 +110,12 @@ void Node::_notification(int p_notification) {
 			// Don't translate UI elements when they're being edited.
 			if (is_part_of_edited_scene()) {
 				set_message_translation(false);
-			} else if (data.auto_translate_mode != AUTO_TRANSLATE_MODE_DISABLED) {
-				notification(NOTIFICATION_TRANSLATION_CHANGED);
 			}
-#else
+#endif
+
 			if (data.auto_translate_mode != AUTO_TRANSLATE_MODE_DISABLED) {
 				notification(NOTIFICATION_TRANSLATION_CHANGED);
 			}
-#endif
 
 			if (data.input) {
 				add_to_group("_vp_input" + itos(get_viewport()->get_instance_id()));
@@ -2506,7 +2504,7 @@ StringName Node::get_property_store_alias(const StringName &p_property) const {
 
 bool Node::is_part_of_edited_scene() const {
 	return Engine::get_singleton()->is_editor_hint() && is_inside_tree() && get_tree()->get_edited_scene_root() &&
-			(get_tree()->get_edited_scene_root() == this || get_tree()->get_edited_scene_root()->is_ancestor_of(this));
+			get_tree()->get_edited_scene_root()->get_parent()->is_ancestor_of(this);
 }
 #endif
 
