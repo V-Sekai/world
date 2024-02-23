@@ -30,8 +30,9 @@
 
 #include "gltf_document.h"
 
-#include "core/object/object_id.h"
 #include "extensions/gltf_spec_gloss.h"
+#include "gltf_state.h"
+#include "skin_tool.h"
 
 #include "core/config/project_settings.h"
 #include "core/crypto/crypto_core.h"
@@ -41,9 +42,8 @@
 #include "core/io/file_access_memory.h"
 #include "core/io/json.h"
 #include "core/io/stream_peer.h"
+#include "core/object/object_id.h"
 #include "core/version.h"
-#include "gltf_document.compat.inc"
-#include "modules/gltf/gltf_state.h"
 #include "scene/3d/bone_attachment_3d.h"
 #include "scene/3d/camera_3d.h"
 #include "scene/3d/importer_mesh_instance_3d.h"
@@ -51,23 +51,13 @@
 #include "scene/3d/mesh_instance_3d.h"
 #include "scene/3d/multimesh_instance_3d.h"
 #include "scene/resources/image_texture.h"
-#include "scene/resources/model_state_3d.h"
 #include "scene/resources/portable_compressed_texture.h"
 #include "scene/resources/skin.h"
-#include "scene/resources/skin_tool.h"
 #include "scene/resources/surface_tool.h"
-
-#include "modules/modules_enabled.gen.h" // For csg, gridmap.
 
 #ifdef TOOLS_ENABLED
 #include "editor/editor_file_system.h"
 #endif
-#ifdef MODULE_CSG_ENABLED
-#include "modules/csg/csg_shape.h"
-#endif // MODULE_CSG_ENABLED
-#ifdef MODULE_GRIDMAP_ENABLED
-#include "modules/gridmap/grid_map.h"
-#endif // MODULE_GRIDMAP_ENABLED
 
 // FIXME: Hardcoded to avoid editor dependency.
 #define GLTF_IMPORT_GENERATE_TANGENT_ARRAYS 8
@@ -6723,6 +6713,18 @@ void GLTFDocument::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_lossy_quality"), &GLTFDocument::get_lossy_quality);
 	ClassDB::bind_method(D_METHOD("set_root_node_mode", "root_node_mode"), &GLTFDocument::set_root_node_mode);
 	ClassDB::bind_method(D_METHOD("get_root_node_mode"), &GLTFDocument::get_root_node_mode);
+	ClassDB::bind_method(D_METHOD("append_from_file", "path", "state", "flags", "base_path"),
+			&GLTFDocument::append_from_file, DEFVAL(0), DEFVAL(String()));
+	ClassDB::bind_method(D_METHOD("append_from_buffer", "bytes", "base_path", "state", "flags"),
+			&GLTFDocument::append_from_buffer, DEFVAL(0));
+	ClassDB::bind_method(D_METHOD("append_from_scene", "node", "state", "flags"),
+			&GLTFDocument::append_from_scene, DEFVAL(0));
+	ClassDB::bind_method(D_METHOD("generate_scene", "state", "bake_fps", "trimming", "remove_immutable_tracks"),
+			&GLTFDocument::generate_scene, DEFVAL(30), DEFVAL(false), DEFVAL(true));
+	ClassDB::bind_method(D_METHOD("generate_buffer", "state"),
+			&GLTFDocument::generate_buffer);
+	ClassDB::bind_method(D_METHOD("write_to_filesystem", "state", "path"),
+			&GLTFDocument::write_to_filesystem);
 
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "image_format"), "set_image_format", "get_image_format");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "lossy_quality"), "set_lossy_quality", "get_lossy_quality");
@@ -6947,7 +6949,7 @@ Error GLTFDocument::_parse_gltf_state(Ref<GLTFState> p_state, const String &p_se
 	return OK;
 }
 
-PackedByteArray GLTFDocument::generate_buffer_from_data(Ref<ModelState3D> p_state) {
+PackedByteArray GLTFDocument::generate_buffer(Ref<GLTFState> p_state) {
 	Ref<GLTFState> state = p_state;
 	ERR_FAIL_NULL_V(state, PackedByteArray());
 	// For buffers, set the state filename to an empty string, but
@@ -6959,7 +6961,7 @@ PackedByteArray GLTFDocument::generate_buffer_from_data(Ref<ModelState3D> p_stat
 	return bytes;
 }
 
-Error GLTFDocument::write_asset_to_filesystem(Ref<ModelState3D> p_state, const String &p_path) {
+Error GLTFDocument::write_to_filesystem(Ref<GLTFState> p_state, const String &p_path) {
 	Ref<GLTFState> state = p_state;
 	ERR_FAIL_NULL_V(state, ERR_INVALID_PARAMETER);
 	state->base_path = p_path.get_base_dir();
@@ -6975,7 +6977,7 @@ Error GLTFDocument::write_asset_to_filesystem(Ref<ModelState3D> p_state, const S
 	return OK;
 }
 
-Node *GLTFDocument::generate_scene_from_data(Ref<ModelState3D> p_state, float p_bake_fps, bool p_trimming, bool p_remove_immutable_tracks) {
+Node *GLTFDocument::generate_scene(Ref<GLTFState> p_state, float p_bake_fps, bool p_trimming, bool p_remove_immutable_tracks) {
 	Ref<GLTFState> state = p_state;
 	ERR_FAIL_NULL_V(state, nullptr);
 	ERR_FAIL_INDEX_V(0, state->root_nodes.size(), nullptr);
@@ -7016,7 +7018,7 @@ Node *GLTFDocument::generate_scene_from_data(Ref<ModelState3D> p_state, float p_
 	return root;
 }
 
-Error GLTFDocument::append_data_from_scene(Node *p_node, Ref<ModelState3D> p_state, uint32_t p_flags) {
+Error GLTFDocument::append_from_scene(Node *p_node, Ref<GLTFState> p_state, uint32_t p_flags) {
 	Ref<GLTFState> state = p_state;
 	ERR_FAIL_COND_V(state.is_null(), FAILED);
 	state->use_named_skin_binds = p_flags & GLTF_IMPORT_USE_NAMED_SKIN_BINDS;
@@ -7054,7 +7056,7 @@ Error GLTFDocument::append_data_from_scene(Node *p_node, Ref<ModelState3D> p_sta
 	return OK;
 }
 
-Error GLTFDocument::append_data_from_buffer(PackedByteArray p_bytes, String p_base_path, Ref<ModelState3D> p_state, uint32_t p_flags) {
+Error GLTFDocument::append_from_buffer(PackedByteArray p_bytes, String p_base_path, Ref<GLTFState> p_state, uint32_t p_flags) {
 	Ref<GLTFState> state = p_state;
 	ERR_FAIL_COND_V(state.is_null(), FAILED);
 	// TODO Add missing texture and missing .bin file paths to r_missing_deps 2021-09-10 fire
@@ -7078,7 +7080,7 @@ Error GLTFDocument::append_data_from_buffer(PackedByteArray p_bytes, String p_ba
 	return OK;
 }
 
-Error GLTFDocument::append_data_from_file(String p_path, Ref<ModelState3D> p_state, uint32_t p_flags, String p_base_path) {
+Error GLTFDocument::append_from_file(String p_path, Ref<GLTFState> p_state, uint32_t p_flags, String p_base_path) {
 	Ref<GLTFState> state = p_state;
 	// TODO Add missing texture and missing .bin file paths to r_missing_deps 2021-09-10 fire
 	if (state == Ref<GLTFState>()) {

@@ -1395,7 +1395,6 @@ void AnimationTimelineEdit::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_ENTER_TREE:
 		case NOTIFICATION_THEME_CHANGED: {
-			panner->setup((ViewPanner::ControlScheme)EDITOR_GET("editors/panning/animation_editors_panning_scheme").operator int(), ED_GET_SHORTCUT("canvas_item_editor/pan_view"), bool(EDITOR_GET("editors/panning/simple_panning")));
 			add_track->set_icon(get_editor_theme_icon(SNAME("Add")));
 			loop->set_icon(get_editor_theme_icon(SNAME("Loop")));
 			time_icon->set_texture(get_editor_theme_icon(SNAME("Time")));
@@ -1413,7 +1412,9 @@ void AnimationTimelineEdit::_notification(int p_what) {
 		} break;
 
 		case EditorSettings::NOTIFICATION_EDITOR_SETTINGS_CHANGED: {
-			panner->setup((ViewPanner::ControlScheme)EDITOR_GET("editors/panning/animation_editors_panning_scheme").operator int(), ED_GET_SHORTCUT("canvas_item_editor/pan_view"), bool(EDITOR_GET("editors/panning/simple_panning")));
+			if (EditorSettings::get_singleton()->check_changed_settings_in_group("editors/panning")) {
+				panner->setup((ViewPanner::ControlScheme)EDITOR_GET("editors/panning/animation_editors_panning_scheme").operator int(), ED_GET_SHORTCUT("canvas_item_editor/pan_view"), bool(EDITOR_GET("editors/panning/simple_panning")));
+			}
 		} break;
 
 		case NOTIFICATION_RESIZED: {
@@ -2685,33 +2686,33 @@ void AnimationTrackEdit::gui_input(const Ref<InputEvent> &p_event) {
 	ERR_FAIL_COND(p_event.is_null());
 
 	if (p_event->is_pressed()) {
-		if (ED_GET_SHORTCUT("animation_editor/duplicate_selected_keys")->matches_event(p_event)) {
+		if (ED_IS_SHORTCUT("animation_editor/duplicate_selected_keys", p_event)) {
 			if (!read_only) {
 				emit_signal(SNAME("duplicate_request"), -1.0);
 			}
 			accept_event();
 		}
-		if (ED_GET_SHORTCUT("animation_editor/cut_selected_keys")->matches_event(p_event)) {
+		if (ED_IS_SHORTCUT("animation_editor/cut_selected_keys", p_event)) {
 			if (!read_only) {
 				emit_signal(SNAME("cut_request"));
 			}
 			accept_event();
 		}
-		if (ED_GET_SHORTCUT("animation_editor/copy_selected_keys")->matches_event(p_event)) {
+		if (ED_IS_SHORTCUT("animation_editor/copy_selected_keys", p_event)) {
 			if (!read_only) {
 				emit_signal(SNAME("copy_request"));
 			}
 			accept_event();
 		}
 
-		if (ED_GET_SHORTCUT("animation_editor/paste_keys")->matches_event(p_event)) {
+		if (ED_IS_SHORTCUT("animation_editor/paste_keys", p_event)) {
 			if (!read_only) {
 				emit_signal(SNAME("paste_request"), -1.0);
 			}
 			accept_event();
 		}
 
-		if (ED_GET_SHORTCUT("animation_editor/delete_selection")->matches_event(p_event)) {
+		if (ED_IS_SHORTCUT("animation_editor/delete_selection", p_event)) {
 			if (!read_only) {
 				emit_signal(SNAME("delete_request"));
 			}
@@ -4741,8 +4742,11 @@ MenuButton *AnimationTrackEditor::get_edit_menu() {
 void AnimationTrackEditor::_notification(int p_what) {
 	switch (p_what) {
 		case EditorSettings::NOTIFICATION_EDITOR_SETTINGS_CHANGED: {
-			panner->setup((ViewPanner::ControlScheme)EDITOR_GET("editors/panning/animation_editors_panning_scheme").operator int(), ED_GET_SHORTCUT("canvas_item_editor/pan_view"), bool(EDITOR_GET("editors/panning/simple_panning")));
-		} break;
+			if (!EditorSettings::get_singleton()->check_changed_settings_in_group("editors/panning")) {
+				break;
+			}
+			[[fallthrough]];
+		}
 
 		case NOTIFICATION_ENTER_TREE: {
 			panner->setup((ViewPanner::ControlScheme)EDITOR_GET("editors/panning/animation_editors_panning_scheme").operator int(), ED_GET_SHORTCUT("canvas_item_editor/pan_view"), bool(EDITOR_GET("editors/panning/simple_panning")));

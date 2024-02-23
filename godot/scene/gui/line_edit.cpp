@@ -138,17 +138,20 @@ void LineEdit::_backspace(bool p_word, bool p_all_to_left) {
 		return;
 	}
 
+	if (selection.enabled) {
+		selection_delete();
+		return;
+	}
+
+	if (caret_column == 0) {
+		return; // Nothing to do.
+	}
+
 	if (p_all_to_left) {
-		deselect();
 		text = text.substr(caret_column);
 		_shape();
 		set_caret_column(0);
 		_text_changed();
-		return;
-	}
-
-	if (selection.enabled) {
-		selection_delete();
 		return;
 	}
 
@@ -176,23 +179,20 @@ void LineEdit::_delete(bool p_word, bool p_all_to_right) {
 		return;
 	}
 
-	if (p_all_to_right) {
-		deselect();
-		text = text.substr(0, caret_column);
-		_shape();
-		_text_changed();
-		return;
-	}
-
 	if (selection.enabled) {
 		selection_delete();
 		return;
 	}
 
-	int text_len = text.length();
-
-	if (caret_column == text_len) {
+	if (caret_column == text.length()) {
 		return; // Nothing to do.
+	}
+
+	if (p_all_to_right) {
+		text = text.substr(0, caret_column);
+		_shape();
+		_text_changed();
+		return;
 	}
 
 	if (p_word) {
@@ -2133,6 +2133,9 @@ PopupMenu *LineEdit::get_menu() const {
 
 void LineEdit::_editor_settings_changed() {
 #ifdef TOOLS_ENABLED
+	if (!EditorSettings::get_singleton()->check_changed_settings_in_group("text_editor/appearance/caret")) {
+		return;
+	}
 	set_caret_blink_enabled(EDITOR_GET("text_editor/appearance/caret/caret_blink"));
 	set_caret_blink_interval(EDITOR_GET("text_editor/appearance/caret/caret_blink_interval"));
 #endif
@@ -2403,15 +2406,12 @@ void LineEdit::_generate_context_menu() {
 	add_child(menu, false, INTERNAL_MODE_FRONT);
 
 	menu_dir = memnew(PopupMenu);
-	menu_dir->set_name("DirMenu");
 	menu_dir->add_radio_check_item(RTR("Same as Layout Direction"), MENU_DIR_INHERITED);
 	menu_dir->add_radio_check_item(RTR("Auto-Detect Direction"), MENU_DIR_AUTO);
 	menu_dir->add_radio_check_item(RTR("Left-to-Right"), MENU_DIR_LTR);
 	menu_dir->add_radio_check_item(RTR("Right-to-Left"), MENU_DIR_RTL);
-	menu->add_child(menu_dir, false, INTERNAL_MODE_FRONT);
 
 	menu_ctl = memnew(PopupMenu);
-	menu_ctl->set_name("CTLMenu");
 	menu_ctl->add_item(RTR("Left-to-Right Mark (LRM)"), MENU_INSERT_LRM);
 	menu_ctl->add_item(RTR("Right-to-Left Mark (RLM)"), MENU_INSERT_RLM);
 	menu_ctl->add_item(RTR("Start of Left-to-Right Embedding (LRE)"), MENU_INSERT_LRE);
@@ -2430,7 +2430,6 @@ void LineEdit::_generate_context_menu() {
 	menu_ctl->add_item(RTR("Zero-Width Non-Joiner (ZWNJ)"), MENU_INSERT_ZWNJ);
 	menu_ctl->add_item(RTR("Word Joiner (WJ)"), MENU_INSERT_WJ);
 	menu_ctl->add_item(RTR("Soft Hyphen (SHY)"), MENU_INSERT_SHY);
-	menu->add_child(menu_ctl, false, INTERNAL_MODE_FRONT);
 
 	menu->add_item(RTR("Cut"), MENU_CUT);
 	menu->add_item(RTR("Copy"), MENU_COPY);
@@ -2442,10 +2441,10 @@ void LineEdit::_generate_context_menu() {
 	menu->add_item(RTR("Undo"), MENU_UNDO);
 	menu->add_item(RTR("Redo"), MENU_REDO);
 	menu->add_separator();
-	menu->add_submenu_item(RTR("Text Writing Direction"), "DirMenu", MENU_SUBMENU_TEXT_DIR);
+	menu->add_submenu_node_item(RTR("Text Writing Direction"), menu_dir, MENU_SUBMENU_TEXT_DIR);
 	menu->add_separator();
 	menu->add_check_item(RTR("Display Control Characters"), MENU_DISPLAY_UCC);
-	menu->add_submenu_item(RTR("Insert Control Character"), "CTLMenu", MENU_SUBMENU_INSERT_UCC);
+	menu->add_submenu_node_item(RTR("Insert Control Character"), menu_ctl, MENU_SUBMENU_INSERT_UCC);
 
 	menu->connect("id_pressed", callable_mp(this, &LineEdit::menu_option));
 	menu_dir->connect("id_pressed", callable_mp(this, &LineEdit::menu_option));

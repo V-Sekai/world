@@ -35,6 +35,7 @@
 #include "editor/editor_string_names.h"
 #include "editor/editor_undo_redo_manager.h"
 #include "editor/filesystem_dock.h"
+#include "editor/gui/editor_bottom_panel.h"
 #include "editor/inspector_dock.h"
 #include "editor/plugins/text_shader_editor.h"
 #include "editor/plugins/visual_shader_editor_plugin.h"
@@ -143,7 +144,6 @@ void ShaderEditorPlugin::edit(Object *p_object) {
 		es.shader_editor = memnew(TextShaderEditor);
 		es.shader_editor->edit(si);
 		shader_tabs->add_child(es.shader_editor);
-		es.shader_editor->connect("validation_changed", callable_mp(this, &ShaderEditorPlugin::_update_shader_list));
 	} else {
 		Shader *s = Object::cast_to<Shader>(p_object);
 		for (uint32_t i = 0; i < edited_shaders.size(); i++) {
@@ -163,7 +163,16 @@ void ShaderEditorPlugin::edit(Object *p_object) {
 			es.shader_editor = memnew(TextShaderEditor);
 			shader_tabs->add_child(es.shader_editor);
 			es.shader_editor->edit(s);
-			es.shader_editor->connect("validation_changed", callable_mp(this, &ShaderEditorPlugin::_update_shader_list));
+		}
+	}
+
+	if (es.shader_editor) {
+		es.shader_editor->connect("validation_changed", callable_mp(this, &ShaderEditorPlugin::_update_shader_list));
+
+		CodeTextEditor *cte = es.shader_editor->get_code_editor();
+		if (cte) {
+			cte->set_zoom_factor(text_shader_zoom_factor);
+			cte->connect("zoomed", callable_mp(this, &ShaderEditorPlugin::_set_text_shader_zoom_factor));
 		}
 	}
 
@@ -178,7 +187,7 @@ bool ShaderEditorPlugin::handles(Object *p_object) const {
 
 void ShaderEditorPlugin::make_visible(bool p_visible) {
 	if (p_visible) {
-		EditorNode::get_singleton()->make_bottom_panel_item_visible(window_wrapper);
+		EditorNode::get_bottom_panel()->make_item_visible(window_wrapper);
 	}
 }
 
@@ -244,6 +253,8 @@ void ShaderEditorPlugin::set_window_layout(Ref<ConfigFile> p_layout) {
 
 	_update_shader_list();
 	_shader_selected(selected_shader_idx);
+
+	_set_text_shader_zoom_factor(p_layout->get_value("ShaderEditor", "text_shader_zoom_factor", 1.0f));
 }
 
 void ShaderEditorPlugin::get_window_layout(Ref<ConfigFile> p_layout) {
@@ -290,6 +301,7 @@ void ShaderEditorPlugin::get_window_layout(Ref<ConfigFile> p_layout) {
 	p_layout->set_value("ShaderEditor", "open_shaders", shaders);
 	p_layout->set_value("ShaderEditor", "split_offset", main_split->get_split_offset());
 	p_layout->set_value("ShaderEditor", "selected_shader", selected_shader);
+	p_layout->set_value("ShaderEditor", "text_shader_zoom_factor", text_shader_zoom_factor);
 }
 
 String ShaderEditorPlugin::get_unsaved_status(const String &p_for_scene) const {
@@ -590,6 +602,20 @@ void ShaderEditorPlugin::_window_changed(bool p_visible) {
 	make_floating->set_visible(!p_visible);
 }
 
+void ShaderEditorPlugin::_set_text_shader_zoom_factor(float p_zoom_factor) {
+	if (text_shader_zoom_factor != p_zoom_factor) {
+		text_shader_zoom_factor = p_zoom_factor;
+		for (const EditedShader &edited_shader : edited_shaders) {
+			if (edited_shader.shader_editor) {
+				CodeTextEditor *cte = edited_shader.shader_editor->get_code_editor();
+				if (cte && cte->get_zoom_factor() != text_shader_zoom_factor) {
+					cte->set_zoom_factor(text_shader_zoom_factor);
+				}
+			}
+		}
+	}
+}
+
 void ShaderEditorPlugin::_file_removed(const String &p_removed_file) {
 	for (uint32_t i = 0; i < edited_shaders.size(); i++) {
 		if (edited_shaders[i].path == p_removed_file) {
@@ -677,7 +703,7 @@ ShaderEditorPlugin::ShaderEditorPlugin() {
 	empty.instantiate();
 	shader_tabs->add_theme_style_override("panel", empty);
 
-	button = EditorNode::get_singleton()->add_bottom_panel_item(TTR("Shader Editor"), window_wrapper);
+	button = EditorNode::get_bottom_panel()->add_item(TTR("Shader Editor"), window_wrapper);
 
 	shader_create_dialog = memnew(ShaderCreateDialog);
 	vb->add_child(shader_create_dialog);

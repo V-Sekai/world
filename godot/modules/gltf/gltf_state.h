@@ -32,8 +32,6 @@
 #define GLTF_STATE_H
 
 #include "extensions/gltf_light.h"
-#include "scene/3d/importer_mesh_instance_3d.h"
-#include "scene/resources/model_state_3d.h"
 #include "structures/gltf_accessor.h"
 #include "structures/gltf_animation.h"
 #include "structures/gltf_buffer_view.h"
@@ -45,9 +43,10 @@
 #include "structures/gltf_texture.h"
 #include "structures/gltf_texture_sampler.h"
 
-class GLTFState : public ModelState3D {
-	GDCLASS(GLTFState, ModelState3D);
-	friend class ModelDocument3D;
+#include "scene/3d/importer_mesh_instance_3d.h"
+
+class GLTFState : public Resource {
+	GDCLASS(GLTFState, Resource);
 	friend class GLTFDocument;
 
 protected:

@@ -37,11 +37,6 @@
 #include "core/io/file_access_memory.h"
 #include "core/io/image.h"
 #include "core/math/color.h"
-#include "modules/gltf/extensions/gltf_light.h"
-#include "modules/gltf/gltf_defines.h"
-#include "modules/gltf/gltf_state.h"
-#include "modules/gltf/structures/gltf_animation.h"
-#include "modules/gltf/structures/gltf_camera.h"
 #include "scene/3d/bone_attachment_3d.h"
 #include "scene/3d/camera_3d.h"
 #include "scene/3d/importer_mesh_instance_3d.h"
@@ -49,8 +44,13 @@
 #include "scene/resources/image_texture.h"
 #include "scene/resources/material.h"
 #include "scene/resources/portable_compressed_texture.h"
-#include "scene/resources/skin_tool.h"
 #include "scene/resources/surface_tool.h"
+
+#include "modules/gltf/extensions/gltf_light.h"
+#include "modules/gltf/gltf_defines.h"
+#include "modules/gltf/skin_tool.h"
+#include "modules/gltf/structures/gltf_animation.h"
+#include "modules/gltf/structures/gltf_camera.h"
 
 #ifdef TOOLS_ENABLED
 #include "editor/editor_file_system.h"
@@ -1332,23 +1332,37 @@ Error FBXDocument::_parse_animations(Ref<FBXState> p_state) {
 				track.scale_track.values.push_back(_as_vec3(key.value));
 			}
 		}
+
+		Dictionary blend_shape_animations;
+
 		for (const ufbx_baked_element &fbx_baked_element : fbx_baked_anim->elements) {
 			const ufbx_element *fbx_element = fbx_scene->elements[fbx_baked_element.element_id];
-			const GLTFNodeIndex node = fbx_element->typed_id;
-			ERR_CONTINUE(static_cast<uint32_t>(node) >= animation->get_tracks().size());
+
 			for (const ufbx_baked_prop &fbx_baked_prop : fbx_baked_element.props) {
 				String prop_name = _as_string(fbx_baked_prop.name);
 
 				if (fbx_element->type == UFBX_ELEMENT_BLEND_CHANNEL && prop_name == UFBX_DeformPercent) {
-					GLTFAnimation::Channel<real_t> blend_shape_track;
+					const ufbx_blend_channel *fbx_blend_channel = ufbx_as_blend_channel(fbx_element);
+
+					int blend_i = fbx_blend_channel->typed_id;
+					Vector<real_t> track_times;
+					Vector<real_t> track_values;
+
 					for (const ufbx_baked_vec3 &key : fbx_baked_prop.keys) {
-						blend_shape_track.times.push_back(float(key.time));
-						blend_shape_track.values.push_back(real_t(key.value.x / 100.0));
+						track_times.push_back(float(key.time));
+						track_values.push_back(real_t(key.value.x / 100.0));
 					}
-					animation->get_tracks()[node].weight_tracks.push_back(blend_shape_track);
+
+					Dictionary track;
+					track["times"] = track_times;
+					track["values"] = track_values;
+					blend_shape_animations[blend_i] = track;
 				}
 			}
 		}
+
+		animation->set_additional_data("GODOT_blend_shape_animations", blend_shape_animations);
+
 		p_state->animations.push_back(animation);
 	}
 
@@ -1812,6 +1826,8 @@ void FBXDocument::_import_animation(Ref<FBXState> p_state, AnimationPlayer *p_an
 		}
 	}
 
+	Dictionary blend_shape_animations = anim->get_additional_data("GODOT_blend_shape_animations");
+
 	for (GLTFNodeIndex node_index = 0; node_index < p_state->nodes.size(); node_index++) {
 		Ref<GLTFNode> node = p_state->nodes[node_index];
 		if (node->mesh < 0) {
@@ -1837,29 +1853,40 @@ void FBXDocument::_import_animation(Ref<FBXState> p_state, AnimationPlayer *p_an
 		ERR_CONTINUE(mesh.is_null());
 		ERR_CONTINUE(mesh->get_mesh().is_null());
 		ERR_CONTINUE(mesh->get_mesh()->get_mesh().is_null());
-		GLTFAnimation::Track track = anim->get_tracks()[node_index];
+
 		Dictionary mesh_additional_data = mesh->get_additional_data("GODOT_mesh_blend_channels");
 		Vector<int> blend_channels = mesh_additional_data["blend_channels"];
-		for (int i = 0; i < blend_channels.size(); i++) {
-			GLTFAnimation::Track tracks = anim->get_tracks()[blend_channels[i]];
-			for (int channel_i = 0; channel_i < tracks.weight_tracks.size(); channel_i++) {
-				GLTFAnimation::Channel<real_t> weights = tracks.weight_tracks[channel_i];
-				const String blend_path = String(mesh_instance_node_path) + ":" + String(mesh->get_mesh()->get_blend_shape_name(i));
-				const int track_idx = animation->get_track_count();
-				animation->add_track(Animation::TYPE_BLEND_SHAPE);
-				animation->track_set_path(track_idx, blend_path);
-				animation->track_set_imported(track_idx, true); // Helps merging later.
 
-				animation->track_set_interpolation_type(track_idx, Animation::INTERPOLATION_LINEAR);
-				for (int j = 0; j < weights.times.size(); j++) {
-					const double t = weights.times[j] - anim_start_offset;
-					const real_t attribs = weights.values[j];
-					animation->blend_shape_track_insert_key(track_idx, t, attribs);
-				}
+		for (int i = 0; i < blend_channels.size(); i++) {
+			int blend_i = blend_channels[i];
+			if (!blend_shape_animations.has(blend_i)) {
+				continue;
+			}
+			Dictionary blend_track = blend_shape_animations[blend_i];
+
+			GLTFAnimation::Channel<real_t> weights;
+			weights.interpolation = GLTFAnimation::INTERP_LINEAR;
+			weights.times = blend_track["times"];
+			weights.values = blend_track["values"];
+
+			const String blend_path = String(mesh_instance_node_path) + ":" + String(mesh->get_mesh()->get_blend_shape_name(i));
+			const int track_idx = animation->get_track_count();
+			animation->add_track(Animation::TYPE_BLEND_SHAPE);
+			animation->track_set_path(track_idx, blend_path);
+			animation->track_set_imported(track_idx, true); // Helps merging later.
+
+			animation->track_set_interpolation_type(track_idx, Animation::INTERPOLATION_LINEAR);
+			for (int j = 0; j < weights.times.size(); j++) {
+				const double t = weights.times[j] - anim_start_offset;
+				const real_t attribs = weights.values[j];
+				animation->blend_shape_track_insert_key(track_idx, t, attribs);
 			}
 		}
 	}
-	animation->set_length(double(additional_animation_data["time_end"]) - double(additional_animation_data["time_begin"]));
+	double time_begin = additional_animation_data["time_begin"];
+	double time_end = additional_animation_data["time_end"];
+	double length = p_trimming ? time_end - time_begin : time_end;
+	animation->set_length(length);
 
 	Ref<AnimationLibrary> library;
 	if (!p_animation_player->has_animation_library("")) {
@@ -1980,7 +2007,7 @@ Error FBXDocument::_parse(Ref<FBXState> p_state, String p_path, Ref<FileAccess> 
 void FBXDocument::_bind_methods() {
 }
 
-Node *FBXDocument::generate_scene_from_data(Ref<ModelState3D> p_state, float p_bake_fps, bool p_trimming, bool p_remove_immutable_tracks) {
+Node *FBXDocument::generate_scene(Ref<GLTFState> p_state, float p_bake_fps, bool p_trimming, bool p_remove_immutable_tracks) {
 	Ref<FBXState> state = p_state;
 	ERR_FAIL_COND_V(state.is_null(), nullptr);
 	ERR_FAIL_NULL_V(state, nullptr);
@@ -2005,7 +2032,7 @@ Node *FBXDocument::generate_scene_from_data(Ref<ModelState3D> p_state, float p_b
 	return root;
 }
 
-Error FBXDocument::append_data_from_buffer(PackedByteArray p_bytes, String p_base_path, Ref<ModelState3D> p_state, uint32_t p_flags) {
+Error FBXDocument::append_from_buffer(PackedByteArray p_bytes, String p_base_path, Ref<GLTFState> p_state, uint32_t p_flags) {
 	Ref<FBXState> state = p_state;
 	ERR_FAIL_COND_V(state.is_null(), ERR_INVALID_PARAMETER);
 	ERR_FAIL_NULL_V(p_bytes.ptr(), ERR_INVALID_DATA);
@@ -2097,7 +2124,7 @@ Error FBXDocument::_parse_fbx_state(Ref<FBXState> p_state, const String &p_searc
 	return OK;
 }
 
-Error FBXDocument::append_data_from_file(String p_path, Ref<ModelState3D> p_state, uint32_t p_flags, String p_base_path) {
+Error FBXDocument::append_from_file(String p_path, Ref<GLTFState> p_state, uint32_t p_flags, String p_base_path) {
 	Ref<FBXState> state = p_state;
 	ERR_FAIL_COND_V(state.is_null(), ERR_INVALID_PARAMETER);
 	ERR_FAIL_COND_V(p_path.is_empty(), ERR_FILE_NOT_FOUND);
@@ -2316,15 +2343,15 @@ Error FBXDocument::_parse_skins(Ref<FBXState> p_state) {
 	return OK;
 }
 
-PackedByteArray FBXDocument::generate_buffer_from_data(Ref<ModelState3D> p_state) {
+PackedByteArray FBXDocument::generate_buffer(Ref<GLTFState> p_state) {
 	return PackedByteArray();
 }
 
-Error FBXDocument::write_asset_to_filesystem(Ref<ModelState3D> p_state, const String &p_path) {
+Error write_to_filesystem(Ref<GLTFState> p_state, const String &p_path) {
 	return ERR_UNAVAILABLE;
 }
 
-Error FBXDocument::append_data_from_scene(Node *p_node, Ref<ModelState3D> p_state, uint32_t p_flags) {
+Error FBXDocument::append_from_scene(Node *p_node, Ref<GLTFState> p_state, uint32_t p_flags) {
 	return ERR_UNAVAILABLE;
 }
 

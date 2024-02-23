@@ -317,6 +317,10 @@ struct ObjectGDExtension {
 	bool is_virtual = false;
 	bool is_abstract = false;
 	bool is_exposed = true;
+#ifdef TOOLS_ENABLED
+	bool is_runtime = false;
+	bool is_placeholder = false;
+#endif
 	GDExtensionClassSet set;
 	GDExtensionClassGet get;
 	GDExtensionClassGetPropertyList get_property_list;
@@ -354,8 +358,8 @@ struct ObjectGDExtension {
 
 #ifdef TOOLS_ENABLED
 	void *tracking_userdata = nullptr;
-	void (*track_instance)(void *p_userdata, void *p_instance);
-	void (*untrack_instance)(void *p_userdata, void *p_instance);
+	void (*track_instance)(void *p_userdata, void *p_instance) = nullptr;
+	void (*untrack_instance)(void *p_userdata, void *p_instance) = nullptr;
 #endif
 };
 
@@ -698,7 +702,11 @@ protected:
 	virtual void _notificationv(int p_notification, bool p_reversed) {}
 
 	static void _bind_methods();
+#ifndef DISABLE_DEPRECATED
+	static void _bind_compatibility_methods();
+#else
 	static void _bind_compatibility_methods() {}
+#endif
 	bool _set(const StringName &p_name, const Variant &p_property) { return false; };
 	bool _get(const StringName &p_name, Variant &r_property) const { return false; };
 	void _get_property_list(List<PropertyInfo> *p_list) const {};
@@ -755,6 +763,7 @@ protected:
 	void _clear_internal_resource_paths(const Variant &p_var);
 
 	friend class ClassDB;
+	friend class PlaceholderExtensionInstance;
 
 	bool _disconnect(const StringName &p_signal, const Callable &p_callable, bool p_force = false);
 
@@ -977,6 +986,7 @@ public:
 #ifdef TOOLS_ENABLED
 	void clear_internal_extension();
 	void reset_internal_extension(ObjectGDExtension *p_extension);
+	bool is_extension_placeholder() const { return _extension && _extension->is_placeholder; }
 #endif
 
 	void clear_internal_resource_paths();

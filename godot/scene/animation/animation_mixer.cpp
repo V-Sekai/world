@@ -661,13 +661,6 @@ bool AnimationMixer::_update_caches() {
 				Ref<Resource> resource;
 				Vector<StringName> leftover_path;
 
-				if (!parent->has_node_and_resource(path)) {
-					if (check_path) {
-						WARN_PRINT_ED(mixer_name + ": '" + String(E) + "', couldn't resolve track:  '" + String(path) + "'. This warning can be disabled in Project Settings.");
-					}
-					continue;
-				}
-
 				Node *child = parent->get_node_and_resource(path, resource, leftover_path);
 				if (!child) {
 					if (check_path) {
@@ -699,6 +692,9 @@ bool AnimationMixer::_update_caches() {
 
 						track_value->init_value = anim->track_get_key_value(i, 0);
 						track_value->init_value.zero();
+
+						// Can't interpolate them, need to convert.
+						track_value->is_variant_interpolatable = Animation::is_variant_interpolatable(track_value->init_value);
 
 						// If there is a Reset Animation, it takes precedence by overwriting.
 						if (has_reset_anim) {
@@ -1421,7 +1417,7 @@ void AnimationMixer::_blend_process(double p_delta, bool p_update_only) {
 					bool is_value = ttype == Animation::TYPE_VALUE;
 					bool is_discrete = is_value && a->value_track_get_update_mode(i) == Animation::UPDATE_DISCRETE;
 					bool force_continuous = callback_mode_discrete == ANIMATION_CALLBACK_MODE_DISCRETE_FORCE_CONTINUOUS;
-					if (!is_discrete || force_continuous) {
+					if (t->is_variant_interpolatable && (!is_discrete || force_continuous)) {
 						Variant value = is_value ? a->value_track_interpolate(i, time, is_discrete && force_continuous ? backward : false) : Variant(a->bezier_track_interpolate(i, time));
 						value = post_process_key_value(a, i, value, t->object_id);
 						if (value == Variant()) {
@@ -1734,7 +1730,7 @@ void AnimationMixer::_blend_apply() {
 			case Animation::TYPE_VALUE: {
 				TrackCacheValue *t = static_cast<TrackCacheValue *>(track);
 
-				if (callback_mode_discrete == ANIMATION_CALLBACK_MODE_DISCRETE_DOMINANT && t->use_discrete) {
+				if (!t->is_variant_interpolatable || (callback_mode_discrete == ANIMATION_CALLBACK_MODE_DISCRETE_DOMINANT && t->use_discrete)) {
 					break; // Don't overwrite the value set by UPDATE_DISCRETE.
 				}
 
@@ -1974,7 +1970,13 @@ void AnimationMixer::_build_backup_track_cache() {
 				TrackCacheValue *t = static_cast<TrackCacheValue *>(track);
 				Object *t_obj = ObjectDB::get_instance(t->object_id);
 				if (t_obj) {
-					t->value = t_obj->get_indexed(t->subpath);
+					t->value = Animation::cast_to_blendwise(t_obj->get_indexed(t->subpath));
+				}
+				t->use_discrete = false;
+				if (t->init_value.is_array()) {
+					t->element_size = MAX(t->element_size.operator int(), (t->value.operator Array()).size());
+				} else if (t->init_value.is_string()) {
+					t->element_size = (real_t)(t->value.operator Array()).size();
 				}
 			} break;
 			case Animation::TYPE_AUDIO: {

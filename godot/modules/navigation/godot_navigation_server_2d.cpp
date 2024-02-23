@@ -222,7 +222,11 @@ void GodotNavigationServer2D::bake_from_source_geometry_data_async(const Ref<Nav
 }
 
 bool GodotNavigationServer2D::is_baking_navigation_polygon(Ref<NavigationPolygon> p_navigation_polygon) const {
+#ifdef CLIPPER2_ENABLED
 	return NavMeshGenerator2D::get_singleton()->is_baking(p_navigation_polygon);
+#else
+	return false;
+#endif
 }
 
 GodotNavigationServer2D::GodotNavigationServer2D() {}
@@ -251,6 +255,10 @@ bool FORWARD_1_C(map_is_active, RID, p_map, rid_to_rid);
 
 void GodotNavigationServer2D::map_force_update(RID p_map) {
 	NavigationServer3D::get_singleton()->map_force_update(p_map);
+}
+
+uint32_t GodotNavigationServer2D::map_get_iteration_id(RID p_map) const {
+	return NavigationServer3D::get_singleton()->map_get_iteration_id(p_map);
 }
 
 void FORWARD_2(map_set_cell_size, RID, p_map, real_t, p_cell_size, rid_to_rid, real_to_real);

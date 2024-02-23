@@ -1285,25 +1285,25 @@ bool CanvasItemEditor::_gui_input_zoom_or_pan(const Ref<InputEvent> &p_event, bo
 	Ref<InputEventKey> k = p_event;
 	if (k.is_valid()) {
 		if (k->is_pressed()) {
-			if (ED_GET_SHORTCUT("canvas_item_editor/zoom_3.125_percent")->matches_event(p_event)) {
+			if (ED_IS_SHORTCUT("canvas_item_editor/zoom_3.125_percent", p_event)) {
 				_shortcut_zoom_set(1.0 / 32.0);
-			} else if (ED_GET_SHORTCUT("canvas_item_editor/zoom_6.25_percent")->matches_event(p_event)) {
+			} else if (ED_IS_SHORTCUT("canvas_item_editor/zoom_6.25_percent", p_event)) {
 				_shortcut_zoom_set(1.0 / 16.0);
-			} else if (ED_GET_SHORTCUT("canvas_item_editor/zoom_12.5_percent")->matches_event(p_event)) {
+			} else if (ED_IS_SHORTCUT("canvas_item_editor/zoom_12.5_percent", p_event)) {
 				_shortcut_zoom_set(1.0 / 8.0);
-			} else if (ED_GET_SHORTCUT("canvas_item_editor/zoom_25_percent")->matches_event(p_event)) {
+			} else if (ED_IS_SHORTCUT("canvas_item_editor/zoom_25_percent", p_event)) {
 				_shortcut_zoom_set(1.0 / 4.0);
-			} else if (ED_GET_SHORTCUT("canvas_item_editor/zoom_50_percent")->matches_event(p_event)) {
+			} else if (ED_IS_SHORTCUT("canvas_item_editor/zoom_50_percent", p_event)) {
 				_shortcut_zoom_set(1.0 / 2.0);
-			} else if (ED_GET_SHORTCUT("canvas_item_editor/zoom_100_percent")->matches_event(p_event)) {
+			} else if (ED_IS_SHORTCUT("canvas_item_editor/zoom_100_percent", p_event)) {
 				_shortcut_zoom_set(1.0);
-			} else if (ED_GET_SHORTCUT("canvas_item_editor/zoom_200_percent")->matches_event(p_event)) {
+			} else if (ED_IS_SHORTCUT("canvas_item_editor/zoom_200_percent", p_event)) {
 				_shortcut_zoom_set(2.0);
-			} else if (ED_GET_SHORTCUT("canvas_item_editor/zoom_400_percent")->matches_event(p_event)) {
+			} else if (ED_IS_SHORTCUT("canvas_item_editor/zoom_400_percent", p_event)) {
 				_shortcut_zoom_set(4.0);
-			} else if (ED_GET_SHORTCUT("canvas_item_editor/zoom_800_percent")->matches_event(p_event)) {
+			} else if (ED_IS_SHORTCUT("canvas_item_editor/zoom_800_percent", p_event)) {
 				_shortcut_zoom_set(8.0);
-			} else if (ED_GET_SHORTCUT("canvas_item_editor/zoom_1600_percent")->matches_event(p_event)) {
+			} else if (ED_IS_SHORTCUT("canvas_item_editor/zoom_1600_percent", p_event)) {
 				_shortcut_zoom_set(16.0);
 			}
 		}
@@ -4010,6 +4010,10 @@ void CanvasItemEditor::_notification(int p_what) {
 		} break;
 
 		case EditorSettings::NOTIFICATION_EDITOR_SETTINGS_CHANGED: {
+			if (!EditorThemeManager::is_generated_theme_outdated() &&
+					!EditorSettings::get_singleton()->check_changed_settings_in_group("editors/panning")) {
+				break;
+			}
 			_update_editor_settings();
 		} break;
 
@@ -5315,14 +5319,8 @@ CanvasItemEditor::CanvasItemEditor() {
 	p->add_check_shortcut(ED_SHORTCUT("canvas_item_editor/use_scale_snap", TTR("Use Scale Snap")), SNAP_USE_SCALE);
 	p->add_check_shortcut(ED_SHORTCUT("canvas_item_editor/snap_relative", TTR("Snap Relative")), SNAP_RELATIVE);
 	p->add_check_shortcut(ED_SHORTCUT("canvas_item_editor/use_pixel_snap", TTR("Use Pixel Snap")), SNAP_USE_PIXEL);
-	p->add_submenu_item(TTR("Smart Snapping"), "SmartSnapping");
-
-	p->add_separator();
-	p->add_shortcut(ED_SHORTCUT("canvas_item_editor/configure_snap", TTR("Configure Snap...")), SNAP_CONFIGURE);
 
 	smartsnap_config_popup = memnew(PopupMenu);
-	p->add_child(smartsnap_config_popup);
-	smartsnap_config_popup->set_name("SmartSnapping");
 	smartsnap_config_popup->connect("id_pressed", callable_mp(this, &CanvasItemEditor::_popup_callback));
 	smartsnap_config_popup->set_hide_on_checkable_item_selection(false);
 	smartsnap_config_popup->add_check_shortcut(ED_SHORTCUT("canvas_item_editor/snap_node_parent", TTR("Snap to Parent")), SNAP_USE_NODE_PARENT);
@@ -5331,6 +5329,10 @@ CanvasItemEditor::CanvasItemEditor() {
 	smartsnap_config_popup->add_check_shortcut(ED_SHORTCUT("canvas_item_editor/snap_node_center", TTR("Snap to Node Center")), SNAP_USE_NODE_CENTER);
 	smartsnap_config_popup->add_check_shortcut(ED_SHORTCUT("canvas_item_editor/snap_other_nodes", TTR("Snap to Other Nodes")), SNAP_USE_OTHER_NODES);
 	smartsnap_config_popup->add_check_shortcut(ED_SHORTCUT("canvas_item_editor/snap_guides", TTR("Snap to Guides")), SNAP_USE_GUIDES);
+	p->add_submenu_node_item(TTR("Smart Snapping"), smartsnap_config_popup);
+
+	p->add_separator();
+	p->add_shortcut(ED_SHORTCUT("canvas_item_editor/configure_snap", TTR("Configure Snap...")), SNAP_CONFIGURE);
 
 	main_menu_hbox->add_child(memnew(VSeparator));
 
@@ -5412,14 +5414,12 @@ CanvasItemEditor::CanvasItemEditor() {
 	grid_menu = memnew(PopupMenu);
 	grid_menu->connect("about_to_popup", callable_mp(this, &CanvasItemEditor::_prepare_grid_menu));
 	grid_menu->connect("id_pressed", callable_mp(this, &CanvasItemEditor::_on_grid_menu_id_pressed));
-	grid_menu->set_name("GridMenu");
 	grid_menu->add_radio_check_item(TTR("Show"), GRID_VISIBILITY_SHOW);
 	grid_menu->add_radio_check_item(TTR("Show When Snapping"), GRID_VISIBILITY_SHOW_WHEN_SNAPPING);
 	grid_menu->add_radio_check_item(TTR("Hide"), GRID_VISIBILITY_HIDE);
 	grid_menu->add_separator();
 	grid_menu->add_shortcut(ED_SHORTCUT("canvas_item_editor/toggle_grid", TTR("Toggle Grid"), KeyModifierMask::CMD_OR_CTRL | Key::APOSTROPHE));
-	p->add_child(grid_menu);
-	p->add_submenu_item(TTR("Grid"), "GridMenu");
+	p->add_submenu_node_item(TTR("Grid"), grid_menu);
 
 	p->add_check_shortcut(ED_SHORTCUT("canvas_item_editor/show_helpers", TTR("Show Helpers"), Key::H), SHOW_HELPERS);
 	p->add_check_shortcut(ED_SHORTCUT("canvas_item_editor/show_rulers", TTR("Show Rulers")), SHOW_RULERS);
@@ -5448,12 +5448,10 @@ CanvasItemEditor::CanvasItemEditor() {
 
 	theme_menu = memnew(PopupMenu);
 	theme_menu->connect("id_pressed", callable_mp(this, &CanvasItemEditor::_switch_theme_preview));
-	theme_menu->set_name("ThemeMenu");
 	theme_menu->add_radio_check_item(TTR("Project theme"), THEME_PREVIEW_PROJECT);
 	theme_menu->add_radio_check_item(TTR("Editor theme"), THEME_PREVIEW_EDITOR);
 	theme_menu->add_radio_check_item(TTR("Default theme"), THEME_PREVIEW_DEFAULT);
-	p->add_child(theme_menu);
-	p->add_submenu_item(TTR("Preview Theme"), "ThemeMenu");
+	p->add_submenu_node_item(TTR("Preview Theme"), theme_menu);
 
 	theme_preview = (ThemePreviewMode)(int)EditorSettings::get_singleton()->get_project_metadata("2d_editor", "theme_preview", THEME_PREVIEW_PROJECT);
 	for (int i = 0; i < THEME_PREVIEW_MAX; i++) {
