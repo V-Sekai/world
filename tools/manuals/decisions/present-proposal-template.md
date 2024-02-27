@@ -1,26 +1,32 @@
-# Proposed: Overcoming a V-Sekai limit with Documentation
+# Proposed:
 
-## Metadata
+## The Context
 
-- Status: Proposed <!-- Draft | Proposed | Rejected | Accepted | Deprecated | Superseded by -->
-- Deciders: V-Sekai
-- Tags: V-Sekai
+## The Problem Statement
 
-## The Backdrop
+## Describe how your proposal will work with code, pseudo-code, mock-ups, or diagrams
 
-## The Challenge
+## The Benefits
 
-## The Strategy
-
-## The Upside
-
-## The Downside
+## The Downsides
 
 ## The Road Not Taken
 
 ## The Infrequent Use Case
 
-## In Core and Done by Us?
+## In Core and Done by Us
+
+## Status
+
+Status: Proposed <!-- Draft | Proposed | Rejected | Accepted | Deprecated | Superseded by -->
+
+## Decision Makers
+
+- V-Sekai development team and community stakeholders.
+
+## Tags
+
+- V-Sekai, Avatar Customization, AI, Facial Expressions
 
 ## Further Reading
 

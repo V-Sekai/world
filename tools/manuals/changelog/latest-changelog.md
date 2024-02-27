@@ -1,10 +1,10 @@
 # V-Sekai Changelog - Template
 
-## [Released]
+## \[Released]
 
 - Not applicable for this month.
 
-## [Unreleased]
+## \[Unreleased]
 
 - Not applicable for this month.
 
@@ -34,6 +34,6 @@
 
 This project does not adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Previous Releases]
+## \[Previous Releases]
 
 - Not applicable for this month.

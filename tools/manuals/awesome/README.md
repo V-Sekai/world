@@ -6,19 +6,6 @@ V-Sekai is an open-source project that aims to bring social VR/VRSNS/metaverse c
 
 A curated list of all the projects V-Sekai has been involved with in the field of social VR.
 
-## Contents
-
-- [Applications](#applications)
-- [Websites](#websites)
-- [Artwork](#artwork)
-- [Plugins and Scripts](#plugins-and-scripts)
-- [Modules](#modules)
-- [Tools](#tools)
-- [Tools that bring me joy](#tools-that-bring-me-joy)
-- [Groups](#groups)
-- [Experiments](#experiments)
-- [Machine Learning experiments](#machine-learning-experiments)
-
 ## Applications
 
 - [V-Sekai Game](https://github.com/V-Sekai/v-sekai-game)
@@ -26,18 +13,6 @@ A curated list of all the projects V-Sekai has been involved with in the field o
 - [Shader Motion Website](https://github.com/V-Sekai/shader-motion-navy-lead-ostrich)
 - [VSK Model Explorer](https://github.com/V-Sekai/VSK_model_explorer)
 - [Open RTS](https://github.com/lampe-games/godot-open-rts)
-
-## Websites
-
-- [V-Sekai Manuals Website](https://github.com/V-Sekai/manuals)
-- [Godot GLTF 2.0 Scene Exporter](https://godotengine.org/article/introducing-the-godot-gltf-2-0-scene-exporter/)
-- [Animation Retargeting in Godot 4.0](https://godotengine.org/article/animation-retargeting-in-godot-4-0/)
-- [Godot Engine PRs by File](https://godotengine.github.io/godot-prs-by-file/)
-
-## Artwork
-
-- [Blender Art Blue Tin Fox Models](https://github.com/V-Sekai/blender-art-blue-tin-fox-models)
-- [V-Sekai Fire Artwork & Tools](https://github.com/v-sekai-fire)
 
 ## Plugins and Scripts
 
@@ -64,7 +39,6 @@ Modules extend Godot Engine core (C++).
 #### Godot 4.0
 
 - [Godot Speech](https://github.com/v-sekai/godot_speech)
-- [Godot libsql](https://github.com/V-Sekai/godot-libsql)
 - [Fast Subdivision with opensubdiv](https://github.com/V-Sekai/godot-subdiv)
 - [Inverse Kinematics System Solver for Multi-chain Skeletons and with Constraints](https://github.com/V-Sekai/many_bone_ik)
 - [Humanoid Inverse Kinematics Rig for Avatars](https://github.com/V-Sekai/renik)
@@ -73,7 +47,19 @@ Modules extend Godot Engine core (C++).
 - [Hydro](https://github.com/godot-extended-libraries/hydro)
 - [ashtonmeuser/godot-wasm](https://github.com/ashtonmeuser/godot-wasm)
 
-## Tools
+## Websites
+
+- [V-Sekai Manuals Website](https://github.com/V-Sekai/manuals)
+- [Godot GLTF 2.0 Scene Exporter](https://godotengine.org/article/introducing-the-godot-gltf-2-0-scene-exporter/)
+- [Animation Retargeting in Godot 4.0](https://godotengine.org/article/animation-retargeting-in-godot-4-0/)
+- [Godot Engine PRs by File](https://godotengine.github.io/godot-prs-by-file/)
+
+## Artwork
+
+- [Blender Art Blue Tin Fox Models](https://github.com/V-Sekai/blender-art-blue-tin-fox-models)
+- [V-Sekai Fire Artwork & Tools](https://github.com/v-sekai-fire)
+
+## Other Tools
 
 - [SQLpage](https://github.com/lovasoa/SQLpage)
 - [V-Sekai Blender Game Tools](https://github.com/V-Sekai/vsekai-blender-game-tools)
