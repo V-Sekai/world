@@ -10,7 +10,7 @@
       "label": "Godot Engine",
       "type": "shell",
       "options": {
-        "cwd": "${workspaceFolder}/godot"
+        "cwd": "${workspaceFolder}/VSK_godot"
       },
       "command": [
         "scons werror=no dev_build=no precision=double compiledb=yes target=editor tests=yes debug_symbols=yes"
@@ -20,7 +20,7 @@
       "label": "Godot Engine Dev",
       "type": "shell",
       "options": {
-        "cwd": "${workspaceFolder}/godot"
+        "cwd": "${workspaceFolder}/VSK_godot"
       },
       "command": [
         "scons werror=no dev_build=yes precision=double compiledb=yes target=editor tests=yes debug_symbols=yes"
@@ -34,7 +34,7 @@
       "label": "Godot Clean Engine",
       "type": "shell",
       "options": {
-        "cwd": "${workspaceFolder}/godot"
+        "cwd": "${workspaceFolder}/VSK_godot"
       },
       "command": [
         "scons warnings=no werror=yes dev_build=no precision=double compiledb=yes target=editor tests=yes -c"
@@ -44,7 +44,7 @@
       "label": "Godot Engine Windows Clang",
       "type": "shell",
       "options": {
-        "cwd": "${workspaceFolder}/godot"
+        "cwd": "${workspaceFolder}/VSK_godot"
       },
       "command": [
         "scons warnings=no werror=yes dev_build=no tests=yes precision=double use_llvm=yes use_mingw=yes LINKFLAGS='-Wl,-pdb=' CCFLAGS='-g -gcodeview' compiledb=yes target=editor"
@@ -54,7 +54,7 @@
       "label": "Godot Engine Windows MSVC",
       "type": "shell",
       "options": {
-        "cwd": "${workspaceFolder}/godot"
+        "cwd": "${workspaceFolder}/VSK_godot"
       },
       "command": [
         "scons warnings=no werror=no dev_build=yes precision=double vsproj=yes compiledb=yes target=editor"
