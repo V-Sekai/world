@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai/flux-config.git
 	branch = flux2
-	commit = d65649fcafbe38150df1cdac41e932f501a86d74
-	parent = 2a0a4a0e290f2c6f7d30df73d2816f615975c2bb
+	commit = 2e797838100fc8e626e0104261a8ae41d73e2a65
+	parent = 6fae491339f317a0465e6e4492e60bd440c56a56
 	method = merge
 	cmdver = 0.4.6
