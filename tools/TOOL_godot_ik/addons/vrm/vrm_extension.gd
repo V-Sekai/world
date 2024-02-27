@@ -359,7 +359,11 @@ func _first_person_head_hiding(vrm_extension: Dictionary, gstate: GLTFState, hum
 						if head_relative_bones.has(parent_node.bone_name):
 							flag = "ThirdPersonOnly"
 				else:
-					head_hidden_mesh = vrm_utils._generate_hide_bone_mesh(mesh, node.skin, head_relative_bones)
+					var blend_shape_names: Dictionary = vrm_utils._extract_blendshape_names(gstate.json)
+					if node_idx in blend_shape_names.keys():
+						head_hidden_mesh = vrm_utils._generate_hide_bone_mesh(mesh, node.skin, head_relative_bones, blend_shape_names[node_idx])
+					else:
+						head_hidden_mesh = vrm_utils._generate_hide_bone_mesh(mesh, node.skin, head_relative_bones, [])
 					if head_hidden_mesh == null:
 						flag = "ThirdPersonOnly"
 					if head_hidden_mesh == mesh:
@@ -836,11 +840,11 @@ func _parse_secondary_node(secondary_node: Node, vrm_extension: Dictionary, gsta
 			spring_bone.collider_groups = spring_collider_groups
 			for bone_name in chain:
 				spring_bone.joint_nodes.push_back(bone_name)  # end bone will be named ""
-				spring_bone.stiffness_force.push_back(stiffness_force)
-				spring_bone.gravity_power.push_back(gravity_power)
-				spring_bone.gravity_dir.push_back(gravity_dir)
-				spring_bone.drag_force.push_back(drag_force)
-				spring_bone.hit_radius.push_back(hit_radius)
+			spring_bone.stiffness_scale = stiffness_force
+			spring_bone.gravity_scale = gravity_power
+			spring_bone.gravity_dir_default = gravity_dir
+			spring_bone.drag_force_scale = drag_force
+			spring_bone.hit_radius_scale = hit_radius
 
 			if not comment.is_empty():
 				spring_bone.resource_name = comment.split("\n")[0]
@@ -852,7 +856,6 @@ func _parse_secondary_node(secondary_node: Node, vrm_extension: Dictionary, gsta
 	secondary_node.set_script(vrm_secondary)
 	secondary_node.set("skeleton", skeleton_path)
 	secondary_node.set("spring_bones", spring_bones)
-	secondary_node.set("collider_groups", collider_groups)
 
 
 func _add_joints_recursive(new_joints_set: Dictionary, gltf_nodes: Array, bone: int, include_child_meshes: bool = false) -> void:
@@ -959,7 +962,8 @@ func _import_post(gstate: GLTFState, node: Node) -> Error:
 
 	if is_vrm_0:
 		# VRM 0.0 has models facing backwards due to a spec error (flipped z instead of x)
-		vrm_utils.rotate_scene_180(root_node)
+		var blend_shape_names: Dictionary = vrm_utils._extract_blendshape_names(gltf_json)
+		vrm_utils.rotate_scene_180(root_node, blend_shape_names)
 
 	var do_retarget = true
 
