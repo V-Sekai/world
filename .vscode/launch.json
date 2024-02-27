@@ -17,7 +17,7 @@
       "request": "launch",
       "args": ["--path", "game", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/godot/bin/godot.windows.editor.double.x86_64.llvm.exe",
+      "program": "${workspaceFolder}/VSK_godot/bin/godot.windows.editor.double.x86_64.llvm.exe",
       "preLaunchTask": "Godot Engine Windows Clang"
     },
     {
@@ -26,7 +26,7 @@
       "request": "launch",
       "args": ["--path", "game", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/godot/bin/godot.macos.editor.double.arm64",
+      "program": "${workspaceFolder}/VSK_godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
     },
     {
@@ -39,7 +39,7 @@
       "request": "launch",
       "args": ["--path", "tools/task_goal_planner", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/godot/bin/godot.windows.editor.double.x86_64.llvm.exe",
+      "program": "${workspaceFolder}/VSK_godot/bin/godot.windows.editor.double.x86_64.llvm.exe",
       "preLaunchTask": "Godot Engine Windows Clang"
     },
     {
@@ -48,7 +48,7 @@
       "request": "launch",
       "args": ["--path", "game", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/godot/bin/godot.linuxbsd.editor.double.x86_64",
+      "program": "${workspaceFolder}/VSK_godot/bin/godot.linuxbsd.editor.double.x86_64",
       "preLaunchTask": "Godot Engine"
     },
     {
@@ -61,7 +61,7 @@
       "request": "launch",
       "args": ["--path", "tools/TOOL_godot_ik", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/godot/bin/godot.macos.editor.dev.double.arm64",
+      "program": "${workspaceFolder}/VSK_godot/bin/godot.macos.editor.dev.double.arm64",
       "preLaunchTask": "Godot Engine Dev"
     },
     {
@@ -74,7 +74,7 @@
       "request": "launch",
       "args": ["--path", "tools/TOOL_godot_ik", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/godot/bin/godot.macos.editor.double.arm64",
+      "program": "${workspaceFolder}/VSK_godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
     },
     {
@@ -87,7 +87,7 @@
       "request": "launch",
       "args": ["--path", "tools/task_goal_planner", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/godot/bin/godot.macos.editor.double.arm64",
+      "program": "${workspaceFolder}/VSK_godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
     },
   ]
