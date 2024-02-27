@@ -10,7 +10,7 @@ on:
 
 env:
   GAME_NAME: vsekai_xr_grid_
-  GODOT_REF: groups-4.2.2023-11-29T013556Z
+  GODOT_REF: groups-4.3.2024-02-17T211604Z
   GODOT_REPOSITORY: v-sekai/godot
   SCONSFLAGS: verbose=yes warnings=extra werror=no module_text_server_fb_enabled=yes use_thinlto=yes
   DOTNET_NOLOGO: true
@@ -89,7 +89,7 @@ jobs:
             deploy-platform-target: editor
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+        uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
         with:
           egress-policy: audit
 
@@ -124,7 +124,7 @@ jobs:
 
       - name: Set up Emscripten latest
         if: ${{ matrix.platform == 'web' ||  matrix.deploy-platform == 'web'}}
-        uses: mymindstorm/setup-emsdk@d233ac12b0102f74ca199f5dad7a4e2c13a8a745 # v13
+        uses: mymindstorm/setup-emsdk@6ab9eb1bda2574c4ddb79809fc9247783eaf9021 # v14
         with:
           version: ${{env.EM_VERSION}}
           actions-cache-folder: ${{env.EM_CACHE_FOLDER}}
@@ -148,7 +148,7 @@ jobs:
           dotnet-version: "6.0.x"
 
       - name: Setup GCC problem matcher
-        uses: ammaraskar/gcc-problem-matcher@d1fed1fac9e94d30e23b5a82dba4e2963e71d2e7 # master
+        uses: ammaraskar/gcc-problem-matcher@0f9c86f9e693db67dacf53986e1674de5f2e5f28 # master
 
       - name: Compilation
         uses: ./.github/actions/godot-build
@@ -218,7 +218,7 @@ jobs:
 
       - name: Upload Godot Artifact Export
         if: ${{ matrix.deploy }}
-        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
         with:
           name: ${{ env.GAME_NAME }}${{ matrix.deploy-platform }}
           path: |
@@ -282,12 +282,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+        uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
         with:
           egress-policy: audit
 
       - name: Download Artifacts
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        uses: actions/download-artifact@eaceaf801fd36c7dee90939fad912460b18a1ffe # v4.1.2
 
       - name: List files
         run: |
