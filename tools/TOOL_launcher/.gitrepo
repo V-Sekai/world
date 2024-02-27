@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai/v-sekai-central-launcher.git
 	branch = main
-	commit = c6529a46049bfd6d25fe20ed50f4e3ba05ca1de3
-	parent = fb77597cf5ed2a0d54f4fb594c34435020beba5a
+	commit = 381630b2cd41cc25a2d767949e823026a49ec8e8
+	parent = 9305542e6ee73e5665f8452a647342eb0bf8ef13
 	method = merge
 	cmdver = 0.4.6
