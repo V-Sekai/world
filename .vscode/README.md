@@ -4,14 +4,13 @@ Tested on msys2 Windows 11, Popos.
 
 ## Readme for fire
 
-```
+```bash
 scoop install msys2
 msys2
 pacman -S git python3 ssh-pageant
-# copy
-# eval $(/usr/bin/ssh-pageant -r -a "/tmp/.ssh-pageant-$USERNAME")
-# export PATH=/mingw64/bin/:$PATH
-# To the end of ~/.bashrc
+echo "pacman -S git python3 ssh-pageant" >> ~/.bashrc
+echo 'eval $(/usr/bin/ssh-pageant -r -a "/tmp/.ssh-pageant-$USERNAME")' >> ~/.bashrc
+echo 'export PATH=/mingw64/bin/:$PATH' >> ~/.bashrc
 git config --global user.name "K. S. Ernest (iFire) Lee"
 git config --global user.email "ernest.lee@chibifire.com"
 mkdir -p ~/.ssh
