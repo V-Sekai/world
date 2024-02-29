@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai/V-Sekai.godot-gui-in-vr.git
 	branch = master
-	commit = 94346d6f52c9746225aa942e9d3866505bc5cb9d
-	parent = 506e554523fa3e276df97d2a74f2b6b7d6640197
+	commit = 6341072e84387312815e6e3f4439f2443980f598
+	parent = a476dfb33b081fc17a6f2388ca26e0c4e89a183c
 	method = merge
 	cmdver = 0.4.6
