@@ -50,25 +50,6 @@ jobs:
             arch: _x86_64
             deploy-platform-target: editor
 
-          - name: linux_editor_linux_deploy
-            runs-on: ubuntu-22.04
-            cache-name: linux-editor-deploy-linux-editor
-            target: editor
-            tests: false
-            sconsflags: linker=gold precision=double use_llvm=yes
-            doc-test: false
-            bin: ./godot/bin/godot.linuxbsd.editor.double.x86_64.llvm
-            deploy-bin: ./godot/bin/godot.linuxbsd.editor.double.x86_64.llvm
-            editor-bin-name: godot.linuxbsd.editor.double.x86_64.llvm
-            proj-conv: false
-            artifact: true
-            platform: linuxbsd
-            deploy: true
-            deploy-platform: linux
-            export-platform: Linux
-            arch: _x86_64
-            deploy-platform-target: editor
-
           - name: macos_editor_macos_deploy
             runs-on: "macos-latest"
             cache-name: macos-editor-deploy-macos-editor
@@ -86,82 +67,6 @@ jobs:
             deploy-platform: macos
             export-platform: Mac
             arch: _x86_64
-            deploy-platform-target: editor
-
-          - name: linux_editor_android_arm32_deploy
-            runs-on: ubuntu-22.04
-            cache-name: linux-editor-deploy-android-arm32-editor
-            target: editor
-            tests: false
-            sconsflags: platform=android arch=arm32 production=yes precision=double
-            doc-test: false
-            bin: ./godot/bin/libgodot.android.editor.double.arm32.so
-            deploy-bin: ./godot/bin/libgodot.android.editor.double.arm32.so
-            editor-bin-name: libgodot.android.editor.double.arm32.so
-            proj-conv: false
-            artifact: true
-            platform: android
-            deploy: true
-            deploy-platform: android
-            export-platform: Android
-            arch: arm32
-            deploy-platform-target: editor
-
-          - name: linux_editor_android_arm64_deploy
-            runs-on: ubuntu-22.04
-            cache-name: linux-editor-deploy-android-arm64-editor
-            target: editor
-            tests: false
-            sconsflags: platform=android arch=arm64 production=yes precision=double
-            doc-test: false
-            bin: ./godot/bin/libgodot.android.editor.double.arm64.so
-            deploy-bin: ./godot/bin/libgodot.android.editor.double.arm64.so
-            editor-bin-name: libgodot.android.editor.double.arm64.so
-            proj-conv: false
-            artifact: true
-            platform: android
-            deploy: true
-            deploy-platform: android
-            export-platform: Android
-            arch: arm64
-            deploy-platform-target: editor
-
-          - name: linux_editor_android_x86_32_deploy
-            runs-on: ubuntu-22.04
-            cache-name: linux-editor-deploy-android-x86_32-editor
-            target: editor
-            tests: false
-            sconsflags: platform=android arch=x86_32 production=yes precision=double
-            doc-test: false
-            bin: ./godot/bin/libgodot.android.editor.double.x86_32.so
-            deploy-bin: ./godot/bin/libgodot.android.editor.double.x86_32.so
-            editor-bin-name: libgodot.android.editor.double.x86_32.so
-            proj-conv: false
-            artifact: true
-            platform: android
-            deploy: true
-            deploy-platform: android
-            export-platform: Android
-            arch: x86_32
-            deploy-platform-target: editor
-
-          - name: linux_editor_android_x86_64_deploy
-            runs-on: ubuntu-22.04
-            cache-name: linux-editor-deploy-android-x86_64-editor
-            target: editor
-            tests: false
-            sconsflags: platform=android arch=x86_64 production=yes precision=double
-            doc-test: false
-            bin: ./godot/bin/libgodot.android.editor.double.x86_64.so
-            deploy-bin: ./godot/bin/libgodot.android.editor.double.x86_64.so
-            editor-bin-name: libgodot.android.editor.double.x86_64.so
-            proj-conv: false
-            artifact: true
-            platform: android
-            deploy: true
-            deploy-platform: android
-            export-platform: Android
-            arch: x86_64
             deploy-platform-target: editor
     steps:
       - name: Harden Runner
@@ -363,23 +268,19 @@ jobs:
           egress-policy: audit
 
       - name: Download Artifacts
-        uses: actions/download-artifact@eaceaf801fd36c7dee90939fad912460b18a1ffe # v4.1.2
+        uses: actions/download-artifact@87c55149d96e628cc2ef7e6fc2aab372015aec85 # v4.1.3
 
       - name: List files
         run: |
           ls -R ${{ env.GAME_NAME }}windows${{ matrix.arch }}
-          ls -R ${{ env.GAME_NAME }}linux${{ matrix.arch }}
           ls -R linux-editor-deploy-windows-editor
-          ls -R linux-editor-deploy-linux-editor
           ls -R macos-editor-deploy-macos-editor
         shell: bash
 
       - name: Archive files
         run: |
           zip -r ${{ env.GAME_NAME }}windows${{ matrix.arch }}.zip ${{ env.GAME_NAME }}windows${{ matrix.arch }}
-          zip -r ${{ env.GAME_NAME }}linux${{ matrix.arch }}.zip ${{ env.GAME_NAME }}linux${{ matrix.arch }}
           zip -r linux-editor-deploy-windows-editor.zip linux-editor-deploy-windows-editor
-          zip -r linux-editor-deploy-linux-editor.zip linux-editor-deploy-linux-editor
           zip -r macos-editor-deploy-macos-editor.zip macos-editor-deploy-macos-editor
 
       - name: Create and Upload Release
@@ -387,9 +288,7 @@ jobs:
         with:
           files: |
             ${{ env.GAME_NAME }}windows${{ matrix.arch }}.zip
-            ${{ env.GAME_NAME }}linux${{ matrix.arch }}.zip
             linux-editor-deploy-windows-editor.zip
-            linux-editor-deploy-linux-editor.zip
             macos-editor-deploy-macos-editor.zip
           generate_release_notes: true
           draft: true
