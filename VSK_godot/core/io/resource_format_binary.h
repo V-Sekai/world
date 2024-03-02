@@ -89,6 +89,7 @@ class ResourceLoaderBinary {
 	Dictionary type_whitelist;
 
 	ResourceFormatLoader::CacheMode cache_mode = ResourceFormatLoader::CACHE_MODE_REUSE;
+	ResourceFormatLoader::CacheMode cache_mode_for_external = ResourceFormatLoader::CACHE_MODE_REUSE;
 
 	friend class ResourceFormatLoaderBinary;
 
