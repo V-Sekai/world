@@ -685,15 +685,14 @@ Error ResourceLoaderBinary::load() {
 		}
 
 		external_resources.write[i].path = path; //remap happens here, not on load because on load it can actually be used for filesystem dock resource remap
-<<<<<<<
-		external_resources.write[i].load_token = ResourceLoader::_load_start(path, external_resources[i].type, use_sub_threads ? ResourceLoader::LOAD_THREAD_DISTRIBUTE : ResourceLoader::LOAD_THREAD_FROM_CURRENT, cache_mode_for_external);
-=======
+
 		if (using_whitelist && !external_path_whitelist.has(path)) {
 			error = ERR_FILE_MISSING_DEPENDENCIES;
 			ERR_FAIL_V_MSG(error, "External dependency not in whitelist: " + path + ".");
 		}
+
 		external_resources.write[i].load_token = ResourceLoader::_load_start(path, external_resources[i].type, use_sub_threads ? ResourceLoader::LOAD_THREAD_DISTRIBUTE : ResourceLoader::LOAD_THREAD_FROM_CURRENT, ResourceFormatLoader::CACHE_MODE_REUSE, using_whitelist, external_path_whitelist, type_whitelist);
->>>>>>>
+
 		if (!external_resources[i].load_token.is_valid()) {
 			if (!ResourceLoader::get_abort_on_missing_resources()) {
 				ResourceLoader::notify_dependency_error(local_path, path, external_resources[i].type);
