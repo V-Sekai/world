@@ -5,8 +5,8 @@
 ;
 [subrepo]
 	remote = https://github.com/V-Sekai/godot-speech.git
-	branch = master
-	commit = 088930b54644d70fd186c78125630438cfa7657b
-	parent = 5f1e56ff26be4070496aa51095b9ac2f2b4f4ed8
+	branch = main
+	commit = 65e4630bb405a61d78fc49f982068b03d0725cad
+	parent = dad6c774b019ef8c5dccb4a1955c6a77b41a323e
 	method = merge
 	cmdver = 0.4.6
