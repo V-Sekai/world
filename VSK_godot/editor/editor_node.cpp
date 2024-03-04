@@ -5468,9 +5468,9 @@ void EditorNode::_notify_scene_updated(Node *p_node) {
 	if (skel_3d) {
 		skel_3d->reset_bone_poses();
 	} else {
-		SkeletonModifier3D *modification = Object::cast_to<SkeletonModifier3D>(p_node);
-		if (modification) {
-			modification->notify_rebind_required();
+		BoneAttachment3D *attachment = Object::cast_to<BoneAttachment3D>(p_node);
+		if (attachment) {
+			attachment->notify_rebind_required();
 		}
 	}
 
@@ -6191,7 +6191,9 @@ EditorNode::EditorNode() {
 			// Only if no touchscreen ui hint, disable emulation just in case.
 			Input::get_singleton()->set_emulate_touch_from_mouse(false);
 		}
-		DisplayServer::get_singleton()->cursor_set_custom_image(Ref<Resource>());
+		if (DisplayServer::get_singleton()->has_feature(DisplayServer::FEATURE_CUSTOM_CURSOR_SHAPE)) {
+			DisplayServer::get_singleton()->cursor_set_custom_image(Ref<Resource>());
+		}
 	}
 
 	SceneState::set_disable_placeholders(true);
