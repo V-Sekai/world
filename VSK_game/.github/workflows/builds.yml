@@ -10,7 +10,7 @@ on:
 
 env:
   GAME_NAME: vsekai_game_
-  GODOT_REF: groups-4.3.2024-02-25T005650Z
+  GODOT_REF: groups-4.3.2024-03-02T193957Z
   GODOT_REPOSITORY: v-sekai/godot
   SCONSFLAGS: verbose=yes warnings=extra werror=no module_text_server_fb_enabled=yes use_thinlto=yes
   DOTNET_NOLOGO: true
@@ -47,6 +47,25 @@ jobs:
             deploy-pdb: true
             deploy-platform: windows
             export-platform: Windows
+            arch: _x86_64
+            deploy-platform-target: editor
+
+          - name: linux_editor_linux_deploy
+            runs-on: ubuntu-22.04
+            cache-name: linux-editor-deploy-linux-editor
+            target: editor
+            tests: false
+            sconsflags: linker=gold precision=double use_llvm=yes
+            doc-test: false
+            bin: ./godot/bin/godot.linuxbsd.editor.double.x86_64.llvm
+            deploy-bin: ./godot/bin/godot.linuxbsd.editor.double.x86_64.llvm
+            editor-bin-name: godot.linuxbsd.editor.double.x86_64.llvm
+            proj-conv: false
+            artifact: true
+            platform: linuxbsd
+            deploy: true
+            deploy-platform: linux
+            export-platform: Linux
             arch: _x86_64
             deploy-platform-target: editor
 
@@ -268,19 +287,23 @@ jobs:
           egress-policy: audit
 
       - name: Download Artifacts
-        uses: actions/download-artifact@87c55149d96e628cc2ef7e6fc2aab372015aec85 # v4.1.3
+        uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
 
       - name: List files
         run: |
           ls -R ${{ env.GAME_NAME }}windows${{ matrix.arch }}
+          ls -R ${{ env.GAME_NAME }}linux${{ matrix.arch }}
           ls -R linux-editor-deploy-windows-editor
+          ls -R linux-editor-deploy-linux-editor
           ls -R macos-editor-deploy-macos-editor
         shell: bash
 
       - name: Archive files
         run: |
           zip -r ${{ env.GAME_NAME }}windows${{ matrix.arch }}.zip ${{ env.GAME_NAME }}windows${{ matrix.arch }}
+          zip -r ${{ env.GAME_NAME }}linux${{ matrix.arch }}.zip ${{ env.GAME_NAME }}linux${{ matrix.arch }}
           zip -r linux-editor-deploy-windows-editor.zip linux-editor-deploy-windows-editor
+          zip -r linux-editor-deploy-linux-editor.zip linux-editor-deploy-linux-editor
           zip -r macos-editor-deploy-macos-editor.zip macos-editor-deploy-macos-editor
 
       - name: Create and Upload Release
@@ -288,7 +311,9 @@ jobs:
         with:
           files: |
             ${{ env.GAME_NAME }}windows${{ matrix.arch }}.zip
+            ${{ env.GAME_NAME }}linux${{ matrix.arch }}.zip
             linux-editor-deploy-windows-editor.zip
+            linux-editor-deploy-linux-editor.zip
             macos-editor-deploy-macos-editor.zip
           generate_release_notes: true
           draft: true
