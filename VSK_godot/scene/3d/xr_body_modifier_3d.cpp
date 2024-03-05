@@ -311,22 +311,18 @@ void XRBodyModifier3D::_update_skeleton() {
 		return;
 	}
 
-	// Get the world and skeleton scale
-	const float ws = xr_server->get_world_scale();
-	const float ss = skeleton->get_motion_scale();
-
-	// Read the relevant tracking data. This applies the skeleton motion scale to
-	// the joint transforms, allowing the tracking data to be scaled to the skeleton.
+	// Read the relevant tracking data.
 	bool has_valid_data[XRBodyTracker::JOINT_MAX];
 	Transform3D transforms[XRBodyTracker::JOINT_MAX];
 	Transform3D inv_transforms[XRBodyTracker::JOINT_MAX];
+	const float ws = xr_server->get_world_scale();
 	for (int joint = 0; joint < XRBodyTracker::JOINT_MAX; joint++) {
 		BitField<XRBodyTracker::JointFlags> flags = tracker->get_joint_flags(static_cast<XRBodyTracker::Joint>(joint));
 		has_valid_data[joint] = flags.has_flag(XRBodyTracker::JOINT_FLAG_ORIENTATION_VALID) && flags.has_flag(XRBodyTracker::JOINT_FLAG_POSITION_VALID);
 
 		if (has_valid_data[joint]) {
 			transforms[joint] = tracker->get_joint_transform(static_cast<XRBodyTracker::Joint>(joint));
-			transforms[joint].origin *= ss;
+			transforms[joint].origin *= ws;
 			inv_transforms[joint] = transforms[joint].inverse();
 		}
 	}
@@ -357,9 +353,8 @@ void XRBodyModifier3D::_update_skeleton() {
 		const int parent_joint = joints[joint].parent_joint;
 		const Transform3D relative_transform = inv_transforms[parent_joint] * transforms[joint];
 
-		// Update the bone position if enabled by update mode, or if the joint is the hips, to allow
-		// for climbing or crouching.
-		if (bone_update == BONE_UPDATE_FULL || joint == XRBodyTracker::JOINT_HIPS) {
+		// Update the bone position if enabled by update mode.
+		if (bone_update == BONE_UPDATE_FULL) {
 			skeleton->set_bone_pose_position(joints[joint].bone, relative_transform.origin);
 		}
 
@@ -367,10 +362,8 @@ void XRBodyModifier3D::_update_skeleton() {
 		skeleton->set_bone_pose_rotation(joints[joint].bone, Quaternion(relative_transform.basis));
 	}
 
-	// Transform to the tracking data root pose. This also applies the XR world-scale to allow
-	// scaling the avatars mesh and skeleton appropriately (if they are child nodes).
-	set_transform(
-			transforms[XRBodyTracker::JOINT_ROOT].scaled(Vector3(ws, ws, ws)));
+	// Transform to the skeleton pose.
+	set_transform(transforms[XRBodyTracker::JOINT_ROOT]);
 
 	// If tracking-state determines visibility then show the node.
 	if (show_when_tracked) {
