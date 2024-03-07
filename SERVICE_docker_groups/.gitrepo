@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai/docker-groups.git
 	branch = master
-	commit = d879dd41769bc714df91f9571807f1966b605797
-	parent = 9e49da07284ac42f3fc64cf27dc23ef5b3d7bb3c
+	commit = f1b03d2e94e660bc7a8bf5c20eaf99d7b477aaef
+	parent = 200e3844dabb4b5f0cc3e0ba6c9f932891c691e2
 	method = merge
 	cmdver = 0.4.6
