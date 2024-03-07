@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
       - env:
-        image: groupsinfra/groups-server:groups-4.3.groups-4.3.0.a6592278.714.1474.1683
+        image: groupsinfra/groups-server:groups-4.3.groups-4.3.0.a84f225a.799.1533.1730
         args: ["--headless","--public", "--dedicated", "--max_retries", "100", "--map", "uro://b32aa3d8-6913-43e0-bc95-2dd1947c325a",
           "--server_name", "V-Sekai Preview TPS Demo", "--port", "7803"]
         imagePullPolicy: IfNotPresent

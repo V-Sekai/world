@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
       - env:
-        image: groupsinfra/groups-server:groups-4.3.groups-4.3.0.a6592278.714.1474.1683
+        image: groupsinfra/groups-server:groups-4.3.groups-4.3.0.a84f225a.799.1533.1730
         args: ["--headless","--public", "--dedicated", "--max_retries", "100", "--map", "uro://dddf8154-60a3-4c9f-888b-fb70c3e2655f",
           "--server_name", "V-Sekai Preview Haven", "--port", "7801"]
         imagePullPolicy: IfNotPresent

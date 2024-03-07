@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
       - env:
-        image: groupsinfra/groups-server:groups-4.3.groups-4.3.0.a6592278.714.1474.1683
+        image: groupsinfra/groups-server:groups-4.3.groups-4.3.0.a84f225a.799.1533.1730
         args: ["--headless","--public", "--dedicated", "--max_retries", "100", "--map", "uro://e23e9388-9bb6-46bf-9e26-496744659e43",
           "--server_name", "V-Sekai Preview Desert Light", "--port", "7802"]
         imagePullPolicy: IfNotPresent
