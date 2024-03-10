@@ -82,6 +82,29 @@ func _run():
 		"Head",
 	]
 
+	var locked_bones: Array = [
+		"LeftUpperLeg",
+		"LeftLowerLeg",
+		"RightUpperLeg",
+		"RightLowerLeg",
+		"Spine",
+		"UpperChest",
+		"Neck",
+		"Jaw",
+		"LeftEye",
+		"RightEye",
+		"LeftShoulder",
+		"LeftUpperArm",
+		"LeftLowerArm",
+		"RightShoulder",
+		"RightUpperArm",
+		"RightLowerArm",
+	]
+	for bone in locked_bones:
+		if bone in bones:
+			continue
+		bones.append(bone)
+
 	many_bone_ik.set_pin_count(0)
 	many_bone_ik.set_pin_count(bones.size())
 
@@ -104,6 +127,9 @@ func _run():
 		var targets_3d: Marker3D = Marker3D.new()
 		targets_3d.gizmo_extents = .05
 		many_bone_ik.add_child(targets_3d)
+		if bone_name in locked_bones:
+			var locked_pin_i = many_bone_ik.find_pin(bone_name)
+			many_bone_ik.set_pin_weight(pin_i, 0)
 		targets_3d.owner = many_bone_ik.owner
 		targets_3d.set_name(bone_name + "Marker3D")
 		var bone_i: int = skeleton.find_bone(bone_name)
