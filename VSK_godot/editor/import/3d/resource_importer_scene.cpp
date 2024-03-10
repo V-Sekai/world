@@ -1859,7 +1859,7 @@ void ResourceImporterScene::get_internal_import_options(InternalImportCategory p
 					"disable Remove Immutable Tracks."); // TODO: translate.
 			r_options->push_back(ImportOption(
 					PropertyInfo(
-							Variant::STRING, U"rest_pose/\u26A0_warnings/mismatched_or_empty_profile",
+							Variant::STRING, U"rest_pose/\u26A0_validation_warning/mismatched_or_empty_profile",
 							PROPERTY_HINT_MULTILINE_TEXT, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_READ_ONLY),
 					Variant(mismatched_or_empty_profile_warning)));
 			String profile_must_not_be_retargeted_warning = String(
@@ -1868,7 +1868,7 @@ void ResourceImporterScene::get_internal_import_options(InternalImportCategory p
 					"choose \"Export Skeleton Rest Pose\" in its advanced importer."); // TODO: translate.
 			r_options->push_back(ImportOption(
 					PropertyInfo(
-							Variant::STRING, U"rest_pose/\u26A0_warnings/profile_must_not_be_retargeted",
+							Variant::STRING, U"rest_pose/\u26A0_validation_warning/profile_must_not_be_retargeted",
 							PROPERTY_HINT_MULTILINE_TEXT, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_READ_ONLY),
 					Variant(profile_must_not_be_retargeted_warning)));
 			String no_animation_warning = String(
@@ -1876,7 +1876,7 @@ void ResourceImporterScene::get_internal_import_options(InternalImportCategory p
 					"and choose \"Export Skeleton Rest Pose\" in its advanced importer."); // TODO: translate.
 			r_options->push_back(ImportOption(
 					PropertyInfo(
-							Variant::STRING, U"rest_pose/\u26A0_warnings/no_animation_chosen",
+							Variant::STRING, U"rest_pose/\u26A0_validation_warning/no_animation_chosen",
 							PROPERTY_HINT_MULTILINE_TEXT, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_READ_ONLY),
 					Variant(no_animation_warning)));
 			r_options->push_back(ImportOption(PropertyInfo(Variant::OBJECT, "retarget/bone_map", PROPERTY_HINT_RESOURCE_TYPE, "BoneMap", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_UPDATE_ALL_IF_MODIFIED), Variant()));
