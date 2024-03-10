@@ -1,7 +1,9 @@
 
-const twist_zero = deg_to_rad(0.0);
-const upper_leg_twist = deg_to_rad(45.0);
-const lower_leg_twist = deg_to_rad(-65.0);
+const twist_zero = deg_to_rad(0.0)
+const upper_leg_twist = deg_to_rad(45.0)
+const lower_leg_twist = deg_to_rad(-65.0)
+const left_shoulder_twist = deg_to_rad(15.0)
+const right_shoulder_twist = deg_to_rad(-15.0)
 
 @export
 var bone_configurations = {
@@ -20,4 +22,6 @@ var bone_configurations = {
 	"RightUpperLeg": {"twist_from": upper_leg_twist, "twist_range": deg_to_rad(45.0)},
 	"LeftLowerLeg": {"twist_from": lower_leg_twist, "twist_range": deg_to_rad(25.0)},
 	"RightLowerLeg": {"twist_from": lower_leg_twist, "twist_range": deg_to_rad(25.0)},
+	"LeftShoulder": {"twist_from": left_shoulder_twist, "twist_range": deg_to_rad(30.0)},
+	"RightShoulder": {"twist_from": right_shoulder_twist, "twist_range": deg_to_rad(30.0)},
 }

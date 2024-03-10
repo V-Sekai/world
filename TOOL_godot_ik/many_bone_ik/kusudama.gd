@@ -52,6 +52,20 @@ var bone_configurations = {
 			LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(25.0))
 		]
 	},
+	"LeftShoulder": {
+		"kususdama": [
+			LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0)),
+			LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(45.0)),
+			LimitCone.new(Vector3.MODEL_LEFT, deg_to_rad(45.0))
+		]
+	},
+	"RightShoulder": {
+		"kususdama": [
+			LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0)),
+			LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(45.0)),
+			LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(45.0))
+		]
+	},
 	"LeftUpperArm": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(120.0))]},
 	"RightUpperArm": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(120.0))]},
 	"LeftLowerArm": {

@@ -124,8 +124,13 @@ func _run():
 			many_bone_ik.set_pin_passthrough_factor(pin_i, 1)
 		if bone_name in ["Root"]:
 			continue
-		var targets_3d: Marker3D = Marker3D.new()
-		targets_3d.gizmo_extents = .05
+		var targets_3d: Node3D = null
+		if bone_name in locked_bones:
+			targets_3d = Node3D.new()
+		else:
+			targets_3d = Marker3D.new()
+			targets_3d.gizmo_extents = .05
+
 		many_bone_ik.add_child(targets_3d)
 		if bone_name in locked_bones:
 			var locked_pin_i = many_bone_ik.find_pin(bone_name)
