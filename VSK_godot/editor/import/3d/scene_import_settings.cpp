@@ -113,23 +113,28 @@ class SceneImportSettingsData : public Object {
 	}
 	void handle_special_properties(PropertyInfo &option) const {
 		ERR_FAIL_NULL(settings);
+		if (option.name == "rest_pose/load_pose") {
+			if (!settings->has("rest_pose/load_pose") || int((*settings)["rest_pose/load_pose"]) != 2) {
+				(*settings)["rest_pose/external_animation_library"] = Variant();
+			}
+		}
 		if (option.name == "rest_pose/selected_animation") {
 			if (!settings->has("rest_pose/load_pose")) {
 				return;
 			}
 			String hint_string;
-			Object *res = (*settings)["rest_pose/external_animation_library"];
-			Ref<Animation> anim(res);
-			Ref<AnimationLibrary> library(res);
 
 			switch (int((*settings)["rest_pose/load_pose"])) {
-				case 1:
+				case 1: {
 					hint_string = String(",").join(animation_list);
 					if (animation_list.size() == 1) {
 						(*settings)["rest_pose/selected_animation"] = animation_list[0];
 					}
-					break;
-				case 2:
+				} break;
+				case 2: {
+					Object *res = (*settings)["rest_pose/external_animation_library"];
+					Ref<Animation> anim(res);
+					Ref<AnimationLibrary> library(res);
 					if (anim.is_valid()) {
 						hint_string = anim->get_name();
 					}
@@ -143,7 +148,7 @@ class SceneImportSettingsData : public Object {
 							hint_string += "," + anim_name; // Include preceding , as catch-all
 						}
 					}
-					break;
+				} break;
 				default:
 					break;
 			}

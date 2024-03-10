@@ -1159,8 +1159,8 @@ Node *ResourceImporterScene::_post_fix_node(Node *p_node, Node *p_root, HashMap<
 
 	if (Object::cast_to<Skeleton3D>(p_node)) {
 		String save_to_file;
-		if (node_settings.has("export_skeleton_rest_pose/enabled") && bool(node_settings["export_skeleton_rest_pose/enabled"]) && node_settings.has("export_skeleton_rest_pose/path")) {
-			save_to_file = node_settings["export_skeleton_rest_pose/path"];
+		if (bool(node_settings.get("export_skeleton_rest_pose_animation/enabled", false))) {
+			save_to_file = node_settings.get("export_skeleton_rest_pose_animation/path", String());
 			if (!save_to_file.is_resource_file()) {
 				save_to_file = "";
 			}
@@ -1196,8 +1196,8 @@ Node *ResourceImporterScene::_post_fix_node(Node *p_node, Node *p_root, HashMap<
 		}
 		Ref<Animation> rest_animation;
 		float rest_animation_timestamp = 0.0;
-		if (skeleton != nullptr && node_settings.has("rest_pose/load_pose")) {
-			String selected_animation_name = node_settings["rest_pose/selected_animation"];
+		if (skeleton != nullptr && int(node_settings.get("rest_pose/load_pose", 0)) != 0) {
+			String selected_animation_name = node_settings.get("rest_pose/selected_animation", String());
 			if (int(node_settings["rest_pose/load_pose"]) == 1) {
 				TypedArray<Node> children = p_root->find_children("*", "AnimationPlayer", true, false);
 				for (int node_i = 0; node_i < children.size(); node_i++) {
@@ -1214,7 +1214,7 @@ Node *ResourceImporterScene::_post_fix_node(Node *p_node, Node *p_root, HashMap<
 					}
 				}
 			} else if (int(node_settings["rest_pose/load_pose"]) == 2) {
-				Object *external_object = node_settings["rest_pose/external_animation_library"];
+				Object *external_object = node_settings.get("rest_pose/external_animation_library", Variant());
 				rest_animation = external_object;
 				if (!rest_animation.is_valid()) {
 					Ref<AnimationLibrary> library(external_object);
@@ -1228,7 +1228,7 @@ Node *ResourceImporterScene::_post_fix_node(Node *p_node, Node *p_root, HashMap<
 					}
 				}
 			}
-			rest_animation_timestamp = double(node_settings["rest_pose/selected_timestamp"]);
+			rest_animation_timestamp = double(node_settings.get("rest_pose/selected_timestamp", 0.0));
 			if (rest_animation.is_valid()) {
 				for (int track_i = 0; track_i < rest_animation->get_track_count(); track_i++) {
 					NodePath path = rest_animation->track_get_path(track_i);
@@ -1872,15 +1872,15 @@ void ResourceImporterScene::get_internal_import_options(InternalImportCategory p
 							PROPERTY_HINT_MULTILINE_TEXT, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_READ_ONLY),
 					Variant(profile_must_not_be_retargeted_warning)));
 			String no_animation_warning = String(
-					"Please select an animation. Find a model with the compatible rest pose "
+					"Select an animation: Find a FBX or glTF in a compatible rest pose "
 					"and choose \"Export Skeleton Rest Pose\" in its advanced importer."); // TODO: translate.
 			r_options->push_back(ImportOption(
 					PropertyInfo(
-							Variant::STRING, U"rest_pose/\u26A0_validation_warning/no_animation_chosen",
+							Variant::STRING, U"rest_pose//no_animation_chosen",
 							PROPERTY_HINT_MULTILINE_TEXT, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_READ_ONLY),
 					Variant(no_animation_warning)));
 			r_options->push_back(ImportOption(PropertyInfo(Variant::OBJECT, "retarget/bone_map", PROPERTY_HINT_RESOURCE_TYPE, "BoneMap", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_UPDATE_ALL_IF_MODIFIED), Variant()));
-			r_options->push_back(ImportOption(PropertyInfo(Variant::BOOL, "export_skeleton_rest_pose/enabled", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_UPDATE_ALL_IF_MODIFIED), false));
+			r_options->push_back(ImportOption(PropertyInfo(Variant::BOOL, "export_skeleton_rest_pose_animation/enabled", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_UPDATE_ALL_IF_MODIFIED), false));
 			r_options->push_back(ImportOption(PropertyInfo(Variant::STRING, "export_skeleton_rest_pose/path", PROPERTY_HINT_SAVE_FILE, "*.anim,*.res,*.tres"), ""));
 		} break;
 		default: {
@@ -1999,7 +1999,7 @@ bool ResourceImporterScene::get_internal_option_visibility(InternalImportCategor
 			if (!use_retarget && p_option != "retarget/bone_map" && p_option.begins_with("retarget/")) {
 				return false;
 			}
-			if (p_option == "export_skeleton_rest_pose/path" && (!p_options.has("export_skeleton_rest_pose/enabled") || !bool(p_options["export_skeleton_rest_pose/enabled"]))) {
+			if (p_option == "export_skeleton_rest_pose_animation/path" && (!p_options.has("export_skeleton_rest_pose_animation/enabled") || !bool(p_options["export_skeleton_rest_pose_animation/enabled"]))) {
 				return false;
 			}
 			int rest_warning = 0;
@@ -2026,7 +2026,9 @@ bool ResourceImporterScene::get_internal_option_visibility(InternalImportCategor
 						if (anim_list.size() == 1) {
 							selected_animation_name = String(anim_list[0]);
 						}
-						anim = library->get_animation(selected_animation_name);
+						if (library->has_animation(selected_animation_name)) {
+							anim = library->get_animation(selected_animation_name);
+						}
 					}
 					int found_bone_count = 0;
 					Ref<BoneMap> bone_map;
@@ -2297,8 +2299,8 @@ Node *ResourceImporterScene::_generate_meshes(Node *p_node, const Dictionary &p_
 						merge_angle = mesh_settings["lods/normal_merge_angle"];
 					}
 
-					if (mesh_settings.has("save_to_file/enabled") && bool(mesh_settings["save_to_file/enabled"]) && mesh_settings.has("save_to_file/path")) {
-						save_to_file = mesh_settings["save_to_file/path"];
+					if (bool(mesh_settings.get("save_to_file/enabled", false))) {
+						save_to_file = mesh_settings.get("save_to_file/path", String());
 						if (!save_to_file.is_resource_file()) {
 							save_to_file = "";
 						}
@@ -2689,8 +2691,8 @@ Error ResourceImporterScene::import(const String &p_source_file, const String &p
 		Array keys = node_data.keys();
 		for (int i = 0; i < keys.size(); i++) {
 			const Dictionary &settings = node_data[keys[i]];
-			if (bool(settings.get("export_skeleton_rest_pose/enabled", false)) && settings.has("export_skeleton_rest_pose/path")) {
-				const String &save_path = settings["export_skeleton_rest_pose/path"];
+			if (bool(settings.get("export_skeleton_rest_pose_animation/enabled", false)) && settings.has("export_skeleton_rest_pose_animation/path")) {
+				const String &save_path = settings["export_skeleton_rest_pose_animation/path"];
 				ERR_FAIL_COND_V(!save_path.is_empty() && !DirAccess::exists(save_path.get_base_dir()), ERR_FILE_BAD_PATH);
 			}
 		}
