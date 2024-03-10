@@ -21,15 +21,6 @@
       "preLaunchTask": "Godot Engine Windows Clang"
     },
     {
-      "name": "Run the Macos editor",
-      "type": "lldb",
-      "request": "launch",
-      "args": ["--path", "TOOL_task_goal_planner", "-e"],
-      "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/VSK_godot/bin/godot.macos.editor.double.arm64",
-      "preLaunchTask": "Godot Engine"
-    },
-    {
       "name": "Run the Linux editor",
       "type": "lldb",
       "request": "launch",
@@ -39,7 +30,7 @@
       "preLaunchTask": "Godot Engine"
     },
     {
-      "name": "Run the Macos editor Dev",
+      "name": "Run the Macos editor",
       "preRunCommands": [
           "command script import ${workspaceFolder}/.vscode/GodotFormatters.py",
           "command source ${workspaceFolder}/.vscode/GodotFormatters.lldb"
@@ -48,8 +39,8 @@
       "request": "launch",
       "args": ["--path", "TOOL_godot_ik", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/VSK_godot/bin/godot.macos.editor.dev.double.arm64",
-      "preLaunchTask": "Godot Engine Dev"
+      "program": "${workspaceFolder}/VSK_godot/bin/godot.macos.editor.double.arm64",
+      "preLaunchTask": "Godot Engine"
     },
     {
       "name": "Run the Macos editor with task_goal_planner",
