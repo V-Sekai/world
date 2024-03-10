@@ -46,23 +46,10 @@
       ],            
       "type": "lldb",
       "request": "launch",
-      "args": ["--path", "tools/TOOL_godot_ik", "-e"],
+      "args": ["--path", "TOOL_godot_ik", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/VSK_godot/bin/godot.macos.editor.dev.double.arm64",
       "preLaunchTask": "Godot Engine Dev"
-    },
-    {
-      "name": "Run the Macos editor",
-      "preRunCommands": [
-          "command script import ${workspaceFolder}/.vscode/GodotFormatters.py",
-          "command source ${workspaceFolder}/.vscode/GodotFormatters.lldb"
-      ],            
-      "type": "lldb",
-      "request": "launch",
-      "args": ["--path", "tools/TOOL_godot_ik", "-e"],
-      "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/VSK_godot/bin/godot.macos.editor.double.arm64",
-      "preLaunchTask": "Godot Engine"
     },
     {
       "name": "Run the Macos editor with task_goal_planner",
