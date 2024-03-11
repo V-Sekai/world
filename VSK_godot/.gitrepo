@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai/godot.git
 	branch = groups-staging-4.3
-	commit = c69fe8eaa782fdd010d132ea081979823bd82e2e
-	parent = 6197b7f8c62249e64a644df401147a3fb0661443
+	commit = 4073fb574ebdc06dd3a2acfe27d7724bf5e14459
+	parent = ae30a591c6fca0c658f609727904306c81839a43
 	method = merge
 	cmdver = 0.4.6
