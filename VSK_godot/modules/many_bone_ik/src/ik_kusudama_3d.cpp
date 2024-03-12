@@ -82,29 +82,31 @@ void IKKusudama3D::set_snap_to_twist_limit(Ref<IKNode3D> p_bone_direction, Ref<I
 }
 
 void IKKusudama3D::get_swing_twist(
-		Quaternion p_rotation,
-		Vector3 p_axis,
-		Quaternion &r_swing,
-		Quaternion &r_twist) {
-#ifdef MATH_CHECKS
-	ERR_FAIL_COND_MSG(!p_rotation.is_normalized(), "The quaternion must be normalized.");
-#endif
-	if (Math::is_zero_approx(p_axis.length_squared())) {
-		r_swing = Quaternion();
-		r_twist = Quaternion();
-		return;
-	}
-	Quaternion rotation = p_rotation;
-	if (rotation.w < real_t(0.0)) {
-		rotation *= -1;
-	}
-	Vector3 p = p_axis * (rotation.x * p_axis.x + rotation.y * p_axis.y + rotation.z * p_axis.z);
-	r_twist = Quaternion(p.x, p.y, p.z, rotation.w).normalized();
-	real_t d = Vector3(r_twist.x, r_twist.y, r_twist.z).dot(p_axis);
-	if (d < real_t(0.0)) {
-		r_twist *= real_t(-1.0);
-	}
-	r_swing = (rotation * r_twist.inverse()).normalized();
+        Quaternion p_rotation,
+        Vector3 p_axis,
+        Quaternion &r_swing,
+        Quaternion &r_twist) {
+    p_rotation.normalize();
+    p_axis.normalize();
+    if (Math::is_zero_approx(p_axis.length_squared())) {
+        r_swing = Quaternion();
+        r_twist = Quaternion();
+        return;
+    }
+    Quaternion rotation = p_rotation;
+    if (rotation.w < real_t(0.0)) {
+        rotation *= -1;
+    }
+    Vector3 p = p_axis * (rotation.x * p_axis.x + rotation.y * p_axis.y + rotation.z * p_axis.z);
+    r_twist = Quaternion(p.x, p.y, p.z, rotation.w);
+    real_t d = Vector3(r_twist.x, r_twist.y, r_twist.z).dot(p_axis);
+    if (d < real_t(0.0)) {
+        r_twist *= real_t(-1.0);
+    }
+    Quaternion twist_conjugate = Quaternion(-r_twist.x, -r_twist.y, -r_twist.z, r_twist.w);
+    r_swing = rotation * twist_conjugate;
+    r_swing.normalize();
+    r_twist.normalize();
 }
 
 void IKKusudama3D::add_limit_cone(

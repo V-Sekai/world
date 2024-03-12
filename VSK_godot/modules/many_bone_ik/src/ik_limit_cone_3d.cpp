@@ -36,19 +36,19 @@
 #include "core/io/resource.h"
 
 void IKLimitCone3D::update_tangent_handles(Ref<IKLimitCone3D> p_next) {
-    if (p_next.is_valid()) {
-        double radA = _get_radius();
-        double radB = p_next->_get_radius();
+	if (p_next.is_valid()) {
+		double radA = _get_radius();
+		double radB = p_next->_get_radius();
 
-        Vector3 A = get_control_point();
-        Vector3 B = p_next->get_control_point();
+		Vector3 A = get_control_point();
+		Vector3 B = p_next->get_control_point();
 
-        Vector3 arc_normal;
-        if (!A.is_zero_approx() && !B.is_zero_approx()) {
-            arc_normal = A.cross(B).normalized();
-        } else {
-            arc_normal = Vector3(0, 1, 0);
-        }
+		Vector3 arc_normal;
+		if (!A.is_zero_approx() && !B.is_zero_approx()) {
+			arc_normal = A.cross(B).normalized();
+		} else {
+			arc_normal = Vector3(0, 1, 0);
+		}
 		/**
 		 * There are an infinite number of circles co-tangent with A and B, every other
 		 * one of which has a unique radius.
