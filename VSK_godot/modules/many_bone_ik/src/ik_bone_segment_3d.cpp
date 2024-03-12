@@ -121,8 +121,8 @@ Quaternion IKBoneSegment3D::clamp_to_quadrance_angle(Quaternion p_quat, double p
 	if (newCoeff >= currentCoeff) {
 		return rot;
 	} else {
-		// Calculate how much over the limit the rotation is, between 0 and 1
 		double over_limit = (currentCoeff - newCoeff) / (1.0 - newCoeff);
+		over_limit = Math::abs(over_limit) < CMP_EPSILON ? 0 : over_limit;
 		Quaternion clamped_rotation = rot;
 		clamped_rotation.w = rot.w < double(0.0) ? -p_cos_half_angle : p_cos_half_angle;
 		double compositeCoeff = Math::sqrt(newCoeff / currentCoeff);
