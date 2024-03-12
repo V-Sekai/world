@@ -7,6 +7,9 @@ class LimitCone:
 		self.limit_angle = limit_angle
 
 
+## Kusudamas are used to expose the movement of bones in a 3D model. Each bone has its own kusudama, which is a chain of limit cones. The limit cones define the open areas from the previous LimitCone to the current limit cone.
+##
+## A LimitCone is defined by a direction and a radius angle on a unit sphere. The direction is a Vector3 object that represents the axis along which the bone can move. The angle is the maximum angle (in radians) that the bone can deviate from this axis.
 @export
 var bone_configurations = {
 	"Root": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(0.0))]},
@@ -54,20 +57,24 @@ var bone_configurations = {
 	},
 	"LeftShoulder": {
 		"kususdama": [
-			LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0)),
-			LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(45.0)),
-			LimitCone.new(Vector3.MODEL_LEFT, deg_to_rad(45.0))
+			LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(50.0)), 
+			LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0.0)),
+			LimitCone.new(Vector3.MODEL_LEFT, deg_to_rad(60.0)),   
+			LimitCone.new(Vector3.MODEL_TOP, deg_to_rad(65.0)),    
+			LimitCone.new(Vector3.MODEL_BOTTOM, deg_to_rad(35.0)) 
 		]
 	},
 	"RightShoulder": {
 		"kususdama": [
-			LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(90.0)),
-			LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(45.0)),
-			LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(45.0))
+			LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(50.0)),  
+			LimitCone.new(Vector3.MODEL_REAR, deg_to_rad(0.0)),
+			LimitCone.new(Vector3.MODEL_RIGHT, deg_to_rad(60.0)),  
+			LimitCone.new(Vector3.MODEL_TOP, deg_to_rad(65.0)),   
+			LimitCone.new(Vector3.MODEL_BOTTOM, deg_to_rad(35.0))
 		]
 	},
-	"LeftUpperArm": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(120.0))]},
-	"RightUpperArm": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(120.0))]},
+	"LeftUpperArm": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(60.0))]},
+	"RightUpperArm": {"kususdama": [LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(60.0))]},
 	"LeftLowerArm": {
 		"kususdama": [
 			LimitCone.new(Vector3.MODEL_FRONT, deg_to_rad(2.5)),
