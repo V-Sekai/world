@@ -332,7 +332,12 @@ Quaternion IKKusudama3D::clamp_to_quadrance_angle(Quaternion p_rotation, double 
 	if (newCoeff >= currentCoeff) {
 		return rotation;
 	}
-	double over_limit = (currentCoeff - newCoeff) / (1.0 - newCoeff);
+	double over_limit;
+	if (abs(1.0 - newCoeff) < CMP_EPSILON) {
+		over_limit = currentCoeff - newCoeff;
+	} else {
+		over_limit = (currentCoeff - newCoeff) / (1.0 - newCoeff);
+	}
 	Quaternion clamped_rotation = rotation;
 	clamped_rotation.w = rotation.w < 0 ? -p_cos_half_angle : p_cos_half_angle;
 	double compositeCoeff = sqrt(newCoeff / currentCoeff);
