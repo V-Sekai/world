@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  bone_attachment_3d.compat.inc                                         */
+/*  dialogs.compat.inc                                                    */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -30,19 +30,17 @@
 
 #ifndef DISABLE_DEPRECATED
 
-void BoneAttachment3D::_set_use_external_skeleton_bind_compat_87888(bool use_external_skeleton) {
-	if (!use_external_skeleton) {
-		set_external_skeleton(NodePath());
-	}
+void AcceptDialog::_register_text_enter_bind_compat_89419(Control *p_line_edit) {
+	register_text_enter(Object::cast_to<LineEdit>(p_line_edit));
 }
 
-bool BoneAttachment3D::_get_use_external_skeleton_bind_compat_87888() const {
-	return !get_external_skeleton().is_empty();
+void AcceptDialog::_remove_button_bind_compat_89419(Control *p_button) {
+	remove_button(Object::cast_to<Button>(p_button));
 }
 
-void BoneAttachment3D::_bind_compatibility_methods() {
-	ClassDB::bind_compatibility_method(D_METHOD("set_use_external_skeleton", "use_external_skeleton"), &BoneAttachment3D::_set_use_external_skeleton_bind_compat_87888);
-	ClassDB::bind_compatibility_method(D_METHOD("get_use_external_skeleton"), &BoneAttachment3D::_get_use_external_skeleton_bind_compat_87888);
+void AcceptDialog::_bind_compatibility_methods() {
+	ClassDB::bind_compatibility_method(D_METHOD("register_text_enter"), &AcceptDialog::_register_text_enter_bind_compat_89419);
+	ClassDB::bind_compatibility_method(D_METHOD("remove_button", "quadrant_size"), &AcceptDialog::_remove_button_bind_compat_89419);
 }
 
-#endif // DISABLE_DEPRECATED
+#endif

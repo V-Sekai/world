@@ -242,16 +242,9 @@ Added optional argument to add_control_to_bottom_panel and add_control_to_dock t
 Compatibility method registered.
 
 
-GH-87888
+GH-89419
 --------
-Validate extension JSON: API was removed: classes/BoneAttachment3D/methods/get_external_skeleton
-Validate extension JSON: API was removed: classes/BoneAttachment3D/methods/set_external_skeleton
-Validate extension JSON: API was removed: classes/BoneAttachment3D/methods/get_use_external_skeleton
-Validate extension JSON: API was removed: classes/BoneAttachment3D/methods/set_use_external_skeleton
-Validate extension JSON: API was removed: classes/OpenXRHand/methods/get_hand_skeleton
-Validate extension JSON: API was removed: classes/OpenXRHand/methods/set_hand_skeleton
-Validate extension JSON: API was removed: classes/OpenXRHand/properties/hand_skeleton
-Validate extension JSON: API was removed: classes/Skeleton3D/properties/animate_physical_bones
+Validate extension JSON: Error: Field 'classes/AcceptDialog/methods/register_text_enter/arguments/0': type changed value in new API, from "Control" to "LineEdit".
+Validate extension JSON: Error: Field 'classes/AcceptDialog/methods/remove_button/arguments/0': type changed value in new API, from "Control" to "Button".
 
-These definitions have been moved to those base classes, so the APIs are actually available or compatibility methods registered.
-Some properties were renamed for integration, but the old setter/getters are kept.
+Changed argument type to the more specific one actually expected by the method. Compatibility method registered.

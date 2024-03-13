@@ -980,6 +980,9 @@ void EditorNode::_fs_changed() {
 						err = platform->export_zip(export_preset, export_defer.debug, export_path);
 					} else if (export_path.ends_with(".pck")) {
 						err = platform->export_pack(export_preset, export_defer.debug, export_path);
+					} else {
+						ERR_PRINT(vformat("Export path \"%s\" doesn't end with a supported extension.", export_path));
+						err = FAILED;
 					}
 				} else { // Normal project export.
 					String config_error;
@@ -5506,9 +5509,9 @@ void EditorNode::_notify_scene_updated(Node *p_node) {
 	if (skel_3d) {
 		skel_3d->reset_bone_poses();
 	} else {
-		SkeletonModifier3D *modification = Object::cast_to<SkeletonModifier3D>(p_node);
-		if (modification) {
-			modification->notify_rebind_required();
+		BoneAttachment3D *attachment = Object::cast_to<BoneAttachment3D>(p_node);
+		if (attachment) {
+			attachment->notify_rebind_required();
 		}
 	}
 
