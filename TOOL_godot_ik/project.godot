@@ -15,9 +15,13 @@ run/main_scene="res://ik_test.tscn"
 config/features=PackedStringArray("4.3", "Double Precision", "Forward Plus")
 config/icon="res://icon.svg"
 
+[autoload]
+
+RootMotionExtractor="*res://addons/root-motion-extractor/root_motion_extractor.gd"
+
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/Godot-MToon-Shader/plugin.cfg", "res://addons/vrm/plugin.cfg")
+enabled=PackedStringArray("res://addons/Godot-MToon-Shader/plugin.cfg", "res://addons/root-motion-extractor/plugin.cfg", "res://addons/vrm/plugin.cfg")
 
 [gui]
 
