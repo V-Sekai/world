@@ -88,7 +88,7 @@ public:
 
 	IKKusudama3D() {}
 
-	void _update_constraint(Ref<IKNode3D> p_limiting_orientation_axes);
+	void _update_constraint();
 
 	void update_tangent_radii();
 
