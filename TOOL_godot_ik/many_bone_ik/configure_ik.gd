@@ -83,22 +83,6 @@ func _run():
 	]
 
 	var locked_bones: Array = [
-		"LeftUpperLeg",
-		"LeftLowerLeg",
-		"RightUpperLeg",
-		"RightLowerLeg",
-		"Spine",
-		"UpperChest",
-		"Neck",
-		"Jaw",
-		"LeftEye",
-		"RightEye",
-		"LeftShoulder",
-		"LeftUpperArm",
-		"LeftLowerArm",
-		"RightShoulder",
-		"RightUpperArm",
-		"RightLowerArm",
 	]
 	for bone in locked_bones:
 		if bone in bones:
