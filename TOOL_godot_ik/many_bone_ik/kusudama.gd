@@ -60,7 +60,7 @@ var bone_configurations = {
 	},
 	"LeftShoulder": {
 		"kususdama": [
-			KusudamaAccessCone.new(Vector3.MODEL_FRONT, deg_to_rad(70.0)), 
+			KusudamaAccessCone.new(Vector3.MODEL_FRONT, deg_to_rad(50.0)), 
 			KusudamaAccessCone.new(Vector3.MODEL_REAR, deg_to_rad(10.0)),
 			KusudamaAccessCone.new(Vector3.MODEL_LEFT, deg_to_rad(60.0)),   
 			KusudamaAccessCone.new(Vector3.MODEL_TOP, deg_to_rad(90.0)),    
@@ -69,7 +69,7 @@ var bone_configurations = {
 	},
 	"RightShoulder": {
 		"kususdama": [
-			KusudamaAccessCone.new(Vector3.MODEL_FRONT, deg_to_rad(70.0)),  
+			KusudamaAccessCone.new(Vector3.MODEL_FRONT, deg_to_rad(50.0)),  
 			KusudamaAccessCone.new(Vector3.MODEL_REAR, deg_to_rad(10.0)),
 			KusudamaAccessCone.new(Vector3.MODEL_RIGHT, deg_to_rad(60.0)),  
 			KusudamaAccessCone.new(Vector3.MODEL_TOP, deg_to_rad(90.0)),   
