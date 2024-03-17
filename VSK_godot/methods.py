@@ -228,22 +228,14 @@ def get_version_info(module_version_string="", silent=False):
     return version_info
 
 
-def write_file_if_needed(path, string):
-    try:
-        with open(path, "r", encoding="utf-8", newline="\n") as f:
-            if f.read() == string:
-                return
-    except FileNotFoundError:
-        pass
-
-    with open(path, "w", encoding="utf-8", newline="\n") as f:
-        f.write(string)
-
-
 def generate_version_header(module_version_string=""):
     version_info = get_version_info(module_version_string)
 
-    version_info_header = """\
+    # NOTE: It is safe to generate these files here, since this is still executed serially.
+
+    with open("core/version_generated.gen.h", "w", encoding="utf-8", newline="\n") as f:
+        f.write(
+            """\
 /* THIS FILE IS GENERATED DO NOT EDIT */
 #ifndef VERSION_GENERATED_GEN_H
 #define VERSION_GENERATED_GEN_H
@@ -260,20 +252,21 @@ def generate_version_header(module_version_string=""):
 #define VERSION_DOCS_URL "https://docs.godotengine.org/en/" VERSION_DOCS_BRANCH
 #endif // VERSION_GENERATED_GEN_H
 """.format(
-        **version_info
-    )
+                **version_info
+            )
+        )
 
-    version_hash_data = """\
+    with open("core/version_hash.gen.cpp", "w", encoding="utf-8", newline="\n") as fhash:
+        fhash.write(
+            """\
 /* THIS FILE IS GENERATED DO NOT EDIT */
 #include "core/version.h"
 const char *const VERSION_HASH = "{git_hash}";
 const uint64_t VERSION_TIMESTAMP = {git_timestamp};
 """.format(
-        **version_info
-    )
-
-    write_file_if_needed("core/version_generated.gen.h", version_info_header)
-    write_file_if_needed("core/version_hash.gen.cpp", version_hash_data)
+                **version_info
+            )
+        )
 
 
 def parse_cg_file(fname, uniforms, sizes, conditionals):
@@ -392,18 +385,15 @@ def is_module(path):
 
 
 def write_disabled_classes(class_list):
-    file_contents = ""
-
-    file_contents += "/* THIS FILE IS GENERATED DO NOT EDIT */\n"
-    file_contents += "#ifndef DISABLED_CLASSES_GEN_H\n"
-    file_contents += "#define DISABLED_CLASSES_GEN_H\n\n"
-    for c in class_list:
-        cs = c.strip()
-        if cs != "":
-            file_contents += "#define ClassDB_Disable_" + cs + " 1\n"
-    file_contents += "\n#endif\n"
-
-    write_file_if_needed("core/disabled_classes.gen.h", file_contents)
+    with open("core/disabled_classes.gen.h", "w", encoding="utf-8", newline="\n") as f:
+        f.write("/* THIS FILE IS GENERATED DO NOT EDIT */\n")
+        f.write("#ifndef DISABLED_CLASSES_GEN_H\n")
+        f.write("#define DISABLED_CLASSES_GEN_H\n\n")
+        for c in class_list:
+            cs = c.strip()
+            if cs != "":
+                f.write("#define ClassDB_Disable_" + cs + " 1\n")
+        f.write("\n#endif\n")
 
 
 def write_modules(modules):
@@ -445,7 +435,9 @@ void uninitialize_modules(ModuleInitializationLevel p_level) {
         uninitialize_cpp,
     )
 
-    write_file_if_needed("modules/register_module_types.gen.cpp", modules_cpp)
+    # NOTE: It is safe to generate this file here, since this is still executed serially
+    with open("modules/register_module_types.gen.cpp", "w", encoding="utf-8", newline="\n") as f:
+        f.write(modules_cpp)
 
 
 def convert_custom_modules_path(path):
