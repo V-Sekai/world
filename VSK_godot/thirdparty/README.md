@@ -168,19 +168,6 @@ Files extracted from upstream source:
 - `doctest/doctest.h` as `doctest.h`
 - `LICENSE.txt`
 
-## eigen
-
-- Upstream: https://gitlab.com/libeigen/eigen/
-- Version: 3.3.7
-- License: Multiple* (BSD-3-Clause, GPLv3, LGPL 2.1, Minpack, MPL 2.0)
-
-Files extracted from upstream source:
-
-- All files in `Eigen/` except `CMakeLists.txt`
-- All `COPYING.*` files.
-
-\* Note that while eigen contains code under many licenses, godot WILL SET BUT DOESN'T CURRENTLY SET, FIXEME the `-DEIGEN_MPL2_ONLY` flag described in `COPYING.README`, which ensures that no code licensed under a more restrictive license than MPL 2.0 is included in godot binaries.
-
 
 ## embree
 
@@ -388,7 +375,7 @@ Files extracted from upstream source:
 ## harfbuzz
 
 - Upstream: https://github.com/harfbuzz/harfbuzz
-- Version: 8.3.0 (894a1f72ee93a1fd8dc1d9218cb3fd8f048be29a, 2023)
+- Version: 8.2.2 (18a6e78549e8e04a281129ea8ca784ce85f111b8, 2023)
 - License: MIT
 
 Files extracted from upstream source:
@@ -396,14 +383,13 @@ Files extracted from upstream source:
 - `AUTHORS`, `COPYING`, `THANKS`
 - From the `src` folder, recursively:
   - All the `.c`, `.cc`, `.h`, `.hh` files
-  - Except `main.cc`, `harfbuzz*.cc`, `failing-alloc.c`, `test*.cc`, `hb-wasm*.*`,
-    and the `wasm` folder
+  - Except `main.cc`, `harfbuzz*.cc`, `failing-alloc.c`, `test*.cc`, `hb-wasm*.*`
 
 
 ## icu4c
 
 - Upstream: https://github.com/unicode-org/icu
-- Version: 74.2 (2d029329c82c7792b985024b2bdab5fc7278fbc8, 2023)
+- Version: 74.1 (9edac7b78327a1cb58db29e2714b15f9fa14e4d7, 2023)
 - License: Unicode
 
 Files extracted from upstream source:
@@ -476,12 +462,12 @@ Files extracted from upstream source:
 ## libpng
 
 - Upstream: http://libpng.org/pub/png/libpng.html
-- Version: 1.6.43 (ed217e3e601d8e462f7fd1e04bed43ac42212429, 2024)
+- Version: 1.6.40 (f135775ad4e5d4408d2e12ffcc71bb36e6b48551, 2023)
 - License: libpng/zlib
 
 Files extracted from upstream source:
 
-- All `.c` and `.h` files of the main directory, apart from `example.c` and
+- All `.c` and `.h` files of the main directory, except from `example.c` and
   `pngtest.c`
 - `arm/`, `intel/` and `powerpc/` folders
 - `scripts/pnglibconf.h.prebuilt` as `pnglibconf.h`
@@ -703,7 +689,7 @@ Collection of single-file libraries used in Godot components.
 ## msdfgen
 
 - Upstream: https://github.com/Chlumsky/msdfgen
-- Version: 1.11 (f12d7ca00091a632a289865b85c3f2e0bfc6542d, 2023)
+- Version: 1.10 (64a91eec3ca3787e6f78b4c99fcd3052ad3e37c0, 2021)
 - License: MIT
 
 Files extracted from the upstream source:
@@ -769,7 +755,7 @@ Exclude:
 ## pcre2
 
 - Upstream: http://www.pcre.org
-- Version: 10.43 (3864abdb713f78831dd12d898ab31bbb0fa630b6, 2024)
+- Version: 10.42 (52c08847921a324c804cabf2814549f50bce1265, 2022)
 - License: BSD-3-Clause
 
 Files extracted from upstream source:
@@ -778,20 +764,11 @@ Files extracted from upstream source:
 - All `.h` files in `src/` apart from `pcre2posix.h`
 - `src/pcre2_jit_match.c`
 - `src/pcre2_jit_misc.c`
-- `src/pcre2_ucptables.c`
 - `src/sljit/`
 - `AUTHORS` and `LICENCE`
 
-
-## pffft
-
-- Upstream: https://bitbucket.org/jpommier/pffft
-- Version: hg (29e4f76, 2016)
-- License: FFTPACK5 (BSD-like) 
-
-Files extracted from upstream source:
-
-- all files
+A sljit patch from upstream was backported to fix macOS < 11.0 compilation
+in 10.40, it can be found in the `patches` folder.
 
 
 ## recastnavigation
@@ -852,20 +829,6 @@ They can be reapplied using the patches included in the `patches`
 folder.
 
 
-## resonanceaudio
-
-- Upstream: https://github.com/resonance-audio/resonance-audio
-- Version: git (1213ab78f00645fd2807285ccd4bed1375a50bfb, 2020)
-- License: Apache 2.0
-
-Files extracted from upstream source:
-
-- `resonance_audio/` and `platforms/common` folders without `*.test.cpp` and `*test.h`
-- `third_party/SADIE_hrtf_database` folder without `generate_hrtf_assets.py`, `WAV/*` and `hrtf_assets.iad`
-- LICENSE
-- AUTHORS
-
-
 ## squish
 
 - Upstream: https://sourceforge.net/projects/libsquish
@@ -898,13 +861,13 @@ instead of `miniz.h` as an external dependency.
 ## thorvg
 
 - Upstream: https://github.com/thorvg/thorvg
-- Version: 0.12.7 (cddae9966cbb48c431ea17c262d6f48393206fd7, 2024)
+- Version: 0.12.5 (9c8eeaab9629b5d241b1092a3398fe6351c259cd, 2024)
 - License: MIT
 
 Files extracted from upstream source:
 
 See `thorvg/update-thorvg.sh` for extraction instructions. Set the version
-number and run the script.
+number and run the script and apply patches from the `patches` folder.
 
 
 ## ufbx

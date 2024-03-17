@@ -383,7 +383,7 @@ public:
 		virtual ~Node() {}
 	};
 
-	template <typename T>
+	template <class T>
 	T *alloc_node() {
 		T *node = memnew(T);
 		node->next = nodes;

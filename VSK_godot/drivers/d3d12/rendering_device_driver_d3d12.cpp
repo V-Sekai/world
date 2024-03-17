@@ -5999,7 +5999,7 @@ RenderingDeviceDriverD3D12::~RenderingDeviceDriverD3D12() {
 }
 
 bool RenderingDeviceDriverD3D12::is_in_developer_mode() {
-	HKEY hkey = nullptr;
+	HKEY hkey = NULL;
 	LSTATUS result = RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\AppModelUnlock", 0, KEY_READ, &hkey);
 	if (result != ERROR_SUCCESS) {
 		return false;

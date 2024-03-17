@@ -273,7 +273,6 @@ struct avar
   {
     TRACE_SANITIZE (this);
     if (!(version.sanitize (c) &&
-	  hb_barrier () &&
 	  (version.major == 1
 #ifndef HB_NO_AVAR2
 	   || version.major == 2
@@ -294,7 +293,6 @@ struct avar
 #ifndef HB_NO_AVAR2
     if (version.major < 2)
       return_trace (true);
-    hb_barrier ();
 
     const auto &v2 = * (const avarV2Tail *) map;
     if (unlikely (!v2.sanitize (c, this)))
@@ -318,7 +316,6 @@ struct avar
 #ifndef HB_NO_AVAR2
     if (version.major < 2)
       return;
-    hb_barrier ();
 
     for (; count < axisCount; count++)
       map = &StructAfter<SegmentMaps> (*map);

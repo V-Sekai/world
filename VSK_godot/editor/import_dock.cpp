@@ -48,8 +48,7 @@ public:
 	Ref<ResourceImporter> importer;
 	Vector<String> paths;
 	HashSet<StringName> checked;
-	bool checking = false;
-	bool skip = false;
+	bool checking;
 	String base_options_path;
 
 	bool _set(const StringName &p_name, const Variant &p_value) {
@@ -92,6 +91,10 @@ public:
 	void update() {
 		notify_property_list_changed();
 	}
+
+	ImportDockParameters() {
+		checking = false;
+	}
 };
 
 ImportDock *ImportDock::singleton = nullptr;
@@ -106,16 +109,8 @@ void ImportDock::set_edit_path(const String &p_path) {
 	}
 
 	String importer_name = config->get_value("remap", "importer");
-	if (importer_name == "keep") {
-		params->importer.unref();
-		params->skip = false;
-	} else if (importer_name == "skip") {
-		params->importer.unref();
-		params->skip = true;
-	} else {
-		params->importer = ResourceFormatImporter::get_singleton()->get_importer_by_name(importer_name);
-		params->skip = false;
-	}
+
+	params->importer = ResourceFormatImporter::get_singleton()->get_importer_by_name(importer_name);
 
 	params->paths.clear();
 	params->paths.push_back(p_path);
@@ -157,13 +152,9 @@ void ImportDock::set_edit_path(const String &p_path) {
 
 void ImportDock::_add_keep_import_option(const String &p_importer_name) {
 	import_as->add_separator();
-	import_as->add_item(TTR("Keep File (exported as is)"));
+	import_as->add_item(TTR("Keep File (No Import)"));
 	import_as->set_item_metadata(-1, "keep");
-	import_as->add_item(TTR("Skip File (not exported)"));
-	import_as->set_item_metadata(-1, "skip");
 	if (p_importer_name == "keep") {
-		import_as->select(import_as->get_item_count() - 2);
-	} else if (p_importer_name == "skip") {
 		import_as->select(import_as->get_item_count() - 1);
 	}
 }
@@ -172,7 +163,7 @@ void ImportDock::_update_options(const String &p_path, const Ref<ConfigFile> &p_
 	// Set the importer class to fetch the correct class in the XML class reference.
 	// This allows tooltips to display when hovering properties.
 	if (params->importer != nullptr) {
-		// Null check to avoid crashing if the "Keep File (exported as is)" mode is selected.
+		// Null check to avoid crashing if the "Keep File (No Import)" mode is selected.
 		import_opts->set_object_class(params->importer->get_class_name());
 	}
 
@@ -224,17 +215,7 @@ void ImportDock::set_edit_multiple_paths(const Vector<String> &p_paths) {
 		ERR_CONTINUE(err != OK);
 
 		if (i == 0) {
-			String importer_name = config->get_value("remap", "importer");
-			if (importer_name == "keep") {
-				params->importer.unref();
-				params->skip = false;
-			} else if (importer_name == "skip") {
-				params->importer.unref();
-				params->skip = true;
-			} else {
-				params->importer = ResourceFormatImporter::get_singleton()->get_importer_by_name(importer_name);
-				params->skip = false;
-			}
+			params->importer = ResourceFormatImporter::get_singleton()->get_importer_by_name(config->get_value("remap", "importer"));
 			if (params->importer.is_null()) {
 				clear();
 				return;
@@ -391,18 +372,12 @@ void ImportDock::_importer_selected(int i_idx) {
 	String name = import_as->get_selected_metadata();
 	if (name == "keep") {
 		params->importer.unref();
-		params->skip = false;
-		_update_options(params->base_options_path, Ref<ConfigFile>());
-	} else if (name == "skip") {
-		params->importer.unref();
-		params->skip = true;
 		_update_options(params->base_options_path, Ref<ConfigFile>());
 	} else {
 		Ref<ResourceImporter> importer = ResourceFormatImporter::get_singleton()->get_importer_by_name(name);
 		ERR_FAIL_COND(importer.is_null());
 
 		params->importer = importer;
-		params->skip = false;
 		Ref<ConfigFile> config;
 		if (params->paths.size()) {
 			String path = params->paths[0];
@@ -515,11 +490,7 @@ void ImportDock::_reimport_attempt() {
 	if (params->importer.is_valid()) {
 		importer_name = params->importer->get_importer_name();
 	} else {
-		if (params->skip) {
-			importer_name = "skip";
-		} else {
-			importer_name = "keep";
-		}
+		importer_name = "keep";
 	}
 	for (int i = 0; i < params->paths.size(); i++) {
 		Ref<ConfigFile> config;
@@ -593,12 +564,8 @@ void ImportDock::_reimport_and_cleanup() {
 void ImportDock::_advanced_options() {
 	if (params->paths.size() == 1 && params->importer.is_valid()) {
 		params->importer->show_advanced_options(params->paths[0]);
-		// Workaround bug that causes Godot to reuse stale settings if Reimport is clicked.
-		import->set_disabled(true);
-		import_as->set_disabled(true);
 	}
 }
-
 void ImportDock::_reimport() {
 	for (int i = 0; i < params->paths.size(); i++) {
 		Ref<ConfigFile> config;
@@ -644,11 +611,7 @@ void ImportDock::_reimport() {
 		} else {
 			//set to no import
 			config->clear();
-			if (params->skip) {
-				config->set_value("remap", "importer", "skip");
-			} else {
-				config->set_value("remap", "importer", "keep");
-			}
+			config->set_value("remap", "importer", "keep");
 		}
 
 		config->save(params->paths[i] + ".import");

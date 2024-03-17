@@ -22,7 +22,6 @@
 
 #include "tvgCommon.h"
 #include "tvgSaveModule.h"
-#include "tvgPaint.h"
 
 #ifdef THORVG_TVG_SAVER_SUPPORT
     #include "tvgTvgSaver.h"
@@ -124,7 +123,7 @@ Result Saver::save(std::unique_ptr<Paint> paint, const string& path, bool compre
 
     //Already on saving an other resource.
     if (pImpl->saveModule) {
-        if (P(p)->refCnt == 0) delete(p);
+        delete(p);
         return Result::InsufficientCondition;
     }
 
@@ -133,12 +132,12 @@ Result Saver::save(std::unique_ptr<Paint> paint, const string& path, bool compre
             pImpl->saveModule = saveModule;
             return Result::Success;
         } else {
-            if (P(p)->refCnt == 0) delete(p);
+            delete(p);
             delete(saveModule);
             return Result::Unknown;
         }
     }
-    if (P(p)->refCnt == 0) delete(p);
+    delete(p);
     return Result::NonSupport;
 }
 

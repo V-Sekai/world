@@ -30,7 +30,6 @@
 
 #include "resource_importer_bmfont.h"
 
-#include "core/io/config_file.h"
 #include "core/io/resource_saver.h"
 
 String ResourceImporterBMFont::get_importer_name() const {
@@ -76,23 +75,8 @@ Error ResourceImporterBMFont::import(const String &p_source_file, const String &
 	Ref<FontFile> font;
 	font.instantiate();
 
-	List<String> image_files;
-	Error err = font->_load_bitmap_font(p_source_file, &image_files);
+	Error err = font->load_bitmap_font(p_source_file);
 	ERR_FAIL_COND_V_MSG(err != OK, err, "Cannot load font to file \"" + p_source_file + "\".");
-
-	// Update import settings for the image files used by font.
-	for (List<String>::Element *E = image_files.front(); E; E = E->next()) {
-		Ref<ConfigFile> config;
-		config.instantiate();
-
-		err = config->load(E->get() + ".import");
-		if (err == OK) {
-			config->clear();
-			config->set_value("remap", "importer", "skip");
-
-			config->save(E->get() + ".import");
-		}
-	}
 
 	font->set_allow_system_fallback(false);
 	font->set_fallbacks(fallbacks);

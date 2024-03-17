@@ -379,7 +379,7 @@ private:
 
 	struct FenceInfo {
 		ComPtr<ID3D12Fence> d3d_fence = nullptr;
-		HANDLE event_handle = nullptr;
+		HANDLE event_handle = NULL;
 		UINT64 fence_value = 0;
 	};
 

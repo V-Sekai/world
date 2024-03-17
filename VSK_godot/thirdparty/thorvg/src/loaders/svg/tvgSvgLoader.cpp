@@ -89,7 +89,6 @@ static char* _skipSpace(const char* str, const char* end)
 static char* _copyId(const char* str)
 {
     if (!str) return nullptr;
-    if (strlen(str) == 0) return nullptr;
 
     return strdup(str);
 }
@@ -378,25 +377,19 @@ static void _parseDashArray(SvgLoaderData* loader, const char *str, SvgDash* das
 
 static char* _idFromUrl(const char* url)
 {
-    auto open = strchr(url, '(');
-    auto close = strchr(url, ')');
-    if (!open || !close || open >= close) return nullptr;
-
-    open = strchr(url, '#');
-    if (!open || open >= close) return nullptr;
-
-    ++open;
-    --close;
-
-    //trim the rest of the spaces if any
-    while (open < close && *close == ' ') --close;
-
-    //quick verification
-    for (auto id = open; id < close; id++) {
-        if (*id == ' ' || *id == '\'') return nullptr;
+    url = _skipSpace(url, nullptr);
+    if ((*url) == '(') {
+        ++url;
+        url = _skipSpace(url, nullptr);
     }
 
-    return strDuplicate(open, (close - open + 1));
+    if ((*url) == '\'') ++url;
+    if ((*url) == '#') ++url;
+
+    int i = 0;
+    while (url[i] > ' ' && url[i] != ')' && url[i] != '\'') ++i;
+    
+    return strDuplicate(url, i);
 }
 
 
@@ -3501,7 +3494,7 @@ void SvgLoader::clear(bool all)
     free(loaderData.svgParse);
     loaderData.svgParse = nullptr;
 
-    for (auto gradient = loaderData.gradients.begin(); gradient < loaderData.gradients.end(); ++gradient) {
+    for (auto gradient = loaderData.gradients.data; gradient < loaderData.gradients.end(); ++gradient) {
         (*gradient)->clear();
         free(*gradient);
     }
@@ -3513,7 +3506,7 @@ void SvgLoader::clear(bool all)
 
     if (!all) return;
 
-    for (auto p = loaderData.images.begin(); p < loaderData.images.end(); ++p) {
+    for (auto p = loaderData.images.data; p < loaderData.images.end(); ++p) {
         free(*p);
     }
     loaderData.images.reset();

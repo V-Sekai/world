@@ -2039,7 +2039,7 @@ void OpenXRAPI::end_frame() {
 	}
 
 	if (frame_state.shouldRender && view_pose_valid && !swapchains[OPENXR_SWAPCHAIN_COLOR].image_acquired) {
-		ERR_PRINT_ONCE("OpenXR: No viewport was marked with use_xr, there is no rendered output!");
+		print_line("OpenXR: No viewport was marked with use_xr, there is no rendered output!");
 	}
 
 	// must have:
@@ -2080,29 +2080,18 @@ void OpenXRAPI::end_frame() {
 		projection_views[eye].pose = views[eye].pose;
 	}
 
-	Vector<OrderedCompositionLayer> ordered_layers_list;
-	bool projection_layer_is_first = true;
+	Vector<const XrCompositionLayerBaseHeader *> layers_list;
 
 	// Add composition layers from providers
 	for (OpenXRCompositionLayerProvider *provider : composition_layer_providers) {
-		for (int i = 0; i < provider->get_composition_layer_count(); i++) {
-			OrderedCompositionLayer layer = {
-				provider->get_composition_layer(i),
-				provider->get_composition_layer_order(i),
-			};
-			if (layer.composition_layer) {
-				ordered_layers_list.push_back(layer);
-				if (layer.sort_order == 0) {
-					WARN_PRINT_ONCE_ED("Composition layer returned sort order 0, it may be overwritten by projection layer.");
-				} else if (layer.sort_order < 0) {
-					projection_layer_is_first = false;
-				}
-			}
+		XrCompositionLayerBaseHeader *layer = provider->get_composition_layer();
+		if (layer) {
+			layers_list.push_back(layer);
 		}
 	}
 
 	XrCompositionLayerFlags layer_flags = XR_COMPOSITION_LAYER_CORRECT_CHROMATIC_ABERRATION_BIT;
-	if (!projection_layer_is_first || environment_blend_mode != XR_ENVIRONMENT_BLEND_MODE_OPAQUE) {
+	if (layers_list.size() > 0 || environment_blend_mode != XR_ENVIRONMENT_BLEND_MODE_OPAQUE) {
 		layer_flags |= XR_COMPOSITION_LAYER_BLEND_TEXTURE_SOURCE_ALPHA_BIT;
 	}
 
@@ -2114,16 +2103,7 @@ void OpenXRAPI::end_frame() {
 		view_count, // viewCount
 		projection_views, // views
 	};
-	ordered_layers_list.push_back({ (const XrCompositionLayerBaseHeader *)&projection_layer, 0 });
-
-	// Sort our layers.
-	ordered_layers_list.sort_custom<OrderedCompositionLayer>();
-
-	// Now make a list we can pass on to OpenXR.
-	Vector<const XrCompositionLayerBaseHeader *> layers_list;
-	for (OrderedCompositionLayer &ordered_layer : ordered_layers_list) {
-		layers_list.push_back(ordered_layer.composition_layer);
-	}
+	layers_list.push_back((const XrCompositionLayerBaseHeader *)&projection_layer);
 
 	XrFrameEndInfo frame_end_info = {
 		XR_TYPE_FRAME_END_INFO, // type

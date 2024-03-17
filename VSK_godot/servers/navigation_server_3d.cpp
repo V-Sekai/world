@@ -29,9 +29,7 @@
 /**************************************************************************/
 
 #include "navigation_server_3d.h"
-
 #include "core/config/project_settings.h"
-#include "scene/main/node.h"
 
 NavigationServer3D *NavigationServer3D::singleton = nullptr;
 

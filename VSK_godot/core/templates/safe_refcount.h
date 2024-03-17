@@ -59,7 +59,7 @@
 	static_assert(sizeof(SafeFlag) == sizeof(bool)); \
 	static_assert(alignof(SafeFlag) == alignof(bool));
 
-template <typename T>
+template <class T>
 class SafeNumeric {
 	std::atomic<T> value;
 

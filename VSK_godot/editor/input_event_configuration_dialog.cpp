@@ -263,6 +263,14 @@ void InputEventConfigurationDialog::_on_listen_input_changed(const Ref<InputEven
 	_set_event(received_event, received_original_event);
 }
 
+void InputEventConfigurationDialog::_on_listen_focus_changed() {
+	if (event_listener->has_focus()) {
+		set_close_on_escape(false);
+	} else {
+		set_close_on_escape(true);
+	}
+}
+
 void InputEventConfigurationDialog::_search_term_updated(const String &) {
 	_update_input_list();
 }
@@ -648,8 +656,8 @@ InputEventConfigurationDialog::InputEventConfigurationDialog() {
 	event_listener->set_h_size_flags(Control::SIZE_EXPAND_FILL);
 	event_listener->set_stretch_ratio(0.75);
 	event_listener->connect("event_changed", callable_mp(this, &InputEventConfigurationDialog::_on_listen_input_changed));
-	event_listener->connect("focus_entered", callable_mp((AcceptDialog *)this, &AcceptDialog::set_close_on_escape).bind(false));
-	event_listener->connect("focus_exited", callable_mp((AcceptDialog *)this, &AcceptDialog::set_close_on_escape).bind(true));
+	event_listener->connect("focus_entered", callable_mp(this, &InputEventConfigurationDialog::_on_listen_focus_changed));
+	event_listener->connect("focus_exited", callable_mp(this, &InputEventConfigurationDialog::_on_listen_focus_changed));
 	main_vbox->add_child(event_listener);
 
 	main_vbox->add_child(memnew(HSeparator));

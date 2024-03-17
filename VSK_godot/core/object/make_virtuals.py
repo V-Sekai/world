@@ -201,5 +201,11 @@ def run(target, source, env):
 
     txt += "#endif // GDVIRTUAL_GEN_H\n"
 
-    with open(str(target[0]), "w", encoding="utf-8", newline="\n") as f:
+    with open(target[0], "w") as f:
         f.write(txt)
+
+
+if __name__ == "__main__":
+    from platform_methods import subprocess_main
+
+    subprocess_main(globals())

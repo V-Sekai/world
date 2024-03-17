@@ -40,7 +40,6 @@ struct AnchorMatrix : public OT::Layout::GPOS_impl::AnchorMatrix
   {
     int64_t vertex_len = vertex.obj.tail - vertex.obj.head;
     if (vertex_len < AnchorMatrix::min_size) return false;
-    hb_barrier ();
 
     return vertex_len >= AnchorMatrix::min_size +
         OT::Offset16::static_size * class_count * this->rows;
@@ -129,7 +128,6 @@ struct MarkArray : public OT::Layout::GPOS_impl::MarkArray
     int64_t vertex_len = vertex.obj.tail - vertex.obj.head;
     unsigned min_size = MarkArray::min_size;
     if (vertex_len < min_size) return false;
-    hb_barrier ();
 
     return vertex_len >= get_size ();
   }
@@ -497,7 +495,6 @@ struct MarkBasePos : public OT::Layout::GPOS_impl::MarkBasePos
   {
     int64_t vertex_len = vertex.obj.tail - vertex.obj.head;
     if (vertex_len < u.format.get_size ()) return false;
-    hb_barrier ();
 
     switch (u.format) {
     case 1:

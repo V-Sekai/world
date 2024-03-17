@@ -86,7 +86,6 @@ class NavMeshGenerator3D : public Object {
 #ifdef MODULE_GRIDMAP_ENABLED
 	static void generator_parse_gridmap_node(const Ref<NavigationMesh> &p_navigation_mesh, Ref<NavigationMeshSourceGeometryData3D> p_source_geometry_data, Node *p_node);
 #endif // MODULE_GRIDMAP_ENABLED
-	static void generator_parse_navigationobstacle_node(const Ref<NavigationMesh> &p_navigation_mesh, Ref<NavigationMeshSourceGeometryData3D> p_source_geometry_data, Node *p_node);
 
 	static bool generator_emit_callback(const Callable &p_callback);
 

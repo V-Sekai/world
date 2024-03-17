@@ -41,7 +41,7 @@
 
 // If tight, it grows strictly as much as needed.
 // Otherwise, it grows exponentially (the default and what you want in most cases).
-template <typename T, typename U = uint32_t, bool force_trivial = false, bool tight = false>
+template <class T, class U = uint32_t, bool force_trivial = false, bool tight = false>
 class LocalVector {
 private:
 	U count = 0;
@@ -248,7 +248,7 @@ public:
 		return -1;
 	}
 
-	template <typename C>
+	template <class C>
 	void sort_custom() {
 		U len = count;
 		if (len == 0) {
@@ -322,7 +322,7 @@ public:
 	}
 };
 
-template <typename T, typename U = uint32_t, bool force_trivial = false>
+template <class T, class U = uint32_t, bool force_trivial = false>
 using TightLocalVector = LocalVector<T, U, force_trivial, true>;
 
 #endif // LOCAL_VECTOR_H

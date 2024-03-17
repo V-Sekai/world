@@ -32,20 +32,17 @@ struct LoadModule
     INLIST_ITEM(LoadModule);
 
     //Use either hashkey(data) or hashpath(path)
-    union {
-        uintptr_t hashkey;
-        char* hashpath = nullptr;
-    };
+    uint64_t hashkey;
+    char* hashpath = nullptr;
 
     FileType type;                                  //current loader file type
     uint16_t sharing = 0;                           //reference count
     bool readied = false;                           //read done already.
-    bool pathcache = false;                         //cached by path
 
     LoadModule(FileType type) : type(type) {}
     virtual ~LoadModule()
     {
-        if (pathcache) free(hashpath);
+        free(hashpath);
     }
 
     virtual bool open(const string& path) { return false; }
@@ -58,12 +55,6 @@ struct LoadModule
         if (readied) return false;
         readied = true;
         return true;
-    }
-
-    bool cached()
-    {
-        if (hashkey) return true;
-        return false;
     }
 
     virtual bool close()

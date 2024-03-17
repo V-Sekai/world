@@ -33,14 +33,7 @@
 
 #include "servers/rendering/storage/render_scene_buffers.h"
 #include "servers/rendering_server.h"
-
-#ifdef _3D_DISABLED
-// RendererSceneCull::render_camera is empty when 3D is disabled, but
-// it and RenderingMethod::render_camera have a parameter for XRInterface.
-#define XRInterface RefCounted
-#else // 3D enabled
 #include "servers/xr/xr_interface.h"
-#endif // _3D_DISABLED
 
 class RenderingMethod {
 public:
@@ -50,7 +43,6 @@ public:
 	virtual void camera_set_perspective(RID p_camera, float p_fovy_degrees, float p_z_near, float p_z_far) = 0;
 	virtual void camera_set_orthogonal(RID p_camera, float p_size, float p_z_near, float p_z_far) = 0;
 	virtual void camera_set_frustum(RID p_camera, float p_size, Vector2 p_offset, float p_z_near, float p_z_far) = 0;
-	virtual void camera_set_override_projection(RID p_camera, const Projection &p_matrix) = 0;
 	virtual void camera_set_transform(RID p_camera, const Transform3D &p_transform) = 0;
 	virtual void camera_set_cull_mask(RID p_camera, uint32_t p_layers) = 0;
 	virtual void camera_set_environment(RID p_camera, RID p_env) = 0;

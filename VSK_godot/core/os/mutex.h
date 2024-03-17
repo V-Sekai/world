@@ -45,10 +45,10 @@
 
 #ifdef THREADS_ENABLED
 
-template <typename MutexT>
+template <class MutexT>
 class MutexLock;
 
-template <typename StdMutexT>
+template <class StdMutexT>
 class MutexImpl {
 	friend class MutexLock<MutexImpl<StdMutexT>>;
 
@@ -70,7 +70,7 @@ public:
 	}
 };
 
-template <typename MutexT>
+template <class MutexT>
 class MutexLock {
 	friend class ConditionVariable;
 
@@ -100,7 +100,7 @@ public:
 	bool try_lock() const { return true; }
 };
 
-template <typename MutexT>
+template <class MutexT>
 class MutexLock {
 public:
 	MutexLock(const MutexT &p_mutex) {}

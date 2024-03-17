@@ -585,9 +585,9 @@ void DisplayServerWayland::screen_set_keep_on(bool p_enable) {
 bool DisplayServerWayland::screen_is_kept_on() const {
 #ifdef DBUS_ENABLED
 	return wayland_thread.window_get_idle_inhibition(MAIN_WINDOW_ID) || screensaver_inhibited;
-#else
-	return wayland_thread.window_get_idle_inhibition(MAIN_WINDOW_ID);
 #endif
+
+	return wayland_thread.window_get_idle_inhibition(MAIN_WINDOW_ID);
 }
 
 Vector<DisplayServer::WindowID> DisplayServerWayland::get_window_list() const {

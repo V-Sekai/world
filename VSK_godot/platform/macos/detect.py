@@ -242,17 +242,10 @@ def configure(env: "SConsEnvironment"):
         env.Append(LINKFLAGS=["-framework", "Metal", "-framework", "IOSurface"])
         if not env["use_volk"]:
             env.Append(LINKFLAGS=["-lMoltenVK"])
-
-            mvk_path = ""
-            arch_variants = ["macos-arm64_x86_64", "macos-" + env["arch"]]
-            for arch in arch_variants:
-                mvk_path = detect_mvk(env, arch)
-                if mvk_path != "":
-                    mvk_path = os.path.join(mvk_path, arch)
-                    break
+            mvk_path = detect_mvk(env, "macos-arm64_x86_64")
 
             if mvk_path != "":
-                env.Append(LINKFLAGS=["-L" + mvk_path])
+                env.Append(LINKFLAGS=["-L" + os.path.join(mvk_path, "macos-arm64_x86_64")])
             else:
                 print(
                     "MoltenVK SDK installation directory not found, use 'vulkan_sdk_path' SCons parameter to specify SDK path."

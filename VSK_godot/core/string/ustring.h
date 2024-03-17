@@ -43,7 +43,7 @@
 /*  CharProxy                                                            */
 /*************************************************************************/
 
-template <typename T>
+template <class T>
 class CharProxy {
 	friend class Char16String;
 	friend class CharString;
@@ -602,13 +602,13 @@ _FORCE_INLINE_ void sarray_add_str(Vector<String> &arr, const String &p_str) {
 	arr.push_back(p_str);
 }
 
-template <typename... P>
+template <class... P>
 _FORCE_INLINE_ void sarray_add_str(Vector<String> &arr, const String &p_str, P... p_args) {
 	arr.push_back(p_str);
 	sarray_add_str(arr, p_args...);
 }
 
-template <typename... P>
+template <class... P>
 _FORCE_INLINE_ Vector<String> sarray(P... p_args) {
 	Vector<String> arr;
 	sarray_add_str(arr, p_args...);

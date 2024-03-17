@@ -534,11 +534,7 @@ void EditorPropertyPath::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_ENTER_TREE:
 		case NOTIFICATION_THEME_CHANGED: {
-			if (folder) {
-				path_edit->set_icon(get_editor_theme_icon(SNAME("FolderBrowse")));
-			} else {
-				path_edit->set_icon(get_editor_theme_icon(SNAME("FileBrowse")));
-			}
+			path_edit->set_icon(get_editor_theme_icon(SNAME("Folder")));
 		} break;
 	}
 }

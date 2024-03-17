@@ -637,8 +637,6 @@ private:
 		int next_alternative_id = 1;
 	};
 
-	bool initializing = true;
-
 	Ref<Texture2D> texture;
 	Vector2i margins;
 	Vector2i separation;
@@ -662,14 +660,12 @@ private:
 	void _queue_update_padded_texture();
 	Ref<ImageTexture> _create_padded_image_texture(const Ref<Texture2D> &p_source);
 	void _update_padded_texture();
-	void _try_emit_changed();
 
 protected:
 	bool _set(const StringName &p_name, const Variant &p_value);
 	bool _get(const StringName &p_name, Variant &r_ret) const;
 	void _get_property_list(List<PropertyInfo> *p_list) const;
 
-	void _notification(int p_notification);
 	static void _bind_methods();
 
 public:
@@ -783,17 +779,13 @@ private:
 	HashMap<int, SceneData> scenes;
 	int next_scene_id = 1;
 
-	bool initializing = true;
-
 	void _compute_next_alternative_id();
-	void _try_emit_changed();
 
 protected:
 	bool _set(const StringName &p_name, const Variant &p_value);
 	bool _get(const StringName &p_name, Variant &r_ret) const;
 	void _get_property_list(List<PropertyInfo> *p_list) const;
 
-	void _notification(int p_notification);
 	static void _bind_methods();
 
 public:

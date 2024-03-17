@@ -264,7 +264,7 @@ class EditorPlugins {
 	static EditorPluginCreateFunc creation_funcs[MAX_CREATE_FUNCS];
 	static int creation_func_count;
 
-	template <typename T>
+	template <class T>
 	static EditorPlugin *creator() {
 		return memnew(T);
 	}
@@ -276,7 +276,7 @@ public:
 		return creation_funcs[p_idx]();
 	}
 
-	template <typename T>
+	template <class T>
 	static void add_by_type() {
 		add_create_func(creator<T>);
 	}

@@ -20,12 +20,32 @@
  * SOFTWARE.
  */
 
+#include "tvgCommon.h"
 #include "tvgFrameModule.h"
-#include "tvgAnimation.h"
+#include "tvgPaint.h"
+#include "tvgPicture.h"
 
 /************************************************************************/
 /* Internal Class Implementation                                        */
 /************************************************************************/
+
+struct Animation::Impl
+{
+    Picture* picture = nullptr;
+
+    Impl()
+    {
+        picture = Picture::gen().release();
+        PP(picture)->ref();
+    }
+
+    ~Impl()
+    {
+        if (PP(picture)->unref() == 0) {
+            delete(picture);
+        }
+    }
+};
 
 /************************************************************************/
 /* External Class Implementation                                        */

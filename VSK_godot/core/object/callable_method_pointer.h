@@ -77,7 +77,7 @@ public:
 	virtual uint32_t hash() const;
 };
 
-template <typename T, typename... P>
+template <class T, class... P>
 class CallableCustomMethodPointer : public CallableCustomMethodPointerBase {
 	struct Data {
 		T *instance;
@@ -91,11 +91,6 @@ public:
 			return ObjectID();
 		}
 		return data.instance->get_instance_id();
-	}
-
-	virtual int get_argument_count(bool &r_is_valid) const {
-		r_is_valid = true;
-		return sizeof...(P);
 	}
 
 	virtual void call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, Callable::CallError &r_call_error) const {
@@ -112,7 +107,7 @@ public:
 	}
 };
 
-template <typename T, typename... P>
+template <class T, class... P>
 Callable create_custom_callable_function_pointer(T *p_instance,
 #ifdef DEBUG_METHODS_ENABLED
 		const char *p_func_text,
@@ -128,7 +123,7 @@ Callable create_custom_callable_function_pointer(T *p_instance,
 
 // VERSION WITH RETURN
 
-template <typename T, typename R, typename... P>
+template <class T, class R, class... P>
 class CallableCustomMethodPointerRet : public CallableCustomMethodPointerBase {
 	struct Data {
 		T *instance;
@@ -145,11 +140,6 @@ public:
 		return data.instance->get_instance_id();
 	}
 
-	virtual int get_argument_count(bool &r_is_valid) const {
-		r_is_valid = true;
-		return sizeof...(P);
-	}
-
 	virtual void call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, Callable::CallError &r_call_error) const {
 		ERR_FAIL_NULL_MSG(ObjectDB::get_instance(ObjectID(data.object_id)), "Invalid Object id '" + uitos(data.object_id) + "', can't call method.");
 		call_with_variant_args_ret(data.instance, data.method, p_arguments, p_argcount, r_return_value, r_call_error);
@@ -164,7 +154,7 @@ public:
 	}
 };
 
-template <typename T, typename R, typename... P>
+template <class T, class R, class... P>
 Callable create_custom_callable_function_pointer(T *p_instance,
 #ifdef DEBUG_METHODS_ENABLED
 		const char *p_func_text,
@@ -180,7 +170,7 @@ Callable create_custom_callable_function_pointer(T *p_instance,
 
 // CONST VERSION WITH RETURN
 
-template <typename T, typename R, typename... P>
+template <class T, class R, class... P>
 class CallableCustomMethodPointerRetC : public CallableCustomMethodPointerBase {
 	struct Data {
 		T *instance;
@@ -197,11 +187,6 @@ public:
 		return data.instance->get_instance_id();
 	}
 
-	virtual int get_argument_count(bool &r_is_valid) const override {
-		r_is_valid = true;
-		return sizeof...(P);
-	}
-
 	virtual void call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, Callable::CallError &r_call_error) const override {
 		ERR_FAIL_NULL_MSG(ObjectDB::get_instance(ObjectID(data.object_id)), "Invalid Object id '" + uitos(data.object_id) + "', can't call method.");
 		call_with_variant_args_retc(data.instance, data.method, p_arguments, p_argcount, r_return_value, r_call_error);
@@ -216,7 +201,7 @@ public:
 	}
 };
 
-template <typename T, typename R, typename... P>
+template <class T, class R, class... P>
 Callable create_custom_callable_function_pointer(T *p_instance,
 #ifdef DEBUG_METHODS_ENABLED
 		const char *p_func_text,
@@ -238,7 +223,7 @@ Callable create_custom_callable_function_pointer(T *p_instance,
 
 // STATIC VERSIONS
 
-template <typename... P>
+template <class... P>
 class CallableCustomStaticMethodPointer : public CallableCustomMethodPointerBase {
 	struct Data {
 		void (*method)(P...);
@@ -253,11 +238,6 @@ public:
 		return ObjectID();
 	}
 
-	virtual int get_argument_count(bool &r_is_valid) const override {
-		r_is_valid = true;
-		return sizeof...(P);
-	}
-
 	virtual void call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, Callable::CallError &r_call_error) const override {
 		call_with_variant_args_static_ret(data.method, p_arguments, p_argcount, r_return_value, r_call_error);
 		r_return_value = Variant();
@@ -270,7 +250,7 @@ public:
 	}
 };
 
-template <typename T, typename... P>
+template <class T, class... P>
 Callable create_custom_callable_static_function_pointer(
 #ifdef DEBUG_METHODS_ENABLED
 		const char *p_func_text,
@@ -284,7 +264,7 @@ Callable create_custom_callable_static_function_pointer(
 	return Callable(ccmp);
 }
 
-template <typename R, typename... P>
+template <class R, class... P>
 class CallableCustomStaticMethodPointerRet : public CallableCustomMethodPointerBase {
 	struct Data {
 		R(*method)
@@ -300,11 +280,6 @@ public:
 		return ObjectID();
 	}
 
-	virtual int get_argument_count(bool &r_is_valid) const override {
-		r_is_valid = true;
-		return sizeof...(P);
-	}
-
 	virtual void call(const Variant **p_arguments, int p_argcount, Variant &r_return_value, Callable::CallError &r_call_error) const override {
 		call_with_variant_args_static_ret(data.method, p_arguments, p_argcount, r_return_value, r_call_error);
 	}
@@ -316,7 +291,7 @@ public:
 	}
 };
 
-template <typename R, typename... P>
+template <class R, class... P>
 Callable create_custom_callable_static_function_pointer(
 #ifdef DEBUG_METHODS_ENABLED
 		const char *p_func_text,
