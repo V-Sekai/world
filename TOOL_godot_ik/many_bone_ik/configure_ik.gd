@@ -102,7 +102,7 @@ func _run():
 	for pin_i in range(bones.size()):
 		var bone_name = bones[pin_i]
 		many_bone_ik.set_pin_bone_name(pin_i, bone_name)
-		if bone_name in ["Root"]:
+		if bone_name in ["Root", "Chest", "LeftShoulder", "RightShoulder"]:
 			many_bone_ik.set_pin_passthrough_factor(pin_i, 0)
 			many_bone_ik.set_pin_weight(pin_i, 0)
 		else:
