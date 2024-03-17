@@ -75,8 +75,12 @@ func _run():
 		"Root",
 		"Hips",
 		"Chest",
+		"LeftUpperArm",
+		"RightUpperArm",
 		"LeftHand",
 		"RightHand",
+		"LeftLowerLeg",
+		"RightLowerLeg",
 		"LeftFoot",
 		"RightFoot",
 		"Head",
@@ -106,7 +110,13 @@ func _run():
 			many_bone_ik.set_pin_passthrough_factor(pin_i, 0)
 		else:
 			many_bone_ik.set_pin_passthrough_factor(pin_i, 1)
-		many_bone_ik.set_pin_weight(pin_i, 1)
+		if not bone_name in [
+			"LeftUpperArm",
+			"RightUpperArm",
+			"LeftLowerLeg",
+			"RightLowerLeg",
+		]:
+			many_bone_ik.set_pin_weight(pin_i, 1)
 		var targets_3d: Node3D = null
 		if bone_name in locked_bones:
 			targets_3d = Node3D.new()
