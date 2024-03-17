@@ -1547,7 +1547,7 @@ void RasterizerSceneGLES3::_fill_render_list(RenderListType p_render_list, const
 void RasterizerSceneGLES3::_setup_environment(const RenderDataGLES3 *p_render_data, bool p_no_fog, const Size2i &p_screen_size, bool p_flip_y, const Color &p_default_bg_color, bool p_pancake_shadows, float p_shadow_bias) {
 	Projection correction;
 	correction.columns[1][1] = p_flip_y ? -1.0 : 1.0;
-	Projection projection = correction * p_render_data->cam_projection;
+	Projection projection = correction * p_render_data->view_projection[0];
 	//store camera into ubo
 	GLES3::MaterialStorage::store_camera(projection, scene_state.ubo.projection_matrix);
 	GLES3::MaterialStorage::store_camera(projection.inverse(), scene_state.ubo.inv_projection_matrix);
@@ -3462,10 +3462,10 @@ void RasterizerSceneGLES3::_render_list_template(RenderListParameters *p_params,
 				}
 
 				if (use_wireframe) {
-					glDrawElementsInstanced(GL_LINES, count, GL_UNSIGNED_INT, 0, inst->instance_count);
+					glDrawElementsInstanced(GL_LINES, count, GL_UNSIGNED_INT, nullptr, inst->instance_count);
 				} else {
 					if (use_index_buffer) {
-						glDrawElementsInstanced(primitive_gl, count, mesh_storage->mesh_surface_get_index_type(mesh_surface), 0, inst->instance_count);
+						glDrawElementsInstanced(primitive_gl, count, mesh_storage->mesh_surface_get_index_type(mesh_surface), nullptr, inst->instance_count);
 					} else {
 						glDrawArraysInstanced(primitive_gl, 0, count, inst->instance_count);
 					}
@@ -3473,10 +3473,10 @@ void RasterizerSceneGLES3::_render_list_template(RenderListParameters *p_params,
 			} else {
 				// Using regular Mesh.
 				if (use_wireframe) {
-					glDrawElements(GL_LINES, count, GL_UNSIGNED_INT, 0);
+					glDrawElements(GL_LINES, count, GL_UNSIGNED_INT, nullptr);
 				} else {
 					if (use_index_buffer) {
-						glDrawElements(primitive_gl, count, mesh_storage->mesh_surface_get_index_type(mesh_surface), 0);
+						glDrawElements(primitive_gl, count, mesh_storage->mesh_surface_get_index_type(mesh_surface), nullptr);
 					} else {
 						glDrawArrays(primitive_gl, 0, count);
 					}

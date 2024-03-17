@@ -45,6 +45,7 @@
 #include "core/io/file_access_zip.h"
 #include "core/io/image_loader.h"
 #include "core/io/ip.h"
+#include "core/io/resource.h"
 #include "core/io/resource_loader.h"
 #include "core/object/message_queue.h"
 #include "core/os/os.h"
@@ -74,14 +75,16 @@
 #include "servers/navigation_server_3d.h"
 #include "servers/navigation_server_3d_dummy.h"
 #include "servers/physics_server_2d.h"
-#ifndef _3D_DISABLED
-#include "servers/physics_server_3d.h"
-#endif // _3D_DISABLED
 #include "servers/register_server_types.h"
 #include "servers/rendering/rendering_server_default.h"
+#include "servers/resonanceaudio/resonance_audio_wrapper.h"
 #include "servers/text/text_server_dummy.h"
 #include "servers/text_server.h"
+
+#ifndef _3D_DISABLED
+#include "servers/physics_server_3d.h"
 #include "servers/xr_server.h"
+#endif // _3D_DISABLED
 
 #ifdef TESTS_ENABLED
 #include "tests/test_main.h"
@@ -141,20 +144,21 @@ static MessageQueue *message_queue = nullptr;
 
 // Initialized in setup2()
 static AudioServer *audio_server = nullptr;
+static ResonanceAudioServer *resonance_audio_server = nullptr;
 static DisplayServer *display_server = nullptr;
 static RenderingServer *rendering_server = nullptr;
 static CameraServer *camera_server = nullptr;
-static XRServer *xr_server = nullptr;
 static TextServerManager *tsman = nullptr;
-#ifndef _3D_DISABLED
-static PhysicsServer3DManager *physics_server_3d_manager = nullptr;
-static PhysicsServer3D *physics_server_3d = nullptr;
-#endif // _3D_DISABLED
 static PhysicsServer2DManager *physics_server_2d_manager = nullptr;
 static PhysicsServer2D *physics_server_2d = nullptr;
 static NavigationServer3D *navigation_server_3d = nullptr;
 static NavigationServer2D *navigation_server_2d = nullptr;
 static ThemeDB *theme_db = nullptr;
+#ifndef _3D_DISABLED
+static PhysicsServer3DManager *physics_server_3d_manager = nullptr;
+static PhysicsServer3D *physics_server_3d = nullptr;
+static XRServer *xr_server = nullptr;
+#endif // _3D_DISABLED
 // We error out if setup2() doesn't turn this true
 static bool _start_success = false;
 
@@ -931,6 +935,16 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	for (const String &arg : platform_args) {
 		args.push_back(arg);
 	}
+#if defined(IOS_ENABLED) && defined(TOOLS_ENABLED)
+	String _cmd_path = OS::get_singleton()->get_user_data_dir().path_join("_cmd");
+	String _cmd_args_str = FileAccess::get_file_as_string(_cmd_path);
+	Vector<String> _cmd_args = _cmd_args_str.split("\n");
+	for (int i = 0; i < _cmd_args.size(); i++) {
+		args.push_back(_cmd_args[i]);
+	}
+	Ref<DirAccess> dir_access = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
+	dir_access->remove(_cmd_path);
+#endif
 
 	List<String>::Element *I = args.front();
 
@@ -1646,6 +1660,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 			OS::get_singleton()->disable_crash_handler();
 		} else if (I->get() == "--skip-breakpoints") {
 			skip_breakpoints = true;
+#ifndef _3D_DISABLED
 		} else if (I->get() == "--xr-mode") {
 			if (I->next()) {
 				String xr_mode = I->next()->get().to_lower();
@@ -1664,7 +1679,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 				OS::get_singleton()->print("Missing --xr-mode argument, aborting.\n");
 				goto error;
 			}
-
+#endif // _3D_DISABLED
 		} else if (I->get() == "--benchmark") {
 			OS::get_singleton()->set_use_benchmark(true);
 		} else if (I->get() == "--benchmark-file") {
@@ -1771,7 +1786,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	initialize_modules(MODULE_INITIALIZATION_LEVEL_CORE);
 	register_core_extensions(); // core extensions must be registered after globals setup and before display
 
-	ResourceUID::get_singleton()->load_from_cache(); // load UUIDs from cache.
+	ResourceUID::get_singleton()->load_from_cache(true); // load UUIDs from cache.
 
 	if (ProjectSettings::get_singleton()->has_custom_feature("dedicated_server")) {
 		audio_driver = NULL_AUDIO_DRIVER;
@@ -2033,12 +2048,21 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	if (default_renderer_mobile.is_empty()) {
 		default_renderer_mobile = "gl_compatibility";
 	}
+#ifndef IOS_ENABLED
 	// Default to Compatibility when using the project manager.
 	if (rendering_driver.is_empty() && rendering_method.is_empty() && project_manager) {
 		rendering_driver = "opengl3";
 		rendering_method = "gl_compatibility";
 		default_renderer_mobile = "gl_compatibility";
 	}
+#else
+	if (rendering_driver.is_empty() && rendering_method.is_empty() && project_manager) {
+		rendering_driver = "vulkan";
+		rendering_method = "mobile";
+		default_renderer_mobile = "mobile";
+	}
+#endif
+
 #endif
 	if (renderer_hints.is_empty()) {
 		ERR_PRINT("No renderers available.");
@@ -2785,9 +2809,12 @@ Error Main::setup2() {
 		audio_server = memnew(AudioServer);
 		audio_server->init();
 
+		resonance_audio_server = memnew(ResonanceAudioServer);
+
 		OS::get_singleton()->benchmark_end_measure("Servers", "Audio");
 	}
 
+#ifndef _3D_DISABLED
 	/* Initialize XR Server */
 
 	{
@@ -2797,6 +2824,7 @@ Error Main::setup2() {
 
 		OS::get_singleton()->benchmark_end_measure("Servers", "XR");
 	}
+#endif // _3D_DISABLED
 
 	OS::get_singleton()->benchmark_end_measure("Startup", "Servers");
 
@@ -3942,7 +3970,9 @@ bool Main::iteration() {
 	bool exit = false;
 
 	// process all our active interfaces
+#ifndef _3D_DISABLED
 	XRServer::get_singleton()->_process();
+#endif // _3D_DISABLED
 
 	NavigationServer2D::get_singleton()->sync();
 	NavigationServer3D::get_singleton()->sync();
@@ -4161,11 +4191,13 @@ void Main::cleanup(bool p_force) {
 	//clear global shader variables before scene and other graphics stuff are deinitialized.
 	rendering_server->global_shader_parameters_clear();
 
+#ifndef _3D_DISABLED
 	if (xr_server) {
 		// Now that we're unregistering properly in plugins we need to keep access to xr_server for a little longer
 		// We do however unset our primary interface
 		xr_server->set_primary_interface(Ref<XRInterface>());
 	}
+#endif // _3D_DISABLED
 
 #ifdef TOOLS_ENABLED
 	GDExtensionManager::get_singleton()->deinitialize_extensions(GDExtension::INITIALIZATION_LEVEL_EDITOR);
@@ -4195,13 +4227,19 @@ void Main::cleanup(bool p_force) {
 
 	EngineDebugger::deinitialize();
 
+#ifndef _3D_DISABLED
 	if (xr_server) {
 		memdelete(xr_server);
 	}
+#endif // _3D_DISABLED
 
 	if (audio_server) {
 		audio_server->finish();
 		memdelete(audio_server);
+	}
+
+	if (resonance_audio_server) {
+		memdelete(resonance_audio_server);
 	}
 
 	if (camera_server) {
