@@ -434,9 +434,10 @@ void EditorNode::_update_from_settings() {
 	RS::get_singleton()->light_projectors_set_filter(RS::LightProjectorFilter(int(GLOBAL_GET("rendering/textures/light_projectors/filter"))));
 
 	SceneTree *tree = get_tree();
-	tree->set_debug_collisions_color(GLOBAL_GET("debug/shapes/collision/shape_color"));
-	tree->set_debug_collision_contact_color(GLOBAL_GET("debug/shapes/collision/contact_color"));
-
+	if (tree) {
+		tree->set_debug_collisions_color(GLOBAL_GET("debug/shapes/collision/shape_color"));
+		tree->set_debug_collision_contact_color(GLOBAL_GET("debug/shapes/collision/contact_color"));
+	}
 	ResourceImporterTexture::get_singleton()->update_imports();
 
 #ifdef DEBUG_ENABLED
