@@ -235,28 +235,13 @@ namespace Godot.NativeInterop
         }
 
         public static godot_variant CreateFromSystemArrayOfStringName(Span<StringName> from)
-        {
-            if (from == null)
-                return default;
-            using var fromGodot = new Collections.Array(from);
-            return CreateFromArray((godot_array)fromGodot.NativeValue);
-        }
+            => CreateFromArray(new Collections.Array(from));
 
         public static godot_variant CreateFromSystemArrayOfNodePath(Span<NodePath> from)
-        {
-            if (from == null)
-                return default;
-            using var fromGodot = new Collections.Array(from);
-            return CreateFromArray((godot_array)fromGodot.NativeValue);
-        }
+            => CreateFromArray(new Collections.Array(from));
 
         public static godot_variant CreateFromSystemArrayOfRid(Span<Rid> from)
-        {
-            if (from == null)
-                return default;
-            using var fromGodot = new Collections.Array(from);
-            return CreateFromArray((godot_array)fromGodot.NativeValue);
-        }
+            => CreateFromArray(new Collections.Array(from));
 
         public static godot_variant CreateFromSystemArrayOfGodotObject(GodotObject[]? from)
         {

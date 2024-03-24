@@ -252,7 +252,8 @@ Size2 AcceptDialog::_get_contents_minimum_size() const {
 		}
 
 		Size2 child_minsize = c->get_combined_minimum_size();
-		content_minsize = child_minsize.max(content_minsize);
+		content_minsize.x = MAX(child_minsize.x, content_minsize.x);
+		content_minsize.y = MAX(child_minsize.y, content_minsize.y);
 	}
 
 	// Then we take the background panel as it provides the offsets,

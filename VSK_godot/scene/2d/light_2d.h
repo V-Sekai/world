@@ -74,7 +74,6 @@ private:
 	void _update_light_visibility();
 
 	virtual void owner_changed_notify() override;
-	virtual void _physics_interpolated_changed() override;
 
 protected:
 	_FORCE_INLINE_ RID _get_light() const { return canvas_light; }

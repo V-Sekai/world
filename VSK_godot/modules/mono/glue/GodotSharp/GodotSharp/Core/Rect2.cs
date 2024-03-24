@@ -469,7 +469,10 @@ namespace Godot
         /// Converts this <see cref="Rect2"/> to a string.
         /// </summary>
         /// <returns>A string representation of this rect.</returns>
-        public override readonly string ToString() => ToString(null);
+        public override readonly string ToString()
+        {
+            return $"{_position}, {_size}";
+        }
 
         /// <summary>
         /// Converts this <see cref="Rect2"/> to a string with the given <paramref name="format"/>.

@@ -1134,7 +1134,10 @@ namespace Godot
         /// Converts this <see cref="Basis"/> to a string.
         /// </summary>
         /// <returns>A string representation of this basis.</returns>
-        public override readonly string ToString() => ToString(null);
+        public override readonly string ToString()
+        {
+            return $"[X: {X}, Y: {Y}, Z: {Z}]";
+        }
 
         /// <summary>
         /// Converts this <see cref="Basis"/> to a string with the given <paramref name="format"/>.

@@ -86,7 +86,8 @@ Size2 EditorProperty::get_minimum_size() const {
 		}
 
 		Size2 minsize = c->get_combined_minimum_size();
-		ms = ms.max(minsize);
+		ms.width = MAX(ms.width, minsize.width);
+		ms.height = MAX(ms.height, minsize.height);
 	}
 
 	if (keying) {
@@ -1462,7 +1463,8 @@ Size2 EditorInspectorSection::get_minimum_size() const {
 			continue;
 		}
 		Size2 minsize = c->get_combined_minimum_size();
-		ms = ms.max(minsize);
+		ms.width = MAX(ms.width, minsize.width);
+		ms.height = MAX(ms.height, minsize.height);
 	}
 
 	Ref<Font> font = get_theme_font(SNAME("font"), SNAME("Tree"));
@@ -2803,9 +2805,6 @@ void EditorInspector::update_tree() {
 			subgroup = "";
 			subgroup_base = "";
 			section_depth = 0;
-
-			vbox_per_path.clear();
-			editor_inspector_array_per_prefix.clear();
 
 			if (!show_categories) {
 				continue;

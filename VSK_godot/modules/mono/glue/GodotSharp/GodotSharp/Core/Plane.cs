@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Runtime.InteropServices;
 
 #nullable enable
@@ -425,7 +424,10 @@ namespace Godot
         /// Converts this <see cref="Plane"/> to a string.
         /// </summary>
         /// <returns>A string representation of this plane.</returns>
-        public override readonly string ToString() => ToString(null);
+        public override readonly string ToString()
+        {
+            return $"{_normal}, {_d}";
+        }
 
         /// <summary>
         /// Converts this <see cref="Plane"/> to a string with the given <paramref name="format"/>.
@@ -433,7 +435,9 @@ namespace Godot
         /// <returns>A string representation of this plane.</returns>
         public readonly string ToString(string? format)
         {
-            return $"{_normal.ToString(format)}, {_d.ToString(format, CultureInfo.InvariantCulture)}";
+#pragma warning disable CA1305 // Disable warning: "Specify IFormatProvider"
+            return $"{_normal.ToString(format)}, {_d.ToString(format)}";
+#pragma warning restore CA1305
         }
     }
 }

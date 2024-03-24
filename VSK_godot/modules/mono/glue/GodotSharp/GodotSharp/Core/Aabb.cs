@@ -733,7 +733,10 @@ namespace Godot
         /// Converts this <see cref="Aabb"/> to a string.
         /// </summary>
         /// <returns>A string representation of this AABB.</returns>
-        public override readonly string ToString() => ToString(null);
+        public override readonly string ToString()
+        {
+            return $"{_position}, {_size}";
+        }
 
         /// <summary>
         /// Converts this <see cref="Aabb"/> to a string with the given <paramref name="format"/>.

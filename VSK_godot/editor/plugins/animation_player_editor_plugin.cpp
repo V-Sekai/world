@@ -73,8 +73,6 @@ void AnimationPlayerEditor::_node_removed(Node *p_node) {
 		_update_player();
 
 		_ensure_dummy_player();
-
-		pin->set_pressed(false);
 	}
 }
 

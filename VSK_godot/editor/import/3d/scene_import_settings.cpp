@@ -98,7 +98,6 @@ class SceneImportSettingsData : public Object {
 		}
 		return false;
 	}
-
 	bool _get(const StringName &p_name, Variant &r_ret) const {
 		if (settings) {
 			if (settings->has(p_name)) {
@@ -112,15 +111,14 @@ class SceneImportSettingsData : public Object {
 		}
 		return false;
 	}
-
-	void handle_special_properties(PropertyInfo &r_option) const {
+	void handle_special_properties(PropertyInfo &option) const {
 		ERR_FAIL_NULL(settings);
-		if (r_option.name == "rest_pose/load_pose") {
+		if (option.name == "rest_pose/load_pose") {
 			if (!settings->has("rest_pose/load_pose") || int((*settings)["rest_pose/load_pose"]) != 2) {
 				(*settings)["rest_pose/external_animation_library"] = Variant();
 			}
 		}
-		if (r_option.name == "rest_pose/selected_animation") {
+		if (option.name == "rest_pose/selected_animation") {
 			if (!settings->has("rest_pose/load_pose")) {
 				return;
 			}
@@ -147,19 +145,18 @@ class SceneImportSettingsData : public Object {
 							(*settings)["rest_pose/selected_animation"] = String(anim_names[0]);
 						}
 						for (StringName anim_name : anim_names) {
-							hint_string += "," + anim_name; // Include preceding, as a catch-all.
+							hint_string += "," + anim_name; // Include preceding , as catch-all
 						}
 					}
 				} break;
 				default:
 					break;
 			}
-			r_option.hint = PROPERTY_HINT_ENUM;
-			r_option.hint_string = hint_string;
+			option.hint = PROPERTY_HINT_ENUM;
+			option.hint_string = hint_string;
 		}
 	}
-
-	void _get_property_list(List<PropertyInfo> *r_list) const {
+	void _get_property_list(List<PropertyInfo> *p_list) const {
 		if (hide_options) {
 			return;
 		}
@@ -169,24 +166,24 @@ class SceneImportSettingsData : public Object {
 				if (category == ResourceImporterScene::INTERNAL_IMPORT_CATEGORY_MAX) {
 					if (ResourceImporterScene::get_animation_singleton()->get_option_visibility(path, E.option.name, current)) {
 						handle_special_properties(option);
-						r_list->push_back(option);
+						p_list->push_back(option);
 					}
 				} else {
 					if (ResourceImporterScene::get_animation_singleton()->get_internal_option_visibility(category, E.option.name, current)) {
 						handle_special_properties(option);
-						r_list->push_back(option);
+						p_list->push_back(option);
 					}
 				}
 			} else {
 				if (category == ResourceImporterScene::INTERNAL_IMPORT_CATEGORY_MAX) {
 					if (ResourceImporterScene::get_scene_singleton()->get_option_visibility(path, E.option.name, current)) {
 						handle_special_properties(option);
-						r_list->push_back(option);
+						p_list->push_back(option);
 					}
 				} else {
 					if (ResourceImporterScene::get_scene_singleton()->get_internal_option_visibility(category, E.option.name, current)) {
 						handle_special_properties(option);
-						r_list->push_back(option);
+						p_list->push_back(option);
 					}
 				}
 			}
@@ -493,20 +490,13 @@ void SceneImportSettingsDialog::_update_view_gizmos() {
 		return;
 	}
 	const HashMap<StringName, Variant> &main_settings = scene_import_settings_data->current;
-	bool reshow_settings = false;
 	if (main_settings.has("nodes/import_as_skeleton_bones")) {
 		bool new_import_as_skeleton = main_settings["nodes/import_as_skeleton_bones"];
-		reshow_settings = reshow_settings || (new_import_as_skeleton != previous_import_as_skeleton);
-		previous_import_as_skeleton = new_import_as_skeleton;
-	}
-	if (main_settings.has("animation/import_rest_as_RESET")) {
-		bool new_rest_as_reset = main_settings["animation/import_rest_as_RESET"];
-		reshow_settings = reshow_settings || (new_rest_as_reset != previous_rest_as_reset);
-		previous_rest_as_reset = new_rest_as_reset;
-	}
-	if (reshow_settings) {
-		_re_import();
-		open_settings(base_path);
+		if (new_import_as_skeleton != previous_import_as_skeleton) {
+			previous_import_as_skeleton = new_import_as_skeleton;
+			_re_import();
+			open_settings(base_path);
+		}
 		return;
 	}
 	for (const KeyValue<String, NodeData> &e : node_map) {
@@ -754,9 +744,6 @@ void SceneImportSettingsDialog::open_settings(const String &p_path, bool p_for_a
 	const HashMap<StringName, Variant> &main_settings = scene_import_settings_data->current;
 	if (main_settings.has("nodes/import_as_skeleton_bones")) {
 		previous_import_as_skeleton = main_settings["nodes/import_as_skeleton_bones"];
-	}
-	if (main_settings.has("animation/import_rest_as_RESET")) {
-		previous_rest_as_reset = main_settings["animation/import_rest_as_RESET"];
 	}
 	popup_centered_ratio();
 	_update_view_gizmos();

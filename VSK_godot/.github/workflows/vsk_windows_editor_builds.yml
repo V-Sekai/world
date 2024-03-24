@@ -27,7 +27,7 @@ jobs:
             cache-name: windows-editor-double
             target: editor
             tests: false
-            sconsflags: debug_symbols=yes vsproj=yes vsproj_gen_only=no windows_subsystem=console precision=double
+            sconsflags: debug_symbols=no vsproj=yes vsproj_gen_only=no windows_subsystem=console precision=double
             bin: "./bin/godot.windows.editor.double.x86_64.exe"
 
     steps:

@@ -86,8 +86,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       # Need newer mesa for lavapipe to work properly.
       - name: Linux dependencies for tests

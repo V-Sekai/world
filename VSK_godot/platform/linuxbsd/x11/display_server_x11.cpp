@@ -1995,7 +1995,8 @@ void DisplayServerX11::window_set_current_screen(int p_screen, WindowID p_window
 		Size2i wsize = window_get_size(p_window);
 		wpos += srect.position;
 		if (srect != Rect2i()) {
-			wpos = wpos.clamp(srect.position, srect.position + srect.size - wsize / 3);
+			wpos.x = CLAMP(wpos.x, srect.position.x, srect.position.x + srect.size.width - wsize.width / 3);
+			wpos.y = CLAMP(wpos.y, srect.position.y, srect.position.y + srect.size.height - wsize.height / 3);
 		}
 		window_set_position(wpos, p_window);
 	}
@@ -2223,7 +2224,8 @@ void DisplayServerX11::window_set_size(const Size2i p_size, WindowID p_window) {
 	ERR_FAIL_COND(!windows.has(p_window));
 
 	Size2i size = p_size;
-	size = size.max(Size2i(1, 1));
+	size.x = MAX(1, size.x);
+	size.y = MAX(1, size.y);
 
 	WindowData &wd = windows[p_window];
 
@@ -5449,7 +5451,8 @@ DisplayServerX11::WindowID DisplayServerX11::_create_window(WindowMode p_mode, V
 	} else {
 		Rect2i srect = screen_get_usable_rect(rq_screen);
 		Point2i wpos = p_rect.position;
-		wpos = wpos.clamp(srect.position, srect.position + srect.size - p_rect.size / 3);
+		wpos.x = CLAMP(wpos.x, srect.position.x, srect.position.x + srect.size.width - p_rect.size.width / 3);
+		wpos.y = CLAMP(wpos.y, srect.position.y, srect.position.y + srect.size.height - p_rect.size.height / 3);
 
 		win_rect.position = wpos;
 	}

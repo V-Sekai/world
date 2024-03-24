@@ -1,7 +1,8 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Godot.NativeInterop;
 
 #nullable enable
 
@@ -101,6 +102,6 @@ namespace Godot
         /// Converts this <see cref="Rid"/> to a string.
         /// </summary>
         /// <returns>A string representation of this Rid.</returns>
-        public override readonly string ToString() => $"RID({Id.ToString(null, CultureInfo.InvariantCulture)})";
+        public override string ToString() => $"RID({Id})";
     }
 }

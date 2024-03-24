@@ -941,10 +941,6 @@ void CodeTextEditor::_complete_request() {
 			font_color = completion_string_color;
 		} else if (e.insert_text.begins_with("##") || e.insert_text.begins_with("///")) {
 			font_color = completion_doc_comment_color;
-		} else if (e.insert_text.begins_with("&")) {
-			font_color = completion_string_name_color;
-		} else if (e.insert_text.begins_with("^")) {
-			font_color = completion_node_path_color;
 		} else if (e.insert_text.begins_with("#") || e.insert_text.begins_with("//")) {
 			font_color = completion_comment_color;
 		}
@@ -1001,8 +997,6 @@ void CodeTextEditor::update_editor_settings() {
 	// Theme: Highlighting
 	completion_font_color = EDITOR_GET("text_editor/theme/highlighting/completion_font_color");
 	completion_string_color = EDITOR_GET("text_editor/theme/highlighting/string_color");
-	completion_string_name_color = EDITOR_GET("text_editor/theme/highlighting/gdscript/string_name_color");
-	completion_node_path_color = EDITOR_GET("text_editor/theme/highlighting/gdscript/node_path_color");
 	completion_comment_color = EDITOR_GET("text_editor/theme/highlighting/comment_color");
 	completion_doc_comment_color = EDITOR_GET("text_editor/theme/highlighting/doc_comment_color");
 
@@ -1038,7 +1032,7 @@ void CodeTextEditor::update_editor_settings() {
 	text_editor->set_v_scroll_speed(EDITOR_GET("text_editor/behavior/navigation/v_scroll_speed"));
 	text_editor->set_drag_and_drop_selection_enabled(EDITOR_GET("text_editor/behavior/navigation/drag_and_drop_selection"));
 
-	// Behavior: Indent
+	// Behavior: indent
 	set_indent_using_spaces(EDITOR_GET("text_editor/behavior/indent/type"));
 	text_editor->set_indent_size(EDITOR_GET("text_editor/behavior/indent/size"));
 	text_editor->set_auto_indent_enabled(EDITOR_GET("text_editor/behavior/indent/auto_indent"));

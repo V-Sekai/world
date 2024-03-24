@@ -332,7 +332,7 @@ private:
 		uint64_t modified_time = 0;
 
 		bool operator<(const FileInfo &fi) const {
-			return FileNoCaseComparator()(name, fi.name);
+			return NaturalNoCaseComparator()(name, fi.name);
 		}
 	};
 

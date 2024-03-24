@@ -650,7 +650,10 @@ namespace Godot
         /// Converts this <see cref="Transform2D"/> to a string.
         /// </summary>
         /// <returns>A string representation of this transform.</returns>
-        public override readonly string ToString() => ToString(null);
+        public override readonly string ToString()
+        {
+            return $"[X: {X}, Y: {Y}, O: {Origin}]";
+        }
 
         /// <summary>
         /// Converts this <see cref="Transform2D"/> to a string with the given <paramref name="format"/>.

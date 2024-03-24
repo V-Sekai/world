@@ -46,10 +46,6 @@ void AnimationNode::get_parameter_list(List<PropertyInfo> *r_list) const {
 			r_list->push_back(PropertyInfo::from_dict(d));
 		}
 	}
-
-	r_list->push_back(PropertyInfo(Variant::FLOAT, current_length, PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR | PROPERTY_USAGE_READ_ONLY));
-	r_list->push_back(PropertyInfo(Variant::FLOAT, current_position, PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR | PROPERTY_USAGE_READ_ONLY));
-	r_list->push_back(PropertyInfo(Variant::FLOAT, current_delta, PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR | PROPERTY_USAGE_READ_ONLY));
 }
 
 Variant AnimationNode::get_parameter_default_value(const StringName &p_parameter) const {
@@ -60,15 +56,8 @@ Variant AnimationNode::get_parameter_default_value(const StringName &p_parameter
 
 bool AnimationNode::is_parameter_read_only(const StringName &p_parameter) const {
 	bool ret = false;
-	if (GDVIRTUAL_CALL(_is_parameter_read_only, p_parameter, ret) && ret) {
-		return true;
-	}
-
-	if (p_parameter == current_length || p_parameter == current_position || p_parameter == current_delta) {
-		return true;
-	}
-
-	return false;
+	GDVIRTUAL_CALL(_is_parameter_read_only, p_parameter, ret);
+	return ret;
 }
 
 void AnimationNode::set_parameter(const StringName &p_name, const Variant &p_value) {
@@ -92,20 +81,6 @@ Variant AnimationNode::get_parameter(const StringName &p_name) const {
 	return process_state->tree->property_map[path].first;
 }
 
-void AnimationNode::set_node_time_info(const NodeTimeInfo &p_node_time_info) {
-	set_parameter(current_length, p_node_time_info.length);
-	set_parameter(current_position, p_node_time_info.position);
-	set_parameter(current_delta, p_node_time_info.delta);
-}
-
-AnimationNode::NodeTimeInfo AnimationNode::get_node_time_info() const {
-	NodeTimeInfo nti;
-	nti.length = get_parameter(current_length);
-	nti.position = get_parameter(current_position);
-	nti.delta = get_parameter(current_delta);
-	return nti;
-}
-
 void AnimationNode::get_child_nodes(List<ChildNode> *r_child_nodes) {
 	Dictionary cn;
 	if (GDVIRTUAL_CALL(_get_child_nodes, cn)) {
@@ -126,11 +101,11 @@ void AnimationNode::blend_animation(const StringName &p_animation, AnimationMixe
 	process_state->tree->make_animation_instance(p_animation, p_playback_info);
 }
 
-AnimationNode::NodeTimeInfo AnimationNode::_pre_process(ProcessState *p_process_state, AnimationMixer::PlaybackInfo p_playback_info, bool p_test_only) {
+double AnimationNode::_pre_process(ProcessState *p_process_state, AnimationMixer::PlaybackInfo p_playback_info, bool p_test_only) {
 	process_state = p_process_state;
-	NodeTimeInfo nti = process(p_playback_info, p_test_only);
+	double t = process(p_playback_info, p_test_only);
 	process_state = nullptr;
-	return nti;
+	return t;
 }
 
 void AnimationNode::make_invalid(const String &p_reason) {
@@ -147,11 +122,11 @@ AnimationTree *AnimationNode::get_animation_tree() const {
 	return process_state->tree;
 }
 
-AnimationNode::NodeTimeInfo AnimationNode::blend_input(int p_input, AnimationMixer::PlaybackInfo p_playback_info, FilterAction p_filter, bool p_sync, bool p_test_only) {
-	ERR_FAIL_INDEX_V(p_input, inputs.size(), NodeTimeInfo());
+double AnimationNode::blend_input(int p_input, AnimationMixer::PlaybackInfo p_playback_info, FilterAction p_filter, bool p_sync, bool p_test_only) {
+	ERR_FAIL_INDEX_V(p_input, inputs.size(), 0);
 
 	AnimationNodeBlendTree *blend_tree = Object::cast_to<AnimationNodeBlendTree>(node_state.parent);
-	ERR_FAIL_NULL_V(blend_tree, NodeTimeInfo());
+	ERR_FAIL_NULL_V(blend_tree, 0);
 
 	// Update connections.
 	StringName current_name = blend_tree->get_node_name(Ref<AnimationNode>(this));
@@ -161,31 +136,32 @@ AnimationNode::NodeTimeInfo AnimationNode::blend_input(int p_input, AnimationMix
 	StringName node_name = node_state.connections[p_input];
 	if (!blend_tree->has_node(node_name)) {
 		make_invalid(vformat(RTR("Nothing connected to input '%s' of node '%s'."), get_input_name(p_input), current_name));
-		return NodeTimeInfo();
+		return 0;
 	}
 
 	Ref<AnimationNode> node = blend_tree->get_node(node_name);
-	ERR_FAIL_COND_V(node.is_null(), NodeTimeInfo());
+	ERR_FAIL_COND_V(node.is_null(), 0);
 
 	real_t activity = 0.0;
 	Vector<AnimationTree::Activity> *activity_ptr = process_state->tree->input_activity_map.getptr(node_state.base_path);
-	NodeTimeInfo nti = _blend_node(node, node_name, nullptr, p_playback_info, p_filter, p_sync, p_test_only, &activity);
+	double ret = _blend_node(node, node_name, nullptr, p_playback_info, p_filter, p_sync, p_test_only, &activity);
 
 	if (activity_ptr && p_input < activity_ptr->size()) {
 		activity_ptr->write[p_input].last_pass = process_state->last_pass;
 		activity_ptr->write[p_input].activity = activity;
 	}
-	return nti;
+	return ret;
 }
 
-AnimationNode::NodeTimeInfo AnimationNode::blend_node(Ref<AnimationNode> p_node, const StringName &p_subpath, AnimationMixer::PlaybackInfo p_playback_info, FilterAction p_filter, bool p_sync, bool p_test_only) {
-	ERR_FAIL_COND_V(p_node.is_null(), NodeTimeInfo());
+double AnimationNode::blend_node(Ref<AnimationNode> p_node, const StringName &p_subpath, AnimationMixer::PlaybackInfo p_playback_info, FilterAction p_filter, bool p_sync, bool p_test_only) {
+	ERR_FAIL_COND_V(p_node.is_null(), 0);
+
 	p_node->node_state.connections.clear();
 	return _blend_node(p_node, p_subpath, this, p_playback_info, p_filter, p_sync, p_test_only, nullptr);
 }
 
-AnimationNode::NodeTimeInfo AnimationNode::_blend_node(Ref<AnimationNode> p_node, const StringName &p_subpath, AnimationNode *p_new_parent, AnimationMixer::PlaybackInfo p_playback_info, FilterAction p_filter, bool p_sync, bool p_test_only, real_t *r_activity) {
-	ERR_FAIL_NULL_V(process_state, NodeTimeInfo());
+double AnimationNode::_blend_node(Ref<AnimationNode> p_node, const StringName &p_subpath, AnimationNode *p_new_parent, AnimationMixer::PlaybackInfo p_playback_info, FilterAction p_filter, bool p_sync, bool p_test_only, real_t *r_activity) {
+	ERR_FAIL_NULL_V(process_state, 0);
 
 	int blend_count = node_state.track_weights.size();
 
@@ -285,7 +261,7 @@ AnimationNode::NodeTimeInfo AnimationNode::_blend_node(Ref<AnimationNode> p_node
 		new_parent = p_new_parent;
 		new_path = String(node_state.base_path) + String(p_subpath) + "/";
 	} else {
-		ERR_FAIL_NULL_V(node_state.parent, NodeTimeInfo());
+		ERR_FAIL_NULL_V(node_state.parent, 0);
 		new_parent = node_state.parent;
 		new_path = String(new_parent->node_state.base_path) + String(p_subpath) + "/";
 	}
@@ -295,7 +271,7 @@ AnimationNode::NodeTimeInfo AnimationNode::_blend_node(Ref<AnimationNode> p_node
 	p_node->node_state.base_path = new_path;
 	p_node->node_state.parent = new_parent;
 	if (!p_playback_info.seeked && !p_sync && !any_valid) {
-		p_playback_info.delta = 0.0;
+		p_playback_info.time = 0.0;
 		return p_node->_pre_process(process_state, p_playback_info, p_test_only);
 	}
 	return p_node->_pre_process(process_state, p_playback_info, p_test_only);
@@ -352,31 +328,15 @@ int AnimationNode::find_input(const String &p_name) const {
 	return idx;
 }
 
-AnimationNode::NodeTimeInfo AnimationNode::process(const AnimationMixer::PlaybackInfo p_playback_info, bool p_test_only) {
+double AnimationNode::process(const AnimationMixer::PlaybackInfo p_playback_info, bool p_test_only) {
 	process_state->is_testing = p_test_only;
-
-	AnimationMixer::PlaybackInfo pi = p_playback_info;
-	if (p_playback_info.seeked) {
-		pi.delta = get_node_time_info().position - p_playback_info.time;
-	} else {
-		pi.time = get_node_time_info().position + p_playback_info.delta;
-	}
-
-	NodeTimeInfo nti = _process(pi, p_test_only);
-
-	if (!p_test_only) {
-		set_node_time_info(nti);
-	}
-
-	return nti;
+	return _process(p_playback_info, p_test_only);
 }
 
-AnimationNode::NodeTimeInfo AnimationNode::_process(const AnimationMixer::PlaybackInfo p_playback_info, bool p_test_only) {
-	double r_ret = 0.0;
-	GDVIRTUAL_CALL(_process, p_playback_info.time, p_playback_info.seeked, p_playback_info.is_external_seeking, p_test_only, r_ret);
-	NodeTimeInfo nti;
-	nti.delta = r_ret;
-	return nti;
+double AnimationNode::_process(const AnimationMixer::PlaybackInfo p_playback_info, bool p_test_only) {
+	double ret = 0;
+	GDVIRTUAL_CALL(_process, p_playback_info.time, p_playback_info.seeked, p_playback_info.is_external_seeking, p_test_only, ret);
+	return ret;
 }
 
 void AnimationNode::set_filter_path(const NodePath &p_path, bool p_enable) {
@@ -472,8 +432,7 @@ double AnimationNode::blend_node_ex(const StringName &p_sub_path, Ref<AnimationN
 	info.seeked = p_seek;
 	info.is_external_seeking = p_is_external_seeking;
 	info.weight = p_blend;
-	NodeTimeInfo nti = blend_node(p_node, p_sub_path, info, p_filter, p_sync, p_test_only);
-	return nti.length - nti.position;
+	return blend_node(p_node, p_sub_path, info, p_filter, p_sync, p_test_only);
 }
 
 double AnimationNode::blend_input_ex(int p_input, double p_time, bool p_seek, bool p_is_external_seeking, real_t p_blend, FilterAction p_filter, bool p_sync, bool p_test_only) {
@@ -482,37 +441,8 @@ double AnimationNode::blend_input_ex(int p_input, double p_time, bool p_seek, bo
 	info.seeked = p_seek;
 	info.is_external_seeking = p_is_external_seeking;
 	info.weight = p_blend;
-	NodeTimeInfo nti = blend_input(p_input, info, p_filter, p_sync, p_test_only);
-	return nti.length - nti.position;
+	return blend_input(p_input, info, p_filter, p_sync, p_test_only);
 }
-
-#ifdef TOOLS_ENABLED
-void AnimationNode::get_argument_options(const StringName &p_function, int p_idx, List<String> *r_options) const {
-	const String pf = p_function;
-	if (p_idx == 0) {
-		if (pf == "find_input") {
-			for (const AnimationNode::Input &E : inputs) {
-				r_options->push_back(E.name.quote());
-			}
-		} else if (pf == "get_parameter" || pf == "set_parameter") {
-			bool is_setter = pf == "set_parameter";
-			List<PropertyInfo> parameters;
-			get_parameter_list(&parameters);
-			for (const PropertyInfo &E : parameters) {
-				if (is_setter && is_parameter_read_only(E.name)) {
-					continue;
-				}
-				r_options->push_back(E.name.quote());
-			}
-		} else if (pf == "set_filter_path" || pf == "is_path_filtered") {
-			for (const KeyValue<NodePath, bool> &E : filter) {
-				r_options->push_back(String(E.key).quote());
-			}
-		}
-	}
-	Resource::get_argument_options(p_function, p_idx, r_options);
-}
-#endif
 
 void AnimationNode::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("add_input", "name"), &AnimationNode::add_input);
@@ -638,12 +568,11 @@ bool AnimationTree::_blend_pre_process(double p_delta, int p_track_count, const 
 		if (started) {
 			// If started, seek.
 			pi.seeked = true;
-			pi.delta = p_delta;
 			root_animation_node->_pre_process(&process_state, pi, false);
 			started = false;
 		} else {
 			pi.seeked = false;
-			pi.delta = p_delta;
+			pi.time = p_delta;
 			root_animation_node->_pre_process(&process_state, pi, false);
 		}
 	}

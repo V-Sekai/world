@@ -45,7 +45,8 @@ Size2 SubViewportContainer::get_minimum_size() const {
 		}
 
 		Size2 minsize = c->get_size();
-		ms = ms.max(minsize);
+		ms.width = MAX(ms.width, minsize.width);
+		ms.height = MAX(ms.height, minsize.height);
 	}
 
 	return ms;

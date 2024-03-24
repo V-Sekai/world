@@ -1033,7 +1033,8 @@ void Window::_update_window_size() {
 	}
 
 	if (embedder) {
-		size = size.max(Size2i(1, 1));
+		size.x = MAX(size.x, 1);
+		size.y = MAX(size.y, 1);
 
 		embedder->_sub_window_update(this);
 	} else if (window_id != DisplayServer::INVALID_WINDOW_ID) {
@@ -1544,7 +1545,8 @@ Size2 Window::_get_contents_minimum_size() const {
 			Point2i pos = c->get_position();
 			Size2i min = c->get_combined_minimum_size();
 
-			max = max.max(pos + min);
+			max.x = MAX(pos.x + min.x, max.x);
+			max.y = MAX(pos.y + min.y, max.y);
 		}
 	}
 
@@ -1701,7 +1703,7 @@ void Window::popup_centered_clamped(const Size2i &p_size, float p_fallback_ratio
 	Vector2i size_ratio = parent_rect.size * p_fallback_ratio;
 
 	Rect2i popup_rect;
-	popup_rect.size = size_ratio.min(expected_size);
+	popup_rect.size = Vector2i(MIN(size_ratio.x, expected_size.x), MIN(size_ratio.y, expected_size.y));
 	popup_rect.size = _clamp_window_size(popup_rect.size);
 
 	if (parent_rect != Rect2()) {

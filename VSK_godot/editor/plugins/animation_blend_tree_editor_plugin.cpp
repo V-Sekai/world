@@ -256,6 +256,10 @@ void AnimationNodeBlendTreeEditor::update_graph() {
 				options.push_back(F);
 			}
 
+			if (tree->has_animation(anim->get_animation())) {
+				pb->set_max(tree->get_animation(anim->get_animation())->get_length());
+			}
+
 			pb->set_show_percentage(false);
 			pb->set_custom_minimum_size(Vector2(0, 14) * EDSCALE);
 			animations[E] = pb;
@@ -990,10 +994,9 @@ void AnimationNodeBlendTreeEditor::_notification(int p_what) {
 					if (tree->has_animation(an->get_animation())) {
 						Ref<Animation> anim = tree->get_animation(an->get_animation());
 						if (anim.is_valid()) {
+							E.value->set_max(anim->get_length());
 							//StringName path = AnimationTreeEditor::get_singleton()->get_base_path() + E.input_node;
-							StringName length_path = AnimationTreeEditor::get_singleton()->get_base_path() + String(E.key) + "/current_length";
-							StringName time_path = AnimationTreeEditor::get_singleton()->get_base_path() + String(E.key) + "/current_position";
-							E.value->set_max(tree->get(length_path));
+							StringName time_path = AnimationTreeEditor::get_singleton()->get_base_path() + String(E.key) + "/time";
 							E.value->set_value(tree->get(time_path));
 						}
 					}
