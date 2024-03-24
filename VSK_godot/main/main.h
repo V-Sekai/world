@@ -78,7 +78,7 @@ public:
 	static Error test_setup();
 	static void test_cleanup();
 #endif
-	static int start();
+	static bool start();
 
 	static bool iteration();
 	static void force_redraw();

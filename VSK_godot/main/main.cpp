@@ -770,7 +770,6 @@ Error Main::test_setup() {
 
 	return OK;
 }
-
 // The order is the same as in `Main::cleanup()`.
 void Main::test_cleanup() {
 	ERR_FAIL_COND(!_start_success);
@@ -992,9 +991,8 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	packed_data->add_pack_source(zip_packed_data);
 #endif
 
-	// Exit error code used in the `goto error` conditions.
-	// It's returned as the program exit code. ERR_HELP is special cased and handled as success (0).
-	Error exit_err = ERR_INVALID_PARAMETER;
+	// Default exit code, can be modified for certain errors.
+	Error exit_code = ERR_INVALID_PARAMETER;
 
 	I = args.front();
 	while (I) {
@@ -1044,12 +1042,12 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 		} else if (I->get() == "-h" || I->get() == "--help" || I->get() == "/?") { // display help
 
 			show_help = true;
-			exit_err = ERR_HELP; // Hack to force an early exit in `main()` with a success code.
+			exit_code = ERR_HELP; // Hack to force an early exit in `main()` with a success code.
 			goto error;
 
 		} else if (I->get() == "--version") {
 			print_line(get_full_version_string());
-			exit_err = ERR_HELP; // Hack to force an early exit in `main()` with a success code.
+			exit_code = ERR_HELP; // Hack to force an early exit in `main()` with a success code.
 			goto error;
 
 		} else if (I->get() == "-v" || I->get() == "--verbose") { // verbose output
@@ -2485,7 +2483,7 @@ error:
 	OS::get_singleton()->finalize_core();
 	locale = String();
 
-	return exit_err;
+	return exit_code;
 }
 
 Error _parse_resource_dummy(void *p_data, VariantParser::Stream *p_stream, Ref<Resource> &r_res, int &line, String &r_err_str) {
@@ -3169,10 +3167,7 @@ String Main::get_rendering_driver_name() {
 // everything the main loop needs to know about frame timings
 static MainTimerSync main_timer_sync;
 
-// Return value should be EXIT_SUCCESS if we start successfully
-// and should move on to `OS::run`, and EXIT_FAILURE otherwise for
-// an early exit with that error code.
-int Main::start() {
+bool Main::start() {
 	ERR_FAIL_COND_V(!_start_success, false);
 
 	bool has_icon = false;
@@ -3309,7 +3304,7 @@ int Main::start() {
 
 		{
 			Ref<DirAccess> da = DirAccess::open(doc_tool_path);
-			ERR_FAIL_COND_V_MSG(da.is_null(), EXIT_FAILURE, "Argument supplied to --doctool must be a valid directory path.");
+			ERR_FAIL_COND_V_MSG(da.is_null(), false, "Argument supplied to --doctool must be a valid directory path.");
 		}
 
 #ifndef MODULE_MONO_ENABLED
@@ -3344,11 +3339,11 @@ int Main::start() {
 				// Create the module documentation directory if it doesn't exist
 				Ref<DirAccess> da = DirAccess::create_for_path(path);
 				err = da->make_dir_recursive(path);
-				ERR_FAIL_COND_V_MSG(err != OK, EXIT_FAILURE, "Error: Can't create directory: " + path + ": " + itos(err));
+				ERR_FAIL_COND_V_MSG(err != OK, false, "Error: Can't create directory: " + path + ": " + itos(err));
 
 				print_line("Loading docs from: " + path);
 				err = docsrc.load_classes(path);
-				ERR_FAIL_COND_V_MSG(err != OK, EXIT_FAILURE, "Error loading docs from: " + path + ": " + itos(err));
+				ERR_FAIL_COND_V_MSG(err != OK, false, "Error loading docs from: " + path + ": " + itos(err));
 			}
 		}
 
@@ -3356,11 +3351,11 @@ int Main::start() {
 		// Create the main documentation directory if it doesn't exist
 		Ref<DirAccess> da = DirAccess::create_for_path(index_path);
 		err = da->make_dir_recursive(index_path);
-		ERR_FAIL_COND_V_MSG(err != OK, EXIT_FAILURE, "Error: Can't create index directory: " + index_path + ": " + itos(err));
+		ERR_FAIL_COND_V_MSG(err != OK, false, "Error: Can't create index directory: " + index_path + ": " + itos(err));
 
 		print_line("Loading classes from: " + index_path);
 		err = docsrc.load_classes(index_path);
-		ERR_FAIL_COND_V_MSG(err != OK, EXIT_FAILURE, "Error loading classes from: " + index_path + ": " + itos(err));
+		ERR_FAIL_COND_V_MSG(err != OK, false, "Error loading classes from: " + index_path + ": " + itos(err));
 		checked_paths.insert(index_path);
 
 		print_line("Merging docs...");
@@ -3369,19 +3364,20 @@ int Main::start() {
 		for (const String &E : checked_paths) {
 			print_line("Erasing old docs at: " + E);
 			err = DocTools::erase_classes(E);
-			ERR_FAIL_COND_V_MSG(err != OK, EXIT_FAILURE, "Error erasing old docs at: " + E + ": " + itos(err));
+			ERR_FAIL_COND_V_MSG(err != OK, false, "Error erasing old docs at: " + E + ": " + itos(err));
 		}
 
 		print_line("Generating new docs...");
 		err = doc.save_classes(index_path, doc_data_classes);
-		ERR_FAIL_COND_V_MSG(err != OK, EXIT_FAILURE, "Error saving new docs:" + itos(err));
+		ERR_FAIL_COND_V_MSG(err != OK, false, "Error saving new docs:" + itos(err));
 
 		print_line("Deleting docs cache...");
 		if (FileAccess::exists(EditorHelp::get_cache_full_path())) {
 			DirAccess::remove_file_or_error(EditorHelp::get_cache_full_path());
 		}
 
-		return EXIT_SUCCESS;
+		OS::get_singleton()->set_exit_code(EXIT_SUCCESS);
+		return false;
 	}
 
 	// GDExtension API and interface.
@@ -3396,24 +3392,32 @@ int Main::start() {
 		}
 
 		if (dump_gdextension_interface || dump_extension_api) {
-			return EXIT_SUCCESS;
+			OS::get_singleton()->set_exit_code(EXIT_SUCCESS);
+			return false;
 		}
 
 		if (validate_extension_api) {
 			Engine::get_singleton()->set_editor_hint(true); // "extension_api.json" should always contains editor singletons.
 			bool valid = GDExtensionAPIDump::validate_extension_json_file(validate_extension_api_file) == OK;
-			return valid ? EXIT_SUCCESS : EXIT_FAILURE;
+			OS::get_singleton()->set_exit_code(valid ? EXIT_SUCCESS : EXIT_FAILURE);
+			return false;
 		}
 	}
 
 #ifndef DISABLE_DEPRECATED
 	if (converting_project) {
 		int ret = ProjectConverter3To4(converter_max_kb_file, converter_max_line_length).convert();
-		return ret ? EXIT_SUCCESS : EXIT_FAILURE;
+		if (ret) {
+			OS::get_singleton()->set_exit_code(EXIT_SUCCESS);
+		}
+		return false;
 	}
 	if (validating_converting_project) {
 		bool ret = ProjectConverter3To4(converter_max_kb_file, converter_max_line_length).validate_conversion();
-		return ret ? EXIT_SUCCESS : EXIT_FAILURE;
+		if (ret) {
+			OS::get_singleton()->set_exit_code(EXIT_SUCCESS);
+		}
+		return false;
 	}
 #endif // DISABLE_DEPRECATED
 
@@ -3430,7 +3434,7 @@ int Main::start() {
 		// this might end up triggered by valid usage, in which case we'll have to
 		// fine-tune further.
 		OS::get_singleton()->alert("Couldn't detect whether to run the editor, the project manager or a specific project. Aborting.");
-		ERR_FAIL_V_MSG(EXIT_FAILURE, "Couldn't detect whether to run the editor, the project manager or a specific project. Aborting.");
+		ERR_FAIL_V_MSG(false, "Couldn't detect whether to run the editor, the project manager or a specific project. Aborting.");
 	}
 #endif
 
@@ -3444,10 +3448,15 @@ int Main::start() {
 
 	if (!script.is_empty()) {
 		Ref<Script> script_res = ResourceLoader::load(script);
-		ERR_FAIL_COND_V_MSG(script_res.is_null(), EXIT_FAILURE, "Can't load script: " + script);
+		ERR_FAIL_COND_V_MSG(script_res.is_null(), false, "Can't load script: " + script);
 
 		if (check_only) {
-			return script_res->is_valid() ? EXIT_SUCCESS : EXIT_FAILURE;
+			if (!script_res->is_valid()) {
+				OS::get_singleton()->set_exit_code(EXIT_FAILURE);
+			} else {
+				OS::get_singleton()->set_exit_code(EXIT_SUCCESS);
+			}
+			return false;
 		}
 
 		if (script_res->can_instantiate()) {
@@ -3459,13 +3468,13 @@ int Main::start() {
 					memdelete(obj);
 				}
 				OS::get_singleton()->alert(vformat("Can't load the script \"%s\" as it doesn't inherit from SceneTree or MainLoop.", script));
-				ERR_FAIL_V_MSG(EXIT_FAILURE, vformat("Can't load the script \"%s\" as it doesn't inherit from SceneTree or MainLoop.", script));
+				ERR_FAIL_V_MSG(false, vformat("Can't load the script \"%s\" as it doesn't inherit from SceneTree or MainLoop.", script));
 			}
 
 			script_loop->set_script(script_res);
 			main_loop = script_loop;
 		} else {
-			return EXIT_FAILURE;
+			return false;
 		}
 	} else { // Not based on script path.
 		if (!editor && !ClassDB::class_exists(main_loop_type) && ScriptServer::is_global_class(main_loop_type)) {
@@ -3473,7 +3482,7 @@ int Main::start() {
 			Ref<Script> script_res = ResourceLoader::load(script_path);
 			if (script_res.is_null()) {
 				OS::get_singleton()->alert("Error: Could not load MainLoop script type: " + main_loop_type);
-				ERR_FAIL_V_MSG(EXIT_FAILURE, vformat("Could not load global class %s.", main_loop_type));
+				ERR_FAIL_V_MSG(false, vformat("Could not load global class %s.", main_loop_type));
 			}
 			StringName script_base = script_res->get_instance_base_type();
 			Object *obj = ClassDB::instantiate(script_base);
@@ -3483,7 +3492,7 @@ int Main::start() {
 					memdelete(obj);
 				}
 				OS::get_singleton()->alert("Error: Invalid MainLoop script base type: " + script_base);
-				ERR_FAIL_V_MSG(EXIT_FAILURE, vformat("The global class %s does not inherit from SceneTree or MainLoop.", main_loop_type));
+				ERR_FAIL_V_MSG(false, vformat("The global class %s does not inherit from SceneTree or MainLoop.", main_loop_type));
 			}
 			script_loop->set_script(script_res);
 			main_loop = script_loop;
@@ -3497,15 +3506,15 @@ int Main::start() {
 	if (!main_loop) {
 		if (!ClassDB::class_exists(main_loop_type)) {
 			OS::get_singleton()->alert("Error: MainLoop type doesn't exist: " + main_loop_type);
-			return EXIT_FAILURE;
+			return false;
 		} else {
 			Object *ml = ClassDB::instantiate(main_loop_type);
-			ERR_FAIL_NULL_V_MSG(ml, EXIT_FAILURE, "Can't instance MainLoop type.");
+			ERR_FAIL_NULL_V_MSG(ml, false, "Can't instance MainLoop type.");
 
 			main_loop = Object::cast_to<MainLoop>(ml);
 			if (!main_loop) {
 				memdelete(ml);
-				ERR_FAIL_V_MSG(EXIT_FAILURE, "Invalid MainLoop type.");
+				ERR_FAIL_V_MSG(false, "Invalid MainLoop type.");
 			}
 		}
 	}
@@ -3629,7 +3638,7 @@ int Main::start() {
 			Error err;
 
 			Vector<String> paths = get_files_with_extension(gdscript_docs_path, "gd");
-			ERR_FAIL_COND_V_MSG(paths.is_empty(), EXIT_FAILURE, "Couldn't find any GDScript files under the given directory: " + gdscript_docs_path);
+			ERR_FAIL_COND_V_MSG(paths.is_empty(), false, "Couldn't find any GDScript files under the given directory: " + gdscript_docs_path);
 
 			for (const String &path : paths) {
 				Ref<GDScript> gdscript = ResourceLoader::load(path);
@@ -3644,13 +3653,14 @@ int Main::start() {
 
 			Ref<DirAccess> da = DirAccess::create_for_path(doc_tool_path);
 			err = da->make_dir_recursive(doc_tool_path);
-			ERR_FAIL_COND_V_MSG(err != OK, EXIT_FAILURE, "Error: Can't create GDScript docs directory: " + doc_tool_path + ": " + itos(err));
+			ERR_FAIL_COND_V_MSG(err != OK, false, "Error: Can't create GDScript docs directory: " + doc_tool_path + ": " + itos(err));
 
 			HashMap<String, String> doc_data_classes;
 			err = docs.save_classes(doc_tool_path, doc_data_classes, false);
-			ERR_FAIL_COND_V_MSG(err != OK, EXIT_FAILURE, "Error saving GDScript docs:" + itos(err));
+			ERR_FAIL_COND_V_MSG(err != OK, false, "Error saving GDScript docs:" + itos(err));
 
-			return EXIT_SUCCESS;
+			OS::get_singleton()->set_exit_code(EXIT_SUCCESS);
+			return false;
 		}
 #endif // MODULE_GDSCRIPT_ENABLED
 
@@ -3765,7 +3775,7 @@ int Main::start() {
 
 						if (sep == -1) {
 							Ref<DirAccess> da = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
-							ERR_FAIL_COND_V(da.is_null(), EXIT_FAILURE);
+							ERR_FAIL_COND_V(da.is_null(), false);
 
 							local_game_path = da->get_current_dir().path_join(local_game_path);
 						} else {
@@ -3815,7 +3825,7 @@ int Main::start() {
 					scene = scenedata->instantiate();
 				}
 
-				ERR_FAIL_NULL_V_MSG(scene, EXIT_FAILURE, "Failed loading scene: " + local_game_path + ".");
+				ERR_FAIL_NULL_V_MSG(scene, false, "Failed loading scene: " + local_game_path + ".");
 				sml->add_current_scene(scene);
 
 #ifdef MACOS_ENABLED
@@ -3888,7 +3898,7 @@ int Main::start() {
 	OS::get_singleton()->benchmark_end_measure("Startup", "Total");
 	OS::get_singleton()->benchmark_dump();
 
-	return EXIT_SUCCESS;
+	return true;
 }
 
 /* Main iteration
@@ -3918,10 +3928,10 @@ static uint64_t physics_process_max = 0;
 static uint64_t process_max = 0;
 static uint64_t navigation_process_max = 0;
 
-// Return false means iterating further, returning true means `OS::run`
-// will terminate the program. In case of failure, the OS exit code needs
-// to be set explicitly here (defaults to EXIT_SUCCESS).
 bool Main::iteration() {
+	//for now do not error on this
+	//ERR_FAIL_COND_V(iterating, false);
+
 	iterating++;
 
 	const uint64_t ticks = OS::get_singleton()->get_ticks_usec();
