@@ -213,7 +213,7 @@ public final class PermissionsUtil {
 
 		List<String> manifestPermissions;
 		try {
-			manifestPermissions = getManifestPermissions(activity);
+			manifestPermissions = new ArrayList<String>(getManifestPermissions(activity));
 		} catch (PackageManager.NameNotFoundException e) {
 			e.printStackTrace();
 			return false;

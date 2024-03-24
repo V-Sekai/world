@@ -111,7 +111,7 @@ class SceneImportSettingsData : public Object {
 		}
 		return false;
 	}
-	void handle_special_properties(PropertyInfo &option) const {
+	void handle_special_properties(PropertyInfo &p_option) const {
 		ERR_FAIL_NULL(settings);
 		if (option.name == "rest_pose/load_pose") {
 			if (!settings->has("rest_pose/load_pose") || int((*settings)["rest_pose/load_pose"]) != 2) {
@@ -145,7 +145,7 @@ class SceneImportSettingsData : public Object {
 							(*settings)["rest_pose/selected_animation"] = String(anim_names[0]);
 						}
 						for (StringName anim_name : anim_names) {
-							hint_string += "," + anim_name; // Include preceding , as catch-all
+							hint_string += "," + anim_name; // Include preceding, as a catch-all.
 						}
 					}
 				} break;
