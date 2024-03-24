@@ -10,34 +10,6 @@
     }
   },
   "configurations": [
-
-    {
-      "name": "Run the Windows editor",
-      "type": "cppvsdbg",
-      "request": "launch",
-      "args": ["--path", "TOOL_task_goal_planner", "-e"],
-      "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/VSK_godot/bin/godot.windows.editor.double.x86_64.llvm.exe",
-      "preLaunchTask": "Godot Engine Windows Clang"
-    },
-    {
-      "name": "Run the Linux editor",
-      "type": "lldb",
-      "request": "launch",
-      "args": ["--path", "VSK_game", "-e"],
-      "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/VSK_godot/bin/godot.linuxbsd.editor.double.x86_64",
-      "preLaunchTask": "Godot Engine"
-    },
-    {
-      "name": "Run the Macos editor",
-      "type": "lldb",
-      "request": "launch",
-      "args": ["--path", "TOOL_godot_ik", "-e"],
-      "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/VSK_godot/bin/godot.macos.editor.double.arm64",
-      "preLaunchTask": "Godot Engine",
-    },
     {
       "name": "Run the Macos editor with task_goal_planner",
       "preRunCommands": [
