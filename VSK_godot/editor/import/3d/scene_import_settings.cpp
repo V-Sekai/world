@@ -98,6 +98,7 @@ class SceneImportSettingsData : public Object {
 		}
 		return false;
 	}
+
 	bool _get(const StringName &p_name, Variant &r_ret) const {
 		if (settings) {
 			if (settings->has(p_name)) {
@@ -111,14 +112,15 @@ class SceneImportSettingsData : public Object {
 		}
 		return false;
 	}
-	void handle_special_properties(PropertyInfo &p_option) const {
+
+	void handle_special_properties(PropertyInfo &r_option) const {
 		ERR_FAIL_NULL(settings);
-		if (option.name == "rest_pose/load_pose") {
+		if (r_option.name == "rest_pose/load_pose") {
 			if (!settings->has("rest_pose/load_pose") || int((*settings)["rest_pose/load_pose"]) != 2) {
 				(*settings)["rest_pose/external_animation_library"] = Variant();
 			}
 		}
-		if (option.name == "rest_pose/selected_animation") {
+		if (r_option.name == "rest_pose/selected_animation") {
 			if (!settings->has("rest_pose/load_pose")) {
 				return;
 			}
@@ -152,11 +154,12 @@ class SceneImportSettingsData : public Object {
 				default:
 					break;
 			}
-			option.hint = PROPERTY_HINT_ENUM;
-			option.hint_string = hint_string;
+			r_option.hint = PROPERTY_HINT_ENUM;
+			r_option.hint_string = hint_string;
 		}
 	}
-	void _get_property_list(List<PropertyInfo> *p_list) const {
+
+	void _get_property_list(List<PropertyInfo> *r_list) const {
 		if (hide_options) {
 			return;
 		}
@@ -166,24 +169,24 @@ class SceneImportSettingsData : public Object {
 				if (category == ResourceImporterScene::INTERNAL_IMPORT_CATEGORY_MAX) {
 					if (ResourceImporterScene::get_animation_singleton()->get_option_visibility(path, E.option.name, current)) {
 						handle_special_properties(option);
-						p_list->push_back(option);
+						r_list->push_back(option);
 					}
 				} else {
 					if (ResourceImporterScene::get_animation_singleton()->get_internal_option_visibility(category, E.option.name, current)) {
 						handle_special_properties(option);
-						p_list->push_back(option);
+						r_list->push_back(option);
 					}
 				}
 			} else {
 				if (category == ResourceImporterScene::INTERNAL_IMPORT_CATEGORY_MAX) {
 					if (ResourceImporterScene::get_scene_singleton()->get_option_visibility(path, E.option.name, current)) {
 						handle_special_properties(option);
-						p_list->push_back(option);
+						r_list->push_back(option);
 					}
 				} else {
 					if (ResourceImporterScene::get_scene_singleton()->get_internal_option_visibility(category, E.option.name, current)) {
 						handle_special_properties(option);
-						p_list->push_back(option);
+						r_list->push_back(option);
 					}
 				}
 			}
