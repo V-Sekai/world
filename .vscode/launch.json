@@ -12,15 +12,11 @@
   "configurations": [
     {
       "name": "Run the Macos editor with task_goal_planner",
-      "preRunCommands": [
-          "command script import ${workspaceFolder}/.vscode/GodotFormatters.py",
-          "command source ${workspaceFolder}/.vscode/GodotFormatters.lldb"
-      ],            
-      "type": "lldb",
+      "type": "cppvsdbg",
       "request": "launch",
       "args": ["--path", "TOOL_task_goal_planner", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/VSK_godot/bin/godot.macos.editor.dev.double.arm64",
+      "program": "${workspaceFolder}/VSK_godot/bin/godot.windows.editor.double",
       "preLaunchTask": "Godot Engine"
     },
   ]
