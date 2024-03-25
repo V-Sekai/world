@@ -12,7 +12,7 @@
   "configurations": [
     {
       "name": "Run the Macos editor with task_goal_planner",
-      "type": "cppvsdbg",
+      "type": "cppdbg",
       "request": "launch",
       "args": ["--path", "TOOL_task_goal_planner", "-e"],
       "cwd": "${workspaceFolder}",
