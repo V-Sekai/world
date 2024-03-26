@@ -11,12 +11,12 @@
   },
   "configurations": [
     {
-      "name": "Run the Macos editor with task_goal_planner",
+      "name": "Run the editor with task_goal_planner",
       "type": "lldb",
       "request": "launch",
       "args": ["--path", "TOOL_task_goal_planner", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/VSK_godot/bin/godot.macos.editor.dev.double.arm64",
+      "program": "${workspaceFolder}/VSK_godot/bin/godot.windows.editor.double.x86_64.console.exe",
       "preLaunchTask": "Godot Engine"
     },
   ]
