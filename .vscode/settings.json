@@ -160,5 +160,6 @@
       "language": "markdown",
       "scheme": "file"
     }
-  ]
+  ],
+  "godotTools.editorPath.godot4": "/Users/ernest.lee/Documents/Current/other/VSK_godot/bin/godot.macos.editor.double.arm64"
 }

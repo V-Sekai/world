@@ -16,7 +16,7 @@
       "request": "launch",
       "args": ["--path", "TOOL_task_goal_planner", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/VSK_godot/bin/godot.windows.editor.double.x86_64.console.exe",
+      "program": "${workspaceFolder}/VSK_godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
     },
   ]
