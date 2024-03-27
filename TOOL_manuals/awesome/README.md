@@ -2,7 +2,7 @@
 
 [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)
 
-V-Sekai is an open-source project that aims to bring social VR/VRSNS/metaverse components to the [Godot Engine](https://godotengine.org).
+V-Sekai (pronounced vee-say-kai) is an open-source project that aims to bring social VR/VRSNS/metaverse components to the [Godot Engine](https://godotengine.org).
 
 A curated list of all the projects V-Sekai has been involved with in the field of social VR.
 
@@ -12,7 +12,6 @@ A curated list of all the projects V-Sekai has been involved with in the field o
 - [V-Sekai Uro Online Services](https://github.com/V-Sekai/uro/issues/new/choose)
 - [Shader Motion Website](https://github.com/V-Sekai/shader-motion-navy-lead-ostrich)
 - [VSK Model Explorer](https://github.com/V-Sekai/VSK_model_explorer)
-- [Open RTS](https://github.com/lampe-games/godot-open-rts)
 
 ## Plugins and Scripts
 
@@ -53,6 +52,7 @@ Modules extend Godot Engine core (C++).
 - [Godot GLTF 2.0 Scene Exporter](https://godotengine.org/article/introducing-the-godot-gltf-2-0-scene-exporter/)
 - [Animation Retargeting in Godot 4.0](https://godotengine.org/article/animation-retargeting-in-godot-4-0/)
 - [Godot Engine PRs by File](https://godotengine.github.io/godot-prs-by-file/)
+- [Getty OpenContent CC0](https://www.getty.edu/art/collection/search?open_content=true)
 
 ## Artwork
 
