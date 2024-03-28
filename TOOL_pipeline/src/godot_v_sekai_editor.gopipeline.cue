@@ -71,41 +71,6 @@ stages: [{
 				type:              "exec"
 				working_directory: "g"
 			}]
-		}, {
-			name: "android_job"
-			resources: ["mingw5", "linux"]
-			tasks: [{
-				arguments: ["-c", "sed -i \"/^status =/s/=.*/= \\\"$GODOT_STATUS.$GO_PIPELINE_COUNTER\\\"/\" version.py"]
-				command:           "/bin/bash"
-				type:              "exec"
-				working_directory: "g"
-			}, {
-				arguments: ["-c", "mkdir -p ../.cicd_cache && SCONS_CACHE=../.cicd_cache scons platform=android arch=arm32 production=yes target=editor store_release=yes use_llvm=yes precision=double"]
-				command:           "/bin/bash"
-				type:              "exec"
-				working_directory: "g"
-			}, {
-				arguments: ["-c", "mkdir -p ../.cicd_cache && SCONS_CACHE=../.cicd_cache scons platform=android arch=arm64 production=yes target=editor store_release=yes use_llvm=yes precision=double"]
-				command:           "/bin/bash"
-				type:              "exec"
-				working_directory: "g"
-			}, {
-				arguments: ["-c", "mkdir -p ../.cicd_cache && SCONS_CACHE=../.cicd_cache scons platform=android arch=x86_32 production=yes target=editor store_release=yes use_llvm=yes precision=double"]
-				command:           "/bin/bash"
-				type:              "exec"
-				working_directory: "g"
-			}, {
-				arguments: ["-c", "mkdir -p ../.cicd_cache && SCONS_CACHE=../.cicd_cache scons platform=android arch=x86_64 production=yes target=editor store_release=yes use_llvm=yes precision=double"]
-				command:           "/bin/bash"
-				type:              "exec"
-				working_directory: "g"
-			}, {
-				arguments: ["-c", "cd platform/android/java &&  ./gradlew generateGodotEditor && cd ../../.. && ls -l bin/"]
-				command:           "/bin/bash"
-				type:              "exec"
-				working_directory: "g"
-			},
-			]
 		},
 	]
 	name: "defaultStage"
