@@ -1,11 +1,5 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-import sys
-
-header = """\
 /**************************************************************************/
-/*  $filename                                                             */
+/*  audio_effect_hard_limiter.h                                           */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -33,60 +27,63 @@ header = """\
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
-"""
 
-fname = sys.argv[1]
+#ifndef AUDIO_EFFECT_HARD_LIMITER_H
+#define AUDIO_EFFECT_HARD_LIMITER_H
 
-# Handle replacing $filename with actual filename and keep alignment
-fsingle = fname.strip()
-if fsingle.find("/") != -1:
-    fsingle = fsingle[fsingle.rfind("/") + 1 :]
-rep_fl = "$filename"
-rep_fi = fsingle
-len_fl = len(rep_fl)
-len_fi = len(rep_fi)
-# Pad with spaces to keep alignment
-if len_fi < len_fl:
-    for x in range(len_fl - len_fi):
-        rep_fi += " "
-elif len_fl < len_fi:
-    for x in range(len_fi - len_fl):
-        rep_fl += " "
-if header.find(rep_fl) != -1:
-    text = header.replace(rep_fl, rep_fi)
-else:
-    text = header.replace("$filename", fsingle)
-text += "\n"
+#include "servers/audio/audio_effect.h"
 
-# We now have the proper header, so we want to ignore the one in the original file
-# and potentially empty lines and badly formatted lines, while keeping comments that
-# come after the header, and then keep everything non-header unchanged.
-# To do so, we skip empty lines that may be at the top in a first pass.
-# In a second pass, we skip all consecutive comment lines starting with "/*",
-# then we can append the rest (step 2).
+class AudioEffectHardLimiter;
 
-with open(fname.strip(), "r") as fileread:
-    line = fileread.readline()
-    header_done = False
+class AudioEffectHardLimiterInstance : public AudioEffectInstance {
+	GDCLASS(AudioEffectHardLimiterInstance, AudioEffectInstance);
+	friend class AudioEffectHardLimiter;
+	Ref<AudioEffectHardLimiter> base;
 
-    with open(fname.strip(), "r", encoding="utf-8") as fileread:
-        line = fileread.readline()
+private:
+	int sample_cursor = 0;
 
-    if line.find("/**********") == -1:  # Godot header starts this way
-        # Maybe starting with a non-Godot comment, abort header magic
-        header_done = True
+	float release_factor = 0;
+	float attack_factor = 0;
+	float gain = 1;
+	float gain_target = 1;
 
-    while not header_done:  # Handle header now
-        if line.find("/*") != 0:  # No more starting with a comment
-            header_done = True
-            if line.strip() != "":
-                text += line
-        line = fileread.readline()
+	LocalVector<float> sample_buffer_left;
+	LocalVector<float> sample_buffer_right;
 
-    while line != "":  # Dump everything until EOF
-        text += line
-        line = fileread.readline()
+	int gain_samples_to_store = 0;
+	int gain_bucket_cursor = 0;
+	int gain_bucket_size = 0;
+	LocalVector<float> gain_buckets;
 
-# Write
-with open(fname.strip(), "w", encoding="utf-8", newline="\n") as filewrite:
-    filewrite.write(text)
+public:
+	virtual void process(const AudioFrame *p_src_frames, AudioFrame *p_dst_frames, int p_frame_count) override;
+};
+
+class AudioEffectHardLimiter : public AudioEffect {
+	GDCLASS(AudioEffectHardLimiter, AudioEffect);
+
+	friend class AudioEffectHardLimiterInstance;
+	float pre_gain = 0.0f;
+	float ceiling = -0.3f;
+	float sustain = 0.02f;
+	float release = 0.1f;
+	const float attack = 0.002;
+
+protected:
+	static void _bind_methods();
+
+public:
+	void set_ceiling_db(float p_ceiling);
+	float get_ceiling_db() const;
+
+	void set_release(float p_release);
+	float get_release() const;
+
+	void set_pre_gain_db(float p_pre_gain);
+	float get_pre_gain_db() const;
+
+	Ref<AudioEffectInstance> instantiate() override;
+};
+
+#endif // AUDIO_EFFECT_HARD_LIMITER_H
