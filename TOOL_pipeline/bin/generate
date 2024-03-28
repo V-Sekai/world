@@ -1,0 +1,7 @@
+rm -rf build
+mkdir -p build
+rm -rf .github/workflows/
+mkdir -p .github/workflows/
+for file in src/*.cue; do cue export "$file" -o "build/$(basename "$file" .cue).json"; done
+dos2unix build/*.json
+echo "Script executed successfully"
