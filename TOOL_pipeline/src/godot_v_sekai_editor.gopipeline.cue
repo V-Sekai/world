@@ -11,7 +11,7 @@ materials: [{
 	type:        "git"
 	url:         "https://github.com/V-Sekai/godot.git"
 }]
-name: "godot-groups-editor"
+name: "godot-groups"
 stages: [{
 	jobs: [
 	{
@@ -96,7 +96,7 @@ stages: [{
 			destination:      "g/bin/"
 			is_source_a_file: true
 			job:              "windows_job"
-			pipeline:         "godot-groups-editor"
+			pipeline:         "godot-groups"
 			source:           "godot.windows.editor.double.x86_64.llvm.exe"
 			stage:            "defaultStage"
 			type:             "fetch"
@@ -110,7 +110,7 @@ stages: [{
 			destination:      "g/bin/"
 			is_source_a_file: true
 			job:              "windows_job"
-			pipeline:         "godot-groups-editor"
+			pipeline:         "godot-groups"
 			source:           "godot.windows.editor.double.x86_64.llvm.exe"
 			stage:            "defaultStage"
 			type:             "fetch"
@@ -151,7 +151,7 @@ stages: [{
 			destination:      "g/bin/"
 			is_source_a_file: true
 			job:              "linux_job"
-			pipeline:         "godot-groups-editor"
+			pipeline:         "godot-groups"
 			source:           "godot.linuxbsd.editor.double.x86_64.llvm"
 			stage:            "defaultStage"
 			type:             "fetch"
@@ -165,7 +165,7 @@ stages: [{
 			destination:      "g/bin/"
 			is_source_a_file: true
 			job:              "linux_job"
-			pipeline:         "godot-groups-editor"
+			pipeline:         "godot-groups"
 			source:           "godot.linuxbsd.editor.double.x86_64.llvm"
 			stage:            "defaultStage"
 			type:             "fetch"
@@ -206,7 +206,7 @@ stages: [{
 			destination:      "g/bin/"
 			is_source_a_file: true
 			job:              "web_job"
-			pipeline:         "godot-groups-editor"
+			pipeline:         "godot-groups"
 			source:           "godot.web.template_release.double.wasm32.nothreads.zip"
 			stage:            "defaultStage"
 			type:             "fetch"
@@ -220,7 +220,7 @@ stages: [{
 			destination:      "g/bin/"
 			is_source_a_file: true
 			job:              "web_job"
-			pipeline:         "godot-groups-editor"
+			pipeline:         "godot-groups"
 			source:           "godot.web.template_release.double.wasm32.nothreads.zip"
 			stage:            "defaultStage"
 			type:             "fetch"
@@ -260,7 +260,7 @@ stages: [{
 			destination:      "templates"
 			is_source_a_file: true
 			job:              "windows_job"
-			pipeline:         "godot-groups-editor"
+			pipeline:         "godot-groups"
 			source:           "version.txt"
 			stage:            "templateStage"
 			type:             "fetch"
@@ -269,7 +269,7 @@ stages: [{
 			destination:      "templates"
 			is_source_a_file: true
 			job:              "windows_job"
-			pipeline:         "godot-groups-editor"
+			pipeline:         "godot-groups"
 			source:           "windows_debug_x86_64.exe"
 			stage:            "templateStage"
 			type:             "fetch"
@@ -278,7 +278,7 @@ stages: [{
 			destination:      "templates"
 			is_source_a_file: true
 			job:              "windows_job"
-			pipeline:         "godot-groups-editor"
+			pipeline:         "godot-groups"
 			source:           "windows_release_x86_64.exe"
 			stage:            "templateStage"
 			type:             "fetch"
@@ -287,7 +287,7 @@ stages: [{
 			destination:      "templates"
 			is_source_a_file: true
 			job:              "linux_job"
-			pipeline:         "godot-groups-editor"
+			pipeline:         "godot-groups"
 			source:           "linux_debug.x86_64"
 			stage:            "templateStage"
 			type:             "fetch"
@@ -296,7 +296,7 @@ stages: [{
 			destination:      "templates"
 			is_source_a_file: true
 			job:              "linux_job"
-			pipeline:         "godot-groups-editor"
+			pipeline:         "godot-groups"
 			source:           "linux_release.x86_64"
 			stage:            "templateStage"
 			type:             "fetch"
@@ -305,7 +305,7 @@ stages: [{
 			destination:      "templates"
 			is_source_a_file: true
 			job:              "web_job"
-			pipeline:         "godot-groups-editor"
+			pipeline:         "godot-groups"
 			source:           "web_nothreads_debug.zip"
 			stage:            "templateStage"
 			type:             "fetch"
@@ -314,7 +314,7 @@ stages: [{
 			destination:      "templates"
 			is_source_a_file: true
 			job:              "web_job"
-			pipeline:         "godot-groups-editor"
+			pipeline:         "godot-groups"
 			source:           "web_nothreads_release.zip"
 			stage:            "templateStage"
 			type:             "fetch"

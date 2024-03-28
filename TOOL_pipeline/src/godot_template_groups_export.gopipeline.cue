@@ -19,7 +19,7 @@ materials: [{
 }, {
 	ignore_for_scheduling: false
 	name:                  "godot-groups-editor_pipeline_dependency"
-	pipeline:              "godot-groups-editor"
+	pipeline:              "godot-groups"
 	stage:                 "templateZipStage"
 	type:                  "dependency"
 }]
@@ -40,7 +40,7 @@ stages: [{
 			destination:      ""
 			is_source_a_file: true
 			job:              "defaultJob"
-			pipeline:         "godot-groups-editor"
+			pipeline:         "godot-groups"
 			source:           "godot.templates.tpz"
 			stage:            "templateZipStage"
 			type:             "fetch"
@@ -49,7 +49,7 @@ stages: [{
 			destination:      ""
 			is_source_a_file: true
 			job:              "linux_job"
-			pipeline:         "godot-groups-editor"
+			pipeline:         "godot-groups"
 			source:           "godot.linuxbsd.editor.double.x86_64.llvm"
 			stage:            "defaultStage"
 			type:             "fetch"
@@ -58,7 +58,7 @@ stages: [{
 			destination:      ""
 			is_source_a_file: true
 			job:              "linux_job"
-			pipeline:         "godot-groups-editor"
+			pipeline:         "godot-groups"
 			source:           "godot.linuxbsd.editor.double.x86_64.llvm"
 			stage:            "defaultStage"
 			type:             "fetch"
@@ -98,7 +98,7 @@ stages: [{
 				destination:      ""
 				is_source_a_file: true
 				job:              "defaultJob"
-				pipeline:         "godot-groups-editor"
+				pipeline:         "godot-groups"
 				source:           "godot.templates.tpz"
 				stage:            "templateZipStage"
 				type:             "fetch"
@@ -107,7 +107,7 @@ stages: [{
 					destination:      ""
 					is_source_a_file: true
 					job:              "linux_job"
-					pipeline:         "godot-groups-editor"
+					pipeline:         "godot-groups"
 					source:           "godot.linuxbsd.editor.double.x86_64.llvm"
 					stage:            "defaultStage"
 					type:             "fetch"
@@ -116,7 +116,7 @@ stages: [{
 					destination:      ""
 					is_source_a_file: true
 					job:              "linux_job"
-					pipeline:         "godot-groups-editor"
+					pipeline:         "godot-groups"
 					source:           "godot.linuxbsd.editor.double.x86_64.llvm"
 					stage:            "defaultStage"
 					type:             "fetch"
