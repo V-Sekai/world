@@ -16,7 +16,7 @@
       "request": "launch",
       "args": ["--path", "${workspaceFolder}/VSK_game", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/VSK_godot/bin/godot.macos.editor.double.arm64",
+      "program": "${workspaceFolder}/VSK_godot/bin/godot.windows.editor.double.x86_64.exe",
       "preLaunchTask": "Godot Engine"
     },
   ]
