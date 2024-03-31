@@ -12,11 +12,11 @@
   "configurations": [
     {
       "name": "Run the editor with task_goal_planner",
-      "type": "cppvsdbg",
+      "type": "lldb",
       "request": "launch",
-      "args": ["--path", "D:/20240307_windows/range-of-motion-game-project", "-e"],
+      "args": ["--path", "D:/20240307_windows/VSK_game", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/VSK_godot/bin/godot.windows.editor.double.x86_64.exe",
+      "program": "${workspaceFolder}/VSK_godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
     },
   ]
