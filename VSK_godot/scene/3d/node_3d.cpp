@@ -452,7 +452,7 @@ void Node3D::set_rotation_edit_mode(RotationEditMode p_mode) {
 	}
 
 	bool transform_changed = false;
-	if ((data.rotation_edit_mode == ROTATION_EDIT_MODE_BASIS || data.rotation_edit_mode == ROTATION_EDIT_MODE_AXIS_ANGLE) && !_test_dirty_bits(DIRTY_LOCAL_TRANSFORM)) {
+	if ((data.rotation_edit_mode == ROTATION_EDIT_MODE_BASIS) && !_test_dirty_bits(DIRTY_LOCAL_TRANSFORM)) {
 		data.local_transform.orthogonalize();
 		transform_changed = true;
 	}
