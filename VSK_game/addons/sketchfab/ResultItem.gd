@@ -15,10 +15,11 @@ var editor_interface :EditorInterface
 
 var dialog
 
+func set_data(data):
+	self.data = data
 
-func set_data(p_data):
-	self.data = p_data
-
+func _enter_tree():
+	custom_minimum_size = custom_minimum_size * 1.0
 
 func _ready():
 	if data == null:
@@ -33,7 +34,6 @@ func _ready():
 	var images = SafeData.array(thumbnails, "images")
 	image.url = Utils.get_best_size_url(images, self.image.max_size, SafeData)
 
-
 func _on_Button_pressed():
 	dialog = ModelDialog.instantiate()
 	dialog.editor_interface = editor_interface
@@ -41,7 +41,6 @@ func _on_Button_pressed():
 	add_child(dialog)
 	dialog.close_requested.connect(_on_dialog_hide)
 	dialog.popup_centered()
-
 
 func _on_dialog_hide():
 	remove_child(dialog)
