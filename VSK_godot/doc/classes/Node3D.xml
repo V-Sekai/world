@@ -362,8 +362,5 @@
 		<constant name="ROTATION_EDIT_MODE_BASIS" value="2" enum="RotationEditMode">
 			The rotation is edited using a [Basis]. In this mode, [member scale] can't be edited separately.
 		</constant>
-		<constant name="ROTATION_EDIT_MODE_AXIS_ANGLE" value="3" enum="RotationEditMode">
-			The rotation is edited using a [Vector4]. In this mode, [member scale] can't be edited separately.
-		</constant>
 	</constants>
 </class>
