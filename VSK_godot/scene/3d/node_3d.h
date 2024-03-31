@@ -59,7 +59,6 @@ public:
 		ROTATION_EDIT_MODE_EULER,
 		ROTATION_EDIT_MODE_QUATERNION,
 		ROTATION_EDIT_MODE_BASIS,
-		ROTATION_EDIT_MODE_AXIS_ANGLE,
 	};
 
 private:
@@ -202,13 +201,11 @@ public:
 	void set_transform(const Transform3D &p_transform);
 	void set_basis(const Basis &p_basis);
 	void set_quaternion(const Quaternion &p_quaternion);
-	void set_axis_angle(const Vector4 &p_axis_angle);
 	void set_global_transform(const Transform3D &p_transform);
 
 	Transform3D get_transform() const;
 	Basis get_basis() const;
 	Quaternion get_quaternion() const;
-	Vector4 get_axis_angle() const;
 	Transform3D get_global_transform() const;
 
 #ifdef TOOLS_ENABLED
