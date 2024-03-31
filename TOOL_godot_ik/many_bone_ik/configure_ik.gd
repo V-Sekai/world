@@ -140,8 +140,6 @@ func _run():
 
 	for pin_i in range(bones.size()):
 		var bone_name = bones[pin_i]
-		if bone_name in ["Root"]:
-			continue
 		many_bone_ik.set_pin_nodepath(pin_i, NodePath(bone_name + "Marker3D"))
 
 	skeleton.show_rest_only = false
