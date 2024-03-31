@@ -264,7 +264,7 @@ void Node3D::set_axis_angle(const Vector4 &p_axis_angle) {
 		data.scale = data.local_transform.basis.get_scale();
 		_clear_dirty_bits(DIRTY_EULER_ROTATION_AND_SCALE);
 	}
-	data.local_transform.basis = Basis(Vector3(p_axis_angle.x, p_axis_angle.y, p_axis_angle.z).normalized(), p_axis_angle.w).scaled(data.scale);
+	data.local_transform.basis = Basis(Quaternion(Vector3(p_axis_angle.x, p_axis_angle.y, p_axis_angle.z).normalized(), p_axis_angle.w)).orthnormalized().scaled(data.scale);
 	// Rotscale should not be marked dirty because that would cause precision loss issues with the scale. Instead reconstruct rotation now.
 	data.euler_rotation = data.local_transform.basis.get_euler_normalized(data.euler_rotation_order);
 
