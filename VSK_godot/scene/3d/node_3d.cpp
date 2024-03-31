@@ -235,7 +235,6 @@ void Node3D::set_basis(const Basis &p_basis) {
 
 	set_transform(Transform3D(p_basis, data.local_transform.origin));
 }
-
 void Node3D::set_quaternion(const Quaternion &p_quaternion) {
 	ERR_THREAD_GUARD;
 
@@ -322,42 +321,6 @@ Basis Node3D::get_basis() const {
 
 Quaternion Node3D::get_quaternion() const {
 	return get_transform().basis.get_rotation_quaternion();
-}
-
-void Node3D::set_axis_angle(const Vector4 &p_axis_angle) {
-	ERR_THREAD_GUARD;
-
-	if (_test_dirty_bits(DIRTY_EULER_ROTATION_AND_SCALE)) {
-		// We need the scale part, so if these are dirty, update it
-		data.scale = data.local_transform.basis.get_scale();
-		_clear_dirty_bits(DIRTY_EULER_ROTATION_AND_SCALE);
-	}
-	Vector3 axis(p_axis_angle.x, p_axis_angle.y, p_axis_angle.z);
-	axis.normalize();
-	real_t angle = p_axis_angle.w;
-	if (Math::is_zero_approx(axis.length_squared())) {
-		data.local_transform.basis = Basis().scaled(data.scale);
-	} else {
-		Basis rotation = Basis(axis, angle);
-		Basis result = data.local_transform.basis * rotation;
-		data.local_transform.basis = result.orthonormalized().scaled(data.scale);	
-	}
-	// Rotscale should not be marked dirty because that would cause precision loss issues with the scale. Instead reconstruct rotation now.
-	data.euler_rotation = data.local_transform.basis.get_euler_normalized(data.euler_rotation_order);
-
-	_replace_dirty_mask(DIRTY_NONE);
-
-	_propagate_transform_changed(this);
-	if (data.notify_local_transform) {
-		notification(NOTIFICATION_LOCAL_TRANSFORM_CHANGED);
-	}
-}
-
-Vector4 Node3D::get_axis_angle() const {
-	Vector3 axis;
-	real_t angle;
-	get_transform().basis.get_axis_angle(axis, angle);
-	return Vector4(axis.x, axis.y, axis.z, angle);
 }
 
 void Node3D::set_global_transform(const Transform3D &p_transform) {
@@ -461,7 +424,7 @@ void Node3D::set_rotation_edit_mode(RotationEditMode p_mode) {
 	}
 
 	bool transform_changed = false;
-	if ((data.rotation_edit_mode == ROTATION_EDIT_MODE_BASIS) && !_test_dirty_bits(DIRTY_LOCAL_TRANSFORM)) {
+	if (data.rotation_edit_mode == ROTATION_EDIT_MODE_BASIS && !_test_dirty_bits(DIRTY_LOCAL_TRANSFORM)) {
 		data.local_transform.orthogonalize();
 		transform_changed = true;
 	}
@@ -1074,9 +1037,6 @@ void Node3D::_validate_property(PropertyInfo &p_property) const {
 	if (data.rotation_edit_mode != ROTATION_EDIT_MODE_BASIS && p_property.name == "basis") {
 		p_property.usage = 0;
 	}
-	if (data.rotation_edit_mode != ROTATION_EDIT_MODE_AXIS_ANGLE && p_property.name == "axis_angle") {
-		p_property.usage = 0;
-	}
 	if (data.rotation_edit_mode == ROTATION_EDIT_MODE_BASIS && p_property.name == "scale") {
 		p_property.usage = 0;
 	}
@@ -1097,8 +1057,6 @@ bool Node3D::_property_can_revert(const StringName &p_name) const {
 	} else if (p_name == "scale") {
 		return true;
 	} else if (p_name == "quaternion") {
-		return true;
-	} else if (p_name == "axis_angle") {
 		return true;
 	} else if (p_name == "rotation") {
 		return true;
@@ -1131,16 +1089,6 @@ bool Node3D::_property_get_revert(const StringName &p_name, Variant &r_property)
 			r_property = Quaternion(Transform3D(variant).get_basis().get_rotation_quaternion());
 		} else {
 			r_property = Quaternion();
-		}
-	} else if (p_name == "axis_angle") {
-		Variant variant = PropertyUtils::get_property_default_value(this, "transform", &valid);
-		if (valid && variant.get_type() == Variant::Type::TRANSFORM3D) {
-			Vector3 axis;
-			real_t angle;
-			Transform3D(variant).get_basis().get_rotation_quaternion().get_axis_angle(axis, angle);
-			r_property = Vector4(axis.x, axis.y, axis.z, angle);
-		} else {
-			r_property = Vector4(0, 1, 0, 0);
 		}
 	} else if (p_name == "rotation") {
 		Variant variant = PropertyUtils::get_property_default_value(this, "transform", &valid);
@@ -1181,8 +1129,6 @@ void Node3D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_quaternion"), &Node3D::get_quaternion);
 	ClassDB::bind_method(D_METHOD("set_basis", "basis"), &Node3D::set_basis);
 	ClassDB::bind_method(D_METHOD("get_basis"), &Node3D::get_basis);
-	ClassDB::bind_method(D_METHOD("set_axis_angle", "axis_angle"), &Node3D::set_axis_angle);
-	ClassDB::bind_method(D_METHOD("get_axis_angle"), &Node3D::get_axis_angle);
 
 	ClassDB::bind_method(D_METHOD("set_global_transform", "global"), &Node3D::set_global_transform);
 	ClassDB::bind_method(D_METHOD("get_global_transform"), &Node3D::get_global_transform);
@@ -1256,7 +1202,6 @@ void Node3D::_bind_methods() {
 	BIND_ENUM_CONSTANT(ROTATION_EDIT_MODE_EULER);
 	BIND_ENUM_CONSTANT(ROTATION_EDIT_MODE_QUATERNION);
 	BIND_ENUM_CONSTANT(ROTATION_EDIT_MODE_BASIS);
-	BIND_ENUM_CONSTANT(ROTATION_EDIT_MODE_AXIS_ANGLE);
 
 	ADD_GROUP("Transform", "");
 	ADD_PROPERTY(PropertyInfo(Variant::TRANSFORM3D, "transform", PROPERTY_HINT_NONE, "suffix:m", PROPERTY_USAGE_NO_EDITOR), "set_transform", "get_transform");
@@ -1265,10 +1210,9 @@ void Node3D::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR3, "rotation", PROPERTY_HINT_RANGE, "-360,360,0.1,or_less,or_greater,radians_as_degrees", PROPERTY_USAGE_EDITOR), "set_rotation", "get_rotation");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR3, "rotation_degrees", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NONE), "set_rotation_degrees", "get_rotation_degrees");
 	ADD_PROPERTY(PropertyInfo(Variant::QUATERNION, "quaternion", PROPERTY_HINT_HIDE_QUATERNION_EDIT, "", PROPERTY_USAGE_EDITOR), "set_quaternion", "get_quaternion");
-	ADD_PROPERTY(PropertyInfo(Variant::VECTOR4, "axis_angle", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR), "set_axis_angle", "get_axis_angle");
 	ADD_PROPERTY(PropertyInfo(Variant::BASIS, "basis", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_EDITOR), "set_basis", "get_basis");
 	ADD_PROPERTY(PropertyInfo(Variant::VECTOR3, "scale", PROPERTY_HINT_LINK, "", PROPERTY_USAGE_EDITOR), "set_scale", "get_scale");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "rotation_edit_mode", PROPERTY_HINT_ENUM, "Euler,Quaternion,Basis,Axis Angle"), "set_rotation_edit_mode", "get_rotation_edit_mode");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "rotation_edit_mode", PROPERTY_HINT_ENUM, "Euler,Quaternion,Basis"), "set_rotation_edit_mode", "get_rotation_edit_mode");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "rotation_order", PROPERTY_HINT_ENUM, "XYZ,XZY,YXZ,YZX,ZXY,ZYX"), "set_rotation_order", "get_rotation_order");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "top_level"), "set_as_top_level", "is_set_as_top_level");
 
