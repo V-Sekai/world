@@ -256,32 +256,6 @@ void Node3D::set_quaternion(const Quaternion &p_quaternion) {
 	}
 }
 
-void Node3D::set_axis_angle(const Vector4 &p_axis_angle) {
-	ERR_THREAD_GUARD;
-
-	if (_test_dirty_bits(DIRTY_EULER_ROTATION_AND_SCALE)) {
-		// We need the scale part, so if these are dirty, update it
-		data.scale = data.local_transform.basis.get_scale();
-		_clear_dirty_bits(DIRTY_EULER_ROTATION_AND_SCALE);
-	}
-	Vector3 axis(p_axis_angle.x, p_axis_angle.y, p_axis_angle.z);
-	if (Math::is_zero_approx(axis.length_squared())) {
-		// If the axis vector is too small, use a default rotation
-		data.local_transform.basis = Basis().scaled(data.scale);
-	} else {
-		data.local_transform.basis = Basis(Quaternion(axis.normalized(), p_axis_angle.w)).orthonormalized().scaled(data.scale);
-	}	
-	// Rotscale should not be marked dirty because that would cause precision loss issues with the scale. Instead reconstruct rotation now.
-	data.euler_rotation = data.local_transform.basis.get_euler_normalized(data.euler_rotation_order);
-
-	_replace_dirty_mask(DIRTY_NONE);
-
-	_propagate_transform_changed(this);
-	if (data.notify_local_transform) {
-		notification(NOTIFICATION_LOCAL_TRANSFORM_CHANGED);
-	}
-}
-
 Vector3 Node3D::get_global_position() const {
 	ERR_READ_THREAD_GUARD_V(Vector3());
 	return get_global_transform().get_origin();
@@ -348,6 +322,35 @@ Basis Node3D::get_basis() const {
 
 Quaternion Node3D::get_quaternion() const {
 	return get_transform().basis.get_rotation_quaternion();
+}
+
+void Node3D::set_axis_angle(const Vector4 &p_axis_angle) {
+	ERR_THREAD_GUARD;
+
+	if (_test_dirty_bits(DIRTY_EULER_ROTATION_AND_SCALE)) {
+		// We need the scale part, so if these are dirty, update it
+		data.scale = data.local_transform.basis.get_scale();
+		_clear_dirty_bits(DIRTY_EULER_ROTATION_AND_SCALE);
+	}
+	Vector3 axis(p_axis_angle.x, p_axis_angle.y, p_axis_angle.z);
+	axis.normalize();
+	real_t angle = p_axis_angle.w;
+	if (Math::is_zero_approx(axis.length_squared())) {
+		data.local_transform.basis = Basis().scaled(data.scale);
+	} else {
+		Basis rotation = Basis(axis, angle);
+		Basis result = data.local_transform.basis * rotation;
+		data.local_transform.basis = result.orthonormalized().scaled(data.scale);	
+	}
+	// Rotscale should not be marked dirty because that would cause precision loss issues with the scale. Instead reconstruct rotation now.
+	data.euler_rotation = data.local_transform.basis.get_euler_normalized(data.euler_rotation_order);
+
+	_replace_dirty_mask(DIRTY_NONE);
+
+	_propagate_transform_changed(this);
+	if (data.notify_local_transform) {
+		notification(NOTIFICATION_LOCAL_TRANSFORM_CHANGED);
+	}
 }
 
 Vector4 Node3D::get_axis_angle() const {
