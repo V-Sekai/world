@@ -105,12 +105,12 @@ void IKKusudama3D::set_axial_limits(real_t min_angle, real_t in_range) {
 	range_angle = in_range;
 	Vector3 y_axis = Vector3(0.0f, 1.0f, 0.0f);
 	Vector3 z_axis = Vector3(0.0f, 0.0f, 1.0f);
-	twist_min_rot = Quaternion(y_axis, min_axial_angle);
+	twist_min_rot = IKKusudama3D::get_quaternion_axis_angle(y_axis, min_axial_angle);
 	twist_min_vec = twist_min_rot.xform(z_axis).normalized();
 	twist_center_vec = twist_min_rot.xform(twist_min_vec).normalized();
 	twist_center_rot = Quaternion(z_axis, twist_center_vec);
 	twist_half_range_half_cos = Math::cos(in_range / real_t(4.0)); // For the quadrance angle. We need half the range angle since starting from the center, and half of that since quadrance takes cos(angle/2).
-	twist_max_vec = Quaternion(y_axis, in_range).xform(twist_min_vec).normalized();
+	twist_max_vec = IKKusudama3D::get_quaternion_axis_angle(y_axis, in_range).xform(twist_min_vec).normalized();
 	twist_max_rot = Quaternion(z_axis, twist_max_vec);
 }
 
@@ -397,4 +397,16 @@ Quaternion IKKusudama3D::clamp_to_quadrance_angle(Quaternion p_rotation, double 
 
 void IKKusudama3D::clear_limit_cones() {
 	limit_cones.clear();
+}
+
+Quaternion IKKusudama3D::get_quaternion_axis_angle(const Vector3 &p_axis, real_t p_angle) {
+	real_t d = p_axis.length_squared();
+	if (d == 0) {
+		return Quaternion();
+	} else {
+		real_t sin_angle = Math::sin(p_angle * 0.5f);
+		real_t cos_angle = Math::cos(p_angle * 0.5f);
+		real_t s = sin_angle / d;
+		return Quaternion(p_axis.x * s, p_axis.y * s, p_axis.z * s, cos_angle);
+	}
 }
