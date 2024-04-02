@@ -50,7 +50,7 @@ spec:
       containers:
       - name: uro
         env:
-        - name: SENDGRID_API_KEY
+        - name: XXDISABLEDXX_SENDGRID_API_KEY
           valueFrom:
             secretKeyRef:
               name: uro-prod
