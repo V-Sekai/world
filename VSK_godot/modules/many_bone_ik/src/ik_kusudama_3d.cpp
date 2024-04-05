@@ -272,66 +272,66 @@ Vector3 IKKusudama3D::local_point_on_path_sequence(Vector3 p_in_point, Ref<IKNod
  * the point is outside of the boundary, but does not signify anything about how far from the boundary the point is.
  * @return the original point, if it's in limits, or the closest point which is in limits.
  */
- Vector3 IKKusudama3D::get_local_point_in_limits(Vector3 in_point, Vector<double> *in_bounds) {
-	 // Normalize the input point
-	 Vector3 point = in_point.normalized();
-	 real_t closest_cos = -2.0;
-	 in_bounds->write[0] = -1;
- 
-	 Vector3 closest_collision_point = in_point;
- 
-	 // Loop through each limit cone
-	 for (int i = 0; i < limit_cones.size(); i++) {
-		 Ref<IKLimitCone3D> cone = limit_cones[i];
-		 Vector3 collision_point = cone->closest_to_cone(point, in_bounds);
- 
-		 // If the collision point is NaN, return the original point
-		 if (Math::is_nan(collision_point.x) || Math::is_nan(collision_point.y) || Math::is_nan(collision_point.z)) {
-			 in_bounds->write[0] = 1;
-			 return point;
-		 }
- 
-		 // Calculate the cosine of the angle between the collision point and the original point
-		 real_t this_cos = collision_point.dot(point);
- 
-		 // If the closest collision point is not set or the cosine is greater than the current closest cosine, update the closest collision point and cosine
-		 if (closest_collision_point.is_zero_approx() || this_cos > closest_cos) {
-			 closest_collision_point = collision_point;
-			 closest_cos = this_cos;
-		 }
-	 }
- 
-	 // If we're out of bounds of all cones, check if we're in the paths between the cones
-	 if ((*in_bounds)[0] == -1) {
-		 for (int i = 0; i < limit_cones.size() - 1; i++) {
-			 Ref<IKLimitCone3D> currCone = limit_cones[i];
-			 Ref<IKLimitCone3D> nextCone = limit_cones[i + 1];
-			 Vector3 collision_point = currCone->get_on_great_tangent_triangle(nextCone, point);
- 
-			 // If the collision point is NaN, skip to the next iteration
-			 if (Math::is_nan(collision_point.x)) {
-				 continue;
-			 }
- 
-			 real_t this_cos = collision_point.dot(point);
- 
-			 // If the cosine is approximately 1, return the original point
-			 if (Math::is_equal_approx(this_cos, real_t(1.0))) {
-				 in_bounds->write[0] = 1;
-				 return point;
-			 }
- 
-			 // If the cosine is greater than the current closest cosine, update the closest collision point and cosine
-			 if (this_cos > closest_cos) {
-				 closest_collision_point = collision_point;
-				 closest_cos = this_cos;
-			 }
-		 }
-	 }
- 
-	 // Return the closest boundary point between cones
-	 return closest_collision_point;
- }
+Vector3 IKKusudama3D::get_local_point_in_limits(Vector3 in_point, Vector<double> *in_bounds) {
+	// Normalize the input point
+	Vector3 point = in_point.normalized();
+	real_t closest_cos = -2.0;
+	in_bounds->write[0] = -1;
+
+	Vector3 closest_collision_point = in_point;
+
+	// Loop through each limit cone
+	for (int i = 0; i < limit_cones.size(); i++) {
+		Ref<IKLimitCone3D> cone = limit_cones[i];
+		Vector3 collision_point = cone->closest_to_cone(point, in_bounds);
+
+		// If the collision point is NaN, return the original point
+		if (Math::is_nan(collision_point.x) || Math::is_nan(collision_point.y) || Math::is_nan(collision_point.z)) {
+			in_bounds->write[0] = 1;
+			return point;
+		}
+
+		// Calculate the cosine of the angle between the collision point and the original point
+		real_t this_cos = collision_point.dot(point);
+
+		// If the closest collision point is not set or the cosine is greater than the current closest cosine, update the closest collision point and cosine
+		if (closest_collision_point.is_zero_approx() || this_cos > closest_cos) {
+			closest_collision_point = collision_point;
+			closest_cos = this_cos;
+		}
+	}
+
+	// If we're out of bounds of all cones, check if we're in the paths between the cones
+	if ((*in_bounds)[0] == -1) {
+		for (int i = 0; i < limit_cones.size() - 1; i++) {
+			Ref<IKLimitCone3D> currCone = limit_cones[i];
+			Ref<IKLimitCone3D> nextCone = limit_cones[i + 1];
+			Vector3 collision_point = currCone->get_on_great_tangent_triangle(nextCone, point);
+
+			// If the collision point is NaN, skip to the next iteration
+			if (Math::is_nan(collision_point.x)) {
+				continue;
+			}
+
+			real_t this_cos = collision_point.dot(point);
+
+			// If the cosine is approximately 1, return the original point
+			if (Math::is_equal_approx(this_cos, real_t(1.0))) {
+				in_bounds->write[0] = 1;
+				return point;
+			}
+
+			// If the cosine is greater than the current closest cosine, update the closest collision point and cosine
+			if (this_cos > closest_cos) {
+				closest_collision_point = collision_point;
+				closest_cos = this_cos;
+			}
+		}
+	}
+
+	// Return the closest boundary point between cones
+	return closest_collision_point;
+}
 
 void IKKusudama3D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_limit_cones"), &IKKusudama3D::get_limit_cones);

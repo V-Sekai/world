@@ -90,15 +90,6 @@ void RendererSceneCull::camera_set_frustum(RID p_camera, float p_size, Vector2 p
 	camera->zfar = p_z_far;
 }
 
-void RendererSceneCull::camera_set_override_projection(RID p_camera, const Projection &p_matrix) {
-	Camera *camera = camera_owner.get_or_null(p_camera);
-	ERR_FAIL_COND(!camera);
-	Projection zero;
-	zero.set_zero();
-	camera->has_override_projection = (p_matrix != zero);
-	camera->override_projection = p_matrix;
-}
-
 void RendererSceneCull::camera_set_transform(RID p_camera, const Transform3D &p_transform) {
 	Camera *camera = camera_owner.get_or_null(p_camera);
 	ERR_FAIL_NULL(camera);
@@ -1729,6 +1720,7 @@ void RendererSceneCull::_update_instance(Instance *p_instance) {
 		idata.base_rid = p_instance->base;
 		idata.parent_array_index = p_instance->visibility_parent ? p_instance->visibility_parent->array_index : -1;
 		idata.visibility_index = p_instance->visibility_index;
+		idata.occlusion_timeout = 0;
 
 		for (Instance *E : p_instance->visibility_dependencies) {
 			Instance *dep_instance = E;
@@ -2614,9 +2606,6 @@ void RendererSceneCull::render_camera(const Ref<RenderSceneBuffers> &p_render_bu
 		}
 
 		camera_data.set_camera(transform, projection, is_orthogonal, vaspect, jitter, camera->visible_layers);
-		if (camera->has_override_projection) {
-			camera_data.set_override_projection(camera->override_projection);
-		}
 	} else {
 		// Setup our camera for our XR interface.
 		// We can support multiple views here each with their own camera
@@ -2787,7 +2776,7 @@ void RendererSceneCull::_scene_cull(CullData &cull_data, InstanceCullResult &cul
 #define VIS_RANGE_CHECK ((idata.visibility_index == -1) || _visibility_range_check<false>(cull_data.scenario->instance_visibility[idata.visibility_index], cull_data.cam_transform.origin, cull_data.visibility_viewport_mask) == 0)
 #define VIS_PARENT_CHECK (_visibility_parent_check(cull_data, idata))
 #define VIS_CHECK (visibility_check < 0 ? (visibility_check = (visibility_flags != InstanceData::FLAG_VISIBILITY_DEPENDENCY_NEEDS_CHECK || (VIS_RANGE_CHECK && VIS_PARENT_CHECK))) : visibility_check)
-#define OCCLUSION_CULLED (cull_data.occlusion_buffer != nullptr && (cull_data.scenario->instance_data[i].flags & InstanceData::FLAG_IGNORE_OCCLUSION_CULLING) == 0 && cull_data.occlusion_buffer->is_occluded(cull_data.scenario->instance_aabbs[i].bounds, cull_data.cam_transform.origin, inv_cam_transform, *cull_data.camera_matrix, z_near))
+#define OCCLUSION_CULLED (cull_data.occlusion_buffer != nullptr && (cull_data.scenario->instance_data[i].flags & InstanceData::FLAG_IGNORE_OCCLUSION_CULLING) == 0 && cull_data.occlusion_buffer->is_occluded(cull_data.scenario->instance_aabbs[i].bounds, cull_data.cam_transform.origin, inv_cam_transform, *cull_data.camera_matrix, z_near, cull_data.scenario->instance_data[i].occlusion_timeout))
 
 		if (!HIDDEN_BY_VISIBILITY_CHECKS) {
 			if ((LAYER_CHECK && IN_FRUSTUM(cull_data.cull->frustum) && VIS_CHECK && !OCCLUSION_CULLED) || (cull_data.scenario->instance_data[i].flags & InstanceData::FLAG_IGNORE_ALL_CULLING)) {
@@ -3579,43 +3568,47 @@ void RendererSceneCull::render_probes() {
 
 	bool busy = false;
 
-	while (ref_probe) {
-		SelfList<InstanceReflectionProbeData> *next = ref_probe->next();
-		RID base = ref_probe->self()->owner->base;
+	if (ref_probe) {
+		RENDER_TIMESTAMP("Render ReflectionProbes");
 
-		switch (RSG::light_storage->reflection_probe_get_update_mode(base)) {
-			case RS::REFLECTION_PROBE_UPDATE_ONCE: {
-				if (busy) { //already rendering something
-					break;
-				}
+		while (ref_probe) {
+			SelfList<InstanceReflectionProbeData> *next = ref_probe->next();
+			RID base = ref_probe->self()->owner->base;
 
-				bool done = _render_reflection_probe_step(ref_probe->self()->owner, ref_probe->self()->render_step);
-				if (done) {
+			switch (RSG::light_storage->reflection_probe_get_update_mode(base)) {
+				case RS::REFLECTION_PROBE_UPDATE_ONCE: {
+					if (busy) { // Already rendering something.
+						break;
+					}
+
+					bool done = _render_reflection_probe_step(ref_probe->self()->owner, ref_probe->self()->render_step);
+					if (done) {
+						done_list.push_back(ref_probe);
+					} else {
+						ref_probe->self()->render_step++;
+					}
+
+					busy = true; // Do not render another one of this kind.
+				} break;
+				case RS::REFLECTION_PROBE_UPDATE_ALWAYS: {
+					int step = 0;
+					bool done = false;
+					while (!done) {
+						done = _render_reflection_probe_step(ref_probe->self()->owner, step);
+						step++;
+					}
+
 					done_list.push_back(ref_probe);
-				} else {
-					ref_probe->self()->render_step++;
-				}
+				} break;
+			}
 
-				busy = true; //do not render another one of this kind
-			} break;
-			case RS::REFLECTION_PROBE_UPDATE_ALWAYS: {
-				int step = 0;
-				bool done = false;
-				while (!done) {
-					done = _render_reflection_probe_step(ref_probe->self()->owner, step);
-					step++;
-				}
-
-				done_list.push_back(ref_probe);
-			} break;
+			ref_probe = next;
 		}
 
-		ref_probe = next;
-	}
-
-	// Now remove from our list
-	for (SelfList<InstanceReflectionProbeData> *rp : done_list) {
-		reflection_probe_render_list.remove(rp);
+		// Now remove from our list
+		for (SelfList<InstanceReflectionProbeData> *rp : done_list) {
+			reflection_probe_render_list.remove(rp);
+		}
 	}
 
 	/* VOXEL GIS */
@@ -4264,6 +4257,7 @@ RendererSceneCull::RendererSceneCull() {
 	indexer_update_iterations = GLOBAL_GET("rendering/limits/spatial_indexer/update_iterations_per_frame");
 	thread_cull_threshold = GLOBAL_GET("rendering/limits/spatial_indexer/threaded_cull_minimum_instances");
 	thread_cull_threshold = MAX(thread_cull_threshold, (uint32_t)WorkerThreadPool::get_singleton()->get_thread_count()); //make sure there is at least one thread per CPU
+	RendererSceneOcclusionCull::HZBuffer::occlusion_jitter_enabled = GLOBAL_GET("rendering/occlusion_culling/jitter_projection");
 
 	dummy_occlusion_culling = memnew(RendererSceneOcclusionCull);
 
