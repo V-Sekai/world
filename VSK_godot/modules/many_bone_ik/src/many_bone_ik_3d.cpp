@@ -784,6 +784,7 @@ void ManyBoneIK3D::_skeleton_changed(Skeleton3D *p_old, Skeleton3D *p_new_) {
 	if (queue_debug_skeleton) {
 		queue_debug_skeleton = false;
 	}
+	update_gizmos();
 }
 
 real_t ManyBoneIK3D::get_pin_weight(int32_t p_pin_index) const {
