@@ -52,7 +52,7 @@ public:
 	};
 
 	RenderingContextDriverVulkanWindows();
-	~RenderingContextDriverVulkanWindows() override;
+	~RenderingContextDriverVulkanWindows() override final;
 };
 
 #endif // VULKAN_ENABLED
