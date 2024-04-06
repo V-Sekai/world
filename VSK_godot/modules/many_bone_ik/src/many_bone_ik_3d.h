@@ -91,8 +91,6 @@ protected:
 	virtual void _process_modification() override;
 
 public:
-	float get_kusudama_twist_current(int32_t p_index) const;
-	void set_kusudama_twist_current(int32_t p_index, float p_rotation);
 	void set_pin_bone_name(int32_t p_effector_index, StringName p_name) const;
 	void set_state(Ref<ManyBoneIK3DState> p_state);
 	Ref<ManyBoneIK3DState> get_state() const;
