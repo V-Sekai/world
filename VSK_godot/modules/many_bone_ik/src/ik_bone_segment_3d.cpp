@@ -30,16 +30,16 @@
 
 #include "ik_bone_segment_3d.h"
 
+#include "core/string/string_builder.h"
 #include "ik_effector_3d.h"
 #include "ik_kusudama_3d.h"
-#include "ik_limit_cone_3d.h"
 #include "many_bone_ik_3d.h"
-#include "math/ik_node_3d.h"
 #include "scene/3d/skeleton_3d.h"
 
 Ref<IKBone3D> IKBoneSegment3D::get_root() const {
 	return root;
 }
+
 Ref<IKBone3D> IKBoneSegment3D::get_tip() const {
 	return tip;
 }
@@ -431,7 +431,15 @@ void IKBoneSegment3D::_finalize_segment(Ref<IKBone3D> p_current_tip) {
 		_enable_pinned_descendants();
 	}
 
-	set_name(vformat("IKBoneSegment%sRoot%sTip", root->get_name(), tip->get_name()));
+	StringBuilder name_builder;
+	name_builder.append("IKBoneSegment");
+	name_builder.append(root->get_name());
+	name_builder.append("Root");
+	name_builder.append(tip->get_name());
+	name_builder.append("Tip");
+
+	String ik_bone_name = name_builder.as_string();
+	set_name(ik_bone_name);
 	bones.clear();
 	create_bone_list(bones, false);
 }
