@@ -14,7 +14,7 @@
       "name": "Run the editor with task_goal_planner",
       "type": "lldb",
       "request": "launch",
-      "args": ["--path", "/Users/ernest.lee/Documents/Current/test_range_of_motion_01", "-e"],
+      "args": ["--path", "../test_range_of_motion_01", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/VSK_godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
