@@ -30,6 +30,7 @@
 
 #include "ik_kusudama_3d.h"
 
+#include "core/math/math_defs.h"
 #include "core/math/quaternion.h"
 #include "ik_limit_cone_3d.h"
 #include "math/ik_node_3d.h"
@@ -426,4 +427,32 @@ Quaternion IKKusudama3D::get_quaternion_axis_angle(const Vector3 &p_axis, real_t
 		real_t s = sin_angle / d;
 		return Quaternion(p_axis.x * s, p_axis.y * s, p_axis.z * s, cos_angle);
 	}
+}
+
+void IKKusudama3D::set_current_twist_rotation(Ref<IKNode3D> p_godot_skeleton_aligned_transform, Ref<IKNode3D> p_bone_direction, Ref<IKNode3D> p_twist_transform, float p_rotation) {
+	Quaternion new_twist_rotation = Quaternion(Vector3(0, 1, 0), p_rotation);
+	Quaternion global_twist_center = p_twist_transform->get_global_transform().basis.inverse().get_rotation_quaternion() * twist_center_rot;
+	Quaternion current_align_rotation = global_twist_center * p_bone_direction->get_global_transform().basis.get_rotation_quaternion();
+	Quaternion current_swing_rotation, current_twist_rotation;
+	get_swing_twist(current_align_rotation, Vector3(0, 1, 0), current_swing_rotation, current_twist_rotation);
+	Quaternion new_align_rotation = current_swing_rotation * new_twist_rotation;
+	Transform3D new_global_transform = p_godot_skeleton_aligned_transform->get_global_transform();
+	new_global_transform.basis = new_align_rotation;
+	p_godot_skeleton_aligned_transform->set_global_transform(new_global_transform);
+}
+
+float IKKusudama3D::get_current_twist_rotation(Ref<IKNode3D> p_godot_skeleton_aligned_transform, Ref<IKNode3D> p_bone_direction, Ref<IKNode3D> p_twist_transform) {
+	Quaternion global_twist_center = p_twist_transform->get_global_transform().basis.inverse().get_rotation_quaternion() * twist_center_rot;
+	Quaternion align_rot = global_twist_center * p_bone_direction->get_global_transform().basis.get_rotation_quaternion();
+	Quaternion twist_rotation, swing_rotation;
+	get_swing_twist(align_rot, Vector3(0, 1, 0), swing_rotation, twist_rotation);
+	if (range_angle == 0.0) {
+		return 0;
+	}
+	Vector3 forward_axis = p_bone_direction->get_global_transform().basis.get_column(Vector3::AXIS_Z);
+	Vector3 twist_vec = twist_rotation.xform(forward_axis);
+	real_t min_angle = twist_vec.angle_to(twist_min_vec);
+	real_t max_angle = twist_vec.angle_to(twist_max_vec);
+	real_t center_angle = (min_angle + max_angle) / 2.0;
+	return center_angle;
 }
