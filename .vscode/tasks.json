@@ -13,7 +13,7 @@
         "cwd": "${workspaceFolder}/VSK_godot"
       },
       "command": [
-        "scons scu_build=yes werror=yes use_llvm=yes use_mingw=yes production=yes precision=double compiledb=yes target=editor tests=yes debug_symbols=yes"
+        "scons werror=yes use_llvm=yes use_mingw=yes production=yes precision=double compiledb=yes target=editor tests=yes debug_symbols=yes"
       ],
     },
   ]
