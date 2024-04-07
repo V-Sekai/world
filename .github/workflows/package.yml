@@ -98,13 +98,20 @@ jobs:
           echo "<title>V-Sekai Kit Contents</title>" >> ./archive/index.html
           echo "</head>" >> ./archive/index.html
           echo "<body>" >> ./archive/index.html
-          echo "<h1>Archive Contents</h1>" >> ./archive/index.html
+          echo "<h1>V-Sekai Kit Contents</h1>" >> ./archive/index.html
           echo "<ul>" >> ./archive/index.html
           for file in $(find ./archive -type f ! -path "./archive/store/*"); do
             stripped_file=$(echo "$file" | sed 's|./archive/||')
             echo "<li><a href=\"$stripped_file\">$stripped_file</a></li>" >> ./archive/index.html
           done
           echo "</ul>" >> ./archive/index.html
+          echo "<h2>Instructions</h2>" >> ./archive/index.html
+          echo "<h3>Windows</h3>" >> ./archive/index.html
+          echo "<pre><code>./desync-windows-amd64.exe untar -s https://v-sekai.github.io/v-sekai-other-world/store -i https://v-sekai.github.io/v-sekai-other-world/VSK_game.caidx VSK_game --no-same-owner</code></pre>" >> ./archive/index.html
+          echo "<h3>Mac</h3>" >> ./archive/index.html
+          echo "<pre><code>./desync-darwin-amd64 untar -s https://v-sekai.github.io/v-sekai-other-world/store -i https://v-sekai.github.io/v-sekai-other-world/VSK_game.caidx VSK_game --no-same-owner</code></pre>" >> ./archive/index.html
+          echo "<h3>Linux</h3>" >> ./archive/index.html
+          echo "<pre><code>./desync-linux-amd64 untar -s https://v-sekai.github.io/v-sekai-other-world/store -i https://v-sekai.github.io/v-sekai-other-world/VSK_game.caidx VSK_game --no-same-owner</code></pre>" >> ./archive/index.html
           echo "</body>" >> ./archive/index.html
           echo "</html>" >> ./archive/index.html
 
