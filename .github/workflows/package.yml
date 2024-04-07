@@ -94,3 +94,28 @@ jobs:
           ./butler push archive ${{ secrets.ITCHIO_USER }}/vsekai-kit:linux
         env:
           BUTLER_API_KEY: ${{ secrets.ITCHIO_API_KEY }}
+
+      - name: Generate index.html
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "<!DOCTYPE html>" > ./archive/index.html
+          echo "<html>" >> ./archive/index.html
+          echo "<head>" >> ./archive/index.html
+          echo "<title>Archive Contents</title>" >> ./archive/index.html
+          echo "</head>" >> ./archive/index.html
+          echo "<body>" >> ./archive/index.html
+          echo "<h1>Archive Contents</h1>" >> ./archive/index.html
+          echo "<ul>" >> ./archive/index.html
+          for file in $(ls ./archive); do
+            echo "<li><a href=\"$file\">$file</a></li>" >> ./archive/index.html
+          done
+          echo "</ul>" >> ./archive/index.html
+          echo "</body>" >> ./archive/index.html
+          echo "</html>" >> ./archive/index.html
+      
+      - name: Upload to GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./archive
