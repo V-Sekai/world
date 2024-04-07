@@ -38,8 +38,9 @@ jobs:
             ${{ runner.os }}-go-
 
       - run: go test
-      - run: go build ./cmd/desync
-
+      - run: GOOS=windows GOARCH=amd64 go build -o ./archive/desync-windows-amd64.exe ./cmd/desync
+      - run: GOOS=darwin GOARCH=amd64 go build -o ./archive/desync-darwin-amd64 ./cmd/desync
+      - run: GOOS=linux GOARCH=amd64 go build -o ./archive/desync-linux-amd64 ./cmd/desync
       - name: Debug
         shell: bash
         run: |
@@ -51,15 +52,14 @@ jobs:
         with:
           path: other
 
-      - run: chmod +x desync
+      - run: chmod +x ./archive/desync-linux-amd64
 
       - name: Package Code
         run: |
-          mkdir archive
+          mkdir -p archive
           for dir in ART_base_mesh SERVICE_flux_config TOOL_cloth_dynamics TOOL_intrinsic_triangulations TOOL_okhsl_picker TOOL_task_goal_planner SERVICE_uro TOOL_convex_decomposition_for_3d_meshes TOOL_launcher TOOL_pipeline TOOL_xr_grid SERVICE_vsona_bot TOOL_godot_animation_provider TOOL_manuals TOOL_sample_gui_in_vr VSK_game SERVICE_docker_groups TOOL_blender TOOL_goedesiac_path TOOL_model_explorer TOOL_shader_motion VSK_godot; do
-            ./desync tar archive/$dir.catar other/$dir
+            ./archive/desync-linux-amd64 tar archive/$dir.catar other/$dir
           done
-          cp desync archive/
 
       - name: Upload Desync Files as Artifacts
         uses: actions/upload-artifact@v2
@@ -80,12 +80,14 @@ jobs:
           path: LICENSE
 
       - name: Download Butler
+        if: github.ref == 'refs/heads/main'
         run: |
           wget https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default -O butler.zip
           unzip butler.zip
           chmod +x butler
 
       - name: Upload to Itch.io
+        if: github.ref == 'refs/heads/main'
         run: |
           ./butler push archive ${{ secrets.ITCHIO_USER }}/vsekai-kit:mac
           ./butler push archive ${{ secrets.ITCHIO_USER }}/vsekai-kit:windows
