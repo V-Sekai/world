@@ -12,6 +12,15 @@ jobs:
   build:
     name: Validate Desync on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
     strategy:
       matrix:
         include:
@@ -125,4 +134,4 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
+  
