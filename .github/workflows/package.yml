@@ -26,28 +26,28 @@ jobs:
 
     - name: Package Code
       run: |
-        zstd ART_base_mesh -o ART_base_mesh.zst
-        zstd SERVICE_flux_config -o SERVICE_flux_config.zst
-        zstd TOOL_cloth_dynamics -o TOOL_cloth_dynamics.zst
-        zstd TOOL_intrinsic_triangulations -o TOOL_intrinsic_triangulations.zst
-        zstd TOOL_okhsl_picker -o TOOL_okhsl_picker.zst
-        zstd TOOL_task_goal_planner -o TOOL_task_goal_planner.zst
-        zstd SERVICE_uro -o SERVICE_uro.zst
-        zstd TOOL_convex_decomposition_for_3d_meshes -o TOOL_convex_decomposition_for_3d_meshes.zst
-        zstd TOOL_launcher -o TOOL_launcher.zst
-        zstd TOOL_pipeline -o TOOL_pipeline.zst
-        zstd TOOL_xr_grid -o TOOL_xr_grid.zst
-        zstd SERVICE_vsona_bot -o SERVICE_vsona_bot.zst
-        zstd TOOL_godot_animation_provider -o TOOL_godot_animation_provider.zst
-        zstd TOOL_manuals -o TOOL_manuals.zst
-        zstd TOOL_sample_gui_in_vr -o TOOL_sample_gui_in_vr.zst
-        zstd VSK_game -o VSK_game.zst
-        zstd SERVICE_docker_groups -o SERVICE_docker_groups.zst
-        zstd TOOL_blender -o TOOL_blender.zst
-        zstd TOOL_goedesiac_path -o TOOL_goedesiac_path.zst
-        zstd TOOL_model_explorer -o TOOL_model_explorer.zst
-        zstd TOOL_shader_motion -o TOOL_shader_motion.zst
-        zstd VSK_godot -o VSK_godot.zst
+        zstd -r ART_base_mesh -o ART_base_mesh.zst
+        zstd -r SERVICE_flux_config -o SERVICE_flux_config.zst
+        zstd -r TOOL_cloth_dynamics -o TOOL_cloth_dynamics.zst
+        zstd -r TOOL_intrinsic_triangulations -o TOOL_intrinsic_triangulations.zst
+        zstd -r TOOL_okhsl_picker -o TOOL_okhsl_picker.zst
+        zstd -r TOOL_task_goal_planner -o TOOL_task_goal_planner.zst
+        zstd -r SERVICE_uro -o SERVICE_uro.zst
+        zstd -r TOOL_convex_decomposition_for_3d_meshes -o TOOL_convex_decomposition_for_3d_meshes.zst
+        zstd -r TOOL_launcher -o TOOL_launcher.zst
+        zstd -r TOOL_pipeline -o TOOL_pipeline.zst
+        zstd -r TOOL_xr_grid -o TOOL_xr_grid.zst
+        zstd -r SERVICE_vsona_bot -o SERVICE_vsona_bot.zst
+        zstd -r TOOL_godot_animation_provider -o TOOL_godot_animation_provider.zst
+        zstd -r TOOL_manuals -o TOOL_manuals.zst
+        zstd -r TOOL_sample_gui_in_vr -o TOOL_sample_gui_in_vr.zst
+        zstd -r VSK_game -o VSK_game.zst
+        zstd -r SERVICE_docker_groups -o SERVICE_docker_groups.zst
+        zstd -r TOOL_blender -o TOOL_blender.zst
+        zstd -r TOOL_goedesiac_path -o TOOL_goedesiac_path.zst
+        zstd -r TOOL_model_explorer -o TOOL_model_explorer.zst
+        zstd -r TOOL_shader_motion -o TOOL_shader_motion.zst
+        zstd -r VSK_godot -o VSK_godot.zst
 
     - name: Upload Zipped Files as Artifacts
       uses: actions/upload-artifact@v2
