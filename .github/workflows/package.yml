@@ -108,12 +108,17 @@ jobs:
           echo "<pre><code>./desync-linux-amd64 untar -s https://v-sekai.github.io/v-sekai-other-world/store -i https://v-sekai.github.io/v-sekai-other-world/VSK_game.caidx VSK_game --no-same-owner</code></pre>" >> ./archive/index.html
           echo "<ul>" >> ./archive/index.html
           # List desync binaries first
-          for file in ./archive/desync-*; do
+          for file in $(ls ./archive/desync-* 2> /dev/null); do
+            stripped_file=$(echo "$file" | sed 's|./archive/||')
+            echo "<li><a href=\"$stripped_file\">$stripped_file</a></li>" >> ./archive/index.html
+          done
+          # Then list caidx files
+          for file in $(ls ./archive/*.caidx 2> /dev/null); do
             stripped_file=$(echo "$file" | sed 's|./archive/||')
             echo "<li><a href=\"$stripped_file\">$stripped_file</a></li>" >> ./archive/index.html
           done
           # Then list the remaining files
-          find ./archive -type f ! -name 'desync-*' | while read file; do
+          find ./archive -type f ! -name 'desync-*' ! -name '*.caidx' | while read file; do
             stripped_file=$(echo "$file" | sed 's|./archive/||')
             echo "<li><a href=\"$stripped_file\">$stripped_file</a></li>" >> ./archive/index.html
           done
