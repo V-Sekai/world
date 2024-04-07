@@ -1,48 +1,94 @@
-name: Package casync
+name: Package V-Sekai SDK
 
 on:
   push:
     branches:
-      - 'main'
+      - "main"
   pull_request:
     branches:
-      - '**'
+      - "**"
 
 jobs:
-  package:
-    runs-on: ubuntu-latest
+  build:
+    name: Validate Desync on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        dir: [ART_base_mesh, SERVICE_flux_config, TOOL_cloth_dynamics, TOOL_intrinsic_triangulations, TOOL_okhsl_picker, TOOL_task_goal_planner, SERVICE_uro, TOOL_convex_decomposition_for_3d_meshes, TOOL_launcher, TOOL_pipeline, TOOL_xr_grid, SERVICE_vsona_bot, TOOL_godot_animation_provider, TOOL_manuals, TOOL_sample_gui_in_vr, VSK_game, SERVICE_docker_groups, TOOL_blender, TOOL_goedesiac_path, TOOL_model_explorer, TOOL_shader_motion, VSK_godot]
+        include:
+          - os: ubuntu-latest
+            triplet: x86_64-unknown-linux-gnu
 
+    timeout-minutes: 10
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout desync
+        uses: actions/checkout@v2
+        with:
+          repository: V-Sekai/desync
+          fetch-depth: 0
 
-    - name: Install casync
-      run: |
-        sudo apt-get update
-        sudo apt-get install zstd
-        sudo apt-get install casync
+      - uses: actions/setup-go@v2
+        with:
+          go-version: "^1.15.6"
 
-    - name: Package Code
-      run: |
-        casync make  ${{ matrix.dir }}.catar ${{ matrix.dir }}
+      - uses: actions/cache@v1
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
-    - name: Upload CASYNC Files as Artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ matrix.dir }}.catar
-        path: ./${{ matrix.dir }}.catar
+      - run: go test
+      - run: go build ./cmd/desync
 
-    - name: Upload README.md
-      uses: actions/upload-artifact@v2
-      with:
-        name: README.md
-        path: README.md
+      - name: Debug
+        shell: bash
+        run: |
+          pwd
+          ls -la
 
-    - name: Upload LICENSE
-      uses: actions/upload-artifact@v2
-      with:
-        name: LICENSE
-        path: LICENSE
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          path: other
+
+      - run: chmod +x desync
+
+      - name: Package Code
+        run: |
+          mkdir archive
+          for dir in ART_base_mesh SERVICE_flux_config TOOL_cloth_dynamics TOOL_intrinsic_triangulations TOOL_okhsl_picker TOOL_task_goal_planner SERVICE_uro TOOL_convex_decomposition_for_3d_meshes TOOL_launcher TOOL_pipeline TOOL_xr_grid SERVICE_vsona_bot TOOL_godot_animation_provider TOOL_manuals TOOL_sample_gui_in_vr VSK_game SERVICE_docker_groups TOOL_blender TOOL_goedesiac_path TOOL_model_explorer TOOL_shader_motion VSK_godot; do
+            ./desync tar archive/$dir.catar other/$dir
+          done
+          cp desync archive/
+
+      - name: Upload Desync Files as Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: desync-files
+          path: ./archive
+
+      - name: Upload README.md
+        uses: actions/upload-artifact@v2
+        with:
+          name: README.md
+          path: README.md
+
+      - name: Upload LICENSE
+        uses: actions/upload-artifact@v2
+        with:
+          name: LICENSE
+          path: LICENSE
+
+      - name: Download Butler
+        run: |
+          wget https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default -O butler.zip
+          unzip butler.zip
+          chmod +x butler
+
+      - name: Upload to Itch.io
+        run: |
+          ./butler push archive ${{ secrets.ITCHIO_USER }}/vsekai-kit:mac
+          ./butler push archive ${{ secrets.ITCHIO_USER }}/vsekai-kit:windows
+          ./butler push archive ${{ secrets.ITCHIO_USER }}/vsekai-kit:linux
+        env:
+          BUTLER_API_KEY: ${{ secrets.ITCHIO_API_KEY }}
