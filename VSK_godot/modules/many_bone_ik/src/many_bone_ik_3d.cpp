@@ -718,6 +718,7 @@ void ManyBoneIK3D::_execute(real_t delta) {
 	if (!is_visible()) {
 		return;
 	}
+	_update_ik_bones_transform();
 	for (int32_t i = 0; i < get_iterations_per_frame(); i++) {
 		for (Ref<IKBoneSegment3D> segmented_skeleton : segmented_skeletons) {
 			if (segmented_skeleton.is_null()) {
@@ -859,16 +860,13 @@ void ManyBoneIK3D::set_skeleton_node_path(NodePath p_skeleton_node_path) {
 
 void ManyBoneIK3D::_notification(int p_what) {
 	switch (p_what) {
-		case NOTIFICATION_READY: {
-			set_process_priority(1);
-			set_notify_transform(true);
-		} break;
 		case NOTIFICATION_ENTER_TREE: {
 			set_process_internal(true);
+			set_process_priority(1);
+			set_notify_local_transform(true);
 		} break;
-		case NOTIFICATION_EXIT_TREE: {
-		} break;
-		case NOTIFICATION_TRANSFORM_CHANGED: {
+		case NOTIFICATION_LOCAL_TRANSFORM_CHANGED: {
+			_execute(get_process_delta_time());
 			update_gizmos();
 		} break;
 		case NOTIFICATION_INTERNAL_PROCESS: {
