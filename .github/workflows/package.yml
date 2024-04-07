@@ -48,7 +48,7 @@ jobs:
 
       - run: go test
       - run: GOOS=windows GOARCH=amd64 go build -o ./archive/desync-windows-amd64.exe ./cmd/desync
-      - run: GOOS=darwin GOARCH=amd64 go build -o ./archive/desync-darwin-amd64 ./cmd/desync
+      - run: GOOS=darwin GOARCH=amd64 go build -o ./archive/desync-macos-amd64 ./cmd/desync
       - run: GOOS=linux GOARCH=amd64 go build -o ./archive/desync-linux-amd64 ./cmd/desync
       - name: Debug
         shell: bash
@@ -103,7 +103,7 @@ jobs:
           echo "<h3>Windows</h3>" >> ./archive/index.html
           echo "<pre><code>./desync-windows-amd64.exe untar -s https://v-sekai.github.io/v-sekai-other-world/store -i https://v-sekai.github.io/v-sekai-other-world/VSK_game.caidx VSK_game --no-same-owner</code></pre>" >> ./archive/index.html
           echo "<h3>Mac</h3>" >> ./archive/index.html
-          echo "<pre><code>./desync-darwin-amd64 untar -s https://v-sekai.github.io/v-sekai-other-world/store -i https://v-sekai.github.io/v-sekai-other-world/VSK_game.caidx VSK_game --no-same-owner</code></pre>" >> ./archive/index.html
+          echo "<pre><code>./desync-macos-amd64 untar -s https://v-sekai.github.io/v-sekai-other-world/store -i https://v-sekai.github.io/v-sekai-other-world/VSK_game.caidx VSK_game --no-same-owner</code></pre>" >> ./archive/index.html
           echo "<h3>Linux</h3>" >> ./archive/index.html
           echo "<pre><code>./desync-linux-amd64 untar -s https://v-sekai.github.io/v-sekai-other-world/store -i https://v-sekai.github.io/v-sekai-other-world/VSK_game.caidx VSK_game --no-same-owner</code></pre>" >> ./archive/index.html
           echo "<ul>" >> ./archive/index.html
