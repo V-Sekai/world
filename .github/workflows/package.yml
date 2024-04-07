@@ -89,22 +89,6 @@ jobs:
           name: LICENSE
           path: LICENSE
 
-      - name: Download Butler
-        if: github.ref == 'refs/heads/main'
-        run: |
-          wget https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default -O butler.zip
-          unzip butler.zip
-          chmod +x butler
-
-      - name: Upload to Itch.io
-        if: github.ref == 'refs/heads/main'
-        run: |
-          ./butler push archive ${{ secrets.ITCHIO_USER }}/vsekai-kit:mac
-          ./butler push archive ${{ secrets.ITCHIO_USER }}/vsekai-kit:windows
-          ./butler push archive ${{ secrets.ITCHIO_USER }}/vsekai-kit:linux
-        env:
-          BUTLER_API_KEY: ${{ secrets.ITCHIO_API_KEY }}
-
       - name: Generate index.html
         if: github.ref == 'refs/heads/main'
         run: |
