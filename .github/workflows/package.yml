@@ -14,7 +14,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Install zip
-      run: sudo apt-get install zip
+      run: sudo apt-get install zstd
 
   package:
     needs: setup
@@ -26,49 +26,41 @@ jobs:
 
     - name: Package Code
       run: |
-        zip -r ART_base_mesh.zip ART_base_mesh
-        zip -r SERVICE_flux_config.zip SERVICE_flux_config
-        zip -r TOOL_cloth_dynamics.zip TOOL_cloth_dynamics
-        zip -r TOOL_intrinsic_triangulations.zip TOOL_intrinsic_triangulations
-        zip -r TOOL_okhsl_picker.zip TOOL_okhsl_picker
-        zip -r TOOL_task_goal_planner.zip TOOL_task_goal_planner
-        zip -r SERVICE_uro.zip SERVICE_uro
-        zip -r TOOL_convex_decomposition_for_3d_meshes.zip TOOL_convex_decomposition_for_3d_meshes
-        zip -r TOOL_launcher.zip TOOL_launcher
-        zip -r TOOL_pipeline.zip TOOL_pipeline
-        zip -r TOOL_xr_grid.zip TOOL_xr_grid
-        zip -r SERVICE_vsona_bot.zip SERVICE_vsona_bot
-        zip -r TOOL_godot_animation_provider.zip TOOL_godot_animation_provider
-        zip -r TOOL_manuals.zip TOOL_manuals
-        zip -r TOOL_sample_gui_in_vr.zip TOOL_sample_gui_in_vr
-        zip -r VSK_game.zip VSK_game
-        zip -r SERVICE_docker_groups.zip SERVICE_docker_groups
-        zip -r TOOL_blender.zip TOOL_blender
-        zip -r TOOL_goedesiac_path.zip TOOL_goedesiac_path
-        zip -r TOOL_model_explorer.zip TOOL_model_explorer
-        zip -r TOOL_shader_motion.zip TOOL_shader_motion
-        zip -r VSK_godot.zip VSK_godot
+        zstd ART_base_mesh -o ART_base_mesh.zst
+        zstd SERVICE_flux_config -o SERVICE_flux_config.zst
+        zstd TOOL_cloth_dynamics -o TOOL_cloth_dynamics.zst
+        zstd TOOL_intrinsic_triangulations -o TOOL_intrinsic_triangulations.zst
+        zstd TOOL_okhsl_picker -o TOOL_okhsl_picker.zst
+        zstd TOOL_task_goal_planner -o TOOL_task_goal_planner.zst
+        zstd SERVICE_uro -o SERVICE_uro.zst
+        zstd TOOL_convex_decomposition_for_3d_meshes -o TOOL_convex_decomposition_for_3d_meshes.zst
+        zstd TOOL_launcher -o TOOL_launcher.zst
+        zstd TOOL_pipeline -o TOOL_pipeline.zst
+        zstd TOOL_xr_grid -o TOOL_xr_grid.zst
+        zstd SERVICE_vsona_bot -o SERVICE_vsona_bot.zst
+        zstd TOOL_godot_animation_provider -o TOOL_godot_animation_provider.zst
+        zstd TOOL_manuals -o TOOL_manuals.zst
+        zstd TOOL_sample_gui_in_vr -o TOOL_sample_gui_in_vr.zst
+        zstd VSK_game -o VSK_game.zst
+        zstd SERVICE_docker_groups -o SERVICE_docker_groups.zst
+        zstd TOOL_blender -o TOOL_blender.zst
+        zstd TOOL_goedesiac_path -o TOOL_goedesiac_path.zst
+        zstd TOOL_model_explorer -o TOOL_model_explorer.zst
+        zstd TOOL_shader_motion -o TOOL_shader_motion.zst
+        zstd VSK_godot -o VSK_godot.zst
 
-  upload:
-    needs: package
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Upload Artifacts
+    - name: Upload Zipped Files as Artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: package
-        path: ./*.zip
-
+        name: zipped-files
+        path: ./*.zst
+        
     - name: Upload Artifacts
       uses: actions/upload-artifact@v2
       with:
         name: README.md
         path: README.md
-  
+
     - name: Upload Artifacts
       uses: actions/upload-artifact@v2
       with:
