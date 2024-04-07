@@ -1,0 +1,76 @@
+name: Package Docker Groups
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install zip
+      run: sudo apt-get install zip
+
+  package:
+    needs: setup
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Package Code
+      run: |
+        zip -r ART_base_mesh.zip ART_base_mesh
+        zip -r SERVICE_flux_config.zip SERVICE_flux_config
+        zip -r TOOL_cloth_dynamics.zip TOOL_cloth_dynamics
+        zip -r TOOL_intrinsic_triangulations.zip TOOL_intrinsic_triangulations
+        zip -r TOOL_okhsl_picker.zip TOOL_okhsl_picker
+        zip -r TOOL_task_goal_planner.zip TOOL_task_goal_planner
+        zip -r SERVICE_uro.zip SERVICE_uro
+        zip -r TOOL_convex_decomposition_for_3d_meshes.zip TOOL_convex_decomposition_for_3d_meshes
+        zip -r TOOL_launcher.zip TOOL_launcher
+        zip -r TOOL_pipeline.zip TOOL_pipeline
+        zip -r TOOL_xr_grid.zip TOOL_xr_grid
+        zip -r SERVICE_vsona_bot.zip SERVICE_vsona_bot
+        zip -r TOOL_godot_animation_provider.zip TOOL_godot_animation_provider
+        zip -r TOOL_manuals.zip TOOL_manuals
+        zip -r TOOL_sample_gui_in_vr.zip TOOL_sample_gui_in_vr
+        zip -r VSK_game.zip VSK_game
+        zip -r SERVICE_docker_groups.zip SERVICE_docker_groups
+        zip -r TOOL_blender.zip TOOL_blender
+        zip -r TOOL_goedesiac_path.zip TOOL_goedesiac_path
+        zip -r TOOL_model_explorer.zip TOOL_model_explorer
+        zip -r TOOL_shader_motion.zip TOOL_shader_motion
+        zip -r VSK_godot.zip VSK_godot
+
+  upload:
+    needs: package
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: package
+        path: ./*.zip
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: README.md
+        path: README.md
+  
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: LICENSE
+        path: LICENSE
