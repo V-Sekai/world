@@ -1,54 +1,47 @@
-name: Package Docker Groups
+name: Package casync
 
 on:
   push:
     branches:
-      - main
+      - 'main'
+  pull_request:
+    branches:
+      - '**'
 
 jobs:
-  setup:
+  package:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dir: [ART_base_mesh, SERVICE_flux_config, TOOL_cloth_dynamics, TOOL_intrinsic_triangulations, TOOL_okhsl_picker, TOOL_task_goal_planner, SERVICE_uro, TOOL_convex_decomposition_for_3d_meshes, TOOL_launcher, TOOL_pipeline, TOOL_xr_grid, SERVICE_vsona_bot, TOOL_godot_animation_provider, TOOL_manuals, TOOL_sample_gui_in_vr, VSK_game, SERVICE_docker_groups, TOOL_blender, TOOL_goedesiac_path, TOOL_model_explorer, TOOL_shader_motion, VSK_godot]
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Install zip and casync
+    - name: Install casync
       run: |
         sudo apt-get update
         sudo apt-get install zstd
         sudo apt-get install casync
 
-  package:
-    needs: setup
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
     - name: Package Code
       run: |
-        # Add your directories here
-        DIRS="ART_base_mesh SERVICE_flux_config TOOL_cloth_dynamics TOOL_intrinsic_triangulations TOOL_okhsl_picker TOOL_task_goal_planner SERVICE_uro TOOL_convex_decomposition_for_3d_meshes TOOL_launcher TOOL_pipeline TOOL_xr_grid SERVICE_vsona_bot TOOL_godot_animation_provider TOOL_manuals TOOL_sample_gui_in_vr VSK_game SERVICE_docker_groups TOOL_blender TOOL_goedesiac_path TOOL_model_explorer TOOL_shader_motion VSK_godot"
-        
-        for dir in $DIRS; do
-          casync make $dir.caibx $dir
-        done
+        casync make  ${{ matrix.dir }}.catar ${{ matrix.dir }}
 
     - name: Upload CASYNC Files as Artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: casync-files
-        path: ./*.caibx
+        name: ${{ matrix.dir }}.catar
+        path: ./${{ matrix.dir }}.catar
 
-    - name: Upload Artifacts
+    - name: Upload README.md
       uses: actions/upload-artifact@v2
       with:
         name: README.md
         path: README.md
 
-    - name: Upload Artifacts
+    - name: Upload LICENSE
       uses: actions/upload-artifact@v2
       with:
         name: LICENSE
