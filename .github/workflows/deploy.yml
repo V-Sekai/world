@@ -1,0 +1,78 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+    branches:
+      - "**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate index.html
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "<!DOCTYPE html>" > ./archive/index.html
+          echo "<html>" >> ./archive/index.html
+          echo "<head>" >> ./archive/index.html
+          echo "<title>V-Sekai Kit Contents</title>" >> ./archive/index.html
+          echo "</head>" >> ./archive/index.html
+          echo "<body>" >> ./archive/index.html
+          echo "<h1>V-Sekai Kit Contents</h1>" >> ./archive/index.html
+          echo "<h2>Instructions</h2>" >> ./archive/index.html
+          echo "<h3>Windows</h3>" >> ./archive/index.html
+          echo "<pre><code>./desync-windows-amd64.exe untar -s https://v-sekai.github.io/v-sekai-other-world/store -i https://v-sekai.github.io/v-sekai-other-world/VSK_game.caidx VSK_game --no-same-owner</code></pre>" >> ./archive/index.html
+          echo "<h3>Mac</h3>" >> ./archive/index.html
+          echo "<pre><code>./desync-macos-amd64 untar -s https://v-sekai.github.io/v-sekai-other-world/store -i https://v-sekai.github.io/v-sekai-other-world/VSK_game.caidx VSK_game --no-same-owner</code></pre>" >> ./archive/index.html
+          echo "<h3>Linux</h3>" >> ./archive/index.html
+          echo "<pre><code>./desync-linux-amd64 untar -s https://v-sekai.github.io/v-sekai-other-world/store -i https://v-sekai.github.io/v-sekai-other-world/VSK_game.caidx VSK_game --no-same-owner</code></pre>" >> ./archive/index.html
+          echo "<ul>" >> ./archive/index.html
+          # List desync binaries first
+          for file in $(ls ./archive/desync-* 2> /dev/null); do
+            stripped_file=$(echo "$file" | sed 's|./archive/||')
+            echo "<li><a href=\"$stripped_file\">$stripped_file</a></li>" >> ./archive/index.html
+          done
+          # Then list caidx files
+          for file in $(ls ./archive/*.caidx 2> /dev/null); do
+            stripped_file=$(echo "$file" | sed 's|./archive/||')
+            echo "<li><a href=\"$stripped_file\">$stripped_file</a></li>" >> ./archive/index.html
+          done
+          # Then list the remaining files
+          find ./archive -type f ! -name 'desync-*' ! -name '*.caidx' | while read file; do
+            stripped_file=$(echo "$file" | sed 's|./archive/||')
+            echo "<li><a href=\"$stripped_file\">$stripped_file</a></li>" >> ./archive/index.html
+          done
+          echo "</ul>" >> ./archive/index.html
+          echo "</body>" >> ./archive/index.html
+          echo "</html>" >> ./archive/index.html
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "archive"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Download Butler
+        if: github.ref == 'refs/heads/main'
+        run: |
+          wget https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default -O butler.zip
+          unzip butler.zip
+          chmod +x butler
+
+      - name: Upload to Itch.io
+        if: github.ref == 'refs/heads/main'
+        run: |
+          ./butler push archive ${{ secrets.ITCHIO_USER }}/vsekai-kit:mac
+          ./butler push archive ${{ secrets.ITCHIO_USER }}/vsekai-kit:windows
+          ./butler push archive ${{ secrets.ITCHIO_USER }}/vsekai-kit:linux
+        env:
+          BUTLER_API_KEY: ${{ secrets.ITCHIO_API_KEY }}

@@ -1,0 +1,57 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+    branches:
+      - "**"
+
+jobs:
+  build:
+    name: Validate Desync on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            triplet: x86_64-unknown-linux-gnu
+
+    timeout-minutes: 10
+    steps:
+      - name: Checkout desync
+        uses: actions/checkout@v2
+        with:
+          repository: V-Sekai/desync
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v2
+        with:
+          go-version: "^1.15.6"
+
+      - uses: actions/cache@v1
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - run: go test
+      - run: GOOS=windows GOARCH=amd64 go build -o ./archive/desync-windows-amd64.exe ./cmd/desync
+      - run: GOOS=darwin GOARCH=amd64 go build -o ./archive/desync-macos-amd64 ./cmd/desync
+      - run: GOOS=linux GOARCH=amd64 go build -o ./archive/desync-linux-amd64 ./cmd/desync
+      - name: Debug
+        shell: bash
+        run: |
+          pwd
+          ls -la
