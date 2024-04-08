@@ -1,5 +1,0 @@
-outputs/*
-build/*
-dist/*
-wheelhouse/*
-coacd.egg-info/*
