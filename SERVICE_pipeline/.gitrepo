@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/V-Sekai/groups-gocd-pipelines.git
+	branch = master
+	commit = b6d8312f7b816b649865903e623e106eb5c52481
+	parent = e9decc1cbd5768c30aeb7f08416cac36ae95fa6a
+	method = merge
+	cmdver = 0.4.6

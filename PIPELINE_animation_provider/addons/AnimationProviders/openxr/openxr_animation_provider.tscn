@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bk1wt3ddjpeeu"]
+
+[ext_resource type="Script" path="res://addons/AnimationProviders/openxr/openxr_animation_provider.gd" id="1_423sh"]
+
+[node name="OpenXRAnimationProvider" type="Node"]
+script = ExtResource("1_423sh")

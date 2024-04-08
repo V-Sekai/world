@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/nmwsharp/polyscope.git
+	branch = 8e692da5a50c4da8b0dedaf941e1f2cef335fa11
+	commit = 8e692da5a50c4da8b0dedaf941e1f2cef335fa11
+	parent = 397e9c73cf56edb490c6572501a5338aa59d8e01
+	method = merge
+	cmdver = 0.4.6

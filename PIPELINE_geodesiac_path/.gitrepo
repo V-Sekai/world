@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/V-Sekai/TOOL_geodesiac_path.git
+	branch = main
+	commit = beb82fdf863ba69301aa204512d3b8b4e748af22
+	parent = ce8a58d9553331f210f55c12af00500c7036b8df
+	method = merge
+	cmdver = 0.4.6

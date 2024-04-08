@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/V-Sekai/TOOL_cloth_dynamics.git
+	branch = main
+	commit = bc49c1263969cb3381f0e85bcef0ee31045530c7
+	parent = 38b2df8caa79ef9b23c165969e27239c4f2eb358
+	method = merge
+	cmdver = 0.4.6
