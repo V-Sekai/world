@@ -59,7 +59,7 @@ jobs:
 
       - name: Run CMake, Install, Copy to Archive, and Clean Up
         run: |
-          for dir in PIPELINE_geodesiac_path PIPELINE_intrinsic_triangulations; do
+          for dir in PIPELINE_convex_decomposition PIPELINE_geodesiac_path PIPELINE_intrinsic_triangulations; do
             pushd other/$dir
             mkdir build
             pushd build
