@@ -13,21 +13,12 @@ jobs:
     name: Validate Desync on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
 
-    permissions:
-      pages: write
-      id-token: write
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
     strategy:
       matrix:
         include:
           - os: ubuntu-latest
             triplet: x86_64-unknown-linux-gnu
 
-    timeout-minutes: 10
     steps:
       - name: Checkout desync
         uses: actions/checkout@v2
@@ -62,6 +53,24 @@ jobs:
           path: other
 
       - run: chmod +x ./archive/desync-linux-amd64
+
+      - name: Install Ninja Build
+        run: sudo apt-get update && sudo apt-get install -y libglfw3-dev libxinerama-dev libxcursor-dev libxi-dev libsuitesparse-dev libmetis-dev
+
+      - name: Run CMake, Install, Copy to Archive, and Clean Up
+        run: |
+          for dir in PIPELINE_geodesiac_path PIPELINE_intrinsic_triangulations; do
+            pushd other/$dir
+            mkdir build
+            pushd build
+            cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../"${dir}_install" ..
+            make
+            cmake --install .
+            cp -r ../"${dir}_install" ../../archive/
+            popd
+            popd
+            rm -rf other/$dir/*
+          done
 
       - name: Package Code
         # This script is used to package the code into chunks of 64MB. The chunk size of 64MB is a recommendation from Riot Games' CDN engineering team.
@@ -107,18 +116,6 @@ jobs:
           echo "</ul>" >> ./archive/index.html
           echo "</body>" >> ./archive/index.html
           echo "</html>" >> ./archive/index.html
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: "archive"
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
 
       - name: Download Butler
         if: github.ref == 'refs/heads/main'
