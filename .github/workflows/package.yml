@@ -86,6 +86,14 @@ jobs:
           wget -qO- https://binaries.cockroachdb.com/cockroach-v23.2.3.linux-amd64.tgz | tar xvz
           mv cockroach-v23.2.3.linux-amd64/cockroach cockroach-v23.2.3.linux-amd64/cockroach-${{ matrix.triplet }}
           cp -i cockroach-v23.2.3.linux-amd64/cockroach-${{ matrix.triplet }} ./archive/
+          
+      - name: Package Foundationdb
+        run: |
+          mkdir -p archive/store
+          wget https://github.com/apple/foundationdb/releases/download/7.1.15/foundationdb-clients_7.1.15-1_amd64.deb
+          wget https://github.com/apple/foundationdb/releases/download/7.1.15/foundationdb-server_7.1.15-1_amd64.deb
+          mv foundationdb-clients_7.1.15-1_amd64.deb archive/store/
+          mv foundationdb-server_7.1.15-1_amd64.deb archive/store/
 
       - name: Generate index.html
         if: github.ref == 'refs/heads/main'
