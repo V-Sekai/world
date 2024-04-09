@@ -42,6 +42,7 @@ Note that `bcrypt_elixir` will require a working compiler in the PATH. On a Wind
 # Start in v-sekai/v-sekai-other-world
 cd mvsqlite
 cargo build --locked --release -p mvstore --manifest-path Cargo.toml
+export RUST_LOG=error
 DYLD_FALLBACK_LIBRARY_PATH=/usr/local/lib ./target/release/mvstore --data-plane 127.0.0.1:7000 --admin-api 127.0.0.1:7001 --metadata-prefix mvstore-test --raw-data-prefix m --auto-create-namespace --cluster /usr/local/etc/foundationdb/fdb.cluster &
 ```
 
@@ -89,3 +90,9 @@ python -m http.server 80
 ```
 
 Windows allows any user to serve port 80 by default, but on other operating systems the above should be run with sudo.
+
+# Mvsqlite
+
+```
+UPDATE users SET email_confirmation_token = NULL, email_confirmed_at = datetime('now') WHERE 1;
+```
