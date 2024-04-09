@@ -73,3 +73,5 @@ set(SRCS
 add_executable(int_tri "${SRCS}")
 target_include_directories(int_tri PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/")
 target_link_libraries(int_tri geometry-central polyscope)
+
+install(TARGETS int_tri DESTINATION bin)
