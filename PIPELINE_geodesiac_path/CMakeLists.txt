@@ -76,3 +76,5 @@ set(SRCS
 add_executable(flip_geodesics "${SRCS}")
 target_include_directories(flip_geodesics PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/")
 target_link_libraries(flip_geodesics geometry-central polyscope)
+
+install(TARGETS flip_geodesics DESTINATION bin)
