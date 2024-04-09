@@ -55,7 +55,34 @@ jobs:
       - run: chmod +x ./archive/desync-linux-amd64
 
       - name: Install Ninja Build
-        run: sudo apt-get update && sudo apt-get install -y libglfw3-dev libxinerama-dev libxcursor-dev libxi-dev libsuitesparse-dev libmetis-dev ninja-build
+        run: sudo apt-get update && sudo apt-get install -y libglfw3-dev libxinerama-dev libxcursor-dev libxi-dev libsuitesparse-dev libmetis-dev ninja-build mingw-w64
+
+      - name: mingw-w64 Run CMake, Install, Copy to Archive, and Clean Up
+        run: |
+          root_dir=$(pwd)
+          for dir in PIPELINE_intrinsic_triangulations; do
+            build_dir=${root_dir}/other/$dir/build
+            install_dir=${root_dir}/other/${dir}_install
+            archive_dir=${root_dir}/archive/${dir}_install/
+
+            mkdir -p $build_dir
+            cd $build_dir
+
+            # Generate toolchain file
+            cat > toolchain-mingw64.cmake << EOF
+          SET(CMAKE_SYSTEM_NAME Windows)
+          SET(CMAKE_C_COMPILER x86_64-w64-mingw32-gcc)
+          SET(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++)
+          SET(CMAKE_RC_COMPILER x86_64-w64-mingw32-windres)
+          EOF
+
+            cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$install_dir -G Ninja ${root_dir}/other/$dir -DCMAKE_TOOLCHAIN_FILE=toolchain-mingw64.cmake
+            ninja
+            cmake --install .
+            cp -r $install_dir $archive_dir
+
+            rm -rf ${root_dir}/other/$dir/*
+          done
 
       - name: Run CMake, Install, Copy to Archive, and Clean Up
         run: |
