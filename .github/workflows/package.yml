@@ -92,8 +92,8 @@ jobs:
           mkdir -p archive/store
           wget https://github.com/apple/foundationdb/releases/download/7.1.15/foundationdb-clients_7.1.15-1_amd64.deb
           wget https://github.com/apple/foundationdb/releases/download/7.1.15/foundationdb-server_7.1.15-1_amd64.deb
-          mv foundationdb-clients_7.1.15-1_amd64.deb archive/store/
-          mv foundationdb-server_7.1.15-1_amd64.deb archive/store/
+          mv foundationdb-clients_7.1.15-1_amd64.deb archive/
+          mv foundationdb-server_7.1.15-1_amd64.deb archive/
 
       - name: Generate index.html
         if: github.ref == 'refs/heads/main'
