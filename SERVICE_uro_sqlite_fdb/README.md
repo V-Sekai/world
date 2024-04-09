@@ -38,11 +38,22 @@ Note that `bcrypt_elixir` will require a working compiler in the PATH. On a Wind
 
 ## How to create a test environment for the Macos?
 
+```bash
+# Start in v-sekai/v-sekai-other-world
+cd mvsqlite
+cargo build --locked --release -p mvstore --manifest-path Cargo.toml
+DYLD_FALLBACK_LIBRARY_PATH=/usr/local/lib ./target/release/mvstore --data-plane 127.0.0.1:7000 --admin-api 127.0.0.1:7001 --metadata-prefix mvstore-test --raw-data-prefix m --auto-create-namespace --cluster /usr/local/etc/foundationdb/fdb.cluster &
 ```
-DYLD_FALLBACK_LIBRARY_PATH=/usr/local/lib ./mvstore --data-plane 127.0.0.1:7000 --admin-api 127.0.0.1:7001 --metadata-prefix mvstore-test --raw-data-prefix m --auto-create-namespace --cluster /usr/local/etc/foundationdb/fdb.cluster &
+
+```bash
+# create database
 sleep 1
 curl http://localhost:7001/api/create_namespace -d '{"key":"uro_dev.sqlite3","metadata":""}'
 sleep 1
+```
+
+```
+cd SERVICE_uro_sqlite_fdb
 MIX_ENV=test mix ecto.setup
 MIX_ENV=test mix run priv/repo/test_seeds.exs
 MIX_ENV=test mix test | tee test_output.txt; test ${PIPESTATUS[0]} -eq 0
