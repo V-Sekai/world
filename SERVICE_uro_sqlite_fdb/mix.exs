@@ -56,8 +56,6 @@ defmodule Uro.MixProject do
       {:ex_json_schema, "~> 0.7.4"},
       {:remote_ip, "~> 1.0"},
       {:ecto_sqlite3, "~> 0.13.0"},
-      {:exqlite,
-       [env: :prod, git: "https://github.com/V-Sekai/elixir-mvsqlite.git", override: true]},
       {:waffle, "~> 1.1"},
       {:waffle_ecto, "~> 0.0.10"},
       {:swoosh, "~> 1.3"},

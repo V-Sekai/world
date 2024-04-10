@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai/uro.git
 	branch = sqlite-02
-	commit = 94adbc7766bd8bd449257f174b1449a259fe1db6
-	parent = 7c7f59766c56526750a65307c7bf39f0a879797f
+	commit = 56d88e465d2bffe58e37b80c9dbe42df00b3a2ee
+	parent = fd9fcda55be0c3b725ff1e9457766f61a79ed40a
 	method = merge
 	cmdver = 0.4.6

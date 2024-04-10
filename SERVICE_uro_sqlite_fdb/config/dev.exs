@@ -5,7 +5,7 @@ db_type = System.get_env("URO_DB_TYPE") || "postgresql"
 
 # Configure your database
 case db_type do
-  "postgres" ->
+  "postgresql" ->
     config :uro, Uro.Repo,
       adapter: Ecto.Adapters.Postgres,
       username: "root",
