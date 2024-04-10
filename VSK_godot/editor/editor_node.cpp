@@ -2136,10 +2136,6 @@ void EditorNode::_dialog_action(String p_file) {
 
 		} break;
 		case SETTINGS_LAYOUT_DELETE: {
-			if (p_file.is_empty()) {
-				return;
-			}
-
 			Ref<ConfigFile> config;
 			config.instantiate();
 			Error err = config->load(EditorSettings::get_singleton()->get_editor_layouts_config());
@@ -3674,9 +3670,7 @@ void EditorNode::set_edited_scene(Node *p_scene) {
 		if (old_edited_scene_root->get_parent() == scene_root) {
 			scene_root->remove_child(old_edited_scene_root);
 		}
-		if (old_edited_scene_root->is_connected("replacing_by", callable_mp(this, &EditorNode::set_edited_scene))) {
-			old_edited_scene_root->disconnect(SNAME("replacing_by"), callable_mp(this, &EditorNode::set_edited_scene));
-		}
+		old_edited_scene_root->disconnect(SNAME("replacing_by"), callable_mp(this, &EditorNode::set_edited_scene));
 	}
 	get_editor_data().set_edited_scene_root(p_scene);
 
