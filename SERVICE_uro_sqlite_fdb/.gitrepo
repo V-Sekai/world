@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/V-Sekai/uro.git
+	branch = sqlite-02
+	commit = d46fb1aec5361bf8863f0f5caaff29509537fbe9
+	parent = e39c70b5baaa1502edfea6a7a2d7604a545e0d25
+	method = merge
+	cmdver = 0.4.6
