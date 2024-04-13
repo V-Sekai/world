@@ -2270,28 +2270,31 @@ GDScriptParser::PatternNode *GDScriptParser::parse_match_pattern(PatternNode *p_
 			break;
 		case GDScriptTokenizer::Token::BRACKET_OPEN: {
 			// Array.
+			push_multiline(true);
 			advance();
 			pattern->pattern_type = PatternNode::PT_ARRAY;
-
-			if (!check(GDScriptTokenizer::Token::BRACKET_CLOSE)) {
-				do {
-					PatternNode *sub_pattern = parse_match_pattern(p_root_pattern != nullptr ? p_root_pattern : pattern);
-					if (sub_pattern == nullptr) {
-						continue;
-					}
-					if (pattern->rest_used) {
-						push_error(R"(The ".." pattern must be the last element in the pattern array.)");
-					} else if (sub_pattern->pattern_type == PatternNode::PT_REST) {
-						pattern->rest_used = true;
-					}
-					pattern->array.push_back(sub_pattern);
-				} while (match(GDScriptTokenizer::Token::COMMA));
-			}
+			do {
+				if (is_at_end() || check(GDScriptTokenizer::Token::BRACKET_CLOSE)) {
+					break;
+				}
+				PatternNode *sub_pattern = parse_match_pattern(p_root_pattern != nullptr ? p_root_pattern : pattern);
+				if (sub_pattern == nullptr) {
+					continue;
+				}
+				if (pattern->rest_used) {
+					push_error(R"(The ".." pattern must be the last element in the pattern array.)");
+				} else if (sub_pattern->pattern_type == PatternNode::PT_REST) {
+					pattern->rest_used = true;
+				}
+				pattern->array.push_back(sub_pattern);
+			} while (match(GDScriptTokenizer::Token::COMMA));
 			consume(GDScriptTokenizer::Token::BRACKET_CLOSE, R"(Expected "]" to close the array pattern.)");
+			pop_multiline();
 			break;
 		}
 		case GDScriptTokenizer::Token::BRACE_OPEN: {
 			// Dictionary.
+			push_multiline(true);
 			advance();
 			pattern->pattern_type = PatternNode::PT_DICTIONARY;
 			do {
@@ -2334,6 +2337,7 @@ GDScriptParser::PatternNode *GDScriptParser::parse_match_pattern(PatternNode *p_
 				}
 			} while (match(GDScriptTokenizer::Token::COMMA));
 			consume(GDScriptTokenizer::Token::BRACE_CLOSE, R"(Expected "}" to close the dictionary pattern.)");
+			pop_multiline();
 			break;
 		}
 		default: {
@@ -2769,10 +2773,6 @@ GDScriptParser::ExpressionNode *GDScriptParser::parse_assignment(ExpressionNode 
 		return parse_expression(false); // Return the following expression.
 	}
 
-#ifdef DEBUG_ENABLED
-	VariableNode *source_variable = nullptr;
-#endif
-
 	switch (p_previous_operand->type) {
 		case Node::IDENTIFIER: {
 #ifdef DEBUG_ENABLED
@@ -2781,8 +2781,6 @@ GDScriptParser::ExpressionNode *GDScriptParser::parse_assignment(ExpressionNode 
 			IdentifierNode *id = static_cast<IdentifierNode *>(p_previous_operand);
 			switch (id->source) {
 				case IdentifierNode::LOCAL_VARIABLE:
-
-					source_variable = id->variable_source;
 					id->variable_source->usages--;
 					break;
 				case IdentifierNode::LOCAL_CONSTANT:
@@ -2813,16 +2811,10 @@ GDScriptParser::ExpressionNode *GDScriptParser::parse_assignment(ExpressionNode 
 	update_extents(assignment);
 
 	make_completion_context(COMPLETION_ASSIGN, assignment);
-#ifdef DEBUG_ENABLED
-	bool has_operator = true;
-#endif
 	switch (previous.type) {
 		case GDScriptTokenizer::Token::EQUAL:
 			assignment->operation = AssignmentNode::OP_NONE;
 			assignment->variant_op = Variant::OP_MAX;
-#ifdef DEBUG_ENABLED
-			has_operator = false;
-#endif
 			break;
 		case GDScriptTokenizer::Token::PLUS_EQUAL:
 			assignment->operation = AssignmentNode::OP_ADDITION;
@@ -2877,16 +2869,6 @@ GDScriptParser::ExpressionNode *GDScriptParser::parse_assignment(ExpressionNode 
 		push_error(R"(Expected an expression after "=".)");
 	}
 	complete_extents(assignment);
-
-#ifdef DEBUG_ENABLED
-	if (source_variable != nullptr) {
-		if (has_operator && source_variable->assignments == 0) {
-			push_warning(assignment, GDScriptWarning::UNASSIGNED_VARIABLE_OP_ASSIGN, source_variable->identifier->name);
-		}
-
-		source_variable->assignments += 1;
-	}
-#endif
 
 	return assignment;
 }

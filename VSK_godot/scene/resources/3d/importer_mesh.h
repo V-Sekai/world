@@ -33,6 +33,7 @@
 
 #include "core/io/resource.h"
 #include "core/templates/local_vector.h"
+#include "core/templates/sort_array.h"
 #include "scene/resources/3d/concave_polygon_shape_3d.h"
 #include "scene/resources/3d/convex_polygon_shape_3d.h"
 #include "scene/resources/mesh.h"
@@ -47,6 +48,10 @@
 class ImporterMesh : public Resource {
 	GDCLASS(ImporterMesh, Resource)
 
+public:
+	static constexpr int bone_influence_lod_count = 8;
+
+public:
 	struct Surface {
 		Mesh::PrimitiveType primitive;
 		Array arrays;
@@ -81,108 +86,19 @@ class ImporterMesh : public Resource {
 	Ref<ImporterMesh> shadow_mesh;
 
 	Size2i lightmap_size_hint;
-
 	struct MergedAttribute {
 		Vector3 normal;
-		Vector<int> primary_bone_influence;
-	};
-
-	Vector<float> merged_attribute_to_float32_array(const MergedAttribute *p_attributes, size_t p_count);
-	struct PairHasher {
-		static _FORCE_INLINE_ uint32_t hash(const Pair<Vector<int>, Vector<int>> &p_pair);
-	};
-	struct VertexSimilarityComparator {
-		Vector<int> target_bones;
-
-		VertexSimilarityComparator(const Vector<int> &p_target) :
-				target_bones(p_target) {}
-
-		_FORCE_INLINE_ bool operator()(const Vector<int> &p_p, const Vector<int> &p_q) const;
-
-		int get_similarity(const Vector<int> &p_a, const Vector<int> &p_b) const;
-	};
-
-	struct BoneWeightComparator {
-		_FORCE_INLINE_ bool operator()(const Pair<int, float> &p, const Pair<int, float> &q) const {
-			if (p.second == q.second) {
-				return p.first < q.first; // Use bone index as the tie-breaker.
-			}
-			return p.second < q.second;
-		}
-	};
-
-	class TopElements {
-		Vector<Pair<int, float>> heap;
-		int size = 0;
-
-	public:
-		TopElements(int capacity) {
-			heap.resize(capacity);
-		}
-
-		void insert(Pair<int, float> key) {
-			if (size == heap.size()) {
-				return;
-			}
-
-			size++;
-			int i = size - 1;
-			heap.write[i] = key;
-
-			while (i != 0 && heap[parent(i)].second < heap[i].second) {
-				SWAP(heap.write[i], heap.write[parent(i)]);
-				i = parent(i);
-			}
-		}
-
-		Vector<Pair<int, float>> get_elements() {
-			return heap;
-		}
-
-	private:
-		int parent(int i) { return (i - 1) / 2; }
-		int left(int i) { return (2 * i + 1); }
-		int right(int i) { return (2 * i + 2); }
-
-		void heapify(int i) {
-			int largest = i;
-			int l = left(i);
-			int r = right(i);
-
-			if (l < size && heap[l].second > heap[largest].second) {
-				largest = l;
-			}
-
-			if (r < size && heap[r].second > heap[largest].second) {
-				largest = r;
-			}
-
-			if (largest != i) {
-				SWAP(heap.write[i], heap.write[largest]);
-				heapify(largest);
+		LocalVector<int> primary_bone_influence = {};
+		MergedAttribute(int32_t p_influences = bone_influence_lod_count) {
+			primary_bone_influence.resize(p_influences);
+			for (int32_t i = 0; i < p_influences; i++) {
+				primary_bone_influence[i] = primary_bone_influence[i];
 			}
 		}
 	};
-
-	struct VectorIntHasher {
-		static _FORCE_INLINE_ uint32_t hash(const Vector<int> &p_vec) {
-			uint32_t hash = 0;
-			for (int i = 0; i < p_vec.size(); i++) {
-				hash = hash * 16777619 ^ p_vec[i];
-			}
-			return hash;
-		}
-	};
-
-	struct BoneWeightPair {
-		int bone;
-		float weight;
-		BoneWeightPair *begin() { return this; }
-		BoneWeightPair *end() { return this + 1; }
-	};
-	LocalVector<Vector<int>> _get_primary_bone_influences(Vector<int> bones, Vector<float> weights);
-
-	float get_bone_influence_similarity(const Vector<int> &p_influence_1, const Vector<int> &p_influence_2);
+	LocalVector<LocalVector<int>> _get_sorted_bone_influences(int32_t p_vertex_count, const int32_t p_influence_count, Vector<int> p_bones, Vector<float> p_weights);
+	Vector<float> _merged_attribute_to_float32_array(const LocalVector<MergedAttribute> &p_attributes);
+	float _get_bone_influence_similarity(const LocalVector<int> &p_influence_1, const LocalVector<int> &p_influence_2);
 
 protected:
 	void _set_data(const Dictionary &p_data);
