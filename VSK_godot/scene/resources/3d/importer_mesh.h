@@ -88,7 +88,7 @@ public:
 	Size2i lightmap_size_hint;
 	struct MergedAttribute {
 		Vector3 normal;
-		LocalVector<int> primary_bone_influence = {};
+		LocalVector<float> primary_bone_influence = {};
 		MergedAttribute(int32_t p_influences = bone_influence_lod_count) {
 			primary_bone_influence.resize(p_influences);
 			for (int32_t i = 0; i < p_influences; i++) {
@@ -96,9 +96,9 @@ public:
 			}
 		}
 	};
-	LocalVector<LocalVector<int>> _get_sorted_bone_influences(int32_t p_vertex_count, const int32_t p_influence_count, Vector<int> p_bones, Vector<float> p_weights);
+	float _get_bone_influence_similarity(const LocalVector<float> &p_influence_1, const LocalVector<float> &p_influence_2);
+	LocalVector<LocalVector<float>> _get_sorted_bone_influences(int32_t p_vertex_count, const int32_t p_influence_count, Vector<int> p_bones, Vector<float> p_weights);
 	Vector<float> _merged_attribute_to_float32_array(const LocalVector<MergedAttribute> &p_attributes);
-	float _get_bone_influence_similarity(const LocalVector<int> &p_influence_1, const LocalVector<int> &p_influence_2);
 
 protected:
 	void _set_data(const Dictionary &p_data);

@@ -34,9 +34,10 @@
 #include "core/math/convex_hull.h"
 #include "core/math/random_pcg.h"
 #include "core/math/static_raycaster.h"
+#include "core/object/class_db.h"
 #include "scene/resources/surface_tool.h"
 
-#include <cstdint>
+#include <cstdlib>
 
 void ImporterMesh::Surface::split_normals(const LocalVector<int> &p_indices, const LocalVector<Vector3> &p_normals) {
 	_split_normals(arrays, p_indices, p_normals);
@@ -322,12 +323,12 @@ void ImporterMesh::generate_lods(float p_normal_merge_angle, float p_normal_spli
 				n_ptr[j + 2] = n;
 			}
 		}
-
+		unsigned int bone_weight_length = 0;
 		if (bones.size() > 0 && weights.size() && bone_transform_vector.size() > 0) {
 			Vector3 *vertices_ptrw = vertices.ptrw();
 
 			// Apply bone transforms to regular surface.
-			unsigned int bone_weight_length = surfaces[i].flags & Mesh::ARRAY_FLAG_USE_8_BONE_WEIGHTS ? 8 : 4;
+			bone_weight_length = surfaces[i].flags & Mesh::ARRAY_FLAG_USE_8_BONE_WEIGHTS ? 8 : 4;
 
 			const int *bo = bones.ptr();
 			const float *we = weights.ptr();
@@ -352,10 +353,9 @@ void ImporterMesh::generate_lods(float p_normal_merge_angle, float p_normal_spli
 
 		LocalVector<MergedAttribute> merged_attributes;
 		LocalVector<int> merged_normals_counts;
-		LocalVector<int> merged_influence_counts;
 		const Vector2 *uvs_ptr = uvs.ptr();
 		const Vector2 *uv2s_ptr = uv2s.ptr();
-		LocalVector<LocalVector<int>> primary_bone_influences = _get_sorted_bone_influences(vertex_count, bone_influence_lod_count, bones, weights);
+		LocalVector<LocalVector<float>> primary_bone_influences = _get_sorted_bone_influences(vertex_count, bone_weight_length, bones, weights);
 		for (unsigned int j = 0; j < vertex_count; j++) {
 			const Vector3 &v = vertices_ptr[j];
 			const Vector3 &n = normals_ptr[j];
@@ -367,18 +367,19 @@ void ImporterMesh::generate_lods(float p_normal_merge_angle, float p_normal_spli
 				for (const Pair<int, int> &idx : close_verts) {
 					bool is_uvs_close = (!uvs_ptr || uvs_ptr[j].distance_squared_to(uvs_ptr[idx.second]) < CMP_EPSILON2);
 					bool is_uv2s_close = (!uv2s_ptr || uv2s_ptr[j].distance_squared_to(uv2s_ptr[idx.second]) < CMP_EPSILON2);
-					bool is_j_in_range = j >= 0 && j < merged_attributes.size();
-					bool is_idx_second_in_range = is_j_in_range && uint32_t(idx.second) < merged_attributes.size();
-					bool is_primary_bone_influence_close = is_idx_second_in_range && Math::is_equal_approx(_get_bone_influence_similarity(merged_attributes[j].primary_bone_influence, merged_attributes[idx.second].primary_bone_influence), 1.0f);
 					ERR_FAIL_INDEX(idx.second, normals.size());
 					bool is_normals_close = normals[idx.second].dot(n) > normal_merge_threshold;
-					if (is_uvs_close && is_uv2s_close && is_normals_close && is_primary_bone_influence_close) {
+					bool is_j_in_range = j >= 0 && j < primary_bone_influences.size();
+					bool is_idx_second_in_range = is_j_in_range && uint32_t(idx.second) < primary_bone_influences.size();
+					bool is_influences_close = false;
+					if (is_idx_second_in_range) {
+						float influence_similarity = _get_bone_influence_similarity(primary_bone_influences[j], primary_bone_influences[idx.second]);
+						is_influences_close = influence_similarity > 0.9f;
+					}
+					if (is_uvs_close && is_uv2s_close && is_normals_close && is_influences_close) {
 						vertex_remap.push_back(idx.first);
 						merged_attributes[idx.first].normal += normals[idx.second];
-						for (uint32_t primary_bone_influence_i = 0; primary_bone_influence_i < bone_influence_lod_count; primary_bone_influence_i++) {
-							merged_attributes[idx.first].primary_bone_influence[primary_bone_influence_i] += merged_attributes[idx.second].primary_bone_influence[primary_bone_influence_i];
-						}
-						merged_influence_counts[idx.first]++;
+						merged_attributes[idx.first].primary_bone_influence = primary_bone_influences[idx.second];
 						merged_normals_counts[idx.first]++;
 						found = true;
 						break;
@@ -393,9 +394,8 @@ void ImporterMesh::generate_lods(float p_normal_merge_angle, float p_normal_spli
 					vertex_remap.push_back(vcount);
 					MergedAttribute merged_attribute(bone_influence_lod_count);
 					merged_attribute.normal = normals_ptr[j];
-					merged_attribute.primary_bone_influence = merged_attribute.primary_bone_influence;
+					merged_attribute.primary_bone_influence = primary_bone_influences[j];
 					merged_attributes.push_back(merged_attribute);
-					merged_influence_counts.push_back(1);
 					merged_normals_counts.push_back(1);
 				}
 			} else {
@@ -407,9 +407,8 @@ void ImporterMesh::generate_lods(float p_normal_merge_angle, float p_normal_spli
 				vertex_remap.push_back(vcount);
 				MergedAttribute merged_attribute(bone_influence_lod_count);
 				merged_attribute.normal = normals_ptr[j];
-				merged_attribute.primary_bone_influence = merged_attribute.primary_bone_influence;
+				merged_attribute.primary_bone_influence = primary_bone_influences[j];
 				merged_attributes.push_back(merged_attribute);
-				merged_influence_counts.push_back(1);
 				merged_normals_counts.push_back(1);
 			}
 		}
@@ -426,19 +425,15 @@ void ImporterMesh::generate_lods(float p_normal_merge_angle, float p_normal_spli
 
 		{
 			const int *counts_ptr = merged_normals_counts.ptr();
-			const int *influences_counts_ptr = merged_influence_counts.ptr();
 			MergedAttribute *merged_attributes_ptrw = merged_attributes.ptr();
 			for (unsigned int j = 0; j < merged_vertex_count; j++) {
 				merged_attributes_ptrw[j].normal /= counts_ptr[j];
-				for (uint32_t merged_attribute_i = 0; merged_attribute_i < bone_influence_lod_count; ++merged_attribute_i) {
-					merged_attributes_ptrw[j].primary_bone_influence[merged_attribute_i] /= influences_counts_ptr[j];
-				}
 			}
 		}
 		float attribute_weights[3 + bone_influence_lod_count];
 
-		for (int attribute_weights_i = 0; attribute_weights_i < 3; ++attribute_weights_i) {
-			attribute_weights[attribute_weights_i] = 2.0f;
+		for (int weights = 0; weights < 3; weights++) {
+			attribute_weights[weights] = 1.0f;
 		}
 
 		for (uint32_t weights_influences_i = 3; weights_influences_i < 3 + bone_influence_lod_count; ++weights_influences_i) {
@@ -482,8 +477,8 @@ void ImporterMesh::generate_lods(float p_normal_merge_angle, float p_normal_spli
 					merged_vertices_f32.ptr(), merged_vertex_count,
 					sizeof(float) * 3, // Vertex stride
 					merged_attributes_ptrw_f32.ptr(),
-					sizeof(float) * (3 + bone_influence_lod_count), // Attribute stride
-					attribute_weights, (3 + bone_influence_lod_count),
+					sizeof(float) * (3 + bone_weight_length * 2), // Attribute stride
+					attribute_weights, (3 + bone_weight_length * 2),
 					index_target,
 					max_mesh_error,
 					simplify_options,
@@ -1402,47 +1397,36 @@ void ImporterMesh::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::DICTIONARY, "_data", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NO_EDITOR), "_set_data", "_get_data");
 }
 
-float ImporterMesh::_get_bone_influence_similarity(const LocalVector<int> &p_influence_1, const LocalVector<int> &p_influence_2) {
-	ERR_FAIL_COND_V(p_influence_1.is_empty(), 0.0f);
-	ERR_FAIL_COND_V(p_influence_2.is_empty(), 0.0f);
-
-	float dot = 0.0f, denom_a = 0.0f, denom_b = 0.0f;
-	for (int i = 0; i < bone_influence_lod_count; ++i) {
-		dot += p_influence_1[i] * p_influence_2[i];
-		denom_a += p_influence_1[i] * p_influence_1[i];
-		denom_b += p_influence_2[i] * p_influence_2[i];
-	}
-	return dot / (sqrt(denom_a) * sqrt(denom_b));
-}
-
-struct CompareByWeight {
+struct CompareByWeightFirstDescending {
 	bool operator()(const Pair<int, float> &a, const Pair<int, float> &b) const {
-		return a.second < b.second;
+		if (a.second != b.second) {
+			return a.second > b.second;
+		} else {
+			return a.first < b.first;
+		}
 	}
 };
 
-LocalVector<LocalVector<int>> ImporterMesh::_get_sorted_bone_influences(int32_t p_vertex_count, const int32_t p_influence_count, Vector<int> p_bones, Vector<float> p_weights) {
-	LocalVector<LocalVector<int>> r_primary_bone_influence;
+LocalVector<LocalVector<float>> ImporterMesh::_get_sorted_bone_influences(int32_t p_vertex_count, const int32_t p_influence_count, Vector<int> p_bones, Vector<float> p_weights) {
+	LocalVector<LocalVector<float>> r_primary_bone_influence;
 	r_primary_bone_influence.resize(p_vertex_count);
 	if (!p_influence_count) {
 		return r_primary_bone_influence;
 	}
-	SortArray<Pair<int, float>, CompareByWeight> sorter{};
 	for (int j = 0; j < p_vertex_count; j++) {
 		LocalVector<Pair<int, float>> open_list;
-		for (int i = 0; i < p_influence_count; i++) {
+		for (int i = 0; i < bone_influence_lod_count; i++) {
 			int index = j * p_influence_count + i;
-			Pair<int, float> influence;
-			if (index < p_bones.size()) {
+			Pair<int, float> influence(0, 0.0f);
+			if (i < p_influence_count && index >= 0 && index < p_bones.size()) {
 				influence = Pair<int, float>(p_bones[index], p_weights[index]);
-			} else {
-				influence = Pair<int, float>(0, 0.0f);
 			}
 			open_list.push_back(influence);
 		}
-		sorter.sort(open_list.ptr(), open_list.size());
+		open_list.sort_custom<CompareByWeightFirstDescending>();
 		for (Pair<int, float> pair : open_list) {
 			r_primary_bone_influence[j].push_back(pair.first);
+			r_primary_bone_influence[j].push_back(pair.second);
 		}
 	}
 	return r_primary_bone_influence;
@@ -1468,11 +1452,27 @@ Vector<float> ImporterMesh::_merged_attribute_to_float32_array(const LocalVector
 		floats_w[1] = attr.normal.y;
 		floats_w[2] = attr.normal.z;
 
-		for (uint32_t j = 0; j < bone_influence_lod_count; ++j) {
+		for (uint32_t j = 0; j < attr.primary_bone_influence.size(); ++j) {
 			floats_w[j + 3] = static_cast<float>(attr.primary_bone_influence[j]);
 		}
 
 		floats_w += 3 + bone_influence_lod_count;
 	}
 	return floats;
+}
+
+float ImporterMesh::_get_bone_influence_similarity(const LocalVector<float> &p_influence_1, const LocalVector<float> &p_influence_2) {
+	if (p_influence_1.is_empty() && p_influence_2.is_empty()) {
+		return 1.0f;
+	}
+	if (p_influence_1.is_empty() || p_influence_2.is_empty()) {
+        return 0.0f;
+    }
+	float dot = 0.0f, denom_a = 0.0f, denom_b = 0.0f;
+	for (int i = 0; i < bone_influence_lod_count; ++i) {
+		dot += p_influence_1[i] * p_influence_2[i];
+		denom_a += p_influence_1[i] * p_influence_1[i];
+		denom_b += p_influence_2[i] * p_influence_2[i];
+	}
+	return dot / (sqrt(denom_a) * sqrt(denom_b));
 }
