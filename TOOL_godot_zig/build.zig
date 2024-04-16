@@ -16,8 +16,10 @@ pub fn build(b: *std.Build) void {
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall. Here we do not
     // set a preferred release mode, allowing the user to decide how to optimize.
     const optimize = b.standardOptimizeOption(.{});
+    const precision = b.option([]const u8, "precision", "double") orelse "float";
+    const arch = b.option([]const u8, "arch", "32") orelse "64";
 
-    _ = createBindStep(b, target);
+    const bind_step = createBindStep(b, target, precision, arch);
 
     const lib = b.addSharedLibrary(.{
         .name = "example",
@@ -26,8 +28,15 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    const build_options = b.addOptions();
+    build_options.addOption([]const u8, "precision", precision);
+    build_options.addOption([]const u8, "arch", arch);
+    lib.root_module.addOptions("build_options", build_options);
+
     lib.addIncludePath(.{ .path = b.pathJoin(&.{ thisDir(), api_path }) });
     lib.linkLibC();
+    lib.step.dependOn(bind_step);
+
     b.lib_dir = "./project/lib";
     b.installArtifact(lib);
 
@@ -39,20 +48,25 @@ pub fn build(b: *std.Build) void {
     run_step.dependOn(&run_cmd.step);
 }
 
-pub fn createBindStep(b: *std.Build, target: std.Build.ResolvedTarget) *std.Build.Step {
+pub fn createBindStep(b: *std.Build, target: std.Build.ResolvedTarget, precision:[]const u8, arch:[]const u8) *std.Build.Step {
+
+
     const dump_cmd = b.addSystemCommand(&.{
         "godot", "--dump-extension-api", "--dump-gdextension-interface",
     });
     const out_path = b.pathJoin(&.{ thisDir(), api_path });
     dump_cmd.setCwd(.{ .cwd_relative = out_path });
+    const dump_step = b.step("dump", "dump api");
+    dump_step.dependOn(&dump_cmd.step);
 
     const binding_generator = b.addExecutable(.{ .name = "binding_generator", .target = target, .root_source_file = .{ .path = b.pathJoin(&.{ thisDir(), "binding_generator/main.zig" }) } });
     binding_generator.addIncludePath(.{ .path = out_path });
-    binding_generator.step.dependOn(&dump_cmd.step);
+    //binding_generator.step.dependOn(dump_step);
 
     const generate_binding = std.Build.Step.Run.create(b, "bind_godot");
     generate_binding.addArtifactArg(binding_generator);
-    generate_binding.addArgs(&.{out_path});
+    generate_binding.addArgs(&.{out_path, precision, arch});
+
     const bind_step = b.step("bind", "generate godot bindings");
     bind_step.dependOn(&generate_binding.step);
     return bind_step;
