@@ -33,7 +33,6 @@
 
 #include "core/io/resource.h"
 #include "core/templates/local_vector.h"
-#include "core/templates/sort_array.h"
 #include "scene/resources/3d/concave_polygon_shape_3d.h"
 #include "scene/resources/3d/convex_polygon_shape_3d.h"
 #include "scene/resources/mesh.h"
@@ -48,10 +47,6 @@
 class ImporterMesh : public Resource {
 	GDCLASS(ImporterMesh, Resource)
 
-public:
-	static constexpr int bone_influence_lod_count = 8;
-
-public:
 	struct Surface {
 		Mesh::PrimitiveType primitive;
 		Array arrays;
@@ -86,19 +81,6 @@ public:
 	Ref<ImporterMesh> shadow_mesh;
 
 	Size2i lightmap_size_hint;
-	struct MergedAttribute {
-		Vector3 normal;
-		LocalVector<float> primary_bone_influence = {};
-		MergedAttribute(int32_t p_influences = bone_influence_lod_count) {
-			primary_bone_influence.resize(p_influences);
-			for (int32_t i = 0; i < p_influences; i++) {
-				primary_bone_influence[i] = primary_bone_influence[i];
-			}
-		}
-	};
-	float _get_bone_influence_similarity(const LocalVector<float> &p_influence_1, const LocalVector<float> &p_influence_2);
-	LocalVector<LocalVector<float>> _get_sorted_bone_influences(int32_t p_vertex_count, const int32_t p_influence_count, Vector<int> p_bones, Vector<float> p_weights);
-	Vector<float> _merged_attribute_to_float32_array(const LocalVector<MergedAttribute> &p_attributes);
 
 protected:
 	void _set_data(const Dictionary &p_data);
