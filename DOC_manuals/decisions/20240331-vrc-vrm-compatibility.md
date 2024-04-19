@@ -30,12 +30,14 @@ The proposed solution involves a series of steps outlined in the README below:
 15. The FX controller must match the name and not be temporary.
 16. Remove all face blend shapes.
 17. Use the reader to add face blend shapes (perfect sync)
-18. Delete VRM tools.
-19. Make sure all pipeline IDs are detached.
-20. Remember to delete the upper chest from the humanoid.
-21. Eye look is behind the nose
-22. Make sure the breast bones are parented as the same bone as the clothing chest bones correspond to.
-23. Upload. (Pick a new slot. DO NOT REUSE A SLOT.)
+18. Delete `mouthRollUpper`, `mouthRollLower` and `mouthClose`. 
+19. Delete VRM tools.
+20. Make sure all pipeline IDs are detached.
+21. Remember to delete the upper chest from the humanoid.
+22. Eye look is behind the nose
+23. Make sure the breast bones are parented as the same bone as the clothing chest bones correspond to.
+24. Cross eyed fix in vrcfury breaks eye tracking.
+25. Upload. (Pick a new slot. DO NOT REUSE A SLOT.)
 
 ### Installed packages
 
@@ -78,7 +80,10 @@ Status: Proposed <!-- Draft | Proposed | Rejected | Accepted | Deprecated | Supe
 
 ## Further Reading
 
+1. [vrc-get gui](https://github.com/vrc-get/vrc-get/releases/tag/gui-v0.1.0-beta.16)
 1. [V-Sekai · GitHub](https://github.com/v-sekai) - Official GitHub account for the V-Sekai development community focusing on social VR functionality for the Godot Engine
 2. [V-Sekai/v-sekai-game](https://github.com/v-sekai/v-sekai-game) - GitHub page for the V-Sekai open-source project bringing social VR/VRSNS/metaverse components to the Godot Engine
+4. https://vcc.vrcfury.com
+5. https://Adjerry91.github.io/VRCFaceTracking-Templates/index.json
 
 AI assistant Aria assisted with this article.
