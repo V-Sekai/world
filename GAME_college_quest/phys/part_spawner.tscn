@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://cyi154v6sa54y"]
+
+[ext_resource type="Script" path="res://phys/part_spawner.gd" id="1_o2cml"]
+[ext_resource type="PackedScene" uid="uid://db2jbt78801e5" path="res://phys/crate.tscn" id="2_3e6lv"]
+
+[node name="PartSpawner" type="Marker3D"]
+gizmo_extents = 1.0
+script = ExtResource("1_o2cml")
+part = ExtResource("2_3e6lv")
