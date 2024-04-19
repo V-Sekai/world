@@ -1,0 +1,40 @@
+[gd_scene load_steps=3 format=3 uid="uid://dkyxpailuglgq"]
+
+[ext_resource type="Texture2D" uid="uid://n2kwjdg3w5w4" path="res://wip/input_prompts_kenney/Flairs/Vector/controller_disconnected.svg" id="1_jgu8t"]
+[ext_resource type="Texture2D" uid="uid://bp6eddkv2crxt" path="res://addons/snail_input/device_assignment/round_rect.svg" id="1_q7ui8"]
+
+[node name="player_missing" type="Control"]
+z_index = -1
+custom_minimum_size = Vector2(2.08165e-12, 64)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="NinePatchRect" type="NinePatchRect" parent="."]
+modulate = Color(0.497474, 0.497474, 0.497474, 0.498039)
+self_modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_q7ui8")
+patch_margin_left = 8
+patch_margin_top = 8
+patch_margin_right = 8
+patch_margin_bottom = 8
+
+[node name="TextureRect" type="TextureRect" parent="NinePatchRect"]
+modulate = Color(1, 0.164706, 0.243137, 1)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_jgu8t")
+stretch_mode = 5

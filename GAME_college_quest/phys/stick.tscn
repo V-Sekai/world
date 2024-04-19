@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=3 uid="uid://dwfgw3tn22cia"]
+
+[ext_resource type="Script" path="res://addons/smoothing/smoothing.gd" id="1_07m5l"]
+[ext_resource type="Script" path="res://phys/quadratic_drag_body.gd" id="1_ep7sl"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ktop3"]
+size = Vector3(0.25, 0.25, 3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_26vrb"]
+size = Vector3(0.25, 0.25, 3)
+
+[node name="stick" type="RigidBody3D" groups=["build"]]
+mass = 0.2
+script = ExtResource("1_ep7sl")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_ktop3")
+
+[node name="Smoothing" type="Node3D" parent="CollisionShape3D"]
+script = ExtResource("1_07m5l")
+
+[node name="Node3D" type="Node3D" parent="CollisionShape3D/Smoothing"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CollisionShape3D/Smoothing/Node3D"]
+layers = 2
+mesh = SubResource("BoxMesh_26vrb")
+skeleton = NodePath("../../..")
