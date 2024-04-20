@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://cogm6hynqnryu"]
+[gd_scene load_steps=24 format=4 uid="uid://cogm6hynqnryu"]
 
 [ext_resource type="PackedScene" uid="uid://d0bndvyxq2j7a" path="res://game/main_background.tscn" id="1_tyay1"]
 [ext_resource type="Material" uid="uid://d1dcxbgx8kga7" path="res://materials/test_grid_grey.tres" id="2_akxk7"]

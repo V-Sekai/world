@@ -38,6 +38,10 @@ window/energy_saving/keep_screen_on=false
 
 enabled=PackedStringArray("res://addons/object-inspector/plugin.cfg", "res://addons/ridiculous_coding/plugin.cfg", "res://addons/smoothing/plugin.cfg", "res://addons/snail_input/plugin.cfg", "res://addons/snail_transition/plugin.cfg")
 
+[filesystem]
+
+import/blender/enabled=false
+
 [input]
 
 ui_accept={
