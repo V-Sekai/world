@@ -1,4 +1,4 @@
-# Proposed: College Quest
+# Proposed: Town Courier
 
 ## The Context
 
@@ -10,7 +10,7 @@ The goal is to create an open-world game that provides players with a unique and
 
 ## Describe how your proposal will work with code, pseudo-code, mock-ups, or diagrams
 
-"College Quest" will be developed using the Godot Engine. The game world will be procedurally generated, ensuring that no two playthroughs are identical. NPCs will assign delivery quests to the player, who must navigate the town and deliver items on a moped within a specified time limit. We will utilize the preexisting vehicle code from "Crappy Contraptions" to facilitate the movement mechanics in our game.
+"Town Courier" will be developed using the Godot Engine. The game world will be procedurally generated, ensuring that no two playthroughs are identical. NPCs will assign delivery quests to the player, who must navigate the town and deliver items on a moped within a specified time limit. We will utilize the preexisting vehicle code from "Crappy Contraptions" to facilitate the movement mechanics in our game.
 
 ## The Benefits
 
@@ -49,5 +49,7 @@ Status: Proposed
 1. [V-Sekai · GitHub](https://github.com/v-sekai) - Official GitHub account for the V-Sekai development community focusing on social VR functionality for the Godot Engine.
 2. [V-Sekai/v-sekai-game](https://github.com/v-sekai/v-sekai-game) is the GitHub page for the V-Sekai open-source project, which brings social VR/VRSNS/metaverse components to the Godot Engine.
 3. [Crappy Contraptions](https://github.com/V-Sekai-fire/ludum-dare-55.git)
+4. ["City Grid Block" (https://skfb.ly/onMzQ) by antoniojmonteiro is licensed under Creative Commons Attribution](https://sketchfab.com/3d-models/city-grid-block-3488e40ceca846bb9023f894a749c398)
+
 
 AI assistant Aria assisted with this article.
