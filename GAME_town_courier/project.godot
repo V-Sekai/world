@@ -15,7 +15,7 @@ config/version="1.2.2"
 run/main_scene="res://ui/boot_splash.tscn"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="crappy-contraptions"
-config/features=PackedStringArray("4.3", "Forward Plus")
+config/features=PackedStringArray("4.3", "Double Precision", "Forward Plus")
 boot_splash/bg_color=Color(0, 0, 0, 1)
 boot_splash/show_image=false
 config/icon="res://icon.svg"
@@ -37,6 +37,10 @@ window/energy_saving/keep_screen_on=false
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/object-inspector/plugin.cfg", "res://addons/ridiculous_coding/plugin.cfg", "res://addons/smoothing/plugin.cfg", "res://addons/snail_input/plugin.cfg", "res://addons/snail_transition/plugin.cfg")
+
+[filesystem]
+
+import/blender/enabled=false
 
 [input]
 

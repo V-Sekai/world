@@ -1,10 +1,7 @@
-[gd_scene load_steps=13 format=3 uid="uid://d0bndvyxq2j7a"]
+[gd_scene load_steps=10 format=4 uid="uid://d0bndvyxq2j7a"]
 
 [ext_resource type="Script" path="res://phys/safe_area.gd" id="1_si5a5"]
 [ext_resource type="Material" uid="uid://d1dcxbgx8kga7" path="res://materials/test_grid_grey.tres" id="2_o7et7"]
-[ext_resource type="PackedScene" uid="uid://cw1ecoafrsn3u" path="res://models/tree_bare_a.blend" id="3_lcsfw"]
-[ext_resource type="PackedScene" uid="uid://bc2p27pp4uqmf" path="res://models/tree_bare_b.blend" id="4_mowbf"]
-[ext_resource type="PackedScene" uid="uid://blmpuk2qvlji5" path="res://models/tree_bare_c.blend" id="5_jxeil"]
 
 [sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_c5qv6"]
 rayleigh_coefficient = 1.25
@@ -402,21 +399,3 @@ size = Vector3(11.2079, 15.6938, 28.4692)
 transform = Transform3D(0.371309, -0.852527, -0.367869, 0.312847, 0.487896, -0.814914, 0.874218, 0.187497, 0.447871, 43.9428, 86.2604, 48.9318)
 material_override = ExtResource("2_o7et7")
 size = Vector3(11.2079, 15.6938, 31.0574)
-
-[node name="tree_bare_a" parent="." instance=ExtResource("3_lcsfw")]
-transform = Transform3D(-0.0602298, 0, 0.998185, 0, 1, 0, -0.998185, 0, -0.0602297, -17.6575, -25.1403, -21.6206)
-
-[node name="tree_bare_b" parent="." instance=ExtResource("4_mowbf")]
-transform = Transform3D(0.606238, 0, -0.795283, 0, 1, 0, 0.795283, 0, 0.606238, 30.4504, -25.1403, -12.1517)
-
-[node name="tree_bare_c" parent="." instance=ExtResource("5_jxeil")]
-transform = Transform3D(0.973403, 0, -0.229098, 0, 1, 0, 0.229098, 0, 0.973403, 19.501, -25.2016, 18.5516)
-
-[node name="tree_bare_a2" parent="." instance=ExtResource("3_lcsfw")]
-transform = Transform3D(0.766201, 0, 0.6426, 0, 1, 0, -0.6426, 0, 0.766201, -15.3447, -25.1793, 22.7757)
-
-[node name="tree_bare_b2" parent="." instance=ExtResource("4_mowbf")]
-transform = Transform3D(0.606238, 0, -0.795283, 0, 1, 0, 0.795283, 0, 0.606238, -8.58334, -25.2016, 36.8964)
-
-[node name="tree_bare_b3" parent="." instance=ExtResource("4_mowbf")]
-transform = Transform3D(-0.998483, 0, -0.0550547, 0, 1, 0, 0.0550547, 0, -0.998483, -9.52328, -25.2249, 3.65895)

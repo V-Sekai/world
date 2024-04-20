@@ -9,7 +9,7 @@ materials: [{
 	destination: "g"
 	name:        "project_git_sandbox"
 	type:        "git"
-	url:         "https://github.com/V-Sekai/TOOL_model_explorer.git"
+	url:         "https://github.com/V-Sekai/godot-crappy-contraptions.git"
 }, {
 	ignore_for_scheduling: false
 	name:                  "godot-groups-editor_pipeline_dependency"
@@ -97,7 +97,12 @@ stages: [{
 			type:              "exec"
 			working_directory: ""
 		}, {
-			arguments: ["-c", "../godot.linuxbsd.editor.double.x86_64.llvm --headless --xr-mode off --export-pack \"Windows\" `pwd`/../export_windows/v_sekai_windows.exe.pck"]
+			arguments: ["-c", "../godot.linuxbsd.editor.double.x86_64.llvm --headless --import \"Windows\""]
+			command:           "/bin/bash"
+			type:              "exec"
+			working_directory: "g"
+		}, {
+			arguments: ["-c", "../godot.linuxbsd.editor.double.x86_64.llvm --headless --export-pack \"Windows\" `pwd`/../export_windows/v_sekai_windows.exe.pck"]
 			command:           "/bin/bash"
 			type:              "exec"
 			working_directory: "g"
@@ -183,7 +188,12 @@ stages: [{
 			type:              "exec"
 			working_directory: ""
 		}, {
-			arguments: ["-c", "../godot.linuxbsd.editor.double.x86_64.llvm --headless --xr-mode off --export-pack \"Linux\" `pwd`/../export_linuxbsd/v_sekai_linuxbsd.pck"]
+			arguments: ["-c", "../godot.linuxbsd.editor.double.x86_64.llvm --headless --import \"Linux\""]
+			command:           "/bin/bash"
+			type:              "exec"
+			working_directory: "g"
+		}, {
+			arguments: ["-c", "../godot.linuxbsd.editor.double.x86_64.llvm --headless --export-pack \"Linux\" `pwd`/../export_linuxbsd/v_sekai_linuxbsd.pck"]
 			command:           "/bin/bash"
 			type:              "exec"
 			working_directory: "g"
