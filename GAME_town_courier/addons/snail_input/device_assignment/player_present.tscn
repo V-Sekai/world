@@ -1,0 +1,64 @@
+[gd_scene load_steps=7 format=3 uid="uid://cajfcmay26qox"]
+
+[ext_resource type="Texture2D" uid="uid://duag6p5ewyqb2" path="res://addons/snail_input/device_assignment/input_prompts_kenney/controller_generic.svg" id="1_nrsi4"]
+[ext_resource type="Script" path="res://addons/snail_input/device_assignment/player_present.gd" id="1_re1ur"]
+[ext_resource type="Texture2D" uid="uid://bcf50xc6sn4qu" path="res://addons/snail_input/device_assignment/input_prompts_kenney/keyboard_arrows.svg" id="2_81k1v"]
+[ext_resource type="Texture2D" uid="uid://blh75v36m763x" path="res://addons/snail_input/device_assignment/input_prompts_kenney/mouse.svg" id="3_02va3"]
+[ext_resource type="Texture2D" uid="uid://bp6eddkv2crxt" path="res://addons/snail_input/device_assignment/round_rect.svg" id="5_1mifa"]
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_nkare"]
+
+[node name="player_present" type="Control"]
+custom_minimum_size = Vector2(2.08165e-12, 64)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_re1ur")
+keyboard_icon = ExtResource("2_81k1v")
+mouse_icon = ExtResource("3_02va3")
+gamepad_icon = ExtResource("1_nrsi4")
+
+[node name="NinePatchRect" type="NinePatchRect" parent="."]
+self_modulate = Color(0.0627451, 0.513726, 0.556863, 0.25098)
+clip_contents = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("5_1mifa")
+patch_margin_left = 8
+patch_margin_top = 8
+patch_margin_right = 8
+patch_margin_bottom = 8
+
+[node name="icon" type="TextureRect" parent="NinePatchRect"]
+modulate = Color(0.294118, 0.623529, 0.87451, 0.862745)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("PlaceholderTexture2D_nkare")
+stretch_mode = 5
+
+[node name="label" type="Label" parent="NinePatchRect"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -291.5
+offset_top = -11.5
+offset_right = 291.5
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "TyreBytesTech Extremely Really Long Device Name (R) G29581 (TB37) (rev 5)"
+horizontal_alignment = 1

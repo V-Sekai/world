@@ -1,0 +1,61 @@
+[gd_scene load_steps=9 format=3 uid="uid://cnn3l47ist43j"]
+
+[ext_resource type="Script" path="res://phys/level_changer.gd" id="1_6hkr7"]
+[ext_resource type="PackedScene" uid="uid://bv21rw6f7mgku" path="res://phys/trigger_door.tscn" id="2_wx2ai"]
+[ext_resource type="PackedScene" uid="uid://b0s7vs1j5g0ik" path="res://phys/pressure_plate.tscn" id="3_82cnk"]
+[ext_resource type="Script" path="res://phys/scene_change_trigger.gd" id="3_bwftw"]
+[ext_resource type="Script" path="res://phys/player_detector.gd" id="4_7f5ls"]
+[ext_resource type="Material" uid="uid://d1dcxbgx8kga7" path="res://materials/test_grid_grey.tres" id="6_b6e3m"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_43glp"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_fqo2w"]
+size = Vector3(5, 2, 5)
+
+[node name="Node3D" type="Node3D"]
+script = ExtResource("1_6hkr7")
+
+[node name="door" parent="." instance=ExtResource("2_wx2ai")]
+
+[node name="pressure_plate" parent="." instance=ExtResource("3_82cnk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 2.08165e-12, 3.756)
+
+[node name="scene_changer" type="Area3D" parent="pressure_plate"]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.08165e-12, 0.769845, 0.000472069)
+script = ExtResource("3_bwftw")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="pressure_plate/scene_changer"]
+shape = SubResource("BoxShape3D_43glp")
+
+[node name="Area3D2" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.40441, -2.49658)
+script = ExtResource("4_7f5ls")
+target_path = NodePath("../door")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D2"]
+shape = SubResource("BoxShape3D_fqo2w")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 3.00446, 4.41551)
+use_collision = true
+size = Vector3(6.0459, 6.00891, 8.02598)
+material = ExtResource("6_b6e3m")
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="CSGBox3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.202205, -0.301132)
+operation = 2
+size = Vector3(4.92944, 5.88045, 8.32632)
+
+[node name="SpotLight3D" type="SpotLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -0.256323, 0.966591, 0, -0.966591, -0.256323, 0, 4.84004, 1.27254)
+light_color = Color(0.886275, 0.85098, 0.847059, 1)
+light_energy = 3.0
+shadow_enabled = true
+shadow_bias = 0.01
+shadow_normal_bias = 0.5
+distance_fade_enabled = true
+distance_fade_begin = 20.0
+distance_fade_shadow = 30.0
+spot_range = 10.0
+spot_angle = 40.0
