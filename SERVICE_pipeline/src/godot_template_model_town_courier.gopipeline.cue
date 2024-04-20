@@ -9,7 +9,7 @@ materials: [{
 	destination: "g"
 	name:        "project_git_sandbox"
 	type:        "git"
-	url:         "https://github.com/V-Sekai/TOOL_model_explorer.git"
+	url:         "https://github.com/V-Sekai/godot-crappy-contraptions.git"
 }, {
 	ignore_for_scheduling: false
 	name:                  "godot-groups-editor_pipeline_dependency"
