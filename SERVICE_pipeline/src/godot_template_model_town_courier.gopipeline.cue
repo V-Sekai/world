@@ -97,7 +97,7 @@ stages: [{
 			type:              "exec"
 			working_directory: ""
 		}, {
-			arguments: ["-c", "../godot.linuxbsd.editor.double.x86_64.llvm --headless --xr-mode off --export-pack \"Windows\" `pwd`/../export_windows/v_sekai_windows.exe.pck"]
+			arguments: ["-c", "../godot.linuxbsd.editor.double.x86_64.llvm --export-pack \"Windows\" `pwd`/../export_windows/v_sekai_windows.exe.pck"]
 			command:           "/bin/bash"
 			type:              "exec"
 			working_directory: "g"
@@ -183,7 +183,7 @@ stages: [{
 			type:              "exec"
 			working_directory: ""
 		}, {
-			arguments: ["-c", "../godot.linuxbsd.editor.double.x86_64.llvm --headless --xr-mode off --export-pack \"Linux\" `pwd`/../export_linuxbsd/v_sekai_linuxbsd.pck"]
+			arguments: ["-c", "../godot.linuxbsd.editor.double.x86_64.llvm --export-pack \"Linux\" `pwd`/../export_linuxbsd/v_sekai_linuxbsd.pck"]
 			command:           "/bin/bash"
 			type:              "exec"
 			working_directory: "g"
