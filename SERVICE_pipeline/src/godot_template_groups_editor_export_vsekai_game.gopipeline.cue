@@ -91,33 +91,33 @@ stages: [{
 		name: "linux_job"
 		resources: ["linux", "mingw5"]
 		tasks: [{
-				artifact_origin:  "gocd"
-				destination:      ""
-				is_source_a_file: true
-				job:              "defaultJob"
-				pipeline:         "godot-groups"
-				source:           "godot.templates.tpz"
-				stage:            "templateZipStage"
-				type:             "fetch"
-			}, {
-					artifact_origin:  "gocd"
-					destination:      ""
-					is_source_a_file: true
-					job:              "linux_job"
-					pipeline:         "godot-groups"
-					source:           "godot.linuxbsd.editor.double.x86_64.llvm"
-					stage:            "defaultStage"
-					type:             "fetch"
-			}, {
-					artifact_origin:  "gocd"
-					destination:      ""
-					is_source_a_file: true
-					job:              "linux_job"
-					pipeline:         "godot-groups"
-					source:           "godot.linuxbsd.editor.double.x86_64.llvm"
-					stage:            "defaultStage"
-					type:             "fetch"
-			},
+			artifact_origin:  "gocd"
+			destination:      ""
+			is_source_a_file: true
+			job:              "defaultJob"
+			pipeline:         "godot-groups"
+			source:           "godot.templates.tpz"
+			stage:            "templateZipStage"
+			type:             "fetch"
+		}, {
+			artifact_origin:  "gocd"
+			destination:      ""
+			is_source_a_file: true
+			job:              "linux_job"
+			pipeline:         "godot-groups"
+			source:           "godot.linuxbsd.editor.double.x86_64.llvm"
+			stage:            "defaultStage"
+			type:             "fetch"
+		}, {
+			artifact_origin:  "gocd"
+			destination:      ""
+			is_source_a_file: true
+			job:              "linux_job"
+			pipeline:         "godot-groups"
+			source:           "godot.linuxbsd.editor.double.x86_64.llvm"
+			stage:            "defaultStage"
+			type:             "fetch"
+		},
 			taskTemplate & {
 				arguments: ["-c", "rm -rf templates && unzip \"godot.templates.tpz\" && export VERSION=\"`cat templates/version.txt`\" && export TEMPLATEDIR=\".local/share/godot/export_templates/$VERSION/\" && export HOME=\"`pwd`\" && export BASEDIR=\"`pwd`\" && rm -rf \"$TEMPLATEDIR\" && mkdir -p \"$TEMPLATEDIR\" && cd \"$TEMPLATEDIR\" && mv \"$BASEDIR\"/templates/* ."]
 				working_directory: ""
@@ -157,7 +157,7 @@ stages: [{
 			taskTemplate & {
 				arguments: ["-c", "ls export_linuxbsd"]
 				working_directory: ""
-			}
+			},
 		]
 	}]
 	name: "exportStage"
@@ -194,30 +194,30 @@ stages: [{
 			arguments: ["-c", "mv export_windows/v_sekai_windows.exe export/editor/v_sekai_windows_editor.exe"]
 		}, taskTemplate & {
 			arguments: ["-c", """
-			cat > export/.itch.toml <<EOF
-			[[actions]]
-			name = "play"
-			path = "game/v_sekai_windows.exe"
+				cat > export/.itch.toml <<EOF
+				[[actions]]
+				name = "play"
+				path = "game/v_sekai_windows.exe"
 
-			[[actions]]
-			name = "Desktop"
-			path = "game/v_sekai_windows.exe"
-			args = ["--xr-mode", "off"]
+				[[actions]]
+				name = "Desktop"
+				path = "game/v_sekai_windows.exe"
+				args = ["--xr-mode", "off"]
 
-			[[actions]]
-			name = "editor"
-			path = "editor/v_sekai_windows_editor.exe"
-			platform = "windows"
+				[[actions]]
+				name = "editor"
+				path = "editor/v_sekai_windows_editor.exe"
+				platform = "windows"
 
-			[[actions]]
-			name = "forums"
-			path = "https://discord.gg/7BQDHesck8"
+				[[actions]]
+				name = "forums"
+				path = "https://discord.gg/7BQDHesck8"
 
-			[[actions]]
-			name = "Manuals"
-			path = "https://v-sekai.github.io/manuals/"
-			EOF
-			"""]
+				[[actions]]
+				name = "Manuals"
+				path = "https://v-sekai.github.io/manuals/"
+				EOF
+				"""]
 		}, taskTemplate & {
 			arguments: ["-c", "butler push export ifiregames/v-sekai-editor:windows-master --userversion $GO_PIPELINE_LABEL-`date --iso=seconds --utc`"]
 		}]
