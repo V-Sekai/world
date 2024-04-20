@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://dkyxpailuglgq"]
 
-[ext_resource type="Texture2D" uid="uid://n2kwjdg3w5w4" path="res://wip/input_prompts_kenney/Flairs/Vector/controller_disconnected.svg" id="1_jgu8t"]
+[ext_resource type="Texture2D" uid="uid://n2kwjdg3w5w4" path="res://addons/snail_input/device_assignment/input_prompts_kenney/controller_disconnected.svg" id="1_jgu8t"]
 [ext_resource type="Texture2D" uid="uid://bp6eddkv2crxt" path="res://addons/snail_input/device_assignment/round_rect.svg" id="1_q7ui8"]
 
 [node name="player_missing" type="Control"]

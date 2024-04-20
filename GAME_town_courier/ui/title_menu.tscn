@@ -9,11 +9,11 @@
 [ext_resource type="Script" path="res://game/unlock_despawn.gd" id="6_qhu45"]
 [ext_resource type="Script" path="res://ui/change_mode.gd" id="8_toek7"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_c4sbw"]
-bg_color = Color(0.25098, 0.470588, 0.352941, 1)
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rb23x"]
 bg_color = Color(0.211765, 0.376471, 0.313726, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_c4sbw"]
+bg_color = Color(0.25098, 0.470588, 0.352941, 1)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_c08jc"]
 size = Vector2(59, 244)
@@ -59,8 +59,8 @@ focus_neighbor_right = NodePath("../center_anchor/StaticBody2D/RigidBody2D2/play
 focus_mode = 0
 theme = ExtResource("3_gubyl")
 theme_override_font_sizes/font_size = 16
-theme_override_styles/hover = SubResource("StyleBoxFlat_c4sbw")
 theme_override_styles/focus = SubResource("StyleBoxFlat_rb23x")
+theme_override_styles/hover = SubResource("StyleBoxFlat_c4sbw")
 disabled = true
 text = "f1 to dev unlock"
 flat = true
@@ -124,8 +124,8 @@ size_flags_vertical = 0
 focus_neighbor_bottom = NodePath("../../RigidBody2D2/play")
 focus_next = NodePath("../../RigidBody2D2/play")
 theme = ExtResource("3_gubyl")
-theme_override_styles/hover = SubResource("StyleBoxFlat_c4sbw")
 theme_override_styles/focus = SubResource("StyleBoxFlat_rb23x")
+theme_override_styles/hover = SubResource("StyleBoxFlat_c4sbw")
 disabled = true
 text = "Continue"
 script = ExtResource("5_slvpy")
@@ -162,8 +162,8 @@ focus_neighbor_bottom = NodePath("../../../level_select")
 focus_next = NodePath("../../../level_select")
 focus_previous = NodePath("../../RigidBody2D/continue")
 theme = ExtResource("3_gubyl")
-theme_override_styles/hover = SubResource("StyleBoxFlat_c4sbw")
 theme_override_styles/focus = SubResource("StyleBoxFlat_rb23x")
+theme_override_styles/hover = SubResource("StyleBoxFlat_c4sbw")
 text = "New Game"
 metadata/_edit_lock_ = true
 
@@ -233,8 +233,8 @@ focus_neighbor_bottom = NodePath("../../RigidBody2D5/qtd")
 focus_next = NodePath("../../RigidBody2D5/qtd")
 focus_previous = NodePath("../../RigidBody2D3/sandbox")
 theme = ExtResource("3_gubyl")
-theme_override_styles/hover = SubResource("StyleBoxFlat_xgtha")
 theme_override_styles/focus = SubResource("StyleBoxFlat_xgtha")
+theme_override_styles/hover = SubResource("StyleBoxFlat_xgtha")
 disabled = true
 text = "Delete Save"
 script = ExtResource("5_slvpy")

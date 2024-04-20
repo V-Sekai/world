@@ -1,49 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://b1a4fhcw48et1"]
 
+[ext_resource type="Script" path="res://ui/pause_menu.gd" id="1_2pw1j"]
 [ext_resource type="Theme" uid="uid://bd7gseqffsnlf" path="res://ui/main_theme.tres" id="1_8kveh"]
-
-[sub_resource type="GDScript" id="GDScript_erwso"]
-script/source = "extends VBoxContainer
-
-@onready var focus := SnailInput.get_input_focus(self)
-
-@export var close_target: Node = self
-@export_file(\"*.tscn\") var restart_scene
-@export_file(\"*.tscn\") var menu_scene
-
-func _ready():
-	assert(close_target)
-	$continue.grab_focus()
-	$continue.pressed.connect(_on_continue)
-	$restart.pressed.connect(_on_restart)
-	$quit.pressed.connect(_on_quit)
-
-func dismiss():
-	await get_tree().process_frame
-	get_tree().paused = false
-	close_target.queue_free()
-
-func _on_continue():
-	dismiss()
-
-func _on_restart():
-	if restart_scene:
-		get_tree().paused = false
-		SnailTransition.auto_transition_threaded(restart_scene)
-
-func _on_quit():
-	if restart_scene:
-		get_tree().paused = false
-		SnailTransition.auto_transition_threaded(menu_scene)
-
-func _input(event: InputEvent) -> void:
-	var input := focus.get_player_input()
-	if input.is_action_pressed(\"pause\") and event.is_pressed():
-		dismiss()
-
-	if event is InputEventMouseMotion:
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-"
 
 [node name="pause_menu" type="VBoxContainer" node_paths=PackedStringArray("close_target")]
 process_mode = 3
@@ -58,7 +16,7 @@ offset_right = 71.0
 offset_bottom = 58.0
 grow_horizontal = 2
 grow_vertical = 2
-script = SubResource("GDScript_erwso")
+script = ExtResource("1_2pw1j")
 close_target = NodePath(".")
 menu_scene = "res://ui/boot_splash.tscn"
 

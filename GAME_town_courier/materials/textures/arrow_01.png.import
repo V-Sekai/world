@@ -2,17 +2,18 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://3ksl1a4dk7mb"
-path.s3tc="res://.godot/imported/doodle_02_normal.png-47fd1e5168a03026d98c62709e5b11a8.s3tc.ctex"
+uid="uid://ct37dkosuacif"
+path.s3tc="res://.godot/imported/arrow_01.png-5671fa72860ce689aeb26398f8f79369.s3tc.ctex"
+path.etc2="res://.godot/imported/arrow_01.png-5671fa72860ce689aeb26398f8f79369.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
-source_file="res://materials/textures/doodle_02_normal.png"
-dest_files=["res://.godot/imported/doodle_02_normal.png-47fd1e5168a03026d98c62709e5b11a8.s3tc.ctex"]
+source_file="res://materials/textures/arrow_01.png"
+dest_files=["res://.godot/imported/arrow_01.png-5671fa72860ce689aeb26398f8f79369.s3tc.ctex", "res://.godot/imported/arrow_01.png-5671fa72860ce689aeb26398f8f79369.etc2.ctex"]
 
 [params]
 

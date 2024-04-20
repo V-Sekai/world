@@ -2,17 +2,18 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ct37dkosuacif"
-path.s3tc="res://.godot/imported/arrow_01.png-5671fa72860ce689aeb26398f8f79369.s3tc.ctex"
+uid="uid://cvqd5n3u8cd66"
+path.s3tc="res://.godot/imported/cross_01.png-0c61d8e52ffef1e6b5bdb049963c09e4.s3tc.ctex"
+path.etc2="res://.godot/imported/cross_01.png-0c61d8e52ffef1e6b5bdb049963c09e4.etc2.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
 "vram_texture": true
 }
 
 [deps]
 
-source_file="res://materials/textures/arrow_01.png"
-dest_files=["res://.godot/imported/arrow_01.png-5671fa72860ce689aeb26398f8f79369.s3tc.ctex"]
+source_file="res://materials/textures/cross_01.png"
+dest_files=["res://.godot/imported/cross_01.png-0c61d8e52ffef1e6b5bdb049963c09e4.s3tc.ctex", "res://.godot/imported/cross_01.png-0c61d8e52ffef1e6b5bdb049963c09e4.etc2.ctex"]
 
 [params]
 
