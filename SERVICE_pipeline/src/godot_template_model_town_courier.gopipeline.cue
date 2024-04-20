@@ -158,7 +158,6 @@ stages: [{
 			type:              "exec"
 			working_directory: ""
 		}, {
-		}, {
 			arguments: ["-c", "rm -rf templates && unzip \"godot.templates.tpz\" && export VERSION=\"`cat templates/version.txt`\" && export TEMPLATEDIR=\".local/share/godot/export_templates/$VERSION/\" && export HOME=\"`pwd`\" && export BASEDIR=\"`pwd`\" && rm -rf \"$TEMPLATEDIR\" && mkdir -p \"$TEMPLATEDIR\" && cd \"$TEMPLATEDIR\" && mv \"$BASEDIR\"/templates/* ."]
 			command:           "/bin/bash"
 			type:              "exec"
