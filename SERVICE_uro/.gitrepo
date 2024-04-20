@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai/uro.git
 	branch = master
-	commit = a4913243a02451c6e9505497960358bfd6621ca8
+	commit = 29d4ee2c89da685c67c91f9fd75c8185135e5a66
 	parent = 86c943a0a66258c59aafce21493f60d3108ab98d
 	method = merge
 	cmdver = 0.4.6

@@ -1,6 +1,6 @@
 # Godot SQLite
 
-This is a [MVSQLite](https://www.sqlite.org/](https://github.com/V-Sekai/mvsqlite) wrapper for the Godot Engine.
+This is a [MVSQLite](https://github.com/V-Sekai/mvsqlite) wrapper for the Godot Engine.
 
 ## Installation
 
