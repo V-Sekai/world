@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=3 uid="uid://c7jaebv3nhvsq"]
+[gd_scene load_steps=3 format=4 uid="uid://c7jaebv3nhvsq"]
 
 [ext_resource type="PackedScene" uid="uid://c0wxk1faqipeb" path="res://addons/exmoe_tools/splash/splash_exmoe.tscn" id="1_654a0"]
 
