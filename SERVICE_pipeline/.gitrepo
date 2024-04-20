@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai/groups-gocd-pipelines.git
 	branch = main
-	commit = 9df468acbcc9fc387dd0bcd4f5382b55f3e4bdab
-	parent = 6fee9531a4cbd42096883521c8efcd761055784d
+	commit = c21f3fe7b956ba2d703e3c84727ed8fbfad748ec
+	parent = cd7992488a0936f18ab440c80d03669617f4c137
 	method = merge
 	cmdver = 0.4.6
