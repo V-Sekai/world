@@ -1,9 +1,0 @@
-[gd_scene load_steps=3 format=3 uid="uid://b581wtdnmnr5d"]
-
-[ext_resource type="Texture2D" uid="uid://ct37dkosuacif" path="res://materials/textures/arrow_01.png" id="1_awpth"]
-[ext_resource type="Texture2D" uid="uid://pu1gjq7ilefy" path="res://materials/textures/arrow_01_normal.png" id="2_mo8kj"]
-
-[node name="Arrow01" type="Decal"]
-texture_albedo = ExtResource("1_awpth")
-texture_normal = ExtResource("2_mo8kj")
-cull_mask = 1048573

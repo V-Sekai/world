@@ -1,9 +1,0 @@
-[gd_scene load_steps=3 format=3 uid="uid://cgrj1q6csap51"]
-
-[ext_resource type="Texture2D" uid="uid://dh2gdr1eskk6" path="res://materials/textures/doodle_02.png" id="1_lqd14"]
-[ext_resource type="Texture2D" uid="uid://3ksl1a4dk7mb" path="res://materials/textures/doodle_02_normal.png" id="2_pvi2m"]
-
-[node name="Doodle02" type="Decal"]
-texture_albedo = ExtResource("1_lqd14")
-texture_normal = ExtResource("2_pvi2m")
-cull_mask = 1048573
