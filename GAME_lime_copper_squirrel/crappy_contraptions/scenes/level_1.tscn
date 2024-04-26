@@ -74,7 +74,7 @@ grabber = NodePath("grabber")
 [node name="Label3D" type="Label3D" parent="."]
 transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0, 4.64251, 50.3054)
 pixel_size = 0.025
-text = "the goal is here"
+text = "The goal is here."
 font = ExtResource("5_pmvyv")
 font_size = 64
 outline_size = 24
@@ -82,28 +82,28 @@ outline_size = 24
 [node name="Label3D2" type="Label3D" parent="."]
 transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0, 1.45991, 51.8165)
 pixel_size = 0.0125
-text = "right here specifically"
+text = "Right here specifically."
 font = ExtResource("5_pmvyv")
 
 [node name="Label3D3" type="Label3D" parent="."]
 transform = Transform3D(-0.00431082, 0, 0.999991, 0, 1, 0, -0.999991, 0, -0.00431082, 2.47869, 2.51376, 54.5483)
 pixel_size = 0.0125
 double_sided = false
-text = "wait no not like that"
+text = "Wait no not like that."
 font = ExtResource("5_pmvyv")
 
 [node name="Label3D4" type="Label3D" parent="."]
 transform = Transform3D(0.0851038, 0, -0.996372, 0, 1, 0, 0.996372, 0, 0.0851038, -0.898013, 2.51376, 54.5483)
 pixel_size = 0.0125
 double_sided = false
-text = "wait no not like that"
+text = "Wait no not like that."
 font = ExtResource("5_pmvyv")
 
 [node name="Label3D5" type="Label3D" parent="."]
 transform = Transform3D(0.999997, 0, -0.00256568, 0, 1, 0, 0.00256567, 0, 0.999997, 0.794287, 4.20947, 53.2141)
 pixel_size = 0.0125
 double_sided = false
-text = "oh no"
+text = "Oh no."
 font = ExtResource("5_pmvyv")
 
 [node name="Contraption" type="Node3D" parent="."]
@@ -226,7 +226,7 @@ map_path = "res://crappy_contraptions/scenes/sandbox.tscn"
 [node name="Label3D6" type="Label3D" parent="Node3D"]
 transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -1.90735e-06, 3.42544, -0.520968)
 pixel_size = 0.01
-text = "sandbox"
+text = "Sandbox"
 font = ExtResource("5_pmvyv")
 font_size = 64
 outline_size = 24
@@ -244,7 +244,7 @@ size = Vector3(1, 4.43115, 4.87769)
 transform = Transform3D(1.31134e-07, 0, 1, 0, 1, 0, -1, 0, 1.31134e-07, 0.514137, 0.180067, -0.173621)
 shaded = true
 double_sided = false
-text = "beat the game first"
+text = "Beat the game first."
 font = ExtResource("5_pmvyv")
 font_size = 64
 outline_size = 24

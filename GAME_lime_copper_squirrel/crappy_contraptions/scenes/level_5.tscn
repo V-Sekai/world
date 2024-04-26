@@ -63,7 +63,7 @@ map_path = "res://crappy_contraptions/scenes/level_6.tscn"
 [node name="Label3D2" type="Label3D" parent="finish"]
 transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 5.6071e-08, 4.48378, -0.641378)
 pixel_size = 0.01
-text = "i see you have chosen the long way"
+text = "I see you have chosen the long way."
 font = ExtResource("10_b4xj4")
 font_size = 64
 outline_size = 24

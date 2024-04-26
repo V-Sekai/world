@@ -272,7 +272,7 @@ material = ExtResource("2_foee3")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.361305)
 pixel_size = 0.0125
 shaded = true
-text = "parts"
+text = "Parts"
 font = ExtResource("7_74r0f")
 font_size = 64
 outline_size = 20
@@ -363,7 +363,7 @@ map_path = "res://crappy_contraptions/scenes/sandbox.tscn"
 [node name="Label3D2" type="Label3D" parent="reset"]
 transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0, 3.69543, -0.656273)
 pixel_size = 0.01
-text = "reload"
+text = "Reload"
 font = ExtResource("16_mxuih")
 font_size = 64
 outline_size = 24

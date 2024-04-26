@@ -63,7 +63,7 @@ map_path = "res://crappy_contraptions/scenes/level_7.tscn"
 [node name="Label3D2" type="Label3D" parent="finish"]
 transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 5.6071e-08, 4.25716, -0.641378)
 pixel_size = 0.01
-text = "i wasn't joking, there's nothing here"
+text = "I wasn't joking, there's nothing here."
 font = ExtResource("10_u7joe")
 font_size = 64
 outline_size = 24
