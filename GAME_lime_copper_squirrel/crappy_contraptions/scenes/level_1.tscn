@@ -12,7 +12,7 @@
 [ext_resource type="PackedScene" uid="uid://cyi154v6sa54y" path="res://crappy_contraptions/physics/part_spawner.tscn" id="10_1pf5l"]
 [ext_resource type="PackedScene" uid="uid://dsnnni3tvdy3y" path="res://crappy_contraptions/physics/sliding_platform.tscn" id="11_5xg58"]
 [ext_resource type="Script" path="res://crappy_contraptions/ui/clear_focus.gd" id="12_5c5yi"]
-[ext_resource type="Script" path="res://addons/object-inspector/scripts/inspector.gd" id="13_trt01"]
+[ext_resource type="Script" path="res://addons/object_inspector/scripts/inspector.gd" id="13_trt01"]
 [ext_resource type="Script" path="res://crappy_contraptions/physics/scene_change_trigger.gd" id="14_edk4x"]
 [ext_resource type="PackedScene" uid="uid://b581wtdnmnr5d" path="res://crappy_contraptions/materials/decals/arrow_01.tscn" id="15_5aese"]
 [ext_resource type="PackedScene" uid="uid://ftfxqqm3ijuk" path="res://crappy_contraptions/materials/decals/cross_01.tscn" id="16_s1kmj"]

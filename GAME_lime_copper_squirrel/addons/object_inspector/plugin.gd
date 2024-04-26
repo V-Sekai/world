@@ -6,8 +6,8 @@ extends EditorPlugin
 
 
 const INSPECTOR_CONTROL_NAME = "ObjectInspector"
-const INSPECTOR_CONTROL_SCRIPT = "res://addons/object-inspector/scripts/inspector.gd"
-const INSPECTOR_CONTROL_ICON = "res://addons/object-inspector/icons/inspector_container.svg"
+const INSPECTOR_CONTROL_SCRIPT = "res://addons/object_inspector/scripts/inspector.gd"
+const INSPECTOR_CONTROL_ICON = "res://addons/object_inspector/icons/inspector_container.svg"
 
 
 func _enter_tree() -> void:

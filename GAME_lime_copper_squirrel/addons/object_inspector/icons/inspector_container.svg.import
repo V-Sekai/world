@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cuioo1ed6v4t7"
-path="res://.godot/imported/inspector.svg-bed534ba731ce8bf354ec742575eda53.ctex"
+uid="uid://gjosa0m70r5l"
+path="res://.godot/imported/inspector_container.svg-0b9b533e4215a83befc8e95e2023ce89.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/object-inspector/icons/inspector.svg"
-dest_files=["res://.godot/imported/inspector.svg-bed534ba731ce8bf354ec742575eda53.ctex"]
+source_file="res://addons/object_inspector/icons/inspector_container.svg"
+dest_files=["res://.godot/imported/inspector_container.svg-0b9b533e4215a83befc8e95e2023ce89.ctex"]
 
 [params]
 
