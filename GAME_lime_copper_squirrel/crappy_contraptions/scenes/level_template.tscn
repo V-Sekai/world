@@ -1,0 +1,58 @@
+[gd_scene load_steps=10 format=3 uid="uid://c3t06ewt8wss4"]
+
+[ext_resource type="Script" path="res://crappy_contraptions/scenes/unlock.gd" id="1_kamou"]
+[ext_resource type="Script" path="res://crappy_contraptions/scenes/save_value.gd" id="2_08vrv"]
+[ext_resource type="PackedScene" uid="uid://de0xrdyh6s7tl" path="res://crappy_contraptions/physics/player.tscn" id="3_oucyn"]
+[ext_resource type="Material" uid="uid://d1dcxbgx8kga7" path="res://crappy_contraptions/materials/test_grid_grey.tres" id="4_rwhbx"]
+[ext_resource type="PackedScene" uid="uid://d0bndvyxq2j7a" path="res://crappy_contraptions/scenes/main_background.tscn" id="5_56v28"]
+[ext_resource type="Script" path="res://addons/exmoe_tools/common/follow_cam.gd" id="6_2unge"]
+[ext_resource type="Script" path="res://crappy_contraptions/physics/safe_area.gd" id="7_nu68b"]
+[ext_resource type="PackedScene" uid="uid://cnn3l47ist43j" path="res://crappy_contraptions/physics/level_changer.tscn" id="8_gabsl"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_iw3lr"]
+size = Vector3(104, 50, 104)
+
+[node name="LevelTemplate" type="Node3D"]
+
+[node name="Unlock" type="Node" parent="."]
+script = ExtResource("1_kamou")
+save_flag = "map_flag"
+
+[node name="SaveValue" type="Node" parent="."]
+script = ExtResource("2_08vrv")
+save_flag = "continue"
+save_value = "map_name"
+
+[node name="player" parent="." node_paths=PackedStringArray("camera") instance=ExtResource("3_oucyn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 1, 2.08165e-12)
+camera = NodePath("../Camera3D")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 2.08165e-12, 2.08165e-12)
+layers = 9
+use_collision = true
+size = Vector3(104, 8, 104)
+material = ExtResource("4_rwhbx")
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="CSGBox3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 10, 2.08165e-12)
+operation = 2
+use_collision = true
+size = Vector3(100, 20, 100)
+material = ExtResource("4_rwhbx")
+
+[node name="background" parent="." instance=ExtResource("5_56v28")]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+script = ExtResource("6_2unge")
+
+[node name="Area3D" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14.5929, 0)
+script = ExtResource("7_nu68b")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("BoxShape3D_iw3lr")
+
+[node name="finish" parent="." instance=ExtResource("8_gabsl")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 2.08165e-12, 2.08165e-12, -30)
+map_path = "res://ui/completion_menu.tscn"

@@ -1,0 +1,77 @@
+[gd_scene load_steps=9 format=3 uid="uid://de0xrdyh6s7tl"]
+
+[ext_resource type="Script" path="res://crappy_contraptions/physics/player.gd" id="1_6fa4x"]
+[ext_resource type="PackedScene" uid="uid://b1a4fhcw48et1" path="res://crappy_contraptions/ui/pause_menu.tscn" id="2_cosj6"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_ku5q7"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_hkaa8"]
+radius = 3.0
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_rstsn"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_j27qs"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_tkvvo"]
+height = 1.75
+
+[sub_resource type="SeparationRayShape3D" id="SeparationRayShape3D_l28ys"]
+
+[node name="player" type="CharacterBody3D" node_paths=PackedStringArray("grabber")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+axis_lock_angular_x = true
+axis_lock_angular_z = true
+platform_floor_layers = 4294967294
+script = ExtResource("1_6fa4x")
+pause_menu = ExtResource("2_cosj6")
+grabber = NodePath("grabber")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+visible = false
+layers = 2
+mesh = SubResource("CapsuleMesh_ku5q7")
+skeleton = NodePath("../..")
+
+[node name="grabber" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="grabber"]
+shape = SubResource("SphereShape3D_hkaa8")
+
+[node name="pusher" type="RigidBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, -0.5, 2.08165e-12)
+top_level = true
+collision_layer = 2
+collision_mask = 2
+axis_lock_angular_x = true
+axis_lock_angular_y = true
+axis_lock_angular_z = true
+mass = 10.0
+gravity_scale = 1.66533e-16
+can_sleep = false
+freeze_mode = 1
+continuous_cd = true
+linear_damp = 3.0
+angular_damp = 3.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="pusher"]
+shape = SubResource("SphereShape3D_rstsn")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="pusher"]
+visible = false
+layers = 2
+mesh = SubResource("SphereMesh_j27qs")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 0.125, 2.08165e-12)
+shape = SubResource("CapsuleShape3D_tkvvo")
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+shape = SubResource("SeparationRayShape3D_l28ys")
+
+[node name="ReflectionProbe" type="ReflectionProbe" parent="."]
+top_level = true
+max_distance = 256.0
+size = Vector3(1024, 1024, 1024)
+origin_offset = Vector3(2.08165e-12, 2, 2.08165e-12)
+enable_shadows = true

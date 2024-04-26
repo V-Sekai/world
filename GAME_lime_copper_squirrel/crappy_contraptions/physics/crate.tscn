@@ -1,0 +1,25 @@
+[gd_scene load_steps=6 format=3 uid="uid://db2jbt78801e5"]
+
+[ext_resource type="Script" path="res://addons/smoothing/smoothing.gd" id="1_jrqbk"]
+[ext_resource type="Script" path="res://crappy_contraptions/physics/quadratic_drag_body.gd" id="1_vyst6"]
+[ext_resource type="PackedScene" uid="uid://dvqjvopw4asx0" path="res://crappy_contraptions/physics/models/crate.glb" id="3_cjhot"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_b4s6b"]
+
+[sub_resource type="BoxOccluder3D" id="BoxOccluder3D_q7b78"]
+
+[node name="Crate" type="RigidBody3D" groups=["build"]]
+script = ExtResource("1_vyst6")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_b4s6b")
+
+[node name="Smoothing" type="Node3D" parent="."]
+script = ExtResource("1_jrqbk")
+
+[node name="Node3D" type="Node3D" parent="Smoothing"]
+
+[node name="crate" parent="Smoothing/Node3D" instance=ExtResource("3_cjhot")]
+
+[node name="OccluderInstance3D" type="OccluderInstance3D" parent="Smoothing/Node3D"]
+occluder = SubResource("BoxOccluder3D_q7b78")

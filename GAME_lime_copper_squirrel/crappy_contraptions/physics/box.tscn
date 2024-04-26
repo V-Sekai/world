@@ -1,0 +1,32 @@
+[gd_scene load_steps=7 format=3 uid="uid://dy34a7txdnetm"]
+
+[ext_resource type="Script" path="res://crappy_contraptions/physics/quadratic_drag_body.gd" id="1_42p2j"]
+[ext_resource type="Script" path="res://addons/smoothing/smoothing.gd" id="1_phna8"]
+[ext_resource type="PackedScene" uid="uid://crxik6bodd7e4" path="res://crappy_contraptions/physics/models/plank.glb" id="3_7v3f2"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_ihwep"]
+friction = 0.9
+bounce = 0.1
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ktop3"]
+size = Vector3(1, 0.25, 4)
+
+[sub_resource type="BoxOccluder3D" id="BoxOccluder3D_de88x"]
+size = Vector3(1, 0.25, 4)
+
+[node name="box" type="RigidBody3D" groups=["build"]]
+physics_material_override = SubResource("PhysicsMaterial_ihwep")
+script = ExtResource("1_42p2j")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_ktop3")
+
+[node name="Smoothing" type="Node3D" parent="."]
+script = ExtResource("1_phna8")
+
+[node name="Node3D" type="Node3D" parent="Smoothing"]
+
+[node name="plank" parent="Smoothing/Node3D" instance=ExtResource("3_7v3f2")]
+
+[node name="OccluderInstance3D" type="OccluderInstance3D" parent="Smoothing/Node3D"]
+occluder = SubResource("BoxOccluder3D_de88x")

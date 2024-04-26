@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://ftfxqqm3ijuk"]
+
+[ext_resource type="Texture2D" uid="uid://cvqd5n3u8cd66" path="res://crappy_contraptions/materials/textures/cross_01.png" id="1_p4xt7"]
+[ext_resource type="Texture2D" uid="uid://bv1yl407qh4e6" path="res://crappy_contraptions/materials/textures/cross_01_normal.png" id="2_fp4nc"]
+
+[node name="Cross01" type="Decal"]
+texture_albedo = ExtResource("1_p4xt7")
+texture_normal = ExtResource("2_fp4nc")
+cull_mask = 1048568
