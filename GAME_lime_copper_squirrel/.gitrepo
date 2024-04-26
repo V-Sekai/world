@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai/godot-crappy-contraptions.git
 	branch = main
-	commit = e042a7dc66515ae09aa01a90f0e5b23a84277ad0
-	parent = d6e7fcbd35971f3f54a44029c680e2667ca4cef1
+	commit = b3daef5f61f9032785bb7891146685fa23a5ba8a
+	parent = 4eae2a22ceada1502f9ea516a470c56b5f69ebf1
 	method = merge
 	cmdver = 0.4.6
