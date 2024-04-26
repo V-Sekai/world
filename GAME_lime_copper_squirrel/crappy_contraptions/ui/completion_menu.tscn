@@ -15,7 +15,7 @@ grow_vertical = 2
 theme = ExtResource("1_8ak5o")
 script = ExtResource("2_7m4qt")
 sandbox_scene_path = "res://crappy_contraptions/scenes/sandbox.tscn"
-quit_scene_path = "res://ui/boot_splash.tscn"
+quit_scene_path = "res://crappy_contraptions/ui/boot_splash.tscn"
 
 [node name="ColorRect" type="ColorRect" parent="."]
 layout_mode = 1

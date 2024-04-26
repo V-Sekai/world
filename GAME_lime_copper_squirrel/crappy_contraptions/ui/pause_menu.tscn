@@ -1,4 +1,4 @@
-[gd_scene load_steps=3 format=4 uid="uid://b1a4fhcw48et1"]
+[gd_scene load_steps=3 format=3 uid="uid://b1a4fhcw48et1"]
 
 [ext_resource type="Script" path="res://crappy_contraptions/ui/pause_menu.gd" id="1_2pw1j"]
 [ext_resource type="Theme" uid="uid://bd7gseqffsnlf" path="res://crappy_contraptions/ui/main_theme.tres" id="1_8kveh"]
@@ -18,7 +18,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_2pw1j")
 close_target = NodePath(".")
-menu_scene = "res://ui/boot_splash.tscn"
+menu_scene = "res://crappy_contraptions/ui/boot_splash.tscn"
 
 [node name="continue" type="Button" parent="."]
 layout_mode = 2

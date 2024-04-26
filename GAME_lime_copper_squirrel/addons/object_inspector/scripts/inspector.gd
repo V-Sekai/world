@@ -40,7 +40,7 @@ func _init() -> void:
 	_search.placeholder_text = tr("Filter properties")
 	_search.editable = false
 	_search.clear_button_enabled = true
-	_search.right_icon = load("addons/object-inspector/icons/search.svg")
+	_search.right_icon = load("addons/object_inspector/icons/search.svg")
 	_search.visible = _search_enabled
 	_search.size_flags_horizontal = SIZE_EXPAND_FILL
 	_search.text_changed.connect(update_inspector)
@@ -291,7 +291,7 @@ class InspectorPropertyMultiline extends InspectorProperty:
 		hbox.add_child(text_edit)
 
 		var maximize := Button.new()
-		maximize.icon = load("addons/object-inspector/icons/maximize.svg")
+		maximize.icon = load("addons/object_inspector/icons/maximize.svg")
 		maximize.disabled = not text_edit.editable
 		maximize.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		hbox.add_child(maximize)
