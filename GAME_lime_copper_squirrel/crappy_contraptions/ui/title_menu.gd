@@ -32,9 +32,6 @@ func _ready():
 	%qtd.pressed.connect(_on_quit)
 	%version.text = "v" + ProjectSettings.get_setting("application/config/version", "DEV")
 
-	# For VR Always enable sandbox mode, this was originally triggered only with F1 buton press
-	#if not OS.has_feature("editor"):
-		#%dev.hide()
 	%dev.show()
 	Globals.set_flag("level_1")
 	Globals.set_flag("sandbox")
