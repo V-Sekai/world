@@ -3,21 +3,19 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bv1yl407qh4e6"
-path.s3tc="res://.godot/imported/cross_01_normal.png-5ca2beeda1173f772bb301d575019a7c.s3tc.ctex"
-path.etc2="res://.godot/imported/cross_01_normal.png-5ca2beeda1173f772bb301d575019a7c.etc2.ctex"
+path="res://.godot/imported/cross_01_normal.png-5ca2beeda1173f772bb301d575019a7c.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
 source_file="res://crappy_contraptions/materials/textures/cross_01_normal.png"
-dest_files=["res://.godot/imported/cross_01_normal.png-5ca2beeda1173f772bb301d575019a7c.s3tc.ctex", "res://.godot/imported/cross_01_normal.png-5ca2beeda1173f772bb301d575019a7c.etc2.ctex"]
+dest_files=["res://.godot/imported/cross_01_normal.png-5ca2beeda1173f772bb301d575019a7c.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=4
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/hdr_compression=1

@@ -3,21 +3,19 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://n5qwtsfjpens"
-path.s3tc="res://.godot/imported/test_grid_1m_roughness.png-466cf8e43ef37dcb9f4efea9a48c8d6e.s3tc.ctex"
-path.etc2="res://.godot/imported/test_grid_1m_roughness.png-466cf8e43ef37dcb9f4efea9a48c8d6e.etc2.ctex"
+path="res://.godot/imported/test_grid_1m_roughness.png-466cf8e43ef37dcb9f4efea9a48c8d6e.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc", "etc2_astc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
 source_file="res://crappy_contraptions/materials/textures/test_grid_1m_roughness.png"
-dest_files=["res://.godot/imported/test_grid_1m_roughness.png-466cf8e43ef37dcb9f4efea9a48c8d6e.s3tc.ctex", "res://.godot/imported/test_grid_1m_roughness.png-466cf8e43ef37dcb9f4efea9a48c8d6e.etc2.ctex"]
+dest_files=["res://.godot/imported/test_grid_1m_roughness.png-466cf8e43ef37dcb9f4efea9a48c8d6e.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=4
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/hdr_compression=1

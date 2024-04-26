@@ -15,7 +15,7 @@ dest_files=["res://.godot/imported/logo-exmoe.png-24d375f78303efea94fb2f73380604
 
 [params]
 
-compress/mode=0
+compress/mode=4
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/hdr_compression=1
