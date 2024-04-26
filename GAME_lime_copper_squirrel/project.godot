@@ -37,7 +37,7 @@ window/energy_saving/keep_screen_on=false
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/object-inspector/plugin.cfg", "res://addons/ridiculous_coding/plugin.cfg", "res://addons/smoothing/plugin.cfg", "res://addons/snail_input/plugin.cfg", "res://addons/snail_transition/plugin.cfg")
+enabled=PackedStringArray("res://addons/object-inspector/plugin.cfg", "res://addons/smoothing/plugin.cfg", "res://addons/snail_input/plugin.cfg", "res://addons/snail_transition/plugin.cfg")
 
 [filesystem]
 
