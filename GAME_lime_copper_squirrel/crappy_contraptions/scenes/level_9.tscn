@@ -69,11 +69,11 @@ map_path = "res://ui/completion_menu.tscn"
 [node name="Label3D2" type="Label3D" parent="finish"]
 transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 5.6071e-08, 4.48378, -0.641378)
 pixel_size = 0.01
-text = "sorry about that
+text = "Sorry about that.
 
-i have fixed it
+I have fixed it.
 
-also this is the end"
+Also this is the end."
 font = ExtResource("10_vdrtu")
 font_size = 64
 outline_size = 24
@@ -81,7 +81,7 @@ outline_size = 24
 [node name="Label3D3" type="Label3D" parent="finish"]
 transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -6.02371e-07, 2.38732, 6.89032)
 pixel_size = 0.01
-text = "thank you for your time"
+text = "Thank you for your time."
 font = ExtResource("10_vdrtu")
 font_size = 64
 outline_size = 24

@@ -63,9 +63,9 @@ map_path = "res://crappy_contraptions/scenes/level_8.tscn"
 [node name="Label3D2" type="Label3D" parent="finish"]
 transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 5.6071e-08, 4.48378, -0.641378)
 pixel_size = 0.01
-text = "is it me or is it
+text = "Is it me or is it
 getting a bit cramped
-on here"
+on here."
 font = ExtResource("10_gfo8k")
 font_size = 64
 outline_size = 24

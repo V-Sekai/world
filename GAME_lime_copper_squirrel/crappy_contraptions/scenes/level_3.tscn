@@ -67,8 +67,8 @@ map_path = "res://crappy_contraptions/scenes/level_4.tscn"
 [node name="Label3D2" type="Label3D" parent="finish"]
 transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0, 3.69543, -0.656273)
 pixel_size = 0.01
-text = "level 4+ are unfinished, but
-you can still visit them"
+text = "Level 4+ are unfinished, but
+you can still visit them."
 font = ExtResource("10_34wf7")
 font_size = 64
 outline_size = 24
@@ -80,7 +80,7 @@ map_path = "res://crappy_contraptions/scenes/sandbox.tscn"
 [node name="Label3D2" type="Label3D" parent="finish2"]
 transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0, 3.69543, -0.656273)
 pixel_size = 0.01
-text = "dev sandbox is more fun"
+text = "The dev sandbox is more fun."
 font = ExtResource("10_34wf7")
 font_size = 64
 outline_size = 24
