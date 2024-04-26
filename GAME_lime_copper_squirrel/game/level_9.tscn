@@ -1,0 +1,130 @@
+[gd_scene load_steps=18 format=3 uid="uid://bked755m3o3em"]
+
+[ext_resource type="Script" path="res://phys/contraption.gd" id="1_8bn6v"]
+[ext_resource type="PackedScene" uid="uid://de0xrdyh6s7tl" path="res://phys/player.tscn" id="2_1fktk"]
+[ext_resource type="Material" uid="uid://d1dcxbgx8kga7" path="res://materials/test_grid_grey.tres" id="3_whgte"]
+[ext_resource type="PackedScene" uid="uid://d0bndvyxq2j7a" path="res://game/main_background.tscn" id="4_op6hf"]
+[ext_resource type="Script" path="res://addons/exmoe_tools/common/follow_cam.gd" id="5_jar7e"]
+[ext_resource type="Script" path="res://phys/safe_area.gd" id="6_32mlc"]
+[ext_resource type="Script" path="res://game/unlock.gd" id="7_yfyt0"]
+[ext_resource type="Script" path="res://game/save_value.gd" id="8_3oqn0"]
+[ext_resource type="PackedScene" uid="uid://cnn3l47ist43j" path="res://phys/level_changer.tscn" id="9_o1rkj"]
+[ext_resource type="FontFile" uid="uid://qf7622sypprq" path="res://addons/exmoe_tools/fonts/Yanone_Kaffeesatz/YanoneKaffeesatz-SemiBold.ttf" id="10_vdrtu"]
+[ext_resource type="PackedScene" uid="uid://b15ybaq5lrclj" path="res://contraptions/trike.tscn" id="11_m3xw3"]
+[ext_resource type="PackedScene" uid="uid://sj58vpi08n48" path="res://contraptions/simple_car.tscn" id="12_u56ox"]
+[ext_resource type="PackedScene" uid="uid://ch1k3oodt0rsv" path="res://contraptions/motorcycle.tscn" id="13_2sgks"]
+[ext_resource type="PackedScene" uid="uid://c75b7ebrxdgow" path="res://contraptions/turbo.tscn" id="13_c80o6"]
+[ext_resource type="PackedScene" uid="uid://md8k3e3aana1" path="res://contraptions/hover.tscn" id="14_geh0y"]
+[ext_resource type="PackedScene" uid="uid://b581wtdnmnr5d" path="res://materials/decals/arrow_01.tscn" id="14_yoo8l"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_2vd67"]
+size = Vector3(104, 50, 104)
+
+[node name="Level2" type="Node3D"]
+script = ExtResource("1_8bn6v")
+
+[node name="player" parent="." node_paths=PackedStringArray("camera") instance=ExtResource("2_1fktk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 1, 2.08165e-12)
+camera = NodePath("../Camera3D")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 2.08165e-12, 2.08165e-12)
+layers = 9
+use_collision = true
+size = Vector3(104, 8, 104)
+material = ExtResource("3_whgte")
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="CSGBox3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 10, 2.08165e-12)
+operation = 2
+use_collision = true
+size = Vector3(100, 20, 100)
+material = ExtResource("3_whgte")
+
+[node name="background" parent="." instance=ExtResource("4_op6hf")]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+script = ExtResource("5_jar7e")
+
+[node name="Area3D" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14.5929, 0)
+script = ExtResource("6_32mlc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("BoxShape3D_2vd67")
+
+[node name="Unlock" type="Node" parent="."]
+script = ExtResource("7_yfyt0")
+save_flag = "level_9"
+
+[node name="SaveValue" type="Node" parent="."]
+script = ExtResource("8_3oqn0")
+save_flag = "continue"
+save_value = "level_9"
+
+[node name="finish" parent="." instance=ExtResource("9_o1rkj")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 2.08165e-12, 2.08165e-12, -30)
+map_path = "res://ui/completion_menu.tscn"
+
+[node name="Label3D2" type="Label3D" parent="finish"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 5.6071e-08, 4.48378, -0.641378)
+pixel_size = 0.01
+text = "sorry about that
+
+i have fixed it
+
+also this is the end"
+font = ExtResource("10_vdrtu")
+font_size = 64
+outline_size = 24
+
+[node name="Label3D3" type="Label3D" parent="finish"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -6.02371e-07, 2.38732, 6.89032)
+pixel_size = 0.01
+text = "thank you for your time"
+font = ExtResource("10_vdrtu")
+font_size = 64
+outline_size = 24
+
+[node name="Autobuild2" parent="." instance=ExtResource("12_u56ox")]
+transform = Transform3D(-0.579381, 0, 0.815057, 0, 1, 0, -0.815057, 0, -0.579381, 8.29787, 0.865276, -13.5353)
+
+[node name="Arrow01" parent="." instance=ExtResource("14_yoo8l")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.33542, 2.08165e-12, -6.73791)
+
+[node name="Arrow02" parent="." instance=ExtResource("14_yoo8l")]
+transform = Transform3D(0.0905283, 0, -0.995894, 0, 1, 0, 0.995894, 0, 0.0905283, -0.291077, -4.76835e-07, -5.54433)
+
+[node name="Arrow03" parent="." instance=ExtResource("14_yoo8l")]
+transform = Transform3D(-0.206716, 0, 0.978401, 0, 1, 0, -0.978401, 0, -0.206716, -0.291077, -4.76835e-07, -9.50529)
+
+[node name="Arrow04" parent="." instance=ExtResource("14_yoo8l")]
+transform = Transform3D(-0.996577, 0, -0.082669, 0, 1, 0, 0.082669, 0, -0.996577, -1.9604, -4.76835e-07, -7.58089)
+
+[node name="Arrow05" parent="." instance=ExtResource("14_yoo8l")]
+transform = Transform3D(0.733042, 0, 0.680184, 0, 1, 0, -0.680184, 0, 0.733042, 2.00023, -4.76835e-07, -9.28784)
+
+[node name="Arrow06" parent="." instance=ExtResource("14_yoo8l")]
+transform = Transform3D(0.918798, 0, 0.394728, 0, 1, 0, -0.394728, 0, 0.918798, 0.245506, -4.76835e-07, -12.4975)
+
+[node name="Arrow07" parent="." instance=ExtResource("14_yoo8l")]
+transform = Transform3D(0.806393, 0, -0.59138, 0, 1, 0, 0.59138, 0, 0.806393, -0.54881, -4.76835e-07, -15.8399)
+
+[node name="Arrow08" parent="." instance=ExtResource("14_yoo8l")]
+transform = Transform3D(0.926555, 0, 0.37616, 0, 1, 0, -0.37616, 0, 0.926555, 0.153177, 4.76839e-07, -20.3063)
+
+[node name="Arrow09" parent="." instance=ExtResource("14_yoo8l")]
+transform = Transform3D(0.979406, 0, -0.201898, 0, 1, 0, 0.201899, 0, 0.979406, -0.379979, 4.76839e-07, -26.6017)
+size = Vector3(2, 2, 5.479)
+
+[node name="Motorcycle" parent="." instance=ExtResource("13_2sgks")]
+transform = Transform3D(0.960284, 0, -0.279025, 0, 1, 0, 0.279025, 0, 0.960284, -18.7073, 1.5604, -25.8268)
+
+[node name="autobuild" parent="." instance=ExtResource("14_geh0y")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.8179, 1.14464, -11.6657)
+
+[node name="Autobuild" parent="." instance=ExtResource("13_c80o6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23.0568, 0.967038, -15.2211)
+
+[node name="Autobuild3" parent="." instance=ExtResource("11_m3xw3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.7653, 1.40581, -7.40362)

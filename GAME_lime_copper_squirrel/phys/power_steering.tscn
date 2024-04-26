@@ -1,0 +1,61 @@
+[gd_scene load_steps=8 format=3 uid="uid://bmnna2qo7t425"]
+
+[ext_resource type="Script" path="res://phys/wheel.gd" id="1_xp3xt"]
+[ext_resource type="Script" path="res://addons/smoothing/smoothing.gd" id="2_7yclk"]
+[ext_resource type="PackedScene" uid="uid://c4w5yc4w1aq4p" path="res://phys/models/wheel.glb" id="3_xbs3b"]
+[ext_resource type="PackedScene" uid="uid://oklirugpr2ou" path="res://phys/models/wheel-powered-steering.glb" id="4_cve3i"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_klilu"]
+size = Vector3(1, 1, 1.5)
+
+[sub_resource type="QuadOccluder3D" id="QuadOccluder3D_3ghrd"]
+size = Vector2(0.977911, 1.47334)
+
+[sub_resource type="QuadOccluder3D" id="QuadOccluder3D_l8bj5"]
+size = Vector2(0.932647, 1.04753)
+
+[node name="power_steering" type="VehicleBody3D" groups=["build", "control", "usable"]]
+mass = 2.0
+max_contacts_reported = 1
+contact_monitor = true
+script = ExtResource("1_xp3xt")
+torque = null
+active = null
+
+[node name="spinny" type="VehicleWheel3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(-1, 0, 8.74226e-08, 0, 1, 0, -8.74226e-08, 0, -1, 0, -0.196778, 0)
+use_as_traction = true
+use_as_steering = true
+wheel_roll_influence = 0.05
+wheel_friction_slip = 3.0
+suspension_stiffness = 200.0
+
+[node name="Smoothing" type="Node3D" parent="spinny"]
+script = ExtResource("2_7yclk")
+
+[node name="Node3D" type="Node3D" parent="spinny/Smoothing"]
+
+[node name="wheel2" parent="spinny/Smoothing/Node3D" instance=ExtResource("3_xbs3b")]
+
+[node name="CollisionShape3D3" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_klilu")
+
+[node name="Smoothing" type="Node3D" parent="CollisionShape3D3"]
+script = ExtResource("2_7yclk")
+
+[node name="Node3D" type="Node3D" parent="CollisionShape3D3/Smoothing"]
+
+[node name="wheel-powered-steering" parent="CollisionShape3D3/Smoothing/Node3D" instance=ExtResource("4_cve3i")]
+
+[node name="OccluderInstance3D" type="OccluderInstance3D" parent="CollisionShape3D3/Smoothing/Node3D"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.470045, 0)
+occluder = SubResource("QuadOccluder3D_3ghrd")
+
+[node name="OccluderInstance3D2" type="OccluderInstance3D" parent="CollisionShape3D3/Smoothing/Node3D"]
+transform = Transform3D(-4.37114e-08, -4.37114e-08, -1, -1, 1.91069e-15, 4.37114e-08, 0, 1, -4.37114e-08, 0.492694, -0.00213689, 0)
+occluder = SubResource("QuadOccluder3D_l8bj5")
+
+[node name="OccluderInstance3D3" type="OccluderInstance3D" parent="CollisionShape3D3/Smoothing/Node3D"]
+transform = Transform3D(-4.37114e-08, -4.37114e-08, -1, -1, 1.91069e-15, 4.37114e-08, 0, 1, -4.37114e-08, -0.493, -0.002, 2.08165e-12)
+occluder = SubResource("QuadOccluder3D_l8bj5")
