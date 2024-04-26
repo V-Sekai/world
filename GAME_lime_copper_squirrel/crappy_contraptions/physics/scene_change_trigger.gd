@@ -6,8 +6,10 @@ class_name SceneChangeTrigger
 @export var transition_out: PackedScene = SnailTransition.FADE_OUT
 @export var transition_in: PackedScene = SnailTransition.FADE_IN
 
+
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
+
 
 func _on_body_entered(node: Node3D):
 	if node is CharacterBody3D:

@@ -8,6 +8,7 @@ class_name Autobuild
 var labels := {}
 var colors := {}
 
+
 func _ready() -> void:
 	if Engine.is_editor_hint():
 		debug_mesh = MeshInstance3D.new()
@@ -26,7 +27,12 @@ func _ready() -> void:
 		if not connection:
 			continue
 		if connection.node_a.is_absolute() or connection.node_b.is_absolute():
-			print("warning: connection has absolute paths (%s, %s)" % [connection.node_a, connection.node_b])
+			print(
+				(
+					"warning: connection has absolute paths (%s, %s)"
+					% [connection.node_a, connection.node_b]
+				)
+			)
 			continue
 		var a := get_node_or_null(connection.node_a)
 		var b := get_node_or_null(connection.node_b)
@@ -36,6 +42,7 @@ func _ready() -> void:
 			continue
 		if a and b:
 			Contraption.attach_bodies(a, [b])
+
 
 func _process(_delta: float) -> void:
 	if not Engine.is_editor_hint():
@@ -48,7 +55,7 @@ func _process(_delta: float) -> void:
 		return
 
 	im.surface_begin(Mesh.PRIMITIVE_LINES)
-	im.surface_add_vertex(Vector3()) # it's valid to have no connections, so silence the error
+	im.surface_add_vertex(Vector3())  # it's valid to have no connections, so silence the error
 	im.surface_add_vertex(Vector3())
 
 	var i := -1
@@ -68,7 +75,7 @@ func _process(_delta: float) -> void:
 			var label: Label3D = labels[connection]
 			var ap: Vector3 = a.global_position
 			var bp: Vector3 = b.global_position
-			label.text = "%s < %d > %s" % [ a.name, i, b.name ]
+			label.text = "%s < %d > %s" % [a.name, i, b.name]
 			label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 			label.no_depth_test = true
 			label.pixel_size = 0.0025

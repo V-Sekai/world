@@ -9,6 +9,7 @@ signal changed(pressed: bool)
 signal pressed
 signal released
 
+
 func _ready() -> void:
 	_trigger.body_entered.connect(_on_press)
 	_trigger.body_exited.connect(_on_release)
@@ -22,11 +23,13 @@ func _ready() -> void:
 
 	_switch.add_collision_exception_with(self)
 
+
 func _on_press(node: Node3D):
 	if node != _switch:
 		return
 	changed.emit(true)
 	pressed.emit()
+
 
 func _on_release(node: Node3D):
 	if node != _switch:

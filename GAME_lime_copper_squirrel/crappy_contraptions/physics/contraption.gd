@@ -4,6 +4,7 @@ extends Node3D
 var _connections: Dictionary = {}
 var _constraints: Array[Joint3D] = []
 
+
 static func save_contraption(item: RigidBody3D, path: String = "") -> SavedContraption:
 	var save := SavedContraption.new()
 	var parent := item.get_parent()
@@ -19,7 +20,7 @@ static func save_contraption(item: RigidBody3D, path: String = "") -> SavedContr
 				continue
 			var rel_a := parent.get_path_to(a, true)
 			var rel_b := parent.get_path_to(b, true)
-			print("%s <-> %s" %[ rel_a, rel_b])
+			print("%s <-> %s" % [rel_a, rel_b])
 			save.connections.append(BuildConnection.new(rel_a, rel_b))
 	if path:
 		var ok := ResourceSaver.save(save, path)
@@ -27,6 +28,7 @@ static func save_contraption(item: RigidBody3D, path: String = "") -> SavedContr
 			print_debug(ok)
 		print("saved %s" % ProjectSettings.globalize_path(path))
 	return save
+
 
 static func load_contraption(res: SavedContraption) -> Node3D:
 	var base := Autobuild.new()
@@ -41,6 +43,7 @@ static func load_contraption(res: SavedContraption) -> Node3D:
 		base.add_child(part)
 	return base
 
+
 static func _find_contraption_for(item: RigidBody3D) -> Contraption:
 	if not item.is_inside_tree():
 		return null
@@ -53,8 +56,10 @@ static func _find_contraption_for(item: RigidBody3D) -> Contraption:
 		return null
 	return node
 
+
 static func has_any_attachments(item: RigidBody3D) -> bool:
 	return not get_joints_for(item).is_empty()
+
 
 static func get_joints_for(item: RigidBody3D) -> Array[Joint3D]:
 	var connector := _find_contraption_for(item)
@@ -66,7 +71,10 @@ static func get_joints_for(item: RigidBody3D) -> Array[Joint3D]:
 				ret.append(constraint)
 	return ret
 
-static func _get_all_internal(item: RigidBody3D, items: Array[NodePath] = [], visited: Dictionary = {}) -> Array[NodePath]:
+
+static func _get_all_internal(
+	item: RigidBody3D, items: Array[NodePath] = [], visited: Dictionary = {}
+) -> Array[NodePath]:
 	if not item:
 		return items
 	var path := item.get_path()
@@ -81,13 +89,15 @@ static func _get_all_internal(item: RigidBody3D, items: Array[NodePath] = [], vi
 			_get_all_internal(item.get_node_or_null(joint.node_b), items, visited)
 	return items
 
+
 static func get_all_bodies(item: RigidBody3D) -> Array[RigidBody3D]:
 	var items := _get_all_internal(item)
-	items = items.filter(func(path): return item.get_node_or_null(path)) 
+	items = items.filter(func(path): return item.get_node_or_null(path))
 	var ret: Array[RigidBody3D] = []
 	for path in items:
 		ret.append(item.get_node(path))
 	return ret
+
 
 static func freeze(item: RigidBody3D, force_unfreeze := false):
 	var bodies := get_all_bodies(item)
@@ -99,7 +109,10 @@ static func freeze(item: RigidBody3D, force_unfreeze := false):
 		body.linear_velocity *= 0
 		body.angular_velocity *= 0
 
-static func control(item: RigidBody3D, user: Node, reference: Basis, base: Basis, input: Vector3, rot_input: Vector3) -> bool:
+
+static func control(
+	item: RigidBody3D, user: Node, reference: Basis, base: Basis, input: Vector3, rot_input: Vector3
+) -> bool:
 	var controlled := false
 
 	var bodies := get_all_bodies(item)
@@ -122,6 +135,7 @@ static func control(item: RigidBody3D, user: Node, reference: Basis, base: Basis
 
 	return controlled
 
+
 static func activate(item: RigidBody3D, user: Node):
 	freeze(item, true)
 
@@ -135,6 +149,7 @@ static func activate(item: RigidBody3D, user: Node):
 		else:
 			print("%s is usable, but doesn't have a use signal defined" % item.name)
 
+
 func _is_connected(a: RigidBody3D, b: RigidBody3D) -> bool:
 	var path_a := a.get_path()
 	var path_b := b.get_path()
@@ -145,6 +160,7 @@ func _is_connected(a: RigidBody3D, b: RigidBody3D) -> bool:
 	if _connections[path_a].has(path_b) or _connections[path_b].has(path_a):
 		return true
 	return false
+
 
 static func attach_bodies(a: RigidBody3D, bodies: Array[RigidBody3D]) -> bool:
 	var con := _find_contraption_for(a)
@@ -175,6 +191,7 @@ static func attach_bodies(a: RigidBody3D, bodies: Array[RigidBody3D]) -> bool:
 			#print("attached %s and %s" % [a.name, b.name])
 			attached = true
 	return attached
+
 
 static func detach_body(body: RigidBody3D):
 	var con := _find_contraption_for(body)

@@ -6,7 +6,8 @@ extends Node3D
 		if is_inside_tree():
 			_update_fade()
 
-var material : ShaderMaterial
+var material: ShaderMaterial
+
 
 func _update_fade():
 	if fade == 0.0:
@@ -15,6 +16,7 @@ func _update_fade():
 		if material:
 			material.set_shader_parameter("albedo", Color(0.0, 0.0, 0.0, fade))
 		$MeshInstance3D.visible = true
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready():

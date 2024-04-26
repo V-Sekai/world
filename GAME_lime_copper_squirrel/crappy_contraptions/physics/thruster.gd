@@ -9,18 +9,22 @@ signal control(user: Node3D, global_reference: Transform3D, input: Vector3, rot_
 var _target_control_force := 0.0
 var _control_force := 0.0
 
+
 func _ready() -> void:
 	use.connect(_on_use)
 	reset.connect(_on_reset)
 	control.connect(_on_control)
+
 
 func _on_reset():
 	active = 0.0
 	_target_control_force = 0
 	_control_force = 0
 
+
 func _on_use(_user: Node3D):
 	active = 10.0
+
 
 func _on_control(_user: Node3D, global_reference: Transform3D, input: Vector3, _rot_input: Vector3):
 	var forward := -global_basis.z
@@ -33,6 +37,7 @@ func _on_control(_user: Node3D, global_reference: Transform3D, input: Vector3, _
 		active = get_physics_process_delta_time() * input.limit_length().length()
 	DD.draw_ray_3d(global_position, global_basis.z, 0.5 + _control_force * 2, Color.RED)
 	#DD.draw_axes(global_reference, 4)
+
 
 func _physics_process(delta: float) -> void:
 	super(delta)

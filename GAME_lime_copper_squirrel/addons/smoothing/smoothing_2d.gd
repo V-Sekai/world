@@ -20,9 +20,7 @@
 
 extends Node2D
 
-
-@export
-var target: NodePath:
+@export var target: NodePath:
 	get:
 		return target
 	set(v):
@@ -49,8 +47,8 @@ const SF_GLOBAL_IN = 1 << 4
 const SF_GLOBAL_OUT = 1 << 5
 const SF_INVISIBLE = 1 << 6
 
-
-@export_flags("enabled", "translate", "rotate", "scale", "global in", "global out") var flags: int = SF_ENABLED | SF_TRANSLATE | SF_ROTATE | SF_SCALE | SF_GLOBAL_IN | SF_GLOBAL_OUT:
+@export_flags("enabled", "translate", "rotate", "scale", "global in", "global out")
+var flags: int = SF_ENABLED | SF_TRANSLATE | SF_ROTATE | SF_SCALE | SF_GLOBAL_IN | SF_GLOBAL_OUT:
 	set(v):
 		flags = v
 		# we may have enabled or disabled
@@ -109,6 +107,7 @@ func _SetProcessing():
 
 	set_as_top_level(_TestFlags(SF_GLOBAL_OUT))
 
+
 func _enter_tree():
 	# might have been moved
 	_FindTarget()
@@ -123,7 +122,6 @@ func _notification(what):
 
 
 func _RefreshTransform():
-
 	if _HasTarget() == false:
 		return
 
@@ -152,6 +150,7 @@ func _RefreshTransform():
 			m_Scale_prev = m_Scale_curr
 			m_Scale_curr = _m_Target.get_scale()
 
+
 func _FindTarget():
 	_m_Target = null
 
@@ -162,10 +161,10 @@ func _FindTarget():
 		if parent and (parent is Node2D):
 			_m_Target = parent
 		return
-		
+
 	var targ = get_node(target)
 
-	if ! targ:
+	if !targ:
 		printerr("ERROR SmoothingNode2D : Target " + str(target) + " not found")
 		return
 
@@ -176,6 +175,7 @@ func _FindTarget():
 
 	# if we got to here targ is correct type
 	_m_Target = targ
+
 
 func _HasTarget() -> bool:
 	if _m_Target == null:
@@ -190,7 +190,6 @@ func _HasTarget() -> bool:
 
 
 func _process(_delta):
-
 	var f = Engine.get_physics_interpolation_fraction()
 
 	# We can always use local position rather than set_global_position

@@ -1,6 +1,7 @@
 @tool
 extends EditorScenePostImport
 
+
 func iterate(scene, node: Node3D, animated := false, anim_transform := Transform3D.IDENTITY):
 	if not node:
 		return
@@ -15,16 +16,28 @@ func iterate(scene, node: Node3D, animated := false, anim_transform := Transform
 				node.set_layer_mask_value(1, false)
 				node.set_layer_mask_value(2, true)
 				if size < 1:
-					print("%s: tiny object detected (reflection-, range=%d)" % [node.name, node.visibility_range_end])
+					print(
+						(
+							"%s: tiny object detected (reflection-, range=%d)"
+							% [node.name, node.visibility_range_end]
+						)
+					)
 				else:
-					print("%s: small object detected (reflection-, range=%d)" % [node.name, node.visibility_range_end])
+					print(
+						(
+							"%s: small object detected (reflection-, range=%d)"
+							% [node.name, node.visibility_range_end]
+						)
+					)
 			else:
-				print("%s: medium object detected (range=%d)" % [node.name, node.visibility_range_end])
+				print(
+					"%s: medium object detected (range=%d)" % [node.name, node.visibility_range_end]
+				)
 			node.visibility_range_end_margin = 5
 			node.visibility_range_fade_mode = node.VISIBILITY_RANGE_FADE_SELF
 		elif size > 50:
 			print(node.name, ": large object detected, will be visible in far field")
-			node.set_layer_mask_value(3, true) # large objects
+			node.set_layer_mask_value(3, true)  # large objects
 
 	if node is Light3D:
 		print("adjusting light power and ranges...")
@@ -36,7 +49,7 @@ func iterate(scene, node: Node3D, animated := false, anim_transform := Transform
 		node.light_intensity_lumens *= 2.5
 		node.distance_fade_enabled = true
 		node.distance_fade_begin = node.light_energy * 10
-		node.light_cull_mask ^= 0x4 # don't show on layer 3
+		node.light_cull_mask ^= 0x4  # don't show on layer 3
 		if true or node.name.contains("MW_shadow"):
 			node.shadow_enabled = true
 			node.distance_fade_shadow = node.light_energy
@@ -90,6 +103,7 @@ func iterate(scene, node: Node3D, animated := false, anim_transform := Transform
 
 	for child in node.get_children():
 		iterate(scene, child, animated, anim_transform)
+
 
 func _post_import(scene):
 	# use scene.replace_by(other) to replace root

@@ -4,26 +4,20 @@ var max_players := 4
 var auto_join_primary_player := true
 var auto_activate_on_press := true
 
-signal player_join_ready_accepted(device: int, player: int) # ready to go
-signal player_join_ready_rejected(device: int, player: int) # can't ready up (slot probably taken)
-signal player_join_unready(device: int, player: int) # back up
-signal player_left(device: int, player: int) # left game
+signal player_join_ready_accepted(device: int, player: int)  # ready to go
+signal player_join_ready_rejected(device: int, player: int)  # can't ready up (slot probably taken)
+signal player_join_unready(device: int, player: int)  # back up
+signal player_left(device: int, player: int)  # left game
 
-signal player_join_accepted(device: int) # joined game, not full
-signal player_join_rejected(device: int) # tried to join, but it was full
-signal player_changed_index(device: int, old_player_index: int, new_player_index: int) # moved target slot
+signal player_join_accepted(device: int)  # joined game, not full
+signal player_join_rejected(device: int)  # tried to join, but it was full
+signal player_changed_index(device: int, old_player_index: int, new_player_index: int)  # moved target slot
 signal player_changed_device(player: int, simple_device_name: String)
 
 const DEVICE_KEYBOARD: int = -1
 const PLAYER_INVALID: int = -1
 
-enum InputDeviceType {
-	None,
-	Keyboard,
-	Gamepad_Generic,
-	Gamepad_Playstation,
-	Gamepad_Xbox
-}
+enum InputDeviceType { None, Keyboard, Gamepad_Generic, Gamepad_Playstation, Gamepad_Xbox }
 
 ## TODO:
 # handle device plug/unplugging
@@ -32,24 +26,29 @@ enum InputDeviceType {
 # (api bug) fix per-player input focus
 
 # TODO: save this list?
-var _ignore_guids := [] #"03000000d11800000094000000010000" # stadia controller (test)
+var _ignore_guids := []  #"03000000d11800000094000000010000" # stadia controller (test)
+
 
 func ignore_guid(guid: String):
 	_ignore_guids.append(guid)
+
 
 func ignore_device(device_index: int):
 	if device_index < 0:
 		return
 	_ignore_guids.append(Input.get_joy_guid(device_index))
 
+
 var _focused: Dictionary = {}
 
-class InputFocus extends Node:
+
+class InputFocus:
+	extends Node
 	var player_index: int
 
 	const GLOBAL_FOCUS_ID := -1
 
-	func get_player_input() -> PlayerInput: # just shorthand
+	func get_player_input() -> PlayerInput:  # just shorthand
 		return SnailInput.get_player_input(self)
 
 	func _ready() -> void:
@@ -80,7 +79,8 @@ class InputFocus extends Node:
 		process_priority = -0xFFFFFFFF
 
 	func _process(_delta: float) -> void:
-		SnailInput._focused[player_index] = self # last one in the scene tree wins
+		SnailInput._focused[player_index] = self  # last one in the scene tree wins
+
 
 class InputDevice:
 	var index: int
@@ -91,10 +91,14 @@ class InputDevice:
 
 	func get_simplified_type() -> InputDeviceType:
 		match name:
-			"XInput Gamepad", "Xbox Series Controller", "Xbox 360 Controller", "Xbox One Controller": return InputDeviceType.Gamepad_Xbox
-			"Sony DualSense", "PS5 Controller", "PS4 Controller": return InputDeviceType.Gamepad_Playstation
-			"Keyboard": return InputDeviceType.Keyboard
-			_: return InputDeviceType.Gamepad_Generic
+			"XInput Gamepad", "Xbox Series Controller", "Xbox 360 Controller", "Xbox One Controller":
+				return InputDeviceType.Gamepad_Xbox
+			"Sony DualSense", "PS5 Controller", "PS4 Controller":
+				return InputDeviceType.Gamepad_Playstation
+			"Keyboard":
+				return InputDeviceType.Keyboard
+			_:
+				return InputDeviceType.Gamepad_Generic
 
 	func change_index(p_new_index: int, p_limit: int, p_relative := false):
 		if p_relative:
@@ -117,6 +121,7 @@ class InputDevice:
 		else:
 			name = "Keyboard"
 
+
 class PlayerSlot:
 	var primary_player := false
 	var ready := false
@@ -128,10 +133,14 @@ class PlayerSlot:
 			return "keyboard"
 
 		match last_device.get_simplified_type():
-			InputDeviceType.Gamepad_Generic: return "generic"
-			InputDeviceType.Gamepad_Playstation: return "playstation"
-			InputDeviceType.Gamepad_Xbox: return "xbox"
-			_: return "keyboard" # default to keyboard if we don't know better
+			InputDeviceType.Gamepad_Generic:
+				return "generic"
+			InputDeviceType.Gamepad_Playstation:
+				return "playstation"
+			InputDeviceType.Gamepad_Xbox:
+				return "xbox"
+			_:
+				return "keyboard"  # default to keyboard if we don't know better
 
 	func remove_device(p_device: InputDevice):
 		if devices.has(p_device):
@@ -143,6 +152,7 @@ class PlayerSlot:
 
 	func has_device(p_device: InputDevice):
 		return devices.has(p_device)
+
 
 class PlayerInput:
 	var _devices: Array[InputDevice] = []
@@ -166,7 +176,7 @@ class PlayerInput:
 					InputMap.add_action(p_new_action, InputMap.action_get_deadzone(p_base_action))
 				for device in _devices:
 					if device.index < 0:
-						continue # skip keyboard
+						continue  # skip keyboard
 					var device_event := event.duplicate()
 					device_event.device = device.index
 					InputMap.action_add_event(p_new_action, device_event)
@@ -175,7 +185,7 @@ class PlayerInput:
 					InputMap.add_action(p_new_action, InputMap.action_get_deadzone(p_base_action))
 				for device in _devices:
 					if device.index >= 0:
-						continue # skip gamepads
+						continue  # skip gamepads
 					InputMap.action_add_event(p_new_action, event.duplicate())
 
 	func update_devices(p_devices: Array[InputDevice]):
@@ -193,9 +203,17 @@ class PlayerInput:
 		return Input.get_action_strength(get_mapped_action(action))
 
 	func get_axis(negative_action: StringName, positive_action: StringName) -> float:
-		return Input.get_axis(get_mapped_action(negative_action), get_mapped_action(positive_action))
+		return Input.get_axis(
+			get_mapped_action(negative_action), get_mapped_action(positive_action)
+		)
 
-	func get_vector(negative_x: StringName, positive_x: StringName, negative_y: StringName, positive_y: StringName, deadzone: float = -1.0) -> Vector2:
+	func get_vector(
+		negative_x: StringName,
+		positive_x: StringName,
+		negative_y: StringName,
+		positive_y: StringName,
+		deadzone: float = -1.0
+	) -> Vector2:
 		return Input.get_vector(
 			get_mapped_action(negative_x),
 			get_mapped_action(positive_x),
@@ -228,10 +246,12 @@ class PlayerInput:
 	func get_mapped_action(action: String) -> String:
 		return _prefix + action
 
+
 var _player_slots: Array[PlayerSlot] = []
 var _input_devices: Array[InputDevice] = []
 var _last_seen_devices: Array[int] = []
 var _player_inputs: Array[PlayerInput] = []
+
 
 func _rescan_devices():
 	var connected: Array[int] = Input.get_connected_joypads()
@@ -252,11 +272,17 @@ func _rescan_devices():
 	for i in connected:
 		var device_guid := Input.get_joy_guid(i)
 		if _ignore_guids.has(device_guid):
-			print("input device %d (%s, guid: %s) ignored by user configuration" % [i, Input.get_joy_name(i), device_guid])
+			print(
+				(
+					"input device %d (%s, guid: %s) ignored by user configuration"
+					% [i, Input.get_joy_name(i), device_guid]
+				)
+			)
 			continue
 
 		if Input.is_joy_known(i):
 			_input_devices.append(InputDevice.new(i))
+
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -270,6 +296,7 @@ func _ready() -> void:
 	_player_inputs.append(PlayerInput.new(_player_inputs.size()))
 	_player_inputs.back().update_devices([] as Array[InputDevice])
 
+
 func get_primary_player() -> int:
 	var players := get_ready_players()
 	for i in players.size():
@@ -279,24 +306,31 @@ func get_primary_player() -> int:
 		players[0].primary_player = true
 	return 0
 
+
 func get_player_slot(index: int) -> PlayerSlot:
 	return _player_slots[index % _player_slots.size()]
+
 
 func get_player_devices(index: int) -> Array[InputDevice]:
 	return get_player_slot(index).devices
 
+
 func get_all_devices() -> Array[InputDevice]:
-	var connected := Input.get_connected_joypads() # don't include since-disconnected devices
+	var connected := Input.get_connected_joypads()  # don't include since-disconnected devices
 	return _input_devices.filter(func(dev): return dev.index < 0 or connected.has(dev.index))
+
 
 func get_active_devices() -> Array[InputDevice]:
 	return _input_devices.filter(func(dev): return dev.active)
 
+
 func get_ready_devices() -> Array[InputDevice]:
 	return _input_devices.filter(func(dev): return dev.active and dev.player_index >= 0)
 
+
 func get_ready_players() -> Array[PlayerSlot]:
 	return _player_slots.filter(func(slot): return slot.ready)
+
 
 func get_player_input(focus: InputFocus, player_index := -1) -> PlayerInput:
 	# input focus is not inside scene tree, focus will always return false.
@@ -308,29 +342,37 @@ func get_player_input(focus: InputFocus, player_index := -1) -> PlayerInput:
 		var want_index := focus.player_index
 		if player_index >= 0 and focus.player_index == InputFocus.GLOBAL_FOCUS_ID:
 			want_index = player_index
-		elif player_index != InputFocus.GLOBAL_FOCUS_ID and focus.player_index != player_index: # invalid request, no focus
+		elif player_index != InputFocus.GLOBAL_FOCUS_ID and focus.player_index != player_index:  # invalid request, no focus
 			return null_device
 		elif player_index == -1 and focus.player_index == InputFocus.GLOBAL_FOCUS_ID:
 			want_index = get_primary_player()
 		return _player_inputs[want_index % max_players]
 	return null_device
 
+
 func get_player_input_always(index: int) -> PlayerInput:
 	return _player_inputs[index % max_players]
 
+
 func get_primary_input(focus: InputFocus) -> PlayerInput:
-	if focus.player_index == get_primary_player() || focus.player_index == InputFocus.GLOBAL_FOCUS_ID:
+	if (
+		focus.player_index == get_primary_player()
+		|| focus.player_index == InputFocus.GLOBAL_FOCUS_ID
+	):
 		return get_player_input(focus)
-	return _player_inputs[max_players] # null device
+	return _player_inputs[max_players]  # null device
+
 
 func get_primary_input_always() -> PlayerInput:
 	return get_player_input_always(get_primary_player())
+
 
 func get_input_focus(parent: Node = null, player_index := -1) -> InputFocus:
 	var focus := InputFocus.new(player_index)
 	if parent:
 		parent.add_child(focus)
 	return focus
+
 
 func device_move(p_device: InputDevice, p_direction: int):
 	var start_slot := get_player_slot(p_device.want_player_index)
@@ -346,12 +388,16 @@ func device_move(p_device: InputDevice, p_direction: int):
 	elif not p_device.active:
 		device_join(p_device)
 
+
 func device_join(p_device: InputDevice):
 	var active_devices := get_active_devices()
 	var any_slots_available := active_devices.size() < max_players
-	if p_device.active: # try to ready up if active
+	if p_device.active:  # try to ready up if active
 		var slot := get_player_slot(p_device.want_player_index)
-		if (slot.ready or p_device.player_index >= 0) and (not auto_join_primary_player and p_device.want_player_index == 0):
+		if (
+			(slot.ready or p_device.player_index >= 0)
+			and (not auto_join_primary_player and p_device.want_player_index == 0)
+		):
 			player_join_ready_rejected.emit(p_device.index, p_device.want_player_index)
 		else:
 			p_device.player_index = p_device.want_player_index
@@ -360,7 +406,7 @@ func device_join(p_device: InputDevice):
 			get_player_input_always(p_device.want_player_index).update_devices(slot.devices)
 			print("updated input map")
 			player_join_ready_accepted.emit(p_device.index, p_device.player_index)
-	elif any_slots_available: # join the game
+	elif any_slots_available:  # join the game
 		p_device.active = true
 		player_join_accepted.emit(p_device.index)
 		for i in _player_slots.size():
@@ -368,11 +414,14 @@ func device_join(p_device: InputDevice):
 			if slot.devices.is_empty() or auto_join_primary_player:
 				p_device.change_index(i, max_players)
 				if i == 0 and auto_join_primary_player:
-					device_join(p_device) # auto-confirm in this case
+					device_join(p_device)  # auto-confirm in this case
 				break
-		player_changed_index.emit(p_device.index, p_device.want_player_index, p_device.want_player_index)
-	else: # game is full
+		player_changed_index.emit(
+			p_device.index, p_device.want_player_index, p_device.want_player_index
+		)
+	else:  # game is full
 		player_join_rejected.emit(p_device.index)
+
 
 func device_leave(p_device: InputDevice):
 	if not p_device.active:
@@ -389,14 +438,17 @@ func device_leave(p_device: InputDevice):
 		player_left.emit(p_device.index, p_device.want_player_index)
 	p_device.player_index = PLAYER_INVALID
 
+
 func get_device_for_event(event: InputEvent) -> InputDevice:
 	var valid_devices := _input_devices.filter(func(dev): return dev.check_event(event))
 	if valid_devices.is_empty():
 		return null
 	return valid_devices[0] as InputDevice
 
+
 var _device_overlay: Node
 var _device_join_input := false
+
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey or event is InputEventJoypadButton or event is InputEventMouseButton:
@@ -412,7 +464,9 @@ func _input(event: InputEvent) -> void:
 			return
 		if event.keycode == KEY_F2:
 			if not _device_overlay:
-				var device_assignment := preload("res://addons/snail_input/device_assignment/device_assignment.tscn")
+				var device_assignment := preload(
+					"res://addons/snail_input/device_assignment/device_assignment.tscn"
+				)
 				_device_overlay = device_assignment.instantiate()
 				get_tree().root.add_child(_device_overlay)
 			elif not _device_join_input:
@@ -432,9 +486,10 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode != Input.MOUSE_MODE_VISIBLE:
 		_try_auto_join(event)
 	elif event is InputEventJoypadMotion or event is InputEventMouseMotion:
-		return # only care about button events after here
+		return  # only care about button events after here
 	elif Input.is_anything_pressed():
 		_try_auto_join(event)
+
 
 func _try_auto_join(event: InputEvent):
 	var auto_join := auto_activate_on_press or auto_join_primary_player

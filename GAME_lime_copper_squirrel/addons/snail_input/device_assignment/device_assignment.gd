@@ -10,8 +10,9 @@ var device_icons: Dictionary = {}
 var slot_tweens: Dictionary = {}
 var slot_placeholders: Dictionary = {}
 
+
 func _on_player_join_ready_accepted(_device: int, player_index: int):
-	print("player %d ready" % (player_index+1))
+	print("player %d ready" % (player_index + 1))
 	var active_players := SnailInput.get_active_devices()
 	var ready_players := SnailInput.get_ready_devices()
 	if active_players.size() == ready_players.size() and not active_players.is_empty():
@@ -26,11 +27,13 @@ func _on_player_join_ready_accepted(_device: int, player_index: int):
 	t.tween_property(slot_placeholders[slot], "modulate:a", 0, 0.2)
 	slot_tweens[slot] = t
 
+
 func _on_player_join_ready_rejected(_device: int, player_index: int):
-	print("player %d could not ready" % (player_index+1))
+	print("player %d could not ready" % (player_index + 1))
+
 
 func _on_player_join_unready(_device: int, player_index: int):
-	print("player %d unready" % (player_index+1))
+	print("player %d unready" % (player_index + 1))
 	var slot := SnailInput.get_player_slot(player_index)
 	if slot.devices.is_empty():
 		if slot_tweens.has(slot):
@@ -41,20 +44,25 @@ func _on_player_join_unready(_device: int, player_index: int):
 		t.tween_property(slot_placeholders[slot], "modulate:a", 1, 0.2)
 		slot_tweens[slot] = t
 
+
 func _on_player_left(device: int, player_index: int):
-	print("player %d left" % (player_index+1))
+	print("player %d left" % (player_index + 1))
 	_move(device, device_container.global_position)
+
 
 func _on_player_join_accepted(device: int):
 	print("player using device %d joined" % (device))
 
+
 func _on_player_join_rejected(device: int):
 	print("player using device %d already joined" % (device))
 
+
 func _on_player_changed_index(device: int, old_player_index: int, new_player_index: int):
-	print("{0}: {1} -> {2}".format([ device, old_player_index, new_player_index ]))
+	print("{0}: {1} -> {2}".format([device, old_player_index, new_player_index]))
 	var placeholder: Control = slot_placeholders[SnailInput.get_player_slot(new_player_index)]
 	_move(device, placeholder.global_position)
+
 
 func _move(device: int, p_global_position: Vector2):
 	if device_tweens.has(device):
@@ -67,6 +75,7 @@ func _move(device: int, p_global_position: Vector2):
 	t.play()
 	device_tweens[device] = t
 
+
 func _mk_label(p_text: String) -> Label:
 	var label := Label.new()
 	label.text = p_text
@@ -75,7 +84,9 @@ func _mk_label(p_text: String) -> Label:
 	label.theme = theme
 	return label
 
+
 @onready var focus := SnailInput.get_input_focus()
+
 
 func _ready() -> void:
 	add_child(focus)
@@ -98,7 +109,7 @@ func _ready() -> void:
 	for i in SnailInput.max_players:
 		var pc := VBoxContainer.new()
 		pc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		pc.add_child(_mk_label("Player %d" % (i+1)))
+		pc.add_child(_mk_label("Player %d" % (i + 1)))
 		var placeholder := player_missing.instantiate()
 		var slot := SnailInput.get_player_slot(i)
 		slot_placeholders[slot] = placeholder
@@ -131,9 +142,11 @@ func _ready() -> void:
 		if device.player_index != SnailInput.PLAYER_INVALID:
 			_on_player_join_ready_accepted(device.index, device.player_index)
 
+
 func _on_player_changed_device(_player_index: int, name: String):
 	%latest.text = name
 	print(name)
+
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not focus.is_focused():

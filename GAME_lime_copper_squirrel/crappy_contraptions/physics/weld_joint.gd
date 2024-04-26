@@ -6,6 +6,7 @@ var display := MeshInstance3D.new()
 # used for safety detach and display
 var reference_distance := 0.0
 
+
 func _init(a: RigidBody3D, b: RigidBody3D) -> void:
 	var cap := CapsuleMesh.new()
 	reference_distance = a.global_position.distance_to(b.global_position)
@@ -14,10 +15,11 @@ func _init(a: RigidBody3D, b: RigidBody3D) -> void:
 	cap.radial_segments = 4
 	cap.material = preload("res://crappy_contraptions/materials/glowy.tres")
 	display.mesh = cap
-	display.rotate_x(PI/2)
+	display.rotate_x(PI / 2)
 	add_child(display)
 	node_a = a.get_path()
 	node_b = b.get_path()
+
 
 func _ready() -> void:
 	var a: RigidBody3D = get_node(node_a)
@@ -41,6 +43,7 @@ func _ready() -> void:
 	lock.set("angular_limit/lower_limit", 0)
 	lock.set("angular_limit/upper_limit", 0)
 
+
 func _update_positions(_delta: float):
 	var a: RigidBody3D = get_node_or_null(node_a)
 	var b: RigidBody3D = get_node_or_null(node_b)
@@ -56,6 +59,7 @@ func _update_positions(_delta: float):
 	if angle < 0.01:
 		up = a.global_basis.z
 	look_at_from_position(center, b.global_position, up)
+
 
 func _process(_delta: float) -> void:
 	_update_positions(_delta)

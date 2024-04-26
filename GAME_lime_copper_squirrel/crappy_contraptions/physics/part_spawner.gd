@@ -5,8 +5,10 @@ extends Node3D
 
 var _spawned: Array[NodePath] = []
 
+
 func _ready() -> void:
 	assert(part and part.can_instantiate())
+
 
 func _on_spawn():
 	var new_part: Node3D = part.instantiate()
@@ -20,6 +22,7 @@ func _on_spawn():
 		if kill_part is RigidBody3D:
 			Contraption.detach_body(kill_part)
 		kill_part.queue_free()
+
 
 func _on_pressure_plate_pressed():
 	_on_spawn()

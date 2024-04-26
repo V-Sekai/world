@@ -6,8 +6,10 @@ class_name SceneTransition
 
 signal finished
 
+
 func _on_finished():
 	finished.emit()
+
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -22,6 +24,7 @@ func _ready() -> void:
 			animation.animation_finished.connect(_on_finished.unbind(1))
 	else:
 		_on_finished()
+
 
 func hurry():
 	if animation:
