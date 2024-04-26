@@ -238,6 +238,7 @@ thrust_down={
 
 [rendering]
 
+textures/vram_compression/import_s3tc_bptc=true
 textures/vram_compression/import_etc2_astc=true
 reflections/sky_reflections/roughness_layers=6
 reflections/sky_reflections/ggx_samples=16
