@@ -34,6 +34,7 @@ window/size/viewport_height=800
 window/size/extend_to_title=true
 window/energy_saving/keep_screen_on=false
 window/stretch/mode="canvas_items"
+window/stretch/aspect="keep_width"
 
 [editor_plugins]
 
