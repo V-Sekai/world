@@ -16,7 +16,7 @@ signal pointer_event(event)
 var _mouse_mask := 0
 
 # Viewport node
-var _viewport : Viewport
+var _viewport: Viewport
 
 # Dictionary of pointers to touch-index
 var _touches := {}
@@ -25,10 +25,10 @@ var _touches := {}
 var _presses := {}
 
 # Dominant pointer (index == 0)
-var _dominant : Node3D
+var _dominant: Node3D
 
 # Mouse pointer
-var _mouse : Node3D
+var _mouse: Node3D
 
 # Last mouse position
 var _mouse_last := Vector2.ZERO
@@ -43,7 +43,7 @@ func _ready():
 
 
 ## Convert intersection point to screen coordinate
-func global_to_viewport(p_at : Vector3) -> Vector2:
+func global_to_viewport(p_at: Vector3) -> Vector2:
 	var t = $CollisionShape3D.global_transform
 	var at = t.affine_inverse() * p_at
 
@@ -65,7 +65,7 @@ func _on_pointer_event(event) -> void:
 	var type = event.event_type
 
 	# Get the touch-index [0..]
-	var index : int = _touches.get(pointer, -1)
+	var index: int = _touches.get(pointer, -1)
 
 	# Create a new touch-index if necessary
 	if index < 0 or type == XRToolsPointerEvent.Type.ENTERED:
@@ -86,7 +86,7 @@ func _on_pointer_event(event) -> void:
 	var last := global_to_viewport(event.last_position)
 
 	# Get/update pressed state
-	var pressed : bool
+	var pressed: bool
 	match type:
 		XRToolsPointerEvent.Type.PRESSED:
 			_presses[pointer] = true
@@ -129,7 +129,7 @@ func _on_pointer_event(event) -> void:
 				_report_mouse_down(at)
 
 			XRToolsPointerEvent.Type.RELEASED:
-				_report_mouse_up( at)
+				_report_mouse_up(at)
 
 			XRToolsPointerEvent.Type.MOVED:
 				_report_mouse_move(pressed, last, at)
@@ -146,7 +146,7 @@ func _on_pointer_event(event) -> void:
 
 
 # Report touch-down event
-func _report_touch_down(index : int, at : Vector2) -> void:
+func _report_touch_down(index: int, at: Vector2) -> void:
 	var event := InputEventScreenTouch.new()
 	event.index = index
 	event.position = at
@@ -155,7 +155,7 @@ func _report_touch_down(index : int, at : Vector2) -> void:
 
 
 # Report touch-up event
-func _report_touch_up(index : int, at : Vector2) -> void:
+func _report_touch_up(index: int, at: Vector2) -> void:
 	var event := InputEventScreenTouch.new()
 	event.index = index
 	event.position = at
@@ -164,7 +164,7 @@ func _report_touch_up(index : int, at : Vector2) -> void:
 
 
 # Report touch-move event
-func _report_touch_move(index : int, pressed : bool, from : Vector2, to : Vector2) -> void:
+func _report_touch_move(index: int, pressed: bool, from: Vector2, to: Vector2) -> void:
 	var event := InputEventScreenDrag.new()
 	event.index = index
 	event.position = to
@@ -174,7 +174,7 @@ func _report_touch_move(index : int, pressed : bool, from : Vector2, to : Vector
 
 
 # Report mouse-down event
-func _report_mouse_down(at : Vector2) -> void:
+func _report_mouse_down(at: Vector2) -> void:
 	var event := InputEventMouseButton.new()
 	event.button_index = 1
 	event.pressed = true
@@ -185,7 +185,7 @@ func _report_mouse_down(at : Vector2) -> void:
 
 
 # Report mouse-up event
-func _report_mouse_up(at : Vector2) -> void:
+func _report_mouse_up(at: Vector2) -> void:
 	var event := InputEventMouseButton.new()
 	event.button_index = 1
 	event.pressed = false
@@ -196,7 +196,7 @@ func _report_mouse_up(at : Vector2) -> void:
 
 
 # Report mouse-move event
-func _report_mouse_move(pressed : bool, from : Vector2, to : Vector2) -> void:
+func _report_mouse_move(pressed: bool, from: Vector2, to: Vector2) -> void:
 	var event := InputEventMouseMotion.new()
 	event.position = to
 	event.global_position = to

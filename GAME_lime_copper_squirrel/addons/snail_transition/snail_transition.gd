@@ -12,13 +12,15 @@ const FADE_IN := preload("res://addons/snail_transition/transitions/FadeIn.tscn"
 const FADE_OUT := preload("res://addons/snail_transition/transitions/FadeOut.tscn")
 
 enum TransitionMode {
-	In, # switches, then uncovers
-	Out, # covers, then switches
-	Full, # Out, then In
+	In,  # switches, then uncovers
+	Out,  # covers, then switches
+	Full,  # Out, then In
 }
+
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+
 
 func _run_transition():
 	if _transition_out:
@@ -52,7 +54,12 @@ func _run_transition():
 	_transition_out = null
 	_transition_in = null
 
-func auto_transition(p_scene: PackedScene, p_transition_out: PackedScene = FADE_OUT, p_transition_in: PackedScene = FADE_IN):
+
+func auto_transition(
+	p_scene: PackedScene,
+	p_transition_out: PackedScene = FADE_OUT,
+	p_transition_in: PackedScene = FADE_IN
+):
 	if _current_transition:
 		_current_transition.hurry()
 		await _current_transition.finished
@@ -66,7 +73,12 @@ func auto_transition(p_scene: PackedScene, p_transition_out: PackedScene = FADE_
 	_transition_out = p_transition_out
 	_run_transition()
 
-func auto_transition_threaded(p_scene_path: String, p_transition_out: PackedScene = FADE_OUT, p_transition_in: PackedScene = FADE_IN):
+
+func auto_transition_threaded(
+	p_scene_path: String,
+	p_transition_out: PackedScene = FADE_OUT,
+	p_transition_in: PackedScene = FADE_IN
+):
 	#assert(FileAccess.file_exists(p_scene_path)) # fails on export due to remapping, need to check for .remap files later if doing this
 	ResourceLoader.load_threaded_request(p_scene_path)
 

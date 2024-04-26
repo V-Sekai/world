@@ -4,11 +4,13 @@
 
 extends PanelContainer
 
+
 func connect_option_button_chidren_signals():
 	var option_button_children = find_children("*", "OptionButton", true, false)
 	for option_button in option_button_children:
 		option_button.connect("item_selected", Callable(self, "_on_option_button_option_selected"))
-	
+
+
 func _on_option_button_option_selected(option):
 	focus_mode = Control.FOCUS_ALL
 	grab_click_focus()

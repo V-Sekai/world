@@ -5,11 +5,13 @@ extends Control
 @export var prev_scene: PackedScene
 @onready var focus := SnailInput.get_input_focus(self)
 
+
 func _physics_process(_delta: float) -> void:
 	var input := focus.get_player_input()
 
 	if prev_scene and input.is_action_just_pressed("ui_cancel"):
 		SnailTransition.auto_transition(prev_scene)
+
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
@@ -19,6 +21,7 @@ func _input(event: InputEvent) -> void:
 		if event.pressed and event.keycode == KEY_F1 and %dev and %dev.visible:
 			Globals.set_flag("level_1")
 			Globals.set_flag("sandbox")
+
 
 func _ready():
 	if %continue.disabled:
@@ -36,6 +39,7 @@ func _ready():
 	Globals.set_flag("level_1")
 	Globals.set_flag("sandbox")
 
+
 const ALL_MAPS := {
 	"level_1": "res://crappy_contraptions/scenes/level_1.tscn",
 	"level_2": "res://crappy_contraptions/scenes/level_2.tscn",
@@ -49,6 +53,7 @@ const ALL_MAPS := {
 	"sandbox": "res://crappy_contraptions/scenes/sandbox.tscn",
 }
 
+
 func _on_continue():
 	var continue_map = Globals.flags["continue"]
 	if ALL_MAPS.has(continue_map):
@@ -56,15 +61,19 @@ func _on_continue():
 	else:
 		print("invalid continue map: %s" % continue_map)
 
+
 func _on_sandbox():
 	SnailTransition.auto_transition_threaded(sandbox_scene_path)
+
 
 func _on_play():
 	SnailTransition.auto_transition_threaded(play_scene_path)
 
+
 func _on_delete():
 	Globals.clear_save()
 	SnailTransition.auto_transition_threaded(scene_file_path)
+
 
 func _on_quit():
 	SnailTransition.quit_after_transition_out = true

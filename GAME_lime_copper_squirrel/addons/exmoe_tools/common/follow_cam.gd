@@ -21,11 +21,13 @@ var target_zoom := zoom
 
 var exclusions: Array = []
 
+
 func _update_exclusions():
 	var tmp = exclusions.duplicate()
 	for node in tmp:
 		if not is_instance_valid(node):
 			exclusions.erase(node)
+
 
 func add_exclusion(node: Node, recursive := true):
 	#print("excludey boy")
@@ -35,6 +37,7 @@ func add_exclusion(node: Node, recursive := true):
 	if recursive:
 		for child in node.get_children():
 			add_exclusion(child, true)
+
 
 func _update_target():
 	var net_offset := offset + next_transform.basis * Vector3(0, 0.0, target_zoom)
@@ -51,6 +54,7 @@ func _update_target():
 	target_origin = target.global_position + offset
 	target_position = target.global_position + net_offset
 	target_rotation = target.global_basis.orthonormalized()
+
 
 func _physics_process(delta: float) -> void:
 	_update_target()
@@ -79,7 +83,11 @@ func _physics_process(delta: float) -> void:
 	if hit:
 		target_position = ray_origin + params.motion * maxf(0.0, hit[0] - ball.radius)
 	gp = gp.lerp(target_position, 1.0 - exp(-(1.0 / (pos_laziness * caffeine)) * delta))
-	gb = gb.slerp(target_rotation, 1.0 - exp(-(1.0 / (rot_laziness * caffeine)) * delta)).orthonormalized()
+	gb = (
+		gb
+		. slerp(target_rotation, 1.0 - exp(-(1.0 / (rot_laziness * caffeine)) * delta))
+		. orthonormalized()
+	)
 	last_transform = next_transform
 	next_transform = Transform3D(gb, gp)
 
@@ -87,15 +95,18 @@ func _physics_process(delta: float) -> void:
 		var speed := (next_transform.origin.distance_to(last_transform.origin) / delta) * 3.6
 		DD.set_text("speed", "%d km/h" % speed)
 
+
 func teleport():
 	next_transform = global_transform
 	last_transform = next_transform
 	_update_target()
 
+
 func _input(event: InputEvent):
 	if event is InputEventKey:
 		if event.keycode == KEY_F3 and event.pressed:
 			_show_speed = not _show_speed
+
 
 func _process(_delta: float) -> void:
 	var f := Engine.get_physics_interpolation_fraction()

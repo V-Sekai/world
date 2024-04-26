@@ -8,6 +8,7 @@ extends Control
 
 var label := "Keyboard"
 
+
 func _ready() -> void:
 	match device_type:
 		"Keyboard":

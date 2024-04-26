@@ -21,14 +21,12 @@
 class_name Smoothing
 extends Node3D
 
-@export
-var target: NodePath:
+@export var target: NodePath:
 	get:
 		return target
 	set(v):
 		target = v
 		set_target()
-
 
 var _m_Target: Node3D
 
@@ -41,14 +39,14 @@ const SF_BASIS = 1 << 2
 const SF_SLERP = 1 << 3
 const SF_INVISIBLE = 1 << 4
 
-@export_flags("enabled", "translate", "basis", "slerp") var flags: int = SF_ENABLED | SF_TRANSLATE | SF_BASIS:
+@export_flags("enabled", "translate", "basis", "slerp")
+var flags: int = SF_ENABLED | SF_TRANSLATE | SF_BASIS:
 	set(v):
 		flags = v
 		# we may have enabled or disabled
 		_SetProcessing()
 	get:
 		return flags
-
 
 ##########################################################################################
 # USER FUNCS
@@ -144,9 +142,10 @@ func _RefreshTransform():
 			print("auto-teleport")
 		teleport()
 
+
 func _FindTarget():
 	_m_Target = null
-	
+
 	# If no target has been assigned in the property,
 	# default to using the parent as the target.
 	if target.is_empty():
@@ -154,10 +153,10 @@ func _FindTarget():
 		if parent:
 			_m_Target = parent
 		return
-		
+
 	var targ = get_node(target)
 
-	if ! targ:
+	if !targ:
 		printerr("ERROR SmoothingNode : Target " + str(target) + " not found")
 		return
 

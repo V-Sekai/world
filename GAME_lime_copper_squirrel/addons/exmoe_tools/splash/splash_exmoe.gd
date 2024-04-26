@@ -4,19 +4,22 @@ extends Control
 @export_file("*.tscn") var next_scene_path: String
 
 @onready var animation: AnimationPlayer = find_child("AnimationPlayer")
-@onready var next_scene_is_valid = (next_scene_path) # and FileAccess.file_exists(next_scene_path))
+@onready var next_scene_is_valid = next_scene_path  # and FileAccess.file_exists(next_scene_path))
 
 var transition_out := false
 @onready var editor_skip := OS.has_feature("editor") and _is_first_load()
+
 
 func _is_first_load() -> bool:
 	if $"/root".has_node("Globals"):
 		return $"/root".get_node("Globals").first_load
 	return true
 
+
 func _clear_first_load():
 	if $"/root".has_node("Globals"):
 		$"/root".get_node("Globals").first_load = false
+
 
 func _ready() -> void:
 	assert(animation)
@@ -28,6 +31,7 @@ func _ready() -> void:
 		animation.animation_finished.connect(_on_animation_finish)
 	if next_scene_is_valid:
 		ResourceLoader.load_threaded_request(next_scene_path)
+
 
 func _on_animation_finish(animation_name: StringName):
 	if transition_out:
@@ -43,6 +47,7 @@ func _on_animation_finish(animation_name: StringName):
 		animation.queue(animation_name)
 		transition_out = false
 	_clear_first_load()
+
 
 func _physics_process(_delta: float) -> void:
 	if transition_out:
@@ -65,6 +70,7 @@ func _physics_process(_delta: float) -> void:
 	var input := focus.get_player_input()
 	if input.is_anything_just_pressed():
 		_on_animation_finish(animation.current_animation)
+
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:

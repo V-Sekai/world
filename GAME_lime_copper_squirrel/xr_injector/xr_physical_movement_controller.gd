@@ -30,11 +30,7 @@
 extends Node
 
 ## Speed mode enumeration
-enum SpeedMode {
-	STOPPED,	## Not jogging
-	SLOW,		## Jogging slowly
-	FAST		## Jogging fast
-}
+enum SpeedMode { STOPPED, SLOW, FAST }  ## Not jogging  ## Jogging slowly  ## Jogging fast
 
 ## Jog arm-swing frequency in Hz to trigger slow movement
 const JOG_SLOW_FREQ := 3.5
@@ -43,11 +39,10 @@ const JOG_SLOW_FREQ := 3.5
 const JOG_FAST_FREQ := 5.5
 
 ## Slow jogging speed in simulated joystick move distance
-var slow_speed : float = -0.4
+var slow_speed: float = -0.4
 
 ## Fast jogging speed in simulated joystick move distance
-var fast_speed : float = -1.0
-
+var fast_speed: float = -1.0
 
 # Jog arm-swing "stroke" detector "confidence-hat" signal
 var _conf_hat := 0.0
@@ -62,53 +57,54 @@ var _last_stroke := 0.0
 var _speed_mode := SpeedMode.STOPPED
 
 # XR Origin node
-var xr_origin_3D : XROrigin3D = null
+var xr_origin_3D: XROrigin3D = null
 
 # XR Camera node
-var xr_camera_3D : XRCamera3D = null
+var xr_camera_3D: XRCamera3D = null
 
 # Primary controller
-var primary_controller : XRController3D = null
+var primary_controller: XRController3D = null
 
 # Secondary controller
-var secondary_controller : XRController3D = null
+var secondary_controller: XRController3D = null
 
 # Input event for simulated joystick motion
-var joypad_left_y_axis : InputEventJoypadMotion = InputEventJoypadMotion.new()
+var joypad_left_y_axis: InputEventJoypadMotion = InputEventJoypadMotion.new()
 
 # Variable to determine whether jog movement enabled
-var jog_enabled : bool = false
+var jog_enabled: bool = false
 
 # Variable to determine if arm swing jog should also try to trigger a sprint action
-var jog_triggers_sprint : bool = false
+var jog_triggers_sprint: bool = false
 
 # Variable to determine whether arm swing jump movement enabled
-var arm_swing_jump_enabled : bool = false
+var arm_swing_jump_enabled: bool = false
 
 # Sprint action event variable
-var sprint_action : InputEventJoypadButton = null
+var sprint_action: InputEventJoypadButton = null
 
 # Track whether currently sprinting
-var physically_sprinting : bool = false
+var physically_sprinting: bool = false
 
 # Arms jump detection threshold (M/S^2)
-var arms_jump_threshold : float = 5.0
+var arms_jump_threshold: float = 5.0
 
 # Node Positions for Arm Swing Jump
 #var _xr_camera_3D_position : float = 0.0
-var _secondary_controller_position : float = 0.0
-var _primary_controller_position : float = 0.0
+var _secondary_controller_position: float = 0.0
+var _primary_controller_position: float = 0.0
 
 # Node Velocities for Arm Swing Jump
 #var _xr_camera_3D_velocity : SlidingAverage = SlidingAverage.new(5)
-var _secondary_controller_velocity : SlidingAverage = SlidingAverage.new(5)
-var _primary_controller_velocity : SlidingAverage = SlidingAverage.new(5)
+var _secondary_controller_velocity: SlidingAverage = SlidingAverage.new(5)
+var _primary_controller_velocity: SlidingAverage = SlidingAverage.new(5)
 
 # Jump action event variable
-var jump_action : InputEventJoypadButton = null
+var jump_action: InputEventJoypadButton = null
 
 # Determing if already jumping
-var physically_jumping : bool = false
+var physically_jumping: bool = false
+
 
 # Sliding Average class
 class SlidingAverage:
@@ -138,14 +134,16 @@ class SlidingAverage:
 		_sum -= _data[_pos]
 
 		# Store the new entry in the array and circularly advance the index
-		_data[_pos] = entry;
+		_data[_pos] = entry
 		_pos = (_pos + 1) % _size
 
 		# Return the average
 		return _sum / _size
 
+
 func _ready():
 	set_process(false)
+
 
 # Detect jog movement and arm jump movement if enabled
 func physics_movement(delta: float):
@@ -153,7 +151,7 @@ func physics_movement(delta: float):
 	if !primary_controller.get_is_active() or !secondary_controller.get_is_active():
 		_speed_mode = SpeedMode.STOPPED
 		return
-	
+
 	# If jog movement enabled, perform calculations
 	if jog_enabled:
 		# Get the arm-swing stroke frequency in Hz
@@ -194,16 +192,18 @@ func physics_movement(delta: float):
 
 		# Trigger simulated input event
 		joypad_left_y_axis.axis = JOY_AXIS_LEFT_Y
-		joypad_left_y_axis.axis_value = clamp(-secondary_controller.get_vector2("primary").y + speed, -1.0, 1.0)
+		joypad_left_y_axis.axis_value = clamp(
+			-secondary_controller.get_vector2("primary").y + speed, -1.0, 1.0
+		)
 		Input.parse_input_event(joypad_left_y_axis)
-		
-	
+
 	# If arm swing jump enabled, perform calculations
 	if arm_swing_jump_enabled:
 		_detect_arms_jump(delta)
-		
+
+
 # Get the frequency of the last arm-swing "stroke" in Hz.
-func _get_stroke_frequency(delta : float) -> float:
+func _get_stroke_frequency(delta: float) -> float:
 	# Get the controller velocities
 	var vl = secondary_controller.get_pose().linear_velocity.y
 	var vr = primary_controller.get_pose().linear_velocity.y
@@ -258,13 +258,14 @@ func _get_stroke_frequency(delta : float) -> float:
 
 	# Return the last jog arm-swing "stroke" in Hz.
 	return 1.0 / _last_stroke
-	
+
+
 # Function used to detect arm swing jump movement
 func _detect_arms_jump(delta):
 	# Skip if either of the controllers is disabled
 	if !primary_controller.get_is_active() or !secondary_controller.get_is_active():
 		return
-	
+
 	# Skip if we don't have a jump action to trigger
 	if jump_action == null:
 		return
@@ -272,7 +273,9 @@ func _detect_arms_jump(delta):
 	# Get the controllers instantaneous velocity
 	var new_controller_secondary_pos = secondary_controller.transform.origin.y
 	var new_controller_primary_pos = primary_controller.transform.origin.y
-	var controller_secondary_vel = (new_controller_secondary_pos - _secondary_controller_position) / delta
+	var controller_secondary_vel = (
+		(new_controller_secondary_pos - _secondary_controller_position) / delta
+	)
 	var controller_primary_vel = (new_controller_primary_pos - _primary_controller_position) / delta
 	_secondary_controller_position = new_controller_secondary_pos
 	_primary_controller_position = new_controller_primary_pos
@@ -287,20 +290,21 @@ func _detect_arms_jump(delta):
 
 	# Clamp the controller instantaneous velocity to +/- 2x the jump threshold
 	controller_secondary_vel = clamp(
-			controller_secondary_vel,
-			-2.0 * arms_jump_threshold,
-			2.0 * arms_jump_threshold)
+		controller_secondary_vel, -2.0 * arms_jump_threshold, 2.0 * arms_jump_threshold
+	)
 	controller_primary_vel = clamp(
-			controller_primary_vel,
-			-2.0 * arms_jump_threshold,
-			2.0 * arms_jump_threshold)
+		controller_primary_vel, -2.0 * arms_jump_threshold, 2.0 * arms_jump_threshold
+	)
 
 	# Get the averaged velocity
 	controller_secondary_vel = _secondary_controller_velocity.update(controller_secondary_vel)
 	controller_primary_vel = _primary_controller_velocity.update(controller_primary_vel)
 
 	# Detect a jump
-	if controller_secondary_vel >= arms_jump_threshold and controller_primary_vel >= arms_jump_threshold:
+	if (
+		controller_secondary_vel >= arms_jump_threshold
+		and controller_primary_vel >= arms_jump_threshold
+	):
 		print("jump detected!")
 		jump_action.pressed = true
 		Input.parse_input_event(jump_action)
@@ -310,6 +314,7 @@ func _detect_arms_jump(delta):
 		jump_action.pressed = false
 		Input.parse_input_event(jump_action)
 		physically_jumping = false
+
 
 func detect_game_jump_action_events():
 	var game_actions = InputMap.get_actions()
@@ -330,12 +335,13 @@ func detect_game_jump_action_events():
 	else:
 		print("Jump action found in physical movement controller")
 
+
 func detect_game_sprint_events():
 	if jog_triggers_sprint == false:
 		return
-	
+
 	var game_actions = InputMap.get_actions()
-	
+
 	for action in game_actions:
 		if action.to_lower() == "sprint":
 			var action_events = InputMap.action_get_events(action)
@@ -352,7 +358,14 @@ func detect_game_sprint_events():
 	else:
 		print("Sprint action found in physical movement controller")
 
-func set_enabled(jog_value: bool, jump_value: bool, pri_controller : XRController3D, sec_controller : XRController3D, use_jog_for_sprint : bool):
+
+func set_enabled(
+	jog_value: bool,
+	jump_value: bool,
+	pri_controller: XRController3D,
+	sec_controller: XRController3D,
+	use_jog_for_sprint: bool
+):
 	jog_enabled = jog_value
 	print("Jog enabled: ", jog_enabled)
 	arm_swing_jump_enabled = jump_value
@@ -369,9 +382,10 @@ func set_enabled(jog_value: bool, jump_value: bool, pri_controller : XRControlle
 		jog_triggers_sprint = use_jog_for_sprint
 		detect_game_sprint_events()
 
+
 func _process(delta):
 	if !is_instance_valid(primary_controller) or !is_instance_valid(secondary_controller):
 		_speed_mode = SpeedMode.STOPPED
 		return
-		
+
 	physics_movement(delta)
