@@ -1,0 +1,9 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://xf7odtyxa0u8"]
+
+[ext_resource type="Texture2D" uid="uid://beleuoxnhobi3" path="res://phys/models/thruster_small_Untitled.png" id="1_5wwtu"]
+[ext_resource type="Shader" path="res://materials/glowy.gdshader" id="1_758n4"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_758n4")
+shader_parameter/alpha = ExtResource("1_5wwtu")

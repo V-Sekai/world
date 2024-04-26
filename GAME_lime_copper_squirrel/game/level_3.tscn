@@ -1,0 +1,98 @@
+[gd_scene load_steps=16 format=3 uid="uid://bil6bxhutywqt"]
+
+[ext_resource type="Script" path="res://phys/contraption.gd" id="1_ur17g"]
+[ext_resource type="PackedScene" uid="uid://de0xrdyh6s7tl" path="res://phys/player.tscn" id="2_n5bjo"]
+[ext_resource type="Material" uid="uid://d1dcxbgx8kga7" path="res://materials/test_grid_grey.tres" id="3_5bwf5"]
+[ext_resource type="PackedScene" uid="uid://d0bndvyxq2j7a" path="res://game/main_background.tscn" id="4_4wmp4"]
+[ext_resource type="Script" path="res://addons/exmoe_tools/common/follow_cam.gd" id="5_htpx0"]
+[ext_resource type="Script" path="res://phys/safe_area.gd" id="6_o7eja"]
+[ext_resource type="Script" path="res://game/unlock.gd" id="7_d3kma"]
+[ext_resource type="Script" path="res://game/save_value.gd" id="8_e2u5o"]
+[ext_resource type="PackedScene" uid="uid://cnn3l47ist43j" path="res://phys/level_changer.tscn" id="9_iebaq"]
+[ext_resource type="FontFile" uid="uid://qf7622sypprq" path="res://addons/exmoe_tools/fonts/Yanone_Kaffeesatz/YanoneKaffeesatz-SemiBold.ttf" id="10_34wf7"]
+[ext_resource type="PackedScene" uid="uid://sj58vpi08n48" path="res://contraptions/simple_car.tscn" id="11_ogo2t"]
+[ext_resource type="PackedScene" uid="uid://b15ybaq5lrclj" path="res://contraptions/trike.tscn" id="12_7y0ku"]
+[ext_resource type="PackedScene" uid="uid://b581wtdnmnr5d" path="res://materials/decals/arrow_01.tscn" id="13_664sk"]
+[ext_resource type="PackedScene" uid="uid://ftfxqqm3ijuk" path="res://materials/decals/cross_01.tscn" id="14_ke8up"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_2vd67"]
+size = Vector3(104, 50, 104)
+
+[node name="Level2" type="Node3D"]
+script = ExtResource("1_ur17g")
+
+[node name="player" parent="." node_paths=PackedStringArray("camera") instance=ExtResource("2_n5bjo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 1, 2.08165e-12)
+camera = NodePath("../Camera3D")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 2.08165e-12, 2.08165e-12)
+layers = 9
+use_collision = true
+size = Vector3(104, 8, 104)
+material = ExtResource("3_5bwf5")
+
+[node name="CSGBox3D2" type="CSGBox3D" parent="CSGBox3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 10, 2.08165e-12)
+operation = 2
+use_collision = true
+size = Vector3(100, 20, 100)
+material = ExtResource("3_5bwf5")
+
+[node name="background" parent="." instance=ExtResource("4_4wmp4")]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+script = ExtResource("5_htpx0")
+
+[node name="Area3D" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14.5929, 0)
+script = ExtResource("6_o7eja")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("BoxShape3D_2vd67")
+
+[node name="Unlock" type="Node" parent="."]
+script = ExtResource("7_d3kma")
+save_flag = "level_3"
+
+[node name="SaveValue" type="Node" parent="."]
+script = ExtResource("8_e2u5o")
+save_flag = "continue"
+save_value = "level_3"
+
+[node name="finish" parent="." instance=ExtResource("9_iebaq")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 2.08165e-12, 2.08165e-12, -14.9314)
+map_path = "res://game/level_4.tscn"
+
+[node name="Label3D2" type="Label3D" parent="finish"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0, 3.69543, -0.656273)
+pixel_size = 0.01
+text = "level 4+ are unfinished, but
+you can still visit them"
+font = ExtResource("10_34wf7")
+font_size = 64
+outline_size = 24
+
+[node name="finish2" parent="." instance=ExtResource("9_iebaq")]
+transform = Transform3D(-0.837947, 0, -0.545751, 0, 1, 0, 0.545751, 0, -0.837947, -7.72378, 2.08165e-12, -12.9848)
+map_path = "res://game/sandbox.tscn"
+
+[node name="Label3D2" type="Label3D" parent="finish2"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0, 3.69543, -0.656273)
+pixel_size = 0.01
+text = "dev sandbox is more fun"
+font = ExtResource("10_34wf7")
+font_size = 64
+outline_size = 24
+
+[node name="Autobuild" parent="." instance=ExtResource("11_ogo2t")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.3968, 1.56731, 9.8206)
+
+[node name="Autobuild2" parent="." instance=ExtResource("12_7y0ku")]
+transform = Transform3D(0.696927, 0, 0.717142, 0, 1, 0, -0.717142, 0, 0.696927, 8.36259, 1.30269, 5.10548)
+
+[node name="Arrow01" parent="." instance=ExtResource("13_664sk")]
+transform = Transform3D(0.830596, 0, 0.556876, 0, 1, 0, -0.556876, 0, 0.830596, -6.00954, 2.86102e-06, -9.93308)
+
+[node name="Cross01" parent="." instance=ExtResource("14_ke8up")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.221864, 9.53676e-07, -12.2897)

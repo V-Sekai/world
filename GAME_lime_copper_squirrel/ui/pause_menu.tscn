@@ -1,0 +1,44 @@
+[gd_scene load_steps=3 format=4 uid="uid://b1a4fhcw48et1"]
+
+[ext_resource type="Script" path="res://ui/pause_menu.gd" id="1_2pw1j"]
+[ext_resource type="Theme" uid="uid://bd7gseqffsnlf" path="res://ui/main_theme.tres" id="1_8kveh"]
+
+[node name="pause_menu" type="VBoxContainer" node_paths=PackedStringArray("close_target")]
+process_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -71.0
+offset_top = -58.0
+offset_right = 71.0
+offset_bottom = 58.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_2pw1j")
+close_target = NodePath(".")
+menu_scene = "res://ui/boot_splash.tscn"
+
+[node name="continue" type="Button" parent="."]
+layout_mode = 2
+focus_neighbor_bottom = NodePath("../restart")
+focus_next = NodePath("../restart")
+theme = ExtResource("1_8kveh")
+text = "Continue"
+
+[node name="restart" type="Button" parent="."]
+layout_mode = 2
+focus_neighbor_top = NodePath("../continue")
+focus_neighbor_bottom = NodePath("../quit")
+focus_next = NodePath("../quit")
+focus_previous = NodePath("../continue")
+theme = ExtResource("1_8kveh")
+text = "Restart Level"
+
+[node name="quit" type="Button" parent="."]
+layout_mode = 2
+focus_neighbor_top = NodePath("../restart")
+focus_previous = NodePath("../restart")
+theme = ExtResource("1_8kveh")
+text = "Quit to Menu"
