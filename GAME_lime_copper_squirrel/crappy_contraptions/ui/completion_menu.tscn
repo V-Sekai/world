@@ -1,0 +1,96 @@
+[gd_scene load_steps=5 format=3 uid="uid://cv8cs6ne0m6c7"]
+
+[ext_resource type="Theme" uid="uid://bd7gseqffsnlf" path="res://crappy_contraptions/ui/main_theme.tres" id="1_8ak5o"]
+[ext_resource type="Script" path="res://crappy_contraptions/ui/completion_menu.gd" id="2_7m4qt"]
+[ext_resource type="PackedScene" uid="uid://d0bndvyxq2j7a" path="res://crappy_contraptions/scenes/main_background.tscn" id="2_epv4h"]
+[ext_resource type="Script" path="res://crappy_contraptions/scenes/unlock.gd" id="4_qysp1"]
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_8ak5o")
+script = ExtResource("2_7m4qt")
+sandbox_scene_path = "res://crappy_contraptions/scenes/sandbox.tscn"
+quit_scene_path = "res://ui/boot_splash.tscn"
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.25098)
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -134.5
+offset_top = -63.5
+offset_right = 134.5
+offset_bottom = 63.5
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_8ak5o")
+text = "you beat crappy contraptions
+
+and all you got was this win screen
+
+thank you for playing!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="sandbox" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -79.0
+offset_top = 92.0
+offset_right = 85.0
+offset_bottom = 123.0
+grow_horizontal = 2
+grow_vertical = 2
+rotation = 0.0554759
+focus_neighbor_bottom = NodePath("../quit")
+focus_next = NodePath("../quit")
+theme = ExtResource("1_8ak5o")
+text = "Play in Sandbox Mode"
+
+[node name="quit" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -73.0
+offset_top = 151.0
+offset_right = 91.0
+offset_bottom = 182.0
+grow_horizontal = 2
+grow_vertical = 2
+rotation = -0.0387304
+focus_neighbor_top = NodePath("../sandbox")
+focus_previous = NodePath("../sandbox")
+theme = ExtResource("1_8ak5o")
+text = "Quit to Menu"
+
+[node name="background" parent="." instance=ExtResource("2_epv4h")]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(0.707854, 0.262566, 0.655746, 0.00600668, 0.926075, -0.377292, -0.706334, 0.271006, 0.653948, -2.13243, -22.5268, 33.8671)
+
+[node name="unlock_sandbox" type="Node" parent="."]
+script = ExtResource("4_qysp1")
+save_flag = "sandbox"

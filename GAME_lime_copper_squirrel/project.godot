@@ -12,7 +12,7 @@ config_version=5
 
 config/name="Crappy Contraptions"
 config/version="1.3.0"
-run/main_scene="res://ui/boot_splash.tscn"
+run/main_scene="res://crappy_contraptions/ui/boot_splash.tscn"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="crappy-contraptions"
 config/features=PackedStringArray("4.3", "Double Precision", "Forward Plus")
@@ -25,8 +25,7 @@ config/icon="res://icon.svg"
 SnailInput="*res://addons/snail_input/snail_input.gd"
 SnailTransition="*res://addons/snail_transition/snail_transition.gd"
 DD="*res://addons/zylann.debug_draw/debug_draw.gd"
-Globals="*res://game/globals.gd"
-XrInjector="*res://xr_injector/xr_injector.gd"
+Globals="*res://crappy_contraptions/scenes/globals.gd"
 
 [display]
 
