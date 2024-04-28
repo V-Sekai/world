@@ -400,7 +400,7 @@
                         {
                             "arguments": [
                                 "-c",
-                                "butler push export ifiregames/town-courier:windows-master --userversion $GO_PIPELINE_LABEL-`date --iso=seconds --utc`"
+                                "butler push export ifiregames/crappy-contraptions:windows-master --userversion $GO_PIPELINE_LABEL-`date --iso=seconds --utc`"
                             ],
                             "command": "/bin/bash",
                             "type": "exec",
@@ -483,7 +483,7 @@
                         {
                             "arguments": [
                                 "-c",
-                                "butler push export ifiregames/town-courier:linux-master --userversion $GO_PIPELINE_LABEL-`date --iso=seconds --utc`"
+                                "butler push export ifiregames/crappy-contraptions:linux-master --userversion $GO_PIPELINE_LABEL-`date --iso=seconds --utc`"
                             ],
                             "command": "/bin/bash",
                             "type": "exec",
