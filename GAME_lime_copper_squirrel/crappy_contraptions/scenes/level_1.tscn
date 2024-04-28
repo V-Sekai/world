@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=4 uid="uid://cogm6hynqnryu"]
+[gd_scene load_steps=24 format=3 uid="uid://cogm6hynqnryu"]
 
 [ext_resource type="PackedScene" uid="uid://d0bndvyxq2j7a" path="res://crappy_contraptions/scenes/main_background.tscn" id="1_tyay1"]
 [ext_resource type="Material" uid="uid://d1dcxbgx8kga7" path="res://crappy_contraptions/materials/test_grid_grey.tres" id="2_akxk7"]
@@ -63,6 +63,7 @@ size = Vector3(20.3103, 1, 23.3867)
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0, 1.7693, -5.97726)
+current = true
 script = ExtResource("3_t3gvp")
 fp_responsiveness = 0.95
 
