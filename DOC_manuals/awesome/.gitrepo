@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai/awesome-v-sekai.git
 	branch = master
-	commit = da30fb1ed900bfa9420f9a95862c2e6585498892
-	parent = 443ded2128d2214e85e5df2f7be74527b85b290b
+	commit = 452251de77202e5775c89d2fa33a6ce6939242ed
+	parent = 257007637203a34f09ce053cd1277ccacd066a6e
 	method = merge
 	cmdver = 0.4.6
