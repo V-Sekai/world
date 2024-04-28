@@ -284,7 +284,7 @@ stages: [{
 			type:              "exec"
 			working_directory: ""
 		}, {
-			arguments: ["-c", "butler push export ifiregames/town-courier:windows-master --userversion $GO_PIPELINE_LABEL-`date --iso=seconds --utc`"]
+			arguments: ["-c", "butler push export ifiregames/crappy-contraptions:windows-master --userversion $GO_PIPELINE_LABEL-`date --iso=seconds --utc`"]
 			command:           "/bin/bash"
 			type:              "exec"
 			working_directory: ""
@@ -366,7 +366,7 @@ stages: [{
 			type:              "exec"
 			working_directory: ""
 		}, {
-			arguments: ["-c", "butler push export ifiregames/town-courier:linux-master --userversion $GO_PIPELINE_LABEL-`date --iso=seconds --utc`"]
+			arguments: ["-c", "butler push export ifiregames/crappy-contraptions:linux-master --userversion $GO_PIPELINE_LABEL-`date --iso=seconds --utc`"]
 			command:           "/bin/bash"
 			type:              "exec"
 			working_directory: ""

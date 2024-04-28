@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=4 uid="uid://d0bndvyxq2j7a"]
+[gd_scene load_steps=10 format=3 uid="uid://d0bndvyxq2j7a"]
 
 [ext_resource type="Script" path="res://crappy_contraptions/physics/safe_area.gd" id="1_si5a5"]
 [ext_resource type="Material" uid="uid://d1dcxbgx8kga7" path="res://crappy_contraptions/materials/test_grid_grey.tres" id="2_o7et7"]

@@ -280,8 +280,7 @@ func _rescan_devices():
 			)
 			continue
 
-		if Input.is_joy_known(i):
-			_input_devices.append(InputDevice.new(i))
+		_input_devices.append(InputDevice.new(i))
 
 
 func _ready() -> void:
@@ -453,7 +452,7 @@ var _device_join_input := false
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey or event is InputEventJoypadButton or event is InputEventMouseButton:
 		var device := get_device_for_event(event)
-		if device.active:
+		if device and device.active:
 			if device.player_index >= 0:
 				var slot := get_player_slot(device.player_index)
 				slot.last_device = device
@@ -485,8 +484,6 @@ func _input(event: InputEvent) -> void:
 
 	if event is InputEventMouseMotion and Input.mouse_mode != Input.MOUSE_MODE_VISIBLE:
 		_try_auto_join(event)
-	elif event is InputEventJoypadMotion or event is InputEventMouseMotion:
-		return  # only care about button events after here
 	elif Input.is_anything_pressed():
 		_try_auto_join(event)
 
@@ -505,6 +502,6 @@ func _try_auto_join(event: InputEvent):
 		device.want_player_index = 0
 	device_join(device)
 	_device_join_input = true
-	#Input.parse_input_event(event.duplicate()) # resubmit input event now that it's remapped, so the first press isn't eaten
+
 	await get_tree().physics_frame
 	_device_join_input = false

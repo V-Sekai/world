@@ -85,10 +85,6 @@ func _input(event: InputEvent) -> void:
 			else:
 				Input.mouse_mode = _prev_mode
 
-	# make sure to block bg captured mouse input
-	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED or not get_viewport().get_window().has_focus():
-		return
-
 	if event is InputEventMouseMotion:
 		var sens := turn_speed * TAU * mouse_sensitivity
 		var controlling := get_node_or_null(_controlling_path)
