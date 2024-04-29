@@ -75,7 +75,7 @@ jobs:
     name: 🐧 Linux
     needs: godot-cpp-test
     uses: ./.github/workflows/vsk_linux_editor_builds.yml
-    
+
   vsk-macos-editor-build:
     if: ${{ vars.DISABLE_GODOT_CI == '' }}
     name: 🍎 macOS
@@ -87,7 +87,7 @@ jobs:
     name: 🏁 Windows
     needs: godot-cpp-test
     uses: ./.github/workflows/vsk_windows_editor_builds.yml
-      
+
   vsk-web-editor-build:
     if: ${{ vars.DISABLE_GODOT_CI == '' }}
     name: 🌐 Web
