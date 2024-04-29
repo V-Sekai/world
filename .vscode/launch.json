@@ -11,7 +11,16 @@
   },
   "configurations": [
     {
-      "name": "Run the editor with task_goal_planner",
+      "name": "Run the editor with V-Sekai game",
+      "type": "lldb",
+      "request": "launch",
+      "args": ["--path", "VSK_game", "-e"],
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/VSK_godot/bin/godot.macos.editor.double.arm64",
+      "preLaunchTask": "Godot Engine"
+    },
+    {
+      "name": "Run the editor with lime copper squirrel",
       "type": "lldb",
       "request": "launch",
       "args": ["--path", "GAME_lime_copper_squirrel", "-e"],
