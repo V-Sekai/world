@@ -94,7 +94,7 @@ void Camera3D::_update_camera() {
 
 	RenderingServer::get_singleton()->camera_set_transform(camera, get_camera_transform());
 
-	if (get_tree()->is_node_being_edited(this) || !is_current()) {
+	if (is_part_of_edited_scene() || !is_current()) {
 		return;
 	}
 
@@ -134,7 +134,7 @@ void Camera3D::_notification(int p_what) {
 		} break;
 
 		case NOTIFICATION_EXIT_WORLD: {
-			if (!get_tree()->is_node_being_edited(this)) {
+			if (!is_part_of_edited_scene()) {
 				if (is_current()) {
 					clear_current();
 					current = true; //keep it true
@@ -294,7 +294,7 @@ void Camera3D::set_current(bool p_enabled) {
 }
 
 bool Camera3D::is_current() const {
-	if (is_inside_tree() && !get_tree()->is_node_being_edited(this)) {
+	if (is_inside_tree() && !is_part_of_edited_scene()) {
 		return get_viewport()->get_camera_3d() == this;
 	} else {
 		return current;
