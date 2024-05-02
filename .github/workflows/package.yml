@@ -94,10 +94,12 @@ jobs:
       - name: Package Foundationdb
         run: |
           mkdir -p archive/store
-          wget https://github.com/apple/foundationdb/releases/download/7.1.15/foundationdb-clients_7.1.15-1_amd64.deb
-          wget https://github.com/apple/foundationdb/releases/download/7.1.15/foundationdb-server_7.1.15-1_amd64.deb
-          mv foundationdb-clients_7.1.15-1_amd64.deb archive/
-          mv foundationdb-server_7.1.15-1_amd64.deb archive/
+          wget https://github.com/apple/foundationdb/releases/download/7.1.29/foundationdb-clients_7.1.29-1_amd64.deb
+          wget https://github.com/apple/foundationdb/releases/download/7.1.29/foundationdb-server_7.1.29-1_amd64.deb
+          wget https://github.com/apple/foundationdb/releases/download/7.1.29/foundationdb-7.1.29-x64.msi
+          mv foundationdb-clients_7.1.29-1_amd64.deb archive/
+          mv foundationdb-server_7.1.29-1_amd64.deb archive/
+          mv foundationdb-7.1.29-x64.msi archive/
 
       - name: Generate index.html
         if: github.ref == 'refs/heads/main'
