@@ -35,6 +35,7 @@
 #include "servers/rendering/rendering_server_globals.h"
 
 #include "extensions/openxr_eye_gaze_interaction.h"
+#include "extensions/openxr_hand_interaction_extension.h"
 #include "thirdparty/openxr/include/openxr/openxr.h"
 
 void OpenXRInterface::_bind_methods() {
@@ -43,6 +44,8 @@ void OpenXRInterface::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("session_stopping"));
 	ADD_SIGNAL(MethodInfo("session_focussed"));
 	ADD_SIGNAL(MethodInfo("session_visible"));
+	ADD_SIGNAL(MethodInfo("session_loss_pending"));
+	ADD_SIGNAL(MethodInfo("instance_exiting"));
 	ADD_SIGNAL(MethodInfo("pose_recentered"));
 	ADD_SIGNAL(MethodInfo("refresh_rate_changed", PropertyInfo(Variant::FLOAT, "refresh_rate")));
 
@@ -91,6 +94,7 @@ void OpenXRInterface::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_hand_joint_angular_velocity", "hand", "joint"), &OpenXRInterface::get_hand_joint_angular_velocity);
 
 	ClassDB::bind_method(D_METHOD("is_hand_tracking_supported"), &OpenXRInterface::is_hand_tracking_supported);
+	ClassDB::bind_method(D_METHOD("is_hand_interaction_supported"), &OpenXRInterface::is_hand_interaction_supported);
 	ClassDB::bind_method(D_METHOD("is_eye_gaze_interaction_supported"), &OpenXRInterface::is_eye_gaze_interaction_supported);
 
 	BIND_ENUM_CONSTANT(HAND_LEFT);
@@ -806,6 +810,21 @@ bool OpenXRInterface::is_hand_tracking_supported() {
 	}
 }
 
+bool OpenXRInterface::is_hand_interaction_supported() const {
+	if (openxr_api == nullptr) {
+		return false;
+	} else if (!openxr_api->is_initialized()) {
+		return false;
+	} else {
+		OpenXRHandInteractionExtension *hand_interaction_ext = OpenXRHandInteractionExtension::get_singleton();
+		if (hand_interaction_ext == nullptr) {
+			return false;
+		} else {
+			return hand_interaction_ext->is_available();
+		}
+	}
+}
+
 bool OpenXRInterface::is_eye_gaze_interaction_supported() {
 	if (openxr_api == nullptr) {
 		return false;
@@ -1256,6 +1275,14 @@ void OpenXRInterface::on_state_focused() {
 
 void OpenXRInterface::on_state_stopping() {
 	emit_signal(SNAME("session_stopping"));
+}
+
+void OpenXRInterface::on_state_loss_pending() {
+	emit_signal(SNAME("session_loss_pending"));
+}
+
+void OpenXRInterface::on_state_exiting() {
+	emit_signal(SNAME("instance_exiting"));
 }
 
 void OpenXRInterface::on_pose_recentered() {
