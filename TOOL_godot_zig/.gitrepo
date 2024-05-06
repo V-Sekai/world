@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/godot-zig/godot-zig.git
 	branch = master
-	commit = c0f187b0e903e0740b000155f1fd8e8cc2658c4a
-	parent = 5f70effb19a38844a993bfad7ee4b6b4d1bdf4b8
+	commit = 3ac053156cd016ae27af9d46c7ebec67f3bc0043
+	parent = 355e0bf2ee2a1db54182c4a84486d7364a3b2104
 	method = merge
 	cmdver = 0.4.6
