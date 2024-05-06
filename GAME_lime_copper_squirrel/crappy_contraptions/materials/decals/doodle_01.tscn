@@ -1,9 +1,0 @@
-[gd_scene load_steps=3 format=3 uid="uid://cyl4rpnl3pex8"]
-
-[ext_resource type="Texture2D" uid="uid://cfrfqvpofkfky" path="res://crappy_contraptions/materials/textures/doodle_01.png" id="1_qmwxl"]
-[ext_resource type="Texture2D" uid="uid://dde2ymeg0n7o7" path="res://crappy_contraptions/materials/textures/doodle_01_normal.png" id="2_f7qpy"]
-
-[node name="Doodle01" type="Decal"]
-texture_albedo = ExtResource("1_qmwxl")
-texture_normal = ExtResource("2_f7qpy")
-cull_mask = 1048568

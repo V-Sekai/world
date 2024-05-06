@@ -1,9 +1,0 @@
-[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://xf7odtyxa0u8"]
-
-[ext_resource type="Texture2D" uid="uid://beleuoxnhobi3" path="res://crappy_contraptions/physics/models/thruster_small_Untitled.png" id="1_5wwtu"]
-[ext_resource type="Shader" path="res://crappy_contraptions/materials/glowy.gdshader" id="1_758n4"]
-
-[resource]
-render_priority = 0
-shader = ExtResource("1_758n4")
-shader_parameter/alpha = ExtResource("1_5wwtu")
