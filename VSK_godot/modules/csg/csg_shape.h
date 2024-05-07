@@ -60,9 +60,7 @@ private:
 
 	bool dirty = false;
 	bool last_visible = false;
-
-	// 0.00001 meters is equal to 0.01 millimeters. Small scale models (e.g., mechanical parts, jewelry).
-	float snap = 0.00001f;
+	float snap = 0.001;
 
 	bool use_collision = false;
 	uint32_t collision_layer = 1;
