@@ -834,7 +834,7 @@ ObjectID Node3DEditorViewport::_select_ray(const Point2 &p_pos) const {
 						bool selection_valid = false;
 						List<Node *> selected_node_list = editor_selection->get_selected_node_list();
 						for (int k = 0; k < selected_node_list.size(); k++) {
-							if (selected_node_list[k] == root_item_owner) {
+							if (selected_node_list.get(k) == root_item_owner) {
 								selection_valid = true;
 								break;
 							}
