@@ -55,7 +55,14 @@ struct CSGBrush {
 	Vector<Face> faces;
 	Vector<Ref<Material>> materials;
 
-	inline void _regen_face_aabbs();
+	inline void _regen_face_aabbs() {
+		for (int i = 0; i < faces.size(); i++) {
+			faces.write[i].aabb = AABB();
+			faces.write[i].aabb.position = faces[i].vertices[0];
+			faces.write[i].aabb.expand_to(faces[i].vertices[1]);
+			faces.write[i].aabb.expand_to(faces[i].vertices[2]);
+		}
+	}
 
 	// Create a brush from faces.
 	void build_from_faces(const Vector<Vector3> &p_vertices, const Vector<Vector2> &p_uvs, const Vector<bool> &p_smooth, const Vector<Ref<Material>> &p_materials, const Vector<bool> &p_invert_faces);
@@ -152,7 +159,7 @@ struct CSGBrushOperation {
 		HashMap<Ref<Material>, int> materials;
 		HashMap<Vector3, int> vertex_map;
 		OAHashMap<VertexKey, int, VertexKeyHash> snap_cache;
-		float vertex_snap = 0.0;
+		float vertex_snap = 1E-5;
 
 		inline void _add_distance(List<IntersectionDistance> &r_intersectionsA, List<IntersectionDistance> &r_intersectionsB, bool p_from_B, real_t p_distance, bool p_is_conormal) const;
 		inline bool _bvh_inside(FaceBVH *r_facebvhptr, int p_max_depth, int p_bvh_first, int p_face_idx) const;

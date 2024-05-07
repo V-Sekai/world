@@ -31,6 +31,9 @@
 #include "csg_shape.h"
 
 #include "core/math/geometry_2d.h"
+#include "glm/ext/vector_int3.hpp"
+#include "scene/resources/material.h"
+#include "thirdparty/manifold/src/utilities/include/public.h"
 
 void CSGShape3D::set_use_collision(bool p_enable) {
 	if (use_collision == p_enable) {
@@ -162,6 +165,89 @@ void CSGShape3D::_make_dirty(bool p_parent_removing) {
 	dirty = true;
 }
 
+#include "scene/resources/mesh_data_tool.h"
+#include "scene/resources/surface_tool.h"
+
+#include "glm/ext/vector_float3.hpp"
+#include "thirdparty/manifold/src/manifold/include/manifold.h"
+#include <stdint.h>
+#include <algorithm>
+#include <vector>
+
+enum {
+	MANIFOLD_PROPERTY_POS_X = 0,
+	MANIFOLD_PROPERTY_POS_Y,
+	MANIFOLD_PROPERTY_POS_Z,
+	MANIFOLD_PROPERTY_UV_X,
+	MANIFOLD_PROPERTY_UV_Y,
+	MANIFOLD_PROPERTY_MATERIAL,
+	MANIFOLD_PROPERTY_SMOOTH,
+	MANIFOLD_PROPERTY_INVERT,
+	MANIFOLD_MAX
+};
+constexpr int MANIFOLD_TRIANGLE = 3;
+
+static void pack_manifold(const CSGBrush *const p_mesh_merge, manifold::Manifold &r_manifold, const float p_snap) {
+	manifold::MeshGL mesh;
+	mesh.triVerts.resize(p_mesh_merge->faces.size() * MANIFOLD_TRIANGLE, 0);
+	mesh.vertProperties.resize(p_mesh_merge->faces.size() * MANIFOLD_TRIANGLE * MANIFOLD_MAX, std::numeric_limits<float>::quiet_NaN());
+	mesh.numProp = MANIFOLD_MAX;
+	constexpr int32_t order[MANIFOLD_TRIANGLE] = { 0, 2, 1 };
+	for (int face_i = 0; face_i < p_mesh_merge->faces.size(); face_i++) {
+		const CSGBrush::Face &face = p_mesh_merge->faces[face_i];
+		for (int32_t vertex_i = 0; vertex_i < MANIFOLD_TRIANGLE; vertex_i++) {
+			int32_t index = face_i * MANIFOLD_TRIANGLE + vertex_i;
+			mesh.triVerts[face_i * MANIFOLD_TRIANGLE + order[vertex_i]] = index;
+			Vector3 pos = face.vertices[vertex_i];
+			Vector2 uv = face.uvs[vertex_i];
+			mesh.vertProperties[index * MANIFOLD_MAX + MANIFOLD_PROPERTY_POS_X] = pos.x;
+			mesh.vertProperties[index * MANIFOLD_MAX + MANIFOLD_PROPERTY_POS_Y] = pos.y;
+			mesh.vertProperties[index * MANIFOLD_MAX + MANIFOLD_PROPERTY_POS_Z] = pos.z;
+			mesh.vertProperties[index * MANIFOLD_MAX + MANIFOLD_PROPERTY_UV_X] = uv.x;
+			mesh.vertProperties[index * MANIFOLD_MAX + MANIFOLD_PROPERTY_UV_Y] = uv.y;
+			mesh.vertProperties[index * MANIFOLD_MAX + MANIFOLD_PROPERTY_SMOOTH] = face.smooth ? 1.0f : 0.0f;
+			mesh.vertProperties[index * MANIFOLD_MAX + MANIFOLD_PROPERTY_INVERT] = face.invert ? 1.0f : 0.0f;
+		}
+	}
+	mesh.precision = p_snap;
+	mesh.Merge();
+	r_manifold = manifold::Manifold(mesh);
+}
+
+static void unpack_manifold(const manifold::Manifold &p_manifold, CSGBrush *r_mesh_merge) {
+	manifold::MeshGL mesh = p_manifold.GetMeshGL();
+	std::vector<glm::vec3> positions;
+	std::vector<glm::vec2> uvs;
+	std::vector<int> materials;
+	std::vector<bool> smooths;
+	std::vector<bool> inverts;
+	ERR_FAIL_COND_MSG(mesh.vertProperties.size() % mesh.numProp != 0, "Invalid vertex properties size");
+	for (size_t i = 0; i < mesh.vertProperties.size(); i += MANIFOLD_MAX) {
+		positions.emplace_back(mesh.vertProperties[i + MANIFOLD_PROPERTY_POS_X], mesh.vertProperties[i + MANIFOLD_PROPERTY_POS_Y], mesh.vertProperties[i + MANIFOLD_PROPERTY_POS_Z]);
+		uvs.emplace_back(mesh.vertProperties[i + MANIFOLD_PROPERTY_UV_X], mesh.vertProperties[i + MANIFOLD_PROPERTY_UV_Y]);
+		materials.push_back(static_cast<int>(Math::round(mesh.vertProperties[i + MANIFOLD_PROPERTY_MATERIAL])));
+		smooths.push_back(mesh.vertProperties[i + MANIFOLD_PROPERTY_SMOOTH] > 0.5f);
+		inverts.push_back(mesh.vertProperties[i + MANIFOLD_PROPERTY_INVERT] > 0.5f);
+	}
+
+	r_mesh_merge->faces.resize(mesh.triVerts.size() / MANIFOLD_TRIANGLE);
+	for (size_t triangle_i = 0; triangle_i < mesh.triVerts.size() / MANIFOLD_TRIANGLE; triangle_i++) {
+		CSGBrush::Face &face = r_mesh_merge->faces.write[triangle_i];
+		constexpr int32_t order[MANIFOLD_TRIANGLE] = { 0, 2, 1 };
+		for (int32_t vertex_i = 0; vertex_i < 3; vertex_i++) {
+			int32_t index = mesh.triVerts[triangle_i * MANIFOLD_TRIANGLE + order[vertex_i]];
+			glm::vec3 position = positions[index];
+			glm::vec2 uv = uvs[index];
+			face.vertices[vertex_i] = Vector3(position.x, position.y, position.z);
+			face.uvs[vertex_i] = Vector2(uv.x, uv.y);
+			face.smooth = smooths[index];
+			face.invert = inverts[index];
+		}
+	}
+
+	r_mesh_merge->_regen_face_aabbs();
+}
+
 CSGBrush *CSGShape3D::_get_brush() {
 	if (dirty) {
 		if (brush) {
@@ -170,43 +256,43 @@ CSGBrush *CSGShape3D::_get_brush() {
 		brush = nullptr;
 
 		CSGBrush *n = _build_brush();
+		manifold::Manifold manifold_n;
 
 		for (int i = 0; i < get_child_count(); i++) {
 			CSGShape3D *child = Object::cast_to<CSGShape3D>(get_child(i));
-			if (!child) {
-				continue;
-			}
-			if (!child->is_visible()) {
+			if (!child || !child->is_visible()) {
 				continue;
 			}
 
 			CSGBrush *n2 = child->_get_brush();
-			if (!n2) {
+			if (!n2 || (!n2->faces.size())) {
 				continue;
 			}
-			if (!n) {
+			if (!n || (!n->faces.size())) {
 				n = memnew(CSGBrush);
-
 				n->copy_from(*n2, child->get_transform());
-
 			} else {
 				CSGBrush *nn = memnew(CSGBrush);
 				CSGBrush *nn2 = memnew(CSGBrush);
 				nn2->copy_from(*n2, child->get_transform());
-
-				CSGBrushOperation bop;
+				pack_manifold(n, manifold_n, snap);
+				manifold::Manifold manifold_nn2 = manifold_n;
+				pack_manifold(nn2, manifold_nn2, snap);
+				manifold::Manifold manifold_nn = manifold_nn2;
 
 				switch (child->get_operation()) {
 					case CSGShape3D::OPERATION_UNION:
-						bop.merge_brushes(CSGBrushOperation::OPERATION_UNION, *n, *nn2, *nn, snap);
+						manifold_nn = manifold_n.Boolean(manifold_nn2, manifold::OpType::Add);
 						break;
 					case CSGShape3D::OPERATION_INTERSECTION:
-						bop.merge_brushes(CSGBrushOperation::OPERATION_INTERSECTION, *n, *nn2, *nn, snap);
+						manifold_nn = manifold_n.Boolean(manifold_nn2, manifold::OpType::Intersect);
 						break;
 					case CSGShape3D::OPERATION_SUBTRACTION:
-						bop.merge_brushes(CSGBrushOperation::OPERATION_SUBTRACTION, *n, *nn2, *nn, snap);
+						manifold_nn = manifold_n.Boolean(manifold_nn2, manifold::OpType::Subtract);
 						break;
 				}
+
+				unpack_manifold(manifold_nn, nn);
 				memdelete(n);
 				memdelete(nn2);
 				n = nn;

@@ -26,29 +26,6 @@
 namespace Clipper2Lib
 {
 
-#if (defined(__cpp_exceptions) && __cpp_exceptions) || (defined(__EXCEPTIONS) && __EXCEPTIONS)
-
-  class Clipper2Exception : public std::exception {
-  public:
-    explicit Clipper2Exception(const char* description) :
-      m_descr(description) {}
-    virtual const char* what() const throw() override { return m_descr.c_str(); }
-  private:
-    std::string m_descr;
-  };
-
-  static const char* precision_error =
-    "Precision exceeds the permitted range";
-  static const char* range_error =
-    "Values exceed permitted range";
-  static const char* scale_error =
-    "Invalid scale (either 0 or too large)";
-  static const char* non_pair_error =
-    "There must be 2 values for each coordinate";
-  static const char* undefined_error =
-    "There is an undefined error in Clipper2";
-#endif
-
   // error codes (2^n)
   const int precision_error_i   = 1;  // non-fatal
   const int scale_error_i       = 2;  // non-fatal 

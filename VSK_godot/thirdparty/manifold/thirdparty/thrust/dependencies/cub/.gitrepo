@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/NVIDIA/cub.git
+	branch = b2e8bccb8c0cd15279974fe4b9b8d6fcd1842b57
+	commit = b2e8bccb8c0cd15279974fe4b9b8d6fcd1842b57
+	parent = 4329b9d4a71edb3dac15c0cb5d993d873dfca5df
+	method = merge
+	cmdver = 0.4.6
