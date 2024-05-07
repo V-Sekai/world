@@ -205,6 +205,7 @@ static void pack_manifold(const CSGBrush *const p_mesh_merge, manifold::Manifold
 			mesh.vertProperties[index * MANIFOLD_MAX + MANIFOLD_PROPERTY_POS_Z] = pos.z;
 			mesh.vertProperties[index * MANIFOLD_MAX + MANIFOLD_PROPERTY_UV_X] = uv.x;
 			mesh.vertProperties[index * MANIFOLD_MAX + MANIFOLD_PROPERTY_UV_Y] = uv.y;
+			mesh.vertProperties[index * MANIFOLD_MAX + MANIFOLD_PROPERTY_MATERIAL] = face.material;
 			mesh.vertProperties[index * MANIFOLD_MAX + MANIFOLD_PROPERTY_SMOOTH] = face.smooth ? 1.0f : 0.0f;
 			mesh.vertProperties[index * MANIFOLD_MAX + MANIFOLD_PROPERTY_INVERT] = face.invert ? 1.0f : 0.0f;
 		}
@@ -218,7 +219,7 @@ static void unpack_manifold(const manifold::Manifold &p_manifold, CSGBrush *r_me
 	manifold::MeshGL mesh = p_manifold.GetMeshGL();
 	std::vector<glm::vec3> positions;
 	std::vector<glm::vec2> uvs;
-	std::vector<int> materials;
+	std::vector<uint64_t> materials;
 	std::vector<bool> smooths;
 	std::vector<bool> inverts;
 	ERR_FAIL_COND_MSG(mesh.vertProperties.size() % mesh.numProp != 0, "Invalid vertex properties size");
@@ -240,6 +241,7 @@ static void unpack_manifold(const manifold::Manifold &p_manifold, CSGBrush *r_me
 			glm::vec2 uv = uvs[index];
 			face.vertices[vertex_i] = Vector3(position.x, position.y, position.z);
 			face.uvs[vertex_i] = Vector2(uv.x, uv.y);
+		    face.material = materials[index];
 			face.smooth = smooths[index];
 			face.invert = inverts[index];
 		}
