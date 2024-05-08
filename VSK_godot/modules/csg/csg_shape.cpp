@@ -34,6 +34,7 @@
 #include "glm/ext/vector_int3.hpp"
 #include "scene/resources/material.h"
 #include "thirdparty/manifold/src/utilities/include/public.h"
+#include <cstddef>
 
 void CSGShape3D::set_use_collision(bool p_enable) {
 	if (use_collision == p_enable) {
@@ -187,15 +188,15 @@ enum {
 };
 constexpr int MANIFOLD_TRIANGLE = 3;
 
-static void pack_manifold(const CSGBrush *const p_mesh_merge, manifold::Manifold &r_manifold, const float p_snap) {
+static void pack_manifold(const CSGBrush *const p_mesh_merge, manifold::Manifold &r_manifold, const float p_snap, HashMap<uint32_t, Vector<Ref<Material>>> &r_materials) {
 	manifold::MeshGL mesh;
 	mesh.triVerts.resize(p_mesh_merge->faces.size() * MANIFOLD_TRIANGLE, 0);
 	mesh.vertProperties.resize(p_mesh_merge->faces.size() * MANIFOLD_TRIANGLE * MANIFOLD_MAX, std::numeric_limits<float>::quiet_NaN());
 	mesh.numProp = MANIFOLD_MAX;
-	constexpr int32_t order[MANIFOLD_TRIANGLE] = { 0, 2, 1 };
-	for (int face_i = 0; face_i < p_mesh_merge->faces.size(); face_i++) {
+	constexpr size_t order[MANIFOLD_TRIANGLE] = { 0, 2, 1 };
+	for (size_t face_i = 0; face_i < p_mesh_merge->faces.size(); face_i++) {
 		const CSGBrush::Face &face = p_mesh_merge->faces[face_i];
-		for (int32_t vertex_i = 0; vertex_i < MANIFOLD_TRIANGLE; vertex_i++) {
+		for (size_t vertex_i = 0; vertex_i < MANIFOLD_TRIANGLE; vertex_i++) {
 			int32_t index = face_i * MANIFOLD_TRIANGLE + vertex_i;
 			mesh.triVerts[face_i * MANIFOLD_TRIANGLE + order[vertex_i]] = index;
 			Vector3 pos = face.vertices[vertex_i];
@@ -213,9 +214,10 @@ static void pack_manifold(const CSGBrush *const p_mesh_merge, manifold::Manifold
 	mesh.precision = p_snap;
 	mesh.Merge();
 	r_manifold = manifold::Manifold(mesh);
+	r_materials.insert(r_manifold.OriginalID(), p_mesh_merge->materials);
 }
 
-static void unpack_manifold(const manifold::Manifold &p_manifold, CSGBrush *r_mesh_merge) {
+static void unpack_manifold(const manifold::Manifold &p_manifold, CSGBrush *r_mesh_merge, const HashMap<uint32_t, Vector<Ref<Material>>> &p_materials) {
 	manifold::MeshGL mesh = p_manifold.GetMeshGL();
 	std::vector<glm::vec3> positions;
 	std::vector<glm::vec2> uvs;
@@ -223,6 +225,7 @@ static void unpack_manifold(const manifold::Manifold &p_manifold, CSGBrush *r_me
 	std::vector<bool> smooths;
 	std::vector<bool> inverts;
 	ERR_FAIL_COND_MSG(mesh.vertProperties.size() % mesh.numProp != 0, "Invalid vertex properties size");
+
 	for (size_t i = 0; i < mesh.vertProperties.size(); i += MANIFOLD_MAX) {
 		positions.emplace_back(mesh.vertProperties[i + MANIFOLD_PROPERTY_POS_X], mesh.vertProperties[i + MANIFOLD_PROPERTY_POS_Y], mesh.vertProperties[i + MANIFOLD_PROPERTY_POS_Z]);
 		uvs.emplace_back(mesh.vertProperties[i + MANIFOLD_PROPERTY_UV_X], mesh.vertProperties[i + MANIFOLD_PROPERTY_UV_Y]);
@@ -232,16 +235,37 @@ static void unpack_manifold(const manifold::Manifold &p_manifold, CSGBrush *r_me
 	}
 
 	r_mesh_merge->faces.resize(mesh.triVerts.size() / MANIFOLD_TRIANGLE);
+
 	for (size_t triangle_i = 0; triangle_i < mesh.triVerts.size() / MANIFOLD_TRIANGLE; triangle_i++) {
 		CSGBrush::Face &face = r_mesh_merge->faces.write[triangle_i];
 		constexpr int32_t order[MANIFOLD_TRIANGLE] = { 0, 2, 1 };
+
 		for (int32_t vertex_i = 0; vertex_i < 3; vertex_i++) {
 			int32_t index = mesh.triVerts[triangle_i * MANIFOLD_TRIANGLE + order[vertex_i]];
 			glm::vec3 position = positions[index];
 			glm::vec2 uv = uvs[index];
 			face.vertices[vertex_i] = Vector3(position.x, position.y, position.z);
 			face.uvs[vertex_i] = Vector2(uv.x, uv.y);
-		    face.material = materials[index];
+
+			uint64_t run_id = mesh.runIndex[index];
+			HashMap<uint32_t, Vector<Ref<Material>>>::ConstIterator it = p_materials.find(run_id);
+			if (it != p_materials.end()) {
+				Vector<Ref<Material>> brush_materials = it->value;
+				if (materials[index] >= 0 && materials[index] < brush_materials.size()) {
+					Ref<Material> material_found = brush_materials[materials[index]];
+					if (material_found.is_valid()) {
+						face.material = brush_materials.find(material_found);
+					} else {
+						face.material = brush_materials.size();
+						brush_materials.push_back(material_found);
+					}
+				} else {
+					face.material = -1;
+				}
+			} else {
+				face.material = -1;
+			}
+
 			face.smooth = smooths[index];
 			face.invert = inverts[index];
 		}
@@ -277,9 +301,9 @@ CSGBrush *CSGShape3D::_get_brush() {
 				CSGBrush *nn = memnew(CSGBrush);
 				CSGBrush *nn2 = memnew(CSGBrush);
 				nn2->copy_from(*n2, child->get_transform());
-				pack_manifold(n, manifold_n, snap);
+				pack_manifold(n, manifold_n, snap, runid_materials);
 				manifold::Manifold manifold_nn2 = manifold_n;
-				pack_manifold(nn2, manifold_nn2, snap);
+				pack_manifold(nn2, manifold_nn2, snap, runid_materials);
 				manifold::Manifold manifold_nn = manifold_nn2;
 
 				switch (child->get_operation()) {
@@ -294,7 +318,7 @@ CSGBrush *CSGShape3D::_get_brush() {
 						break;
 				}
 
-				unpack_manifold(manifold_nn, nn);
+				unpack_manifold(manifold_nn, nn, runid_materials);
 				memdelete(n);
 				memdelete(nn2);
 				n = nn;

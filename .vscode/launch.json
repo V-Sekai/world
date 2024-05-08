@@ -23,7 +23,7 @@
       "name": "Run the editor with lime copper squirrel",
       "type": "lldb",
       "request": "launch",
-      "args": ["--path", "GAME_lime_copper_squirrel", "-e"],
+      "args": ["--path", "/Users/ernest.lee/Desktop/godot-csg-mesh-repro", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/VSK_godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"

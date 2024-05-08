@@ -38,6 +38,7 @@
 #include "scene/resources/3d/concave_polygon_shape_3d.h"
 
 #include "thirdparty/misc/mikktspace.h"
+#include <stdint.h>
 
 class CSGShape3D : public GeometryInstance3D {
 	GDCLASS(CSGShape3D, GeometryInstance3D);
@@ -51,6 +52,7 @@ public:
 	};
 
 private:
+	HashMap<uint32_t, Vector<Ref<Material>>> runid_materials;
 	Operation operation = OPERATION_UNION;
 	CSGShape3D *parent_shape = nullptr;
 
