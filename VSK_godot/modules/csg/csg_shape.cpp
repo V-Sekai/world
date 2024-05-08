@@ -280,6 +280,7 @@ CSGBrush *CSGShape3D::_get_brush() {
 			memdelete(brush);
 		}
 		brush = nullptr;
+		runid_materials.clear();
 
 		CSGBrush *n = _build_brush();
 		manifold::Manifold manifold_n;
