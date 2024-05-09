@@ -62,6 +62,7 @@ struct CSGBrush {
 	Vector<Face> faces;
 	Vector<Ref<Material>> materials;
 
+	manifold::Manifold manifold;
 	enum {
 		MANIFOLD_PROPERTY_POS_X = 0,
 		MANIFOLD_PROPERTY_POS_Y,
@@ -84,7 +85,7 @@ struct CSGBrush {
 		}
 	}
 
-	void pack_manifold(manifold::Manifold &r_manifold, const float p_snap, HashMap<uint32_t, Ref<Material>> &r_materials) {
+	void pack_manifold(const float p_snap, HashMap<uint32_t, Ref<Material>> &r_materials) {
 		if (faces.is_empty()) {
 			return;
 		}
@@ -98,7 +99,7 @@ struct CSGBrush {
 		LocalVector<CSGBrush> split_brushes;
 		CowData<CSGBrush::Face>::Size unique_face_i = 0;
 		for (int32_t material_id : unique_materials) {
-			uint32_t reserved_id = r_manifold.ReserveIDs(1);
+			uint32_t reserved_id = manifold.ReserveIDs(1);
 			CSGBrush current_brush;
 			Ref<Material> material;
 			if (material_id >= 0 && material_id < materials.size()) {
@@ -140,15 +141,15 @@ struct CSGBrush {
 			mesh.precision = p_snap;
 			mesh.Merge();
 			r_materials.insert(reserved_id, material);
-			r_manifold = r_manifold.Boolean(manifold::Manifold(mesh), manifold::OpType::Add);
+			manifold = manifold.Boolean(manifold::Manifold(mesh), manifold::OpType::Add);
 			split_brushes.push_back(current_brush);
 		}
 	}
 
-	void unpack_manifold(const manifold::Manifold &p_manifold, const HashMap<uint32_t, Ref<Material>> &p_materials) {
+	void unpack_manifold(const HashMap<uint32_t, Ref<Material>> &p_materials) {
 		Ref<StandardMaterial3D> default_material;
 		default_material.instantiate();
-		manifold::MeshGL mesh = p_manifold.GetMeshGL();
+		manifold::MeshGL mesh = manifold.GetMeshGL();
 		LocalVector<Vector3> manifold_positions;
 		manifold_positions.resize(mesh.vertProperties.size());
 		LocalVector<Vector2> manifold_uvs;
@@ -218,7 +219,7 @@ struct CSGBrush {
 
 	// Create a brush from faces.
 	void build_from_faces(const Vector<Vector3> &p_vertices, const Vector<Vector2> &p_uvs, const Vector<bool> &p_smooth, const Vector<Ref<Material>> &p_materials, const Vector<bool> &p_invert_faces);
-	void copy_from(const CSGBrush &p_brush, const Transform3D &p_xform);
+	void copy_from(const CSGBrush &p_brush, const Transform3D &p_xform, float p_snap, HashMap<uint32_t, Ref<Material>> &r_mesh_materials);
 };
 
 inline bool is_point_in_triangle(const Vector3 &p_point, const Vector3 p_vertices[3], int p_shifted = 0) {
@@ -329,7 +330,7 @@ void CSGBrush::build_from_faces(const Vector<Vector3> &p_vertices, const Vector<
 	_regen_face_aabbs();
 }
 
-void CSGBrush::copy_from(const CSGBrush &p_brush, const Transform3D &p_xform) {
+void CSGBrush::copy_from(const CSGBrush &p_brush, const Transform3D &p_xform, float p_snap, HashMap<uint32_t, Ref<Material>> &r_mesh_materials) {
 	faces = p_brush.faces;
 	materials = p_brush.materials;
 
@@ -340,6 +341,7 @@ void CSGBrush::copy_from(const CSGBrush &p_brush, const Transform3D &p_xform) {
 	}
 
 	_regen_face_aabbs();
+	pack_manifold(p_snap, r_mesh_materials);
 }
 
 void CSGShape3D::set_use_collision(bool p_enable) {
@@ -480,9 +482,7 @@ CSGBrush *CSGShape3D::_get_brush() {
 		brush = nullptr;
 
 		CSGBrush *n = _build_brush();
-		manifold::Manifold manifold_n;
 		HashMap<uint32_t, Ref<Material>> mesh_materials;
-		n->pack_manifold(manifold_n, snap, mesh_materials);
 
 		for (int i = 0; i < get_child_count(); i++) {
 			CSGShape3D *child = Object::cast_to<CSGShape3D>(get_child(i));
@@ -494,43 +494,37 @@ CSGBrush *CSGShape3D::_get_brush() {
 			}
 
 			CSGBrush *n2 = child->_get_brush();
-			manifold::Manifold manifold_n2;
 			if (!n2) {
 				continue;
 			}
-			n2->pack_manifold(manifold_n2, snap, mesh_materials);
 			if (!n) {
 				n = memnew(CSGBrush);
-				manifold_n = manifold::Manifold();
+				n->manifold = manifold::Manifold();
 				mesh_materials.clear();
 
-				n->copy_from(*n2, child->get_transform());
-				n->pack_manifold(manifold_n, snap, mesh_materials);
+				n->copy_from(*n2, child->get_transform(), snap, mesh_materials);
 
 			} else {
+				n->pack_manifold(snap, mesh_materials);
 				CSGBrush *nn = memnew(CSGBrush);
-				manifold::Manifold manifold_nn;
 				CSGBrush *nn2 = memnew(CSGBrush);
 				manifold::Manifold manifold_nn2;
-				nn2->copy_from(*n2, child->get_transform());
-				nn2->pack_manifold(manifold_nn2, snap, mesh_materials);
-
+				nn2->copy_from(*n2, child->get_transform(), snap, mesh_materials);
 				switch (child->get_operation()) {
 					case CSGShape3D::OPERATION_UNION:
-						manifold_nn = manifold_n.Boolean(manifold_nn2, manifold::OpType::Add);
+						nn->manifold = n->manifold.Boolean(nn2->manifold, manifold::OpType::Add);
 						break;
 					case CSGShape3D::OPERATION_INTERSECTION:
-						manifold_nn = manifold_n.Boolean(manifold_nn2, manifold::OpType::Intersect);
+						nn->manifold = n->manifold.Boolean(nn2->manifold, manifold::OpType::Intersect);
 						break;
 					case CSGShape3D::OPERATION_SUBTRACTION:
-						manifold_nn = manifold_n.Boolean(manifold_nn2, manifold::OpType::Subtract);
+						nn->manifold = n->manifold.Boolean(nn2->manifold, manifold::OpType::Subtract);
 						break;
 				}
 				memdelete(n);
 				memdelete(nn2);
-				nn->unpack_manifold(manifold_nn, mesh_materials);
+				nn->unpack_manifold(mesh_materials);
 				n = nn;
-				manifold_n = manifold_nn;
 			}
 		}
 
@@ -551,6 +545,7 @@ CSGBrush *CSGShape3D::_get_brush() {
 		}
 
 		brush = n;
+		brush->pack_manifold(snap, mesh_materials);
 
 		dirty = false;
 	}
