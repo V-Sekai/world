@@ -160,17 +160,17 @@ struct CSGBrush {
 		LocalVector<bool> manifold_inverts;
 		manifold_inverts.resize(mesh.vertProperties.size());
 		ERR_FAIL_COND_MSG(mesh.vertProperties.size() % mesh.numProp != 0, "Invalid vertex properties size");
-		size_t positionIndex = 0;
-		size_t uvIndex = 0;
-		size_t materialIndex = 0;
-		size_t smoothIndex = 0;
-		size_t invertIndex = 0;
+		size_t position_index = 0;
+		size_t uv_index = 0;
+		size_t material_index = 0;
+		size_t smooth_index = 0;
+		size_t invert_index = 0;
 		for (size_t property_i = 0; property_i < mesh.vertProperties.size(); property_i += CSGBrush::MANIFOLD_MAX) {
-			manifold_positions[positionIndex++] = Vector3(mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_POS_X], mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_POS_Y], mesh.vertProperties[property_i + MANIFOLD_PROPERTY_POS_Z]);
-			manifold_uvs[uvIndex++] = Vector2(mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_UV_X], mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_UV_Y]);
-			manifold_materials[materialIndex++] = static_cast<int>(Math::round(mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_MATERIAL]));
-			manifold_smooths[smoothIndex++] = mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_SMOOTH] > 0.5f;
-			manifold_inverts[invertIndex++] = mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_INVERT] > 0.5f;
+			manifold_positions[position_index++] = Vector3(mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_POS_X], mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_POS_Y], mesh.vertProperties[property_i + MANIFOLD_PROPERTY_POS_Z]);
+			manifold_uvs[uv_index++] = Vector2(mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_UV_X], mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_UV_Y]);
+			manifold_materials[material_index++] = static_cast<int>(Math::round(mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_MATERIAL]));
+			manifold_smooths[smooth_index++] = mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_SMOOTH] > 0.5f;
+			manifold_inverts[invert_index++] = mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_INVERT] > 0.5f;
 		}
 		faces.resize(mesh.triVerts.size() / CSGBrush::MANIFOLD_TRIANGLE);
 		constexpr int32_t order[CSGBrush::MANIFOLD_TRIANGLE] = { 0, 2, 1 };
