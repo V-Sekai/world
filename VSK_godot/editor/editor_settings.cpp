@@ -400,6 +400,7 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 
 	// Editor
 	EDITOR_SETTING(Variant::BOOL, PROPERTY_HINT_NONE, "interface/editor/localize_settings", true, "")
+	EDITOR_SETTING(Variant::INT, PROPERTY_HINT_ENUM, "interface/editor/dock_tab_style", 0, "Text Only,Icon Only,Text and Icon")
 	EDITOR_SETTING_USAGE(Variant::INT, PROPERTY_HINT_ENUM, "interface/editor/ui_layout_direction", 0, "Based on Application Locale,Left-to-Right,Right-to-Left,Based on System Locale", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_RESTART_IF_CHANGED)
 
 	// Display what the Auto display scale setting effectively corresponds to.
@@ -969,7 +970,7 @@ bool EditorSettings::_save_text_editor_theme(const String &p_file) {
 	keys.sort();
 
 	for (const String &key : keys) {
-		if (key.begins_with("text_editor/theme/highlighting/") && key.find("color") >= 0) {
+		if (key.begins_with("text_editor/theme/highlighting/") && key.contains("color")) {
 			cf->set_value(theme_section, key.replace("text_editor/theme/highlighting/", ""), ((Color)props[key].variant).to_html());
 		}
 	}
@@ -1448,7 +1449,7 @@ void EditorSettings::load_text_editor_theme() {
 		// don't load if it's not already there!
 		if (has_setting("text_editor/theme/highlighting/" + key)) {
 			// make sure it is actually a color
-			if (val.is_valid_html_color() && key.find("color") >= 0) {
+			if (val.is_valid_html_color() && key.contains("color")) {
 				props["text_editor/theme/highlighting/" + key].variant = Color::html(val); // change manually to prevent "Settings changed" console spam
 			}
 		}
