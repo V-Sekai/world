@@ -33,7 +33,7 @@
 #include "register_types.h"
 
 #include "core/object/class_db.h"
-#include "summator.h"
+#include "desync.h"
 
 void initialize_desync_module(ModuleInitializationLevel p_level) {
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
