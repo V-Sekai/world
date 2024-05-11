@@ -11,6 +11,7 @@ desync_dir = os.path.join(current_dir, "thirdparty/desync/cmd/desync")
 os.chdir(desync_dir)
 suffix = ".a"
 env_desync = env.Clone()
+
 if env.msvc:
     env_desync.Append(CPPDEFINES=["_SILENCE_CXX17_C_HEADER_DEPRECATION_WARNING"])
     suffix = ".lib"
@@ -39,7 +40,7 @@ runtime_lib = env.File(
     )
 )
 env.Append(LIBS=[runtime_lib])
-if env["platform"] == "macos":
+if env["platform"] == "macos" or env["platform"] == "linuxbsd":
     env.Append(LIBS=["resolv"])
 
 env_desync.add_source_files(env.modules_sources, "*.cpp")

@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai/godot-desync.git
 	branch = main
-	commit = d9c9d5840ff029bc757cd2a2cbcd507709fefe09
-	parent = 9ee3b71ea935bdc992ded7249cbd3b94496af37f
+	commit = cf7956994ea1264f1ff3d31d85ae7130bb91e293
+	parent = 98b798307f513a7723be5aa60c30763b5278c34b
 	method = merge
 	cmdver = 0.4.6
