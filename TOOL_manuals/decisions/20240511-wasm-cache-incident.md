@@ -1,8 +1,8 @@
-# Proposal: Wasm Cache Incident Report
+# Accepted: Wasm Cache Incident Report
 
 ## Context
 
-The issue arose while attempting to build the desync module for Godot Engine 4.3.
+The issue arose while attempting to build the desync module for Godot Engine 4.3 on Github actions.
 
 ## Problem Statement
 
@@ -61,7 +61,7 @@ This proposal is made by us and is intended to be implemented in the core build 
 
 ## Status
 
-Status: Proposed
+Status: Accepted
 
 ## Decision Makers
 
