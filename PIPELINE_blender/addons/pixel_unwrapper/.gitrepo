@@ -4,9 +4,9 @@
 ; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
 ;
 [subrepo]
-	remote = https://github.com/V-Sekai/V-Sekai.blender-game-tools.git
+	remote = https://github.com/noio/Pixel-Unwrapper.git
 	branch = main
-	commit = dc4687a6e4792cb2b9aaf5c051f9c7d7eca2db9f
-	parent = 17a89e4abc443d2d2cf977b73eba7aecfafb772c
+	commit = c4625dcdb4bc63d6ba2e373efd52765275a4e781
+	parent = 4954b4cc037e0c74106ef9bd2a32f1ecf6b10708
 	method = merge
 	cmdver = 0.4.6
