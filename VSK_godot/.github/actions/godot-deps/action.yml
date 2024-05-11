@@ -9,7 +9,7 @@ inputs:
     default: "x64"
   go-version:
     description: The Go version to use.
-    default: "1.21"
+    default: "1.22.3"
 runs:
   using: "composite"
   steps:

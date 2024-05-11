@@ -56,10 +56,6 @@ void EditorResourceTooltipPlugin::_bind_methods() {
 }
 
 VBoxContainer *EditorResourceTooltipPlugin::make_default_tooltip(const String &p_resource_path) {
-	if (p_resource_path.is_empty()) {
-		return nullptr;
-	}
-
 	VBoxContainer *vb = memnew(VBoxContainer);
 	vb->add_theme_constant_override("separation", -4 * EDSCALE);
 	{
@@ -69,10 +65,8 @@ VBoxContainer *EditorResourceTooltipPlugin::make_default_tooltip(const String &p
 
 	{
 		Ref<FileAccess> f = FileAccess::open(p_resource_path, FileAccess::READ);
-		if (f.is_valid()) {
-			Label *label = memnew(Label(vformat(TTR("Size: %s"), String::humanize_size(f->get_length()))));
-			vb->add_child(label);
-		}
+		Label *label = memnew(Label(vformat(TTR("Size: %s"), String::humanize_size(f->get_length()))));
+		vb->add_child(label);
 	}
 
 	if (ResourceLoader::exists(p_resource_path)) {

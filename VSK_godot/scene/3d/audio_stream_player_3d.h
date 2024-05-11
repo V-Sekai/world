@@ -32,7 +32,6 @@
 #define AUDIO_STREAM_PLAYER_3D_H
 
 #include "scene/3d/node_3d.h"
-#include "servers/resonanceaudio/resonance_audio_wrapper.h"
 
 class Area3D;
 struct AudioFrame;
@@ -112,8 +111,6 @@ private:
 
 	float panning_strength = 1.0f;
 	float cached_global_panning_strength = 0.5f;
-
-	AudioSourceId audio_source_id;
 
 protected:
 	void _validate_property(PropertyInfo &p_property) const;
