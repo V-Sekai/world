@@ -184,7 +184,7 @@ func before_each():
 	)
 	planner.declare_unigoal_methods("visited", [Callable(self, "m_create_room_with_create_room_with_mostly_minimal_spanning_tree")])
 	planner.declare_multigoal_methods([planner.m_split_multigoal])
-	var data: RefCounted = load("res://goal_task_tests/game_problems/city_item.gd").new()
+	var data: RefCounted = load("res://goal_tasks/tests/domains/city_item.gd").new()
 	building_city_data = data.building_item_data + data.city_item_data
 
 func _mesh_name_compare(a, b):
