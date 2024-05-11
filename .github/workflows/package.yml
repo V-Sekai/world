@@ -80,7 +80,7 @@ jobs:
         # This script is used to package the code into chunks of 64MB. The chunk size of 64MB is a recommendation from Riot Games' CDN engineering team.
         run: |
           mkdir -p archive/store
-          for dir in ART_base_mesh SERVICE_flux_config PIPELINE_cloth_dynamics PIPELINE_intrinsic_triangulations TOOL_okhsl_picker TOOL_task_goal_planner PIPELINE_convex_decomposition TOOL_launcher PIPELINE_animation_provider TOOL_xr_grid SERVICE_docker_groups PIPELINE_blender PIPELINE_geodesiac_path TOOL_model_explorer TOOL_shader_motion VSK_game TOOL_manuals LICENSE README.md SERVICE_mvsqlite GODOT_mvsqlite SERVICE_pipeline SERVICE_vsona_bot TOOL_desync TOOL_sample_gui_in_vr VSK_godot; do
+          for dir in ART_base_mesh SERVICE_flux_config PIPELINE_cloth_dynamics PIPELINE_intrinsic_triangulations TOOL_okhsl_picker TOOL_task_goal_planner PIPELINE_convex_decomposition TOOL_launcher PIPELINE_animation_provider TOOL_xr_grid SERVICE_docker_groups PIPELINE_blender PIPELINE_geodesiac_path TOOL_model_explorer TOOL_shader_motion VSK_game TOOL_manuals LICENSE README.md SERVICE_mvsqlite SERVICE_pipeline SERVICE_vsona_bot TOOL_desync TOOL_sample_gui_in_vr VSK_godot; do
             ./archive/desync-linux-amd64 tar -i -s archive/store --chunk-size 4096:16384:65536 archive/$dir.caidx other/$dir
           done
 
