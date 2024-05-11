@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 - 2024 the ThorVG project. All rights reserved.
+ * Copyright (c) 2020 - 2024 the ThorVG project. All rights reserved.
 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,43 +20,42 @@
  * SOFTWARE.
  */
 
-#ifndef _TVG_FRAME_MODULE_H_
-#define _TVG_FRAME_MODULE_H_
+#ifndef _TVG_LINES_H_
+#define _TVG_LINES_H_
 
-#include "tvgLoadModule.h"
+#include "tvgCommon.h"
 
 namespace tvg
 {
 
-class FrameModule: public ImageLoader
+struct Line
 {
-public:
-    float segmentBegin = 0.0f;
-    float segmentEnd = 1.0f;
-
-    FrameModule(FileType type) : ImageLoader(type) {}
-    virtual ~FrameModule() {}
-
-    virtual bool frame(float no) = 0;       //set the current frame number
-    virtual float totalFrame() = 0;         //return the total frame count
-    virtual float curFrame() = 0;           //return the current frame number
-    virtual float duration() = 0;           //return the animation duration in seconds
-
-    void segment(float* begin, float* end)
-    {
-        if (begin) *begin = segmentBegin;
-        if (end) *end = segmentEnd;
-    }
-
-    void segment(float begin, float end)
-    {
-        segmentBegin = begin;
-        segmentEnd = end;
-    }
-
-    virtual bool animatable() override { return true; }
+    Point pt1;
+    Point pt2;
 };
 
+float lineLength(const Point& pt1, const Point& pt2);
+void lineSplitAt(const Line& cur, float at, Line& left, Line& right);
+
+
+struct Bezier
+{
+    Point start;
+    Point ctrl1;
+    Point ctrl2;
+    Point end;
+};
+
+void bezSplit(const Bezier&cur, Bezier& left, Bezier& right);
+float bezLength(const Bezier& cur);
+void bezSplitLeft(Bezier& cur, float at, Bezier& left);
+float bezAt(const Bezier& bz, float at, float length);
+void bezSplitAt(const Bezier& cur, float at, Bezier& left, Bezier& right);
+Point bezPointAt(const Bezier& bz, float t);
+float bezAngleAt(const Bezier& bz, float t);
+
+float bezLengthApprox(const Bezier& cur);
+float bezAtApprox(const Bezier& bz, float at, float length);
 }
 
-#endif //_TVG_FRAME_MODULE_H_
+#endif //_TVG_LINES_H_

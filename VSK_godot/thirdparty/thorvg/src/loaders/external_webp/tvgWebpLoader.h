@@ -20,43 +20,30 @@
  * SOFTWARE.
  */
 
-#ifndef _TVG_FRAME_MODULE_H_
-#define _TVG_FRAME_MODULE_H_
+#ifndef _TVG_WEBP_LOADER_H_
+#define _TVG_WEBP_LOADER_H_
 
-#include "tvgLoadModule.h"
+#include "tvgLoader.h"
+#include "tvgTaskScheduler.h"
 
-namespace tvg
-{
-
-class FrameModule: public ImageLoader
+class WebpLoader : public ImageLoader, public Task
 {
 public:
-    float segmentBegin = 0.0f;
-    float segmentEnd = 1.0f;
+    WebpLoader();
+    ~WebpLoader();
 
-    FrameModule(FileType type) : ImageLoader(type) {}
-    virtual ~FrameModule() {}
+    bool open(const string& path) override;
+    bool open(const char* data, uint32_t size, bool copy) override;
+    bool read() override;
 
-    virtual bool frame(float no) = 0;       //set the current frame number
-    virtual float totalFrame() = 0;         //return the total frame count
-    virtual float curFrame() = 0;           //return the current frame number
-    virtual float duration() = 0;           //return the animation duration in seconds
+    Surface* bitmap() override;
 
-    void segment(float* begin, float* end)
-    {
-        if (begin) *begin = segmentBegin;
-        if (end) *end = segmentEnd;
-    }
+private:
+    void run(unsigned tid) override;
 
-    void segment(float begin, float end)
-    {
-        segmentBegin = begin;
-        segmentEnd = end;
-    }
-
-    virtual bool animatable() override { return true; }
+    unsigned char* data = nullptr;
+    unsigned long size = 0;
+    bool freeData = false;
 };
 
-}
-
-#endif //_TVG_FRAME_MODULE_H_
+#endif //_TVG_WEBP_LOADER_H_

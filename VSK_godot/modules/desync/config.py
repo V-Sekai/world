@@ -17,7 +17,10 @@ def can_build(env, platform):
             print("MinGW is not installed or not found in PATH")
             return False
         return True
-    return platform in ["macos", "linux", "windows"]
+    elif platform == "macos":
+        if env.get("arch", "") == "x86_64":
+            return False
+    return platform in ["linux", "windows"]
 
 
 def get_doc_classes():
