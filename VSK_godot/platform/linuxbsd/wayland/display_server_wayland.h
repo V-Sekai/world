@@ -149,7 +149,7 @@ class DisplayServerWayland : public DisplayServer {
 
 	void _resize_window(const Size2i &p_size);
 
-	bool _show_window();
+	virtual void _show_window();
 
 public:
 	virtual bool has_feature(Feature p_feature) const override;

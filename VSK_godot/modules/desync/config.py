@@ -3,6 +3,12 @@ import subprocess
 
 
 def can_build(env, platform):
+    if platform == "web":
+        return False
+    if platform == "ios":
+        return False
+    if platform == "android":
+        return False
     if platform == "windows":
         if os.name != "nt" and env["use_mingw"]:
             return False
@@ -17,7 +23,11 @@ def can_build(env, platform):
             print("MinGW is not installed or not found in PATH")
             return False
         return True
-    return platform in ["macos", "linux", "windows"]
+
+    if platform == "macos":
+        if env.get("arch", "") == "x86_64":
+            return False
+    return True
 
 
 def get_doc_classes():

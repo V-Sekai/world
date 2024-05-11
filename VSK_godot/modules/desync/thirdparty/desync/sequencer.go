@@ -2,8 +2,9 @@ package desync
 
 import (
 	"context"
-	"golang.org/x/sync/errgroup"
 	"os"
+
+	"golang.org/x/sync/errgroup"
 )
 
 // SeedSequencer is used to find sequences of chunks from seed files when assembling
@@ -76,7 +77,7 @@ func (r *SeedSequencer) Rewind() {
 	r.current = 0
 }
 
-//isFileSeed returns true if this segment is pointing to a fileSeed
+// isFileSeed returns true if this segment is pointing to a fileSeed
 func (s SeedSegmentCandidate) isFileSeed() bool {
 	// We expect an empty filename when using nullSeeds
 	return s.source != nil && s.source.FileName() != ""

@@ -5,8 +5,8 @@
 ;
 [subrepo]
 	remote = https://github.com/V-Sekai/desync.git
-	branch = cgo-untar
-	commit = e7eb4cfaca18e60f3842a7ac9b3698f35e2f55f5
-	parent = d6a31ae016da2bf9777daeae6189ed7f4b6f13cb
+	branch = main
+	commit = 294e65fb195e79470c2a5a7d7d6bd9e84f0adbbc
+	parent = 65cb506ab2e1f7fb36a08f0dd5738771df935620
 	method = merge
 	cmdver = 0.4.6
