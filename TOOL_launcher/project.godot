@@ -12,9 +12,16 @@ config_version=5
 
 config/name="Game Launcher Project"
 run/main_scene="res://Node2D.tscn"
-config/features=PackedStringArray("4.2", "Double Precision")
+config/features=PackedStringArray("4.3", "Double Precision")
 config/icon="res://icon.png"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=800
+window/size/extend_to_title=true
+window/energy_saving/keep_screen_on=false
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/godot-package-manager/plugin.cfg")
+enabled=PackedStringArray()
