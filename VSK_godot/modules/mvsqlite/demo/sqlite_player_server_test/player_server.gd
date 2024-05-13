@@ -38,18 +38,9 @@ func _ready() -> void:
 
 var crypto: Crypto = Crypto.new()
 
-var bytes: PackedByteArray = crypto.generate_random_bytes(100)
-	
 func _process(_delta):	
-	player.state = bytes
-	
-	var start_time = Time.get_ticks_msec()
+	player.state = crypto.generate_random_bytes(100)
 	insert_query.execute([player.id, player.state])
-	var end_time = Time.get_ticks_msec()
-	
-	var execution_time = end_time - start_time
-	print("Execution time: " + str(execution_time) + " ms")
-
 
 func _on_request_completed(_result, response_code, _headers, body):
 	var string = body.get_string_from_utf8()
