@@ -25,12 +25,12 @@ func _ready() -> void:
 		var err = http_request.request("http://localhost:7001/api/create_namespace",
 									   ["Content-Type: application/json"],
 									   HTTPClient.METHOD_POST,
-									   '{"key":"' + player.id + '"}')
+									   '{"key":"' + "player_server_01" + '"}')
 		if err == OK:
 			print("Database created")
 
 		db = MVSQLite.new()
-		if not db.open("vsk-" + player.id):
+		if not db.open("player_server_01"):
 			return
 		var query = db.create_query("DROP TABLE IF EXISTS players")
 		query.execute()
@@ -49,7 +49,6 @@ func _process(_delta):
 	for player in players:
 		player.state = crypto.generate_random_bytes(100)
 		params.append_array([player.id, player.state])
-	await get_tree().process_frame 
 	insert_query.execute(params)
 
 func _on_request_completed(_result, response_code, _headers, body):
