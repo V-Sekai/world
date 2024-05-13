@@ -50,7 +50,9 @@ func _process(_delta):
 		player.state = crypto.generate_random_bytes(100)
 		states.append_array([player.id, player.state])
 	var results: Array = insert_query.execute(states)
-	print(results.size())
+	var error = insert_query.get_last_error_message()
+	if error != "not an error":
+		print(error)
 
 func _on_request_completed(_result, response_code, _headers, body):
 	var string = body.get_string_from_utf8()
