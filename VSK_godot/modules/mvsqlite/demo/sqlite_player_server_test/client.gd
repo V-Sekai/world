@@ -12,6 +12,7 @@ var players: Array
 const player_count = 200
 
 func _ready() -> void:
+	print("Player count: %s" % player_count)
 	for count in player_count:
 		var player = PlayerState.new()
 		player.id = generate_uuid()
@@ -29,12 +30,14 @@ func _ready() -> void:
 			print("Database created")
 
 		db = MVSQLite.new()
-		if not db.open(player.id):
+		if not db.open("vsk-" + player.id):
 			return
-		var query = db.create_query("CREATE TABLE IF NOT EXISTS players (id TEXT PRIMARY KEY, state BLOB)")
+		var query = db.create_query("DROP TABLE IF EXISTS players")
+		query.execute()
+		query = db.create_query("CREATE TABLE IF NOT EXISTS players (id TEXT PRIMARY KEY, state BLOB) WITHOUT ROWID, STRICT")
 		query.execute()
 	var place_holders: PackedStringArray
-	place_holders.resize(80)
+	place_holders.resize(players.size())
 	place_holders.fill("(?, ?)")
 	sql = "INSERT OR REPLACE INTO players (id, state) VALUES " + ", ".join(place_holders)
 	insert_query = db.create_query(sql)
@@ -46,6 +49,7 @@ func _process(_delta):
 	for player in players:
 		player.state = crypto.generate_random_bytes(100)
 		params.append_array([player.id, player.state])
+	await get_tree().process_frame 
 	insert_query.execute(params)
 
 func _on_request_completed(_result, response_code, _headers, body):
