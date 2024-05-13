@@ -41,15 +41,10 @@ func _ready() -> void:
 	placeholders.fill("(?, ?)")
 	sql = "INSERT INTO players(id, state) VALUES " + ", ".join(placeholders) + "ON CONFLICT(id) DO UPDATE SET state = excluded.state RETURNING *"
 	insert_query = db.create_query(sql)
-	timer.set_wait_time(1)
-	timer.set_one_shot(false)
-	timer.connect("timeout", write)
-	add_child(timer, true)
-	timer.start()
 	
 var crypto: Crypto = Crypto.new()
 
-func write():
+func _process(_delta):
 	var states: Array
 	for i in range(player_count):
 		player.state = crypto.generate_random_bytes(100)
