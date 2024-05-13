@@ -6,6 +6,8 @@ var players: Array[Player] = []
 
 func _ready():
 	for i in range(80):
-		var player = Player.new()
+		var player: Player = Player.new()
+		player.process_thread_group = Node.PROCESS_THREAD_GROUP_SUB_THREAD
 		players.append(player)
 		add_child(player, true)
+
