@@ -39,7 +39,7 @@ func _ready() -> void:
 	var placeholders: PackedStringArray
 	placeholders.resize(player_count)
 	placeholders.fill("(?, ?, ?)")
-	sql = "INSERT INTO players(id, state, tick) VALUES " + ", ".join(placeholders) + " ON CONFLICT(id) DO UPDATE SET state = CASE WHEN excluded.tick > players.tick THEN excluded.state ELSE players.state END, tick = CASE WHEN excluded.tick > players.tick THEN excluded.tick ELSE players.tick END RETURNING *"
+	sql = "INSERT INTO players(id, state, tick) VALUES " + ", ".join(placeholders) + " ON CONFLICT(id) DO UPDATE SET state = excluded.state, tick = excluded.tick RETURNING *"
 	insert_query = db.create_query(sql)
 	
 var crypto: Crypto = Crypto.new()
