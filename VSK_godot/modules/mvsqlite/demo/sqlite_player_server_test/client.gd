@@ -8,48 +8,54 @@ var sql: String
 var db: MVSQLite
 
 var insert_query: MVSQLiteQuery = null
-var players: Array
-const player_count = 200
+var player
+var timer: Timer = Timer.new()
+
+var player_count = 80
+
 
 func _ready() -> void:
-	print("Player count: %s" % player_count)
-	for count in player_count:
-		var player = PlayerState.new()
-		player.id = generate_uuid()
-		player.state = PackedByteArray()
-		players.append(player)
-		
-		var http_request: HTTPRequest = HTTPRequest.new()
-		add_child(http_request)
-		http_request.connect("request_completed", _on_request_completed)
-		var err = http_request.request("http://localhost:7001/api/create_namespace",
-									   ["Content-Type: application/json"],
-									   HTTPClient.METHOD_POST,
-									   '{"key":"' + "player_server_01" + '"}')
-		if err == OK:
-			print("Database created")
+	player = PlayerState.new()
+	player.id = generate_uuid()
+	player.state = PackedByteArray()
+	
+	var http_request: HTTPRequest = HTTPRequest.new()
+	add_child(http_request)
+	http_request.connect("request_completed", _on_request_completed)
+	var err = http_request.request("http://localhost:7001/api/create_namespace",
+								   ["Content-Type: application/json"],
+								   HTTPClient.METHOD_POST,
+								   '{"key":"' + "player_server_01" + '"}')
+	if err == OK:
+		print("Database created")
 
-		db = MVSQLite.new()
-		if not db.open("player_server_01"):
-			return
-		var query = db.create_query("DROP TABLE IF EXISTS players")
-		query.execute()
-		query = db.create_query("CREATE TABLE IF NOT EXISTS players (id TEXT PRIMARY KEY, state BLOB) WITHOUT ROWID, STRICT")
-		query.execute()
-	var place_holders: PackedStringArray
-	place_holders.resize(players.size())
-	place_holders.fill("(?, ?)")
-	sql = "INSERT OR REPLACE INTO players (id, state) VALUES " + ", ".join(place_holders)
+	db = MVSQLite.new()
+	if not db.open("player_server_01"):
+		return
+	var query = db.create_query("DROP TABLE IF EXISTS players")
+	query.execute()
+	query = db.create_query("CREATE TABLE IF NOT EXISTS players (id TEXT PRIMARY KEY, state BLOB) WITHOUT ROWID, STRICT")
+	query.execute()
+	var placeholders: PackedStringArray
+	placeholders.resize(player_count)
+	placeholders.fill("(?, ?)")
+	sql = "INSERT INTO players(id, state) VALUES " + ", ".join(placeholders) + "ON CONFLICT(id) DO UPDATE SET state = excluded.state RETURNING *"
 	insert_query = db.create_query(sql)
+	timer.set_wait_time(1)
+	timer.set_one_shot(false)
+	timer.connect("timeout", write)
+	add_child(timer, true)
+	timer.start()
 	
 var crypto: Crypto = Crypto.new()
 
-func _process(_delta):	
-	var params: Array = []
-	for player in players:
+func write():
+	var states: Array
+	for i in range(80):
 		player.state = crypto.generate_random_bytes(100)
-		params.append_array([player.id, player.state])
-	insert_query.execute(params)
+		states.append_array([player.id, player.state])
+	var results: Array = insert_query.execute(states)
+	print(results.size())
 
 func _on_request_completed(_result, response_code, _headers, body):
 	var string = body.get_string_from_utf8()
