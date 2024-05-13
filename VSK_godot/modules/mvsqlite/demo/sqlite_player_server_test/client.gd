@@ -34,12 +34,12 @@ func _ready() -> void:
 		return
 	var query = db.create_query("DROP TABLE IF EXISTS players")
 	query.execute()
-	query = db.create_query("CREATE TABLE IF NOT EXISTS players (id TEXT PRIMARY KEY, state BLOB) WITHOUT ROWID, STRICT")
+	query = db.create_query("CREATE TABLE IF NOT EXISTS players (id TEXT PRIMARY KEY, state BLOB, tick INTEGER) WITHOUT ROWID, STRICT")
 	query.execute()
 	var placeholders: PackedStringArray
 	placeholders.resize(player_count)
-	placeholders.fill("(?, ?)")
-	sql = "INSERT INTO players(id, state) VALUES " + ", ".join(placeholders) + "ON CONFLICT(id) DO UPDATE SET state = excluded.state RETURNING *"
+	placeholders.fill("(?, ?, ?)")
+	sql = "INSERT INTO players(id, state, tick) VALUES " + ", ".join(placeholders) + " ON CONFLICT(id) DO UPDATE SET state = CASE WHEN excluded.tick > players.tick THEN excluded.state ELSE players.state END, tick = CASE WHEN excluded.tick > players.tick THEN excluded.tick ELSE players.tick END RETURNING *"
 	insert_query = db.create_query(sql)
 	
 var crypto: Crypto = Crypto.new()
@@ -48,8 +48,10 @@ func _process(_delta):
 	var states: Array
 	for i in range(player_count):
 		player.state = crypto.generate_random_bytes(100)
-		states.append_array([player.id, player.state])
+		states.append_array([player.id, player.state, Engine.get_process_frames()])
 	var results: Array = insert_query.execute(states)
+	if results.size():
+		print(results.size())
 	var error = insert_query.get_last_error_message()
 	if error != "not an error":
 		print(error)
