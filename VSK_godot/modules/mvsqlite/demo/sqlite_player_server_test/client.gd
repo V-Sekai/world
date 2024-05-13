@@ -11,7 +11,7 @@ var insert_query: MVSQLiteQuery = null
 var player
 var timer: Timer = Timer.new()
 
-var player_count = 80
+var player_count = 1000
 
 
 func _ready() -> void:
@@ -51,7 +51,7 @@ var crypto: Crypto = Crypto.new()
 
 func write():
 	var states: Array
-	for i in range(80):
+	for i in range(player_count):
 		player.state = crypto.generate_random_bytes(100)
 		states.append_array([player.id, player.state])
 	var results: Array = insert_query.execute(states)
