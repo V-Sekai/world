@@ -11,7 +11,7 @@ var insert_query: MVSQLiteQuery = null
 var player
 var timer: Timer = Timer.new()
 
-var player_count = 10000
+var player_count = 1
 
 
 func _ready() -> void:
@@ -45,15 +45,13 @@ func _ready() -> void:
 var crypto: Crypto = Crypto.new()
 
 func _process(_delta):
-	write()
-
-func write():
 	var states: Array
 	for i in range(player_count):
 		player.state = crypto.generate_random_bytes(100)
 		states.append_array([player.id, player.state, Engine.get_process_frames()])
-	var results: Array = insert_query.execute(states)
-	print(results.size())
+	var results = insert_query.execute(states)
+	if !results:
+		return
 	var error = insert_query.get_last_error_message()
 	if error != "not an error":
 		print(error)
