@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "options": { 
     "env": {
-      "RUST_LOG": "error",
+      "RUST_LOG": "log",
       "MVSQLITE_DATA_PLANE": "http://192.168.0.39:7000"
     }
   },
@@ -14,9 +14,9 @@
       "name": "Run the editor with V-Sekai game",
       "type": "lldb",
       "request": "launch",
-      "args": ["--path", "TOOL_launcher", "-e"],
+      "args": ["--path", "VSK_godot/modules/mvsqlite/demo", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/VSK_godot/bin/godot.macos.editor.double.arm64",
+      "program": "${workspaceFolder}/VSK_godot/bin/godot.windows.editor.double.x86_64.llvm.console.exe",
       "preLaunchTask": "Godot Engine"
     },
   ]
