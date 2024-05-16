@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://7ovmm8etgpsn"]
 
-[ext_resource type="Script" path="res://sqlite_player_server_test/client.gd" id="1_1se6r"]
+[ext_resource type="Script" path="res://player_client/client.gd" id="1_1se6r"]
 
 [node name="Scene" type="Node"]
 process_thread_group = 2

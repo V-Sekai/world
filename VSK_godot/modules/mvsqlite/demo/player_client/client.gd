@@ -11,7 +11,7 @@ var insert_query: MVSQLiteQuery = null
 var player
 var timer: Timer = Timer.new()
 
-var player_count = 8000
+var player_count = 1
 
 
 func _ready() -> void:
