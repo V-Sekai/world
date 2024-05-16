@@ -8,6 +8,8 @@ By aiming high, 100 players will be easy.
 
 Glenn suggests multiple servers, but I believe they can be simulated on a single Godot engine through parallel processing, sequential processing, or reduction.
 
+According to https://two-wrongs.com/response-time-is-the-system-talking.html run production systems at 40% at all times.
+
 ## Player Servers (Linux kernel ebpf module)
 
 Player simulation means the game code that takes player inputs and moves the player around the world, collides with world geometry, and eventually also lets the player aim and shoot weapons.

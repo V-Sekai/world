@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/foundationdb-beam/ecto_foundationdb.git
+	branch = main
+	commit = 8826f172e5570c7799452fe65b21e484ada7881f
+	parent = 27a81387cc18b97539232fcc041e4fc1c5a56013
+	method = merge
+	cmdver = 0.4.6
