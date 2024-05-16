@@ -3,6 +3,13 @@ import os
 
 
 def can_build(env, platform):
+    try:
+        cargo_version = subprocess.check_output(["cargo", "--version"])
+        print("Cargo is installed: ", cargo_version)
+    except Exception as e:
+        print("Cargo is not installed or not found in PATH")
+        return False
+    
     if platform in ("ios", "web", "android"):
         return False
 
