@@ -24,20 +24,31 @@ These calculations assume that each operation takes the same amount of time, whi
 ```mermaid
 sequenceDiagram
     SingleClient->>8_000_PlayerServer: Send 100 bytes
-    8_000_PlayerServer->>10_000_WorldServer1: Propose operation (Paxos)
-    8_000_PlayerServer->>10_000_WorldServer2: Propose operation (Paxos)
-    8_000_PlayerServer->>10_000_WorldServer3: Propose operation (Paxos)
-    10_000_WorldServer1-->>8_000_PlayerServer: Promise to accept operation (Paxos)
-    10_000_WorldServer2-->>8_000_PlayerServer: Promise to accept operation (Paxos)
-    10_000_WorldServer3-->>8_000_PlayerServer: Promise to accept operation (Paxos)
-    8_000_PlayerServer->>10_000_WorldServer1: Accept operation and send 100 bytes (Paxos)
-    8_000_PlayerServer->>10_000_WorldServer2: Accept operation and send 100 bytes (Paxos)
-    8_000_PlayerServer->>10_000_WorldServer3: Accept operation and send 100 bytes (Paxos)
-    10_000_WorldServer1-->>8_000_PlayerServer: Acknowledge acceptance and send Tree Order of Player States (Paxos)
-    10_000_WorldServer2-->>8_000_PlayerServer: Acknowledge acceptance and send Tree Order of Player States (Paxos)
-    10_000_WorldServer3-->>8_000_PlayerServer: Acknowledge acceptance and send Tree Order of Player States (Paxos)
-    8_000_PlayerServer->>SingleClient: Process 100 bytes in received Tree Order
-    10_000_WorldServer1->>SingleClient: Send data for all authority states
-    10_000_WorldServer2->>SingleClient: Send data for all authority states
-    10_000_WorldServer3->>SingleClient: Send data for all authority states
+    8_000_PlayerServer->>10_000_WorldServerLeader: Process operation
+    10_000_WorldServerLeader->>SingleClient: Process 100 bytes in received Tree Order and send data for all authority states
+```
+
+1. **UDP Monitor and Forwarder (8_000_PlayerServer to 10_000_WorldServerLeader)**: This program would monitor incoming packets at the 8_000_PlayerServer. When it receives the packet from the SingleClient, it forwards this data to another IP:port for 10_000_WorldServerLeader. It also needs to inform the 10_000_WorldServerLeader about the original source IP:port (SingleClient) for spoofing.
+
+2. **UDP Responder (10_000_WorldServerLeader to SingleClient)**:
+
+- It processes the operation received from the `8_000_PlayerServer`.
+- It collects all the ring buffer states.
+- Retrieve the states from the BPF map. The BPF map is a key-value store data structure that can be accessed from both the eBPF program and a user space application.
+- Sort the retrieved states using a Left-child right-sibling binary tree to represent a tree with an arbitrary number of children per node.
+- Apply the game iteration code. This step involves updating the game state based on the sorted player states.
+- After processing and applying the game iteration code, it sends back the processed data to the `SingleClient` by spoofing the source IP:port as informed by the first program.
+
+https://github.com/iovisor/ubpf/
+
+### Paxos sequence
+
+```mermaid
+sequenceDiagram
+    SingleClient->>8_000_PlayerServer: Send 100 bytes
+    8_000_PlayerServer->>10_000_WorldServerLeader: Propose operation (Paxos)
+    10_000_WorldServerLeader-->>8_000_PlayerServer: Promise to accept operation (Paxos)
+    8_000_PlayerServer->>10_000_WorldServerLeader: Accept operation and send 100 bytes (Paxos)
+    10_000_WorldServerLeader-->>8_000_PlayerServer: Acknowledge acceptance (Paxos)
+    10_000_WorldServerLeader->>SingleClient: Process 100 bytes in received Tree Order and send data for all authority states
 ```
