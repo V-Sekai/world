@@ -75,7 +75,8 @@ gcc -O2 -o sqlite3 ./shell.c -L. -lsqlite3
 Set environment variables, and run the shell:
 
 ```bash
-export RUST_LOG=info MVSQLITE_DATA_PLANE="http://localhost:7000"
+export RUST_LOG=info 
+export MVSQLITE_DATA_PLANE="http://localhost:7000"
 export DYLD_LIBRARY_PATH=/usr/local/lib
 
 # "test" is the key of the namespace we created earlier
@@ -95,3 +96,5 @@ make -C mvsqlite-preload
 ```
 
 Internals are documented in the [wiki](https://github.com/V-Sekai/mvsqlite/wiki).
+
+```
