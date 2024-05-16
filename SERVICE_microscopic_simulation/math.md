@@ -23,6 +23,8 @@ These calculations assume that each operation takes the same amount of time, whi
 
 ## Math
 
+32 cores with 10 gigabit internet.
+
 1. **Player Server:**
 
    - 10,000 players are sending data at a frequency of 100hz (100 times per second), each sending 100 bytes of data.
@@ -38,3 +40,9 @@ These calculations assume that each operation takes the same amount of time, whi
 3. **World Server Sending Back to Client:**
 
    - The world server sends back data to 10,000 clients. Without knowing the size of the data being sent back and the frequency, it's hard to calculate the exact data rate or IOPS. If we assume it's also sending 100 bytes of data at a frequency of 100hz, then the calculation would be similar to the player server.
+
+### Ideas
+
+1. Paxos in the kernel ebpf
+2. Ring buffer ebpf
+3. udp networking ebpf
