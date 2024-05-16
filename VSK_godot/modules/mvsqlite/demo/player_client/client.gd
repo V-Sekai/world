@@ -13,8 +13,8 @@ var timer: Timer = Timer.new()
 
 var player_count = 1
 
-
 func _ready() -> void:
+	set_process(false)
 	player = PlayerState.new()
 	player.id = generate_uuid()
 	player.state = PackedByteArray()
@@ -25,22 +25,7 @@ func _ready() -> void:
 	var err = http_request.request("http://localhost:7001/api/create_namespace",
 								   ["Content-Type: application/json"],
 								   HTTPClient.METHOD_POST,
-								   '{"key":"' + "player_server_01" + '"}')
-	if err == OK:
-		print("Database created")
-
-	db = MVSQLite.new()
-	if not db.open("player_server_01"):
-		return
-	var query = db.create_query("DROP TABLE IF EXISTS players")
-	query.execute()
-	query = db.create_query("CREATE TABLE IF NOT EXISTS players (id TEXT PRIMARY KEY, state BLOB, tick INTEGER) WITHOUT ROWID, STRICT")
-	query.execute()
-	var placeholders: PackedStringArray
-	placeholders.resize(player_count)
-	placeholders.fill("(?, ?, ?)")
-	sql = "INSERT INTO players(id, state, tick) VALUES " + ", ".join(placeholders) + " ON CONFLICT(id) DO UPDATE SET state = excluded.state, tick = excluded.tick RETURNING *"
-	insert_query = db.create_query(sql)
+								   '{"key":"' + player.id + '"}')
 	
 var crypto: Crypto = Crypto.new()
 
@@ -63,7 +48,17 @@ func _on_request_completed(_result, response_code, _headers, body):
 	else:
 		print("Request failed with response code: ", response_code)
 		print("Response body: ", string)
-		
+	db = MVSQLite.new()
+	if not db.open(player.id):
+		return
+	var query = db.create_query("CREATE TABLE players (id TEXT PRIMARY KEY, state BLOB, tick INTEGER) WITHOUT ROWID, STRICT")
+	query.execute()
+	var placeholders: PackedStringArray
+	placeholders.resize(player_count)
+	placeholders.fill("(?, ?, ?)")
+	sql = "INSERT INTO players(id, state, tick) VALUES " + ", ".join(placeholders) + " ON CONFLICT(id) DO UPDATE SET state = excluded.state, tick = excluded.tick RETURNING *"
+	insert_query = db.create_query(sql)
+	set_process(true)
 
 func generate_uuid() -> String:
 	var uuid: PackedByteArray = crypto.generate_random_bytes(16)

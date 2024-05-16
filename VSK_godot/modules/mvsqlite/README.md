@@ -26,7 +26,7 @@ This is a [MVSQLite](https://github.com/V-Sekai/mvsqlite) wrapper for the Godot 
 
 ```
 cd thirdparty/mvsqlite
-export RUST_LOG=info 
+export RUST_LOG=error 
 export MVSQLITE_DATA_PLANE="http://localhost:7000"
 export LD_LIBRARY_PATH=/usr/local/lib
 export DYLD_LIBRARY_PATH=/usr/local/lib
