@@ -1,15 +1,5 @@
 # 1_000_000 player fps
 
-By aiming high, 100 players will be easy.
-
-1. Player state nodes are isolated; you can observe others but interaction is not possible.
-2. Each individual player state is processed in tree order for all states within the frame, then stored back into the player state.
-3. All player states are stored in a history buffer for one second for interpolation and other processes, then sent to the player simultaneously.
-
-Glenn suggests multiple servers, but I believe they can be simulated on a single Godot engine through parallel processing, sequential processing, or reduction.
-
-According to https://two-wrongs.com/response-time-is-the-system-talking.html run production systems at 40% at all times.
-
 ## Player Servers (Linux kernel ebpf module)
 
 Player simulation means the game code that takes player inputs and moves the player around the world, collides with world geometry, and eventually also lets the player aim and shoot weapons.
