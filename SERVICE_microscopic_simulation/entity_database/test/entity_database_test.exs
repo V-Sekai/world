@@ -5,6 +5,7 @@
 
 defmodule EntityDatabaseTest do
   use ExUnit.Case, async: true
+  alias EntityDatabaseTest.Entity
 
   setup do
     {:ok, pid} = EntityDatabase.start_link([])
@@ -26,5 +27,14 @@ defmodule EntityDatabaseTest do
     assert_receive {:udp, ^ip, ^port, ^msg}
     assert File.exists?(expected_filename)
     assert File.read!(expected_filename) == msg
+
+    # Fetch the inserted record
+    inserted_entity = Repo.get(Entity, expected_entity_id)
+
+    # Assert the inserted record
+    assert inserted_entity.ip == ip
+    assert inserted_entity.port == port
+    assert inserted_entity.msg == msg
+    assert inserted_entity.entity_id == expected_entity_id
   end
 end
