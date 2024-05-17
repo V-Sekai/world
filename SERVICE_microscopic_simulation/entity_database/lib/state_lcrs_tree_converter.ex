@@ -1,20 +1,20 @@
 # Copyright (c) 2018-present. This file is part of V-Sekai https://v-sekai.org/.
 # K. S. Ernest (Fire) Lee & Contributors
-# state_tree_converter.exs
+# state_lcrs_tree_converter.exs
 # SPDX-License-Identifier: MIT
 
 defmodule StateNode do
   defstruct [:state, :first_child, :next_sibling]
 end
 
-defmodule StateTreeConverter do
+defmodule StateLCRSTreeConverter do
   alias StateNode
 
   def convert_states_to_tree(states) do
     build_tree(states, nil)
   end
 
-  defp build_tree([], _parent), do: _parent
+  defp build_tree([], parent), do: parent
 
   defp build_tree([state | rest], parent) do
     node = %StateNode{
@@ -27,12 +27,12 @@ defmodule StateTreeConverter do
       if parent do
         case parent.first_child do
           nil ->
-            Map.put(parent, :first_child, node)
+            %{parent | first_child: node}
 
           _ ->
             last_sibling = find_last_sibling(parent.first_child)
-            Map.put(last_sibling, :next_sibling, node)
-            parent
+            updated_sibling = %{last_sibling | next_sibling: node}
+            %{parent | first_child: updated_sibling}
         end
       else
         node
