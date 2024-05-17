@@ -37,11 +37,14 @@ This program would monitor incoming packets at the 8_000_PlayerServer. When it r
 - It processes the operation received from the `8_000_PlayerServer`.
 - It collects all the ring buffer states.
 - Retrieve the states from the BPF map. The BPF map is a key-value store data structure that can be accessed from both the eBPF program and a user space application.
-- Sort the retrieved states using a Left-child right-sibling binary tree to represent a tree with an arbitrary number of children per node.
-- Apply the game iteration code. This step involves updating the game state based on the sorted player states.
-- After processing and applying the game iteration code, it sends back the processed data to the `SingleClient` by spoofing the source IP:port as informed by the first program.
+- On write send back the processed data to the `SingleClient` by spoofing the source IP:port as informed by the first program.
 
-https://github.com/iovisor/ubpf/
+3. **Iterator and Interpolator (10_000_WorldServerLeader)**:
+
+- It retrieves the player states from the BPF map. The BPF map is a key-value store data structure that can be accessed from both the eBPF program and a user space application.
+- Sort the retrieved states using a Left-child right-sibling binary tree to represent a tree with an arbitrary number of children per node.
+- It uses an iterator to traverse through the player states. In eBPF, you can use `bpf_map_get_next_key` to iterate over the keys in a map.
+- The interpolation process depends on the specific algorithm you're using. If possible, choose an interpolation method that has a lower time complexity.
 
 ### Paxos sequence
 
@@ -54,3 +57,7 @@ sequenceDiagram
     10_000_WorldServerLeader-->>8_000_PlayerServer: Acknowledge acceptance (Paxos)
     10_000_WorldServerLeader->>SingleClient: Process 100 bytes in received Tree Order and send data for all authority states
 ```
+
+### Other references
+
+https://github.com/iovisor/ubpf/
