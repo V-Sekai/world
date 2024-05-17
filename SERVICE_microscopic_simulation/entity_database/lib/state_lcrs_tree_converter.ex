@@ -4,43 +4,34 @@
 # SPDX-License-Identifier: MIT
 
 defmodule StateNode do
-  defstruct [:state, :first_child, :next_sibling]
+  defstruct [:first_child, :next_sibling, :state]
 end
-
 defmodule StateLCRSTreeConverter do
   alias StateNode
 
-  def convert_states_to_tree(states) do
-    build_tree(states, nil)
-  end
-
-  defp build_tree([], parent), do: parent
-
-  defp build_tree([state | rest], parent) do
-    node = %StateNode{
-      state: state,
-      first_child: nil,
-      next_sibling: nil
+  def convert_states_to_tree([state | _] = states) do
+    %StateNode{
+      state: elem(state, 0),
+      first_child: convert_children(elem(state, 1)),
+      next_sibling: convert_siblings(tl(states))
     }
-
-    updated_parent =
-      if parent do
-        case parent.first_child do
-          nil ->
-            %{parent | first_child: node}
-
-          _ ->
-            last_sibling = find_last_sibling(parent.first_child)
-            updated_sibling = %{last_sibling | next_sibling: node}
-            %{parent | first_child: updated_sibling}
-        end
-      else
-        node
-      end
-
-    build_tree(rest, updated_parent)
   end
 
-  defp find_last_sibling(%StateNode{next_sibling: nil} = sibling), do: sibling
-  defp find_last_sibling(%StateNode{next_sibling: next_sibling}), do: find_last_sibling(next_sibling)
+  defp convert_siblings([]), do: nil
+  defp convert_siblings([head | tail]) do
+    %StateNode{
+      state: elem(head, 0),
+      first_child: convert_children(elem(head, 1)),
+      next_sibling: convert_siblings(tail)
+    }
+  end
+
+  defp convert_children([]), do: nil
+  defp convert_children([head | tail]) do
+    %StateNode{
+      state: elem(head, 0),
+      first_child: convert_children(elem(head, 1)),
+      next_sibling: convert_children(tail)
+    }
+  end
 end
