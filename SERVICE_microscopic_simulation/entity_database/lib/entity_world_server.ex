@@ -3,26 +3,19 @@
 # world_server.exs
 # SPDX-License-Identifier: MIT
 
-# Copyright (c) 2018-present. This file is part of V-Sekai https://v-sekai.org/.
-# K. S. Ernest (Fire) Lee & Contributors
-# world_server.exs
-# SPDX-License-Identifier: MIT
-
 defmodule WorldServer do
   use GenServer
-  alias EntityDatabaseTest.Entity
-  alias Ecto.Adapters.SQL.Sandbox
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
   def init(:ok) do
-    {:ok, socket} = :gen_udp.open(8000, [:binary, active: false])
+    {:ok, _socket} = :gen_udp.open(8000, [:binary, active: false])
   end
 
-  def handle_info({:udp, _socket, ip, port, msg}, state) do
-    entity_id = String.slice(msg, 0..3) |> String.to_integer()
+  def handle_info({:udp, _socket, _ip, _port, msg}, _state) do
+    _entity_id = String.slice(msg, 0..3) |> String.to_integer()
 
     # Create a new entity and insert it into the database
   end
