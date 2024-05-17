@@ -53,7 +53,3 @@ sequenceDiagram
     10_000_WorldServerLeader-->>8_000_PlayerServer: Acknowledge acceptance (Paxos)
     10_000_WorldServerLeader->>SingleClient: Process 100 bytes in received Tree Order and send data for all authority states
 ```
-
-### Other references
-
-[ubpf](https://github.com/iovisor/ubpf/)
