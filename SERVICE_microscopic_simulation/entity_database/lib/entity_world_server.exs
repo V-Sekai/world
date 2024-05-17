@@ -10,14 +10,12 @@ end
 defmodule WorldServer do
   use GenServer
 
-  # Callbacks
-
   def start_link(_) do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
   end
 
   def init(:ok) do
-    player_states = %{}
+    entity_states = %{}
 
     data =
       "./"
@@ -30,20 +28,20 @@ defmodule WorldServer do
     File.write!("worldServer01.txt", processed_data)
 
     {:ok, socket} = :gen_udp.open(8000, [:binary, active: false])
-    {:ok, %{socket: socket, player_states: player_states, processed_data: processed_data}}
+    {:ok, %{socket: socket, entity_states: entity_states, processed_data: processed_data}}
   end
 
   def handle_info({:udp, _socket, ip, port, msg}, state) do
-    player_id = String.slice(msg, 0..3) |> String.to_integer()
-    player_states = Map.put(state.player_states, player_id, {ip, port})
+    entity_id = String.slice(msg, 0..3) |> String.to_integer()
+    entity_states = Map.put(state.entity_states, entity_id, {ip, port})
 
-    Process.send_after(self(), {:send_data, player_id}, 1000)
+    Process.send_after(self(), {:send_data, entity_id}, 1000)
 
-    {:noreply, %{state | player_states: player_states}}
+    {:noreply, %{state | entity_states: entity_states}}
   end
 
-  def handle_info({:send_data, player_id}, state) do
-    case Map.get(state.player_states, player_id) do
+  def handle_info({:send_data, entity_id}, state) do
+    case Map.get(state.entity_states, entity_id) do
       nil -> :ok
       {ip, port} -> :gen_udp.send(state.socket, ip, port, state.processed_data)
     end
@@ -91,6 +89,8 @@ defmodule WorldServer do
   defp convert_tree_to_data(tree) do
     tree |> process_tree() |> String.to_charlist()
   end
+
+  def handle_call(:get_state, _from, state), do: {:reply, state, state}
 end
 
 {:ok, _pid} = WorldServer.start_link([])

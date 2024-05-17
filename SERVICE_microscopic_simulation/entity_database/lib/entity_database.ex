@@ -1,12 +1,10 @@
 # Copyright (c) 2018-present. This file is part of V-Sekai https://v-sekai.org/.
 # K. S. Ernest (Fire) Lee & Contributors
-# player_database.exs
+# entity_database.exs
 # SPDX-License-Identifier: MIT
 
-defmodule PlayerDatabase do
+defmodule EntityDatabase do
   use GenServer
-
-  # Callbacks
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
@@ -18,13 +16,16 @@ defmodule PlayerDatabase do
   end
 
   def handle_info({:udp, _socket, ip, port, msg}, state) do
-    player_id = String.slice(msg, 0..3) |> String.to_integer()
-    offset = player_id * 100
-    player_data_map = %{ip: ip, port: port, player_id: player_id, offset: offset, data: msg}
-    File.write("player_#{player_id}.bin", msg)
-    IO.puts "The file was saved as player_#{player_id}.bin!"
+    entity_id = String.slice(msg, 0..3) |> String.to_integer()
+    offset = entity_id * 100
+    entity_data_map = %{ip: ip, port: port, entity_id: entity_id, offset: offset, data: msg}
+    File.write("entity_#{entity_id}.bin", msg)
+    IO.puts("The file was saved as entity_#{entity_id}.bin!")
+
+    send(Process.whereis(__MODULE__), {:udp, ip, port, msg})
+
     {:noreply, state}
   end
 end
 
-{:ok, _pid} = PlayerDatabase.start_link([])
+{:ok, _pid} = EntityDatabase.start_link([])

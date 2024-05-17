@@ -1,12 +1,10 @@
 # Copyright (c) 2018-present. This file is part of V-Sekai https://v-sekai.org/.
 # K. S. Ernest (Fire) Lee & Contributors
-# player_server.exs
+# entity_server.exs
 # SPDX-License-Identifier: MIT
 
-defmodule PlayerServer do
+defmodule EntityServer do
   use GenServer
-
-  # Callbacks
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
@@ -14,19 +12,21 @@ defmodule PlayerServer do
 
   def init(:ok) do
     {:ok, socket} = :gen_udp.open(8000, [:binary, active: false])
-    {:ok, %{socket: socket, player_states: %{}}}
+    {:ok, %{socket: socket, entity_states: %{}}}
   end
 
   def handle_info({:udp, _socket, ip, port, msg}, state) do
-    player_id = String.slice(msg, 0..3) |> String.to_integer()
-    player_states = Map.put(state.player_states, player_id, {ip, port})
+    assert byte_size(msg) == 104
+    entity_id = String.slice(msg, 0..3) |> String.to_integer()
+    entity_state = String.slice(msg, 4..103)
+    entity_states = Map.put(state.entity_states, entity_id, {ip, port, entity_state})
 
     {:ok, client} = :gen_udp.open(0, [:binary])
     :ok = :gen_udp.send(client, 'localhost', 10000, msg)
     :ok = :gen_udp.close(client)
 
-    {:noreply, %{state | player_states: player_states}}
+    {:noreply, %{state | entity_states: entity_states}}
   end
 end
 
-{:ok, _pid} = PlayerServer.start_link([])
+{:ok, _pid} = EntityServer.start_link([])
