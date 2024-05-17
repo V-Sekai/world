@@ -3,10 +3,6 @@
 # world_server.exs
 # SPDX-License-Identifier: MIT
 
-defmodule Node do
-  defstruct [:state, :first_child, :next_sibling]
-end
-
 defmodule WorldServer do
   use GenServer
 
@@ -17,9 +13,9 @@ defmodule WorldServer do
   def init(:ok) do
     entity_states = %{}
 
+    # Concatenate the directory path and the file extension to form the pattern
     data =
-      "./"
-      |> Path.wildcard("*.bin")
+      Path.wildcard("./" <> "*.bin")
       |> Enum.flat_map(&convert_data_to_states(File.read!(&1)))
 
     tree = convert_states_to_tree(data)
@@ -49,40 +45,22 @@ defmodule WorldServer do
     {:noreply, state}
   end
 
-  defp convert_data_to_states(data) do
-    data
-    |> String.splitter(100)
-    |> Enum.take(-100)
+  defp convert_data_to_states(data), do: convert_data_to_states(data, [])
+
+  defp convert_data_to_states("", acc), do: Enum.reverse(acc)
+
+  defp convert_data_to_states(data, acc) do
+    {chunk, rest} = String.split_at(data, 100)
+    convert_data_to_states(rest, [chunk | acc])
   end
 
   defp convert_states_to_tree(states) do
-    nodes =
-      for {state, i} <- Enum.with_index(states), into: %{} do
-        {i, %Node{state: state}}
-      end
-
-    for {i, node} <- nodes do
-      parent = Map.get(nodes, div(i - 1, 2))
-
-      if parent && !parent.first_child do
-        Map.put(parent, :first_child, node)
-      else
-        sibling = parent && parent.first_child
-
-        while sibling && sibling.next_sibling do
-          sibling = sibling.next_sibling
-        end
-
-        Map.put(sibling, :next_sibling, node)
-      end
-    end
-
-    Map.get(nodes, 0)
+    StateTreeConverter.convert_states_to_tree(states)
   end
 
   defp process_tree(nil), do: ""
 
-  defp process_tree(%Node{} = node) do
+  defp process_tree(%StateNode{} = node) do
     node.state <> process_tree(node.first_child) <> process_tree(node.next_sibling)
   end
 

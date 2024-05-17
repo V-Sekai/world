@@ -18,7 +18,7 @@ defmodule EntityDatabase do
   def handle_info({:udp, _socket, ip, port, msg}, state) do
     entity_id = String.slice(msg, 0..3) |> String.to_integer()
     offset = entity_id * 100
-    entity_data_map = %{ip: ip, port: port, entity_id: entity_id, offset: offset, data: msg}
+    _entity_data_map = %{ip: ip, port: port, entity_id: entity_id, offset: offset, data: msg}
     File.write("entity_#{entity_id}.bin", msg)
     IO.puts("The file was saved as entity_#{entity_id}.bin!")
 

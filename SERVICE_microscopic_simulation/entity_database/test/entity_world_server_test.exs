@@ -7,6 +7,7 @@ defmodule WorldServerTest do
   use ExUnit.Case, async: true
 
   alias WorldServer
+  alias StateNode
 
   setup do
     {:ok, pid} = WorldServer.start_link([])
@@ -40,22 +41,20 @@ defmodule WorldServerTest do
     assert Map.has_key?(entity_states, 97)
   end
 
-
   test "convert_states_to_tree/1 converts states to a tree", %{pid: pid} do
     states = ["state1", "state2", "state3", "state4", "state5"]
 
-    assert {:ok, %{processed_data: processed_data}} = GenServer.call(pid, :get_state)
+    assert {:ok, converted_states} = GenServer.call(pid, {:convert_states_to_tree, states})
 
-    expected_tree = %Node{
+    expected_tree = %StateNode{
       state: "state1",
-      first_child: %Node{
+      first_child: %StateNode{
         state: "state2",
-        first_child: %Node{state: "state4"},
-        next_sibling: %Node{state: "state3", first_child: %Node{state: "state5"}}
+        first_child: %StateNode{state: "state4"},
+        next_sibling: %StateNode{state: "state3", first_child: %StateNode{state: "state5"}}
       }
     }
 
-    assert processed_data == expected_tree
+    assert converted_states == expected_tree
   end
-
 end

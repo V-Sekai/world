@@ -16,7 +16,6 @@ defmodule EntityServer do
   end
 
   def handle_info({:udp, _socket, ip, port, msg}, state) do
-    assert byte_size(msg) == 104
     entity_id = String.slice(msg, 0..3) |> String.to_integer()
     entity_state = String.slice(msg, 4..103)
     entity_states = Map.put(state.entity_states, entity_id, {ip, port, entity_state})
