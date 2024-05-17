@@ -16,6 +16,7 @@ echo 1 > /proc/sys/net/ipv4/ip_forward
 
 ```python
 #!/usr/bin/python3
+# https://github.com/xdp-project/xdp-tutorial/tree/master/basic04-pinning-maps
 from bcc import BPF
 import socket
 import time
