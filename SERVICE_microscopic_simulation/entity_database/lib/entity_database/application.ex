@@ -3,7 +3,6 @@ defmodule EntityDatabase.Application do
 
   def start(_type, _args) do
     children = [
-      {EntityDatabase.Repo, []},
       {WorldServer, []}
     ]
 

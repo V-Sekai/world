@@ -19,37 +19,16 @@ defmodule WorldServer do
 
   def init(:ok) do
     {:ok, socket} = :gen_udp.open(8000, [:binary, active: false])
-    processed_data = EntityDatabase.Repo.all(EntityDatabase.Entity)
-    {:ok, %{socket: socket, processed_data: processed_data}}
   end
 
   def handle_info({:udp, _socket, ip, port, msg}, state) do
     entity_id = String.slice(msg, 0..3) |> String.to_integer()
 
     # Create a new entity and insert it into the database
-    entity = %EntityDatabase.Entity {
-      ip: ip,
-      port: port,
-      msg: msg,
-      entity_id: entity_id
-    }
-
-    case EntityDatabaseTest.Repo.insert(entity) do
-      {:ok, _entity} ->
-        Process.send_after(self(), {:send_data, entity_id}, 1000)
-        {:noreply, state}
-
-      {:error, changeset} ->
-        IO.inspect(changeset.errors)
-        {:stop, :error, state}
-    end
   end
 
   def handle_info({:send_data, entity_id}, state) do
-    case EntityDatabaseTest.Repo.get(Entity, entity_id) do
-      nil -> :ok
-      entity -> :gen_udp.send(state.socket, entity.ip, entity.port, state.processed_data)
-    end
+    # Create a new entity and insert it into the database
 
     {:noreply, state}
   end

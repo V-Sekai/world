@@ -19,26 +19,7 @@ defmodule EntityServer do
     entity_id = String.slice(msg, 0..3) |> String.to_integer()
     entity_state = String.slice(msg, 4..103)
 
-    # Create a new entity and insert it into the database
-    entity = %EntityDatabase.Entity {
-      ip: ip,
-      port: port,
-      msg: entity_state,
-      entity_id: entity_id
-    }
-
-    case EntityDatabaseTest.Repo.insert(entity) do
-      {:ok, _entity} ->
-        {:ok, client} = :gen_udp.open(0, [:binary])
-        :ok = :gen_udp.send(client, 'localhost', 10000, msg)
-        :ok = :gen_udp.close(client)
-
-        {:noreply, state}
-
-      {:error, changeset} ->
-        IO.inspect(changeset.errors)
-        {:stop, :error, state}
-    end
+    # TODO transfer to the world server
   end
 end
 
