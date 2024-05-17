@@ -28,7 +28,9 @@ sequenceDiagram
     10_000_WorldServerLeader->>SingleClient: Process 100 bytes in received Tree Order and send data for all authority states
 ```
 
-1. **UDP Monitor and Forwarder (8_000_PlayerServer to 10_000_WorldServerLeader)**: This program would monitor incoming packets at the 8_000_PlayerServer. When it receives the packet from the SingleClient, it forwards this data to another IP:port for 10_000_WorldServerLeader. It also needs to inform the 10_000_WorldServerLeader about the original source IP:port (SingleClient) for spoofing.
+1. **UDP Monitor and Forwarder (8_000_PlayerServer to 10_000_WorldServerLeader)**:
+
+This program would monitor incoming packets at the 8_000_PlayerServer. When it receives the packet from the SingleClient, it forwards this data to another IP:port for 10_000_WorldServerLeader. It also needs to inform the 10_000_WorldServerLeader about the original source IP:port (SingleClient) for spoofing.
 
 2. **UDP Responder (10_000_WorldServerLeader to SingleClient)**:
 
