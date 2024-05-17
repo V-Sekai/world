@@ -8,6 +8,7 @@ defmodule EntityDatabase.Entity do
 
   import Ecto.Changeset
 
+  @primary_key {:id, :id, autogenerate: true}
   schema "entities" do
     field :ip, :string
     field :port, :integer
@@ -17,9 +18,9 @@ defmodule EntityDatabase.Entity do
     timestamps()
   end
 
-  def changeset(entity, attrs) do
+  def changeset(entity, {ip, port, msg, entity_id}) do
     entity
-    |> cast(attrs, [:ip, :port, :msg, :entity_id])
+    |> cast(%{ip: ip, port: port, msg: msg, entity_id: entity_id}, [:ip, :port, :msg, :entity_id])
     |> validate_required([:ip, :port, :msg, :entity_id])
   end
 end
