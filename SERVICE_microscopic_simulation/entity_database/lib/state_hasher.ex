@@ -1,4 +1,4 @@
-defmodule Hasher do
+defmodule StateHasher do
   use Membrane.Filter
   require Logger
 

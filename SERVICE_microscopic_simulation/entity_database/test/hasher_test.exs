@@ -8,7 +8,7 @@ defmodule HasherTest do
         payload = :crypto.strong_rand_bytes(1000)
         buffer = %Membrane.Buffer{payload: payload}
         state = %{}
-        Hasher.handle_process(:input, buffer, nil, state)
+        StateHasher.handle_process(:input, buffer, nil, state)
       end
     })
   end
