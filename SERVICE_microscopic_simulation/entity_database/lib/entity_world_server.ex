@@ -12,8 +12,6 @@ defmodule WorldServer do
 
   def init(:ok) do
     entity_states = %{}
-
-    # Concatenate the directory path and the file extension to form the pattern
     data =
       Path.wildcard("./" <> "*.bin")
       |> Enum.flat_map(&convert_data_to_states(File.read!(&1)))

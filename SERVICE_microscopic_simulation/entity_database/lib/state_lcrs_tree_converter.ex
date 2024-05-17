@@ -6,6 +6,7 @@
 defmodule StateNode do
   defstruct [:first_child, :next_sibling, :state]
 end
+
 defmodule StateLCRSTreeConverter do
   alias StateNode
 
