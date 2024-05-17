@@ -54,5 +54,13 @@ defmodule StateLCRSTreeConverterTest do
                next_sibling: nil
              } = result
     end
+
+    test "benchmark convert_states_to_tree/1" do
+      states = Enum.to_list(1..10_000) |> Enum.map(&"state#{&1}")
+
+      Benchee.run(%{
+        "convert_states_to_tree" => fn -> StateLCRSTreeConverter.convert_states_to_tree(states) end
+      })
+    end
   end
 end
