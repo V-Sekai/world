@@ -11,8 +11,15 @@ defmodule EntityDatabase do
   end
 
   def init(:ok) do
-    {:ok, socket} = :gen_udp.open(8000, [:binary, active: false])
-    {:ok, %{socket: socket}}
+    {:ok, %{socket: open_socket(8000)}}
+  end
+
+  defp open_socket(port) do
+    case :gen_udp.open(port, [:binary, active: false]) do
+      {:ok, socket} -> socket
+      {:error, :eaddrinuse} -> open_socket(port + 1)
+      {:error, _reason} -> raise "Failed to open socket on port #{port}"
+    end
   end
 
   def handle_info({:udp, _socket, ip, port, msg}, state) do
