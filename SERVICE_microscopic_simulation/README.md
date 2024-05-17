@@ -1,7 +1,5 @@
 # 1_000_000 player fps
 
-By aiming high, 100 players will be easy.
-
 ## Player Servers (Linux kernel ebpf module)
 
 Player simulation means the game code that takes player inputs and moves the player around the world, collides with world geometry, and eventually also lets the player aim and shoot weapons.
