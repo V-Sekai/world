@@ -3,51 +3,59 @@
 # world_server.exs
 # SPDX-License-Identifier: MIT
 
+defmodule EchoFilter do
+  use Membrane.Filter
+
+  def handle_process(:input, %Membrane.Buffer{} = buffer, _ctx, state) do
+    source_ip = buffer.metadata.network.source_address
+    source_port = buffer.metadata.network.source_port
+
+    new_buffer = %Membrane.Buffer{
+      payload: buffer.payload,
+      metadata: %{
+        network: %{
+          destination_address: source_ip,
+          destination_port: source_port
+        }
+      }
+    }
+
+    actions = [
+      {:buffer, :output, new_buffer}
+    ]
+
+    {{:ok, actions}, state}
+  end
+end
+
+defmodule DynamicUDPSink do
+  use Membrane.Sink
+
+  def handle_write(buffer, _ctx, state) do
+    destination_ip = buffer.metadata.network.destination_address
+    destination_port = buffer.metadata.network.destination_port
+
+    :gen_udp.send(state.socket, destination_ip, destination_port, buffer.payload)
+
+    {:ok, state}
+  end
+end
+
 defmodule WorldServer do
-  use GenServer
+  use Membrane.Pipeline
 
-  def start_link(_) do
-    GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
+  alias Membrane.{UDP}
+
+  @impl true
+  def handle_init(_ctx, _opts) do
+    spec =
+      child(%UDP.Source{
+        local_address: {127, 0, 0, 1},
+        local_port_no: 5001
+      })
+      |> child(EchoFilter)
+      |> child(DynamicUDPSink)
+
+    {[spec: spec], %{}}
   end
-
-  def init(:ok) do
-    {:ok, _socket} = :gen_udp.open(8000, [:binary, active: false])
-  end
-
-  def handle_info({:udp, _socket, _ip, _port, msg}, _state) do
-    _entity_id = String.slice(msg, 0..3) |> String.to_integer()
-
-    # Create a new entity and insert it into the database
-  end
-
-  def handle_info({:send_data, entity_id}, state) do
-    # Create a new entity and insert it into the database
-
-    {:noreply, state}
-  end
-
-  defp convert_data_to_states(data), do: convert_data_to_states(data, [])
-
-  defp convert_data_to_states("", acc), do: Enum.reverse(acc)
-
-  defp convert_data_to_states(data, acc) do
-    {chunk, rest} = String.split_at(data, 100)
-    convert_data_to_states(rest, [chunk | acc])
-  end
-
-  defp convert_states_to_tree(states) do
-    StateLCRSTree.convert_states_to_tree(states)
-  end
-
-  defp process_tree(nil), do: ""
-
-  defp process_tree(%StateNode{} = node) do
-    node.state <> process_tree(node.first_child) <> process_tree(node.next_sibling)
-  end
-
-  defp convert_tree_to_data(tree) do
-    tree |> process_tree() |> String.to_charlist()
-  end
-
-  def handle_call(:get_state, _from, state), do: {:reply, state, state}
 end
