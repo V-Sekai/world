@@ -1,7 +1,7 @@
 defmodule HasherTest do
   use ExUnit.Case
 
-  @tag :benchmark
+  @tag :skip
   test "benchmark handle_process/4" do
     Benchee.run(%{
       "handle_process/4" => fn ->
