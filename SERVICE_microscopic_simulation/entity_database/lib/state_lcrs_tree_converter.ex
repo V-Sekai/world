@@ -7,7 +7,7 @@ defmodule StateNode do
   defstruct [:first_child, :next_sibling, :state]
 end
 
-defmodule StateLCRSTreeConverter do
+defmodule StateLCRSTree do
   alias StateNode
 
   def convert_states_to_tree([state | _] = states) do

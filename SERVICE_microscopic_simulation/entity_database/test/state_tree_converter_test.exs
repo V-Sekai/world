@@ -3,16 +3,16 @@
 # state_tree_converter_test.exs
 # SPDX-License-Identifier: MIT
 
-defmodule StateLCRSTreeConverterTest do
+defmodule StateLCRSTreeTest do
   use ExUnit.Case
 
-  alias StateLCRSTreeConverter
+  alias StateLCRSTree
   alias StateNode
 
   describe "convert_states_to_tree/1" do
     test "returns a single node tree when given a single state" do
       states = [{"state1", []}]
-      result = StateLCRSTreeConverter.convert_states_to_tree(states)
+      result = StateLCRSTree.convert_states_to_tree(states)
 
       assert %StateNode{
                state: "state1",
@@ -23,13 +23,13 @@ defmodule StateLCRSTreeConverterTest do
 
     test "returns a tree with first child when given two states" do
       states = [{"state1", []}, {"state2", []}]
-      result = StateLCRSTreeConverter.convert_states_to_tree(states)
+      result = StateLCRSTree.convert_states_to_tree(states)
       assert %StateNode{first_child: nil, next_sibling: %StateNode{first_child: nil, next_sibling: nil, state: "state2"}, state: "state1"} = result
     end
 
     test "returns a tree with first child and next sibling when given three states" do
       states = [{"state1", []}, {"state2", []}, {"state3", []}]
-      result = StateLCRSTreeConverter.convert_states_to_tree(states)
+      result = StateLCRSTree.convert_states_to_tree(states)
       assert %StateNode{
         first_child: nil,
         next_sibling: %StateNode{first_child: nil, next_sibling: %StateNode{first_child: nil, next_sibling: nil, state: "state3"}, state: "state2"},
@@ -42,7 +42,7 @@ defmodule StateLCRSTreeConverterTest do
       states = Enum.to_list(1..10_000) |> Enum.map(&{"state#{&1}", []})
 
       Benchee.run(%{
-        "convert_states_to_tree" => fn -> StateLCRSTreeConverter.convert_states_to_tree(states) end
+        "convert_states_to_tree" => fn -> StateLCRSTree.convert_states_to_tree(states) end
       },
       time: 0.1)
     end
@@ -52,7 +52,7 @@ defmodule StateLCRSTreeConverterTest do
       states = Enum.to_list(1..10_000) |> Enum.reduce([], fn i, acc -> [{"state#{i}", acc}] end)
 
       Benchee.run(%{
-        "convert_states_to_tree nested" => fn -> StateLCRSTreeConverter.convert_states_to_tree(states) end
+        "convert_states_to_tree nested" => fn -> StateLCRSTree.convert_states_to_tree(states) end
       },
       time: 0.1)
     end
@@ -73,7 +73,7 @@ defmodule StateLCRSTreeConverterTest do
           {"state4", []}
         ]}
       ]
-      result = StateLCRSTreeConverter.convert_states_to_tree(states)
+      result = StateLCRSTree.convert_states_to_tree(states)
       assert %StateNode{
         state: "state1",
         first_child: %StateNode{
@@ -115,7 +115,7 @@ defmodule StateLCRSTreeConverterTest do
 
     test "check lcrs tree property" do
       states = [{"state1", []}, {"state2", []}, {"state3", []}, {"state4", []}, {"state5", []}]
-      result = StateLCRSTreeConverter.convert_states_to_tree(states)
+      result = StateLCRSTree.convert_states_to_tree(states)
       assert is_lcrs_tree?(result)
     end
     defp is_lcrs_tree?(nil), do: true

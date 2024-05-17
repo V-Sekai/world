@@ -43,7 +43,7 @@ defmodule WorldServer do
   end
 
   defp convert_states_to_tree(states) do
-    StateLCRSTreeConverter.convert_states_to_tree(states)
+    StateLCRSTree.convert_states_to_tree(states)
   end
 
   defp process_tree(nil), do: ""
