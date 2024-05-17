@@ -1,58 +1,72 @@
-# Copyright (c) 2018-present. This file is part of V-Sekai https://v-sekai.org/.
-# K. S. Ernest (Fire) Lee & Contributors
-# state_tree_converter_test.exs
-# SPDX-License-Identifier: MIT
-
-defmodule StateLCRSTreeTest do
+defmodule StateLCRSTreeFilterTest do
   use ExUnit.Case
 
-  alias StateLCRSTree
+  alias StateLCRSTreeFilter
   alias StateNode
+  alias Membrane.Buffer
 
-  describe "convert_states_to_tree/1" do
     test "returns a single node tree when given a single state" do
       states = [{"state1", []}]
-      result = StateLCRSTree.convert_states_to_tree(states)
+      buffer = %Buffer{payload: states}
+
+      {{:ok, [buffer: {:output, result_buffer}]}, _} = StateLCRSTreeFilter.handle_process(:input, buffer, nil, %{})
 
       assert %StateNode{
-               state: "state1",
-               first_child: nil,
-               next_sibling: nil
-             } = result
+        state: "state1",
+        first_child: nil,
+        next_sibling: nil
+      } = result_buffer.payload
     end
 
     test "returns a tree with first child when given two states" do
       states = [{"state1", []}, {"state2", []}]
-      result = StateLCRSTree.convert_states_to_tree(states)
-      assert %StateNode{first_child: nil, next_sibling: %StateNode{first_child: nil, next_sibling: nil, state: "state2"}, state: "state1"} = result
+      buffer = %Buffer{payload: states}
+
+      {{:ok, [buffer: {:output, %Membrane.Buffer{payload: result_buffer, pts: _, dts: _, metadata: _}}]}, _} = StateLCRSTreeFilter.handle_process(:input, buffer, nil, %{})
+
+      assert %StateNode{first_child: nil, next_sibling: %StateNode{first_child: nil, next_sibling: nil, state: "state2"}, state: "state1"} = result_buffer
     end
 
-    test "returns a tree with first child and next sibling when given three states" do
-      states = [{"state1", []}, {"state2", []}, {"state3", []}]
-      result = StateLCRSTree.convert_states_to_tree(states)
-      assert %StateNode{
+  test "returns a tree with first child and next sibling when given three states" do
+    states = [{"state1", []}, {"state2", []}, {"state3", []}]
+    buffer = %Buffer{payload: states}
+
+    {{:ok, [buffer: {:output, result_buffer}]}, _} = StateLCRSTreeFilter.handle_process(:input, buffer, nil, %{})
+
+    assert %StateNode{
+      first_child: nil,
+      next_sibling: %StateNode{
         first_child: nil,
-        next_sibling: %StateNode{first_child: nil, next_sibling: %StateNode{first_child: nil, next_sibling: nil, state: "state3"}, state: "state2"},
-        state: "state1"
-      } = result
-    end
+        next_sibling: %StateNode{
+          first_child: nil,
+          next_sibling: nil,
+          state: "state3"
+        },
+        state: "state2"
+      },
+      state: "state1"
+    } = result_buffer.payload
+  end
+
 
     # @tag :skip
-    test "benchmark convert_states_to_tree/1" do
+    test "benchmark handle_process/4" do
       states = Enum.to_list(1..10_000) |> Enum.map(&{"state#{&1}", []})
+      buffer = %Buffer{payload: states}
 
       Benchee.run(%{
-        "convert_states_to_tree" => fn -> StateLCRSTree.convert_states_to_tree(states) end
+        "StateLCRSTreeFilter" => fn -> StateLCRSTreeFilter.handle_process(:input, buffer, nil, %{}) end
       },
       time: 0.1)
     end
 
     # @tag :skip
-    test "benchmark convert_states_to_tree/1 nested" do
+    test "benchmark handle_process/4 nested" do
       states = Enum.to_list(1..10_000) |> Enum.reduce([], fn i, acc -> [{"state#{i}", acc}] end)
+      buffer = %Buffer{payload: states}
 
       Benchee.run(%{
-        "convert_states_to_tree nested" => fn -> StateLCRSTree.convert_states_to_tree(states) end
+        "StateLCRSTreeFilter nested" => fn -> StateLCRSTreeFilter.handle_process(:input, buffer, nil, %{}) end
       },
       time: 0.1)
     end
@@ -73,7 +87,10 @@ defmodule StateLCRSTreeTest do
           {"state4", []}
         ]}
       ]
-      result = StateLCRSTree.convert_states_to_tree(states)
+      buffer = %Buffer{payload: states}
+
+      {{:ok, [buffer: {:output, %Membrane.Buffer{payload: result_buffer, pts: _, dts: _, metadata: _}}]}, _} = StateLCRSTreeFilter.handle_process(:input, buffer, nil, %{})
+
       assert %StateNode{
         state: "state1",
         first_child: %StateNode{
@@ -110,17 +127,20 @@ defmodule StateLCRSTreeTest do
           }
         },
         next_sibling: nil
-      } = result
+      } = result_buffer
     end
 
     test "check lcrs tree property" do
       states = [{"state1", []}, {"state2", []}, {"state3", []}, {"state4", []}, {"state5", []}]
-      result = StateLCRSTree.convert_states_to_tree(states)
-      assert is_lcrs_tree?(result)
+      buffer = %Buffer{payload: states}
+
+      {{:ok, [buffer: {:output, result_buffer}]}, _} = StateLCRSTreeFilter.handle_process(:input, buffer, nil, %{})
+
+      assert is_lcrs_tree?(result_buffer.payload)
     end
+
     defp is_lcrs_tree?(nil), do: true
     defp is_lcrs_tree?(%StateNode{first_child: first_child, next_sibling: next_sibling}) do
       is_lcrs_tree?(first_child) and is_lcrs_tree?(next_sibling)
     end
   end
-end

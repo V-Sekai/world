@@ -7,10 +7,29 @@ defmodule StateNode do
   defstruct [:first_child, :next_sibling, :state]
 end
 
-defmodule StateLCRSTree do
+defmodule StateLCRSTreeFilter do
+  use Membrane.Filter
+
   alias StateNode
 
-  def convert_states_to_tree([state | _] = states) do
+  def handle_init(_opts) do
+    {:ok, %{}}
+  end
+
+  @impl true
+  def handle_demand(:output, size, :buffers, _ctx, state) do
+    {{:ok, demand: {:input, size}}, state}
+  end
+
+  def handle_process(:input, buffer, _ctx, state) do
+    states = buffer.payload
+    tree = convert_states_to_tree(states)
+
+    buffer = %{buffer | payload: tree}
+    {{:ok, buffer: {:output, buffer}}, state}
+  end
+
+  defp convert_states_to_tree([state | _] = states) do
     %StateNode{
       state: elem(state, 0),
       first_child: convert_children(elem(state, 1)),
