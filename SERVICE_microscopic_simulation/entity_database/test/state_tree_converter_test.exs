@@ -43,7 +43,8 @@ defmodule StateLCRSTreeConverterTest do
 
       Benchee.run(%{
         "convert_states_to_tree" => fn -> StateLCRSTreeConverter.convert_states_to_tree(states) end
-      })
+      },
+      time: 0.1)
     end
 
     # @tag :skip
@@ -52,7 +53,8 @@ defmodule StateLCRSTreeConverterTest do
 
       Benchee.run(%{
         "convert_states_to_tree nested" => fn -> StateLCRSTreeConverter.convert_states_to_tree(states) end
-      })
+      },
+      time: 0.1)
     end
 
     test "returns a nested tree when given a nested list of states" do

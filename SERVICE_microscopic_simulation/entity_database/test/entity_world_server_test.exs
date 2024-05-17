@@ -42,7 +42,7 @@ defmodule WorldServerTest do
   end
 
   test "convert_states_to_tree/1 converts states to a tree", %{pid: pid} do
-    states = ["state1", "state2", "state3", "state4", "state5"]
+    states = [{"state1", []}, {"state2", []}, {"state3", []}, {"state4", []}, {"state5", []}]
 
     assert {:ok, converted_states} = GenServer.call(pid, {:convert_states_to_tree, states})
 
