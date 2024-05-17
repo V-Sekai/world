@@ -11,7 +11,7 @@ defmodule StateTreeConverter do
   alias StateNode
 
   def convert_states_to_tree(states) do
-    build_tree(Enum.reverse(states), nil)
+    build_tree(states, nil)
   end
 
   defp build_tree([], _parent), do: _parent
@@ -23,23 +23,24 @@ defmodule StateTreeConverter do
       next_sibling: nil
     }
 
-    if parent do
-      case parent.first_child do
-        nil ->
-          parent = Map.put(parent, :first_child, node)
+    updated_parent =
+      if parent do
+        case parent.first_child do
+          nil ->
+            Map.put(parent, :first_child, node)
 
-        _ ->
-          last_sibling =
-            Enum.reduce_while(parent.first_child, fn
-              %{next_sibling: nil} = sib, _ -> {:halt, sib}
-              sib, _ -> {:cont, sib.next_sibling}
-            end)
-
-          last_sibling = Map.put(last_sibling, :next_sibling, node)
-          parent = Map.put(parent, :first_child, last_sibling)
+          _ ->
+            last_sibling = find_last_sibling(parent.first_child)
+            Map.put(last_sibling, :next_sibling, node)
+            parent
+        end
+      else
+        node
       end
-    end
 
-    build_tree(rest, node)
+    build_tree(rest, updated_parent)
   end
+
+  defp find_last_sibling(%StateNode{next_sibling: nil} = sibling), do: sibling
+  defp find_last_sibling(%StateNode{next_sibling: next_sibling}), do: find_last_sibling(next_sibling)
 end
