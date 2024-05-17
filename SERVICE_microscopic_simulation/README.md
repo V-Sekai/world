@@ -1,54 +1,55 @@
-# ebpf prototypes
+To calculate the operations per second (ops/s), consider the number of players and the frequency of each operation.
 
-## **UDP Monitor and Forwarder (8_000_PlayerServer to 10_000_WorldServerLeader)**
+1. **Isolated Player State Nodes & Individual Player State Processing**:
 
-```bash
-iptables -t nat -A PREROUTING -p udp --dport 8000 -j DNAT --to-destination <IP of 10_000_WorldServerLeader>:10000
+   - 8,000 players are processed at a frequency of 100hz.
+   - Therefore, the ops/s = 8,000 players \* 100 operations/player/second = 800,000 ops/s.
+
+2. **Storing All Player States in a History Buffer**:
+
+   - 10,000 players are processed at a frequency of 100hz for 1 second.
+   - Therefore, the ops/s = 10,000 players \* 100 operations/player/second = 1,000,000 ops/s.
+
+To run your production systems at 40% capacity, you would need a system capable of handling:
+
+- For isolated player state nodes and individual player state processing: 800,000 ops/s / 0.4 = 2,000,000 ops/s.
+- For storing all player states in a history buffer: 1,000,000 ops/s / 0.4 = 2,500,000 ops/s.
+
+These calculations assume that each operation takes the same amount of time, which might not be the case in a real-world scenario. Also, these numbers represent the theoretical maximum capacity needed. The actual capacity required could be lower depending on the efficiency of your code and the specific workload characteristics.
+
+```mermaid
+sequenceDiagram
+    SingleClient->>8_000_PlayerServer: Send 100 bytes
+    8_000_PlayerServer->>10_000_WorldServerLeader: Process operation
+    10_000_WorldServerLeader->>SingleClient: Process 100 bytes in received Tree Order and send data for all authority states
 ```
 
-This rule tells `iptables` to take any UDP packets that arrive on port 8000 and forward them to the IP address of `10_000_WorldServerLeader` on port 10000. You'd replace `<IP of 10_000_WorldServerLeader>` with the actual IP address of your `10_000_WorldServerLeader` server.
+1. **UDP Monitor and Forwarder (8_000_PlayerServer to 10_000_WorldServerLeader)**:
 
-```bash
-echo 1 > /proc/sys/net/ipv4/ip_forward
+This program monitors incoming packets at the 8_000_PlayerServer and forwards them to 10_000_WorldServerLeader, informing it about the original source IP:port (SingleClient) for spoofing.
+
+2. **UDP Responder (10_000_WorldServerLeader to SingleClient)**:
+
+- Processes the operation received from the `8_000_PlayerServer`.
+- Collects all the ring buffer states.
+- Retrieves the states from the BPF map.
+- Sends back the processed data to the `SingleClient` by spoofing the source IP:port as informed by the first program.
+
+3. **Iterator and Interpolator (10_000_WorldServerLeader)**:
+
+- Retrieves the player states from the BPF map.
+- Sorts the retrieved states using a Left-child right-sibling binary tree.
+- Uses an iterator to traverse through the player states.
+- Performs interpolation based on the specific algorithm used.
+
+### Paxos sequence
+
+```mermaid
+sequenceDiagram
+    SingleClient->>8_000_PlayerServer: Send 100 bytes
+    8_000_PlayerServer->>10_000_WorldServerLeader: Propose operation (Paxos)
+    10_000_WorldServerLeader-->>8_000_PlayerServer: Promise to accept operation (Paxos)
+    8_000_PlayerServer->>10_000_WorldServerLeader: Accept operation and send 100 bytes (Paxos)
+    10_000_WorldServerLeader-->>8_000_PlayerServer: Acknowledge acceptance (Paxos)
+    10_000_WorldServerLeader->>SingleClient: Process 100 bytes in received Tree Order and send data for all authority states
 ```
-
-## UDP Responder (10_000_WorldServerLeader to SingleClient)\*\*:
-
-```python
-#!/usr/bin/python3
-# https://github.com/xdp-project/xdp-tutorial/tree/master/basic04-pinning-maps
-from bcc import BPF
-import socket
-import time
-
-program = r"""
-// Your BPF program goes here
-// Get the operation from 8_000_PlayerServer
-// (task, pid, cpu, flags, ts, msg) = b.trace_fields()
-// write ring buffer states to the map.
-// on updates of the map send back the processed data to the SingleClient
-"""
-
-device = "eth0"
-b = BPF(text=program)
-b.attach_xdp(device, fn_name="responder_xdp_filter")
-
-def process_data(states):
-    sorted_states = sort_states_with_left_child_right_sibling_binary_tree(player_states)
-    interpolated_states = interpolate_states(sorted_states)
-
-while True:
-    try:
-        states = [(k.value, v.value) for k, v in ring_buffer_states.items()]
-        processed_data = process_data(states)
-
-    except KeyboardInterrupt:
-        break
-```
-
-## Attribution
-
-    Copyright (c) 2018-present. This file is part of V-Sekai https://v-sekai.org/.
-    K. S. Ernest (Fire) Lee & Contributors
-    README.md
-    SPDX-License-Identifier: MIT
