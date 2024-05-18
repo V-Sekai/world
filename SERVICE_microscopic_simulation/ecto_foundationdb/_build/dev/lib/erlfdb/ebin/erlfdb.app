@@ -1,0 +1,13 @@
+{application,erlfdb,
+             [{description,"Erlang client for FoundationDB"},
+              {vsn,"0.1.0"},
+              {registered,[]},
+              {applications,[kernel,stdlib]},
+              {maintainers,["Jesse Stimpson"]},
+              {links,[{"GitHub",
+                       "https://github.com/foundationdb-beam/erlfdb"}]},
+              {licenses,["Apache-2.0"]},
+              {env,[{api_version,730},{network_options,[]}]},
+              {modules,[erlfdb,erlfdb_directory,erlfdb_float,erlfdb_hca,
+                        erlfdb_key,erlfdb_nif,erlfdb_subspace,
+                        erlfdb_tenant_management,erlfdb_tuple,erlfdb_util]}]}.
