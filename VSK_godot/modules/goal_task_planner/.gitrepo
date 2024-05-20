@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai/godot-goal-task-planner.git
 	branch = main
-	commit = b8d4e0488f20e470f9241b0c01ede8bb90fce28e
-	parent = 1d8e79d7746e018a79a4236993108418d10aaff7
+	commit = f514a42416a0a2fec193c8bb7713d5da258f7db7
+	parent = 5ebfd4726df67f51db60e1a237b35a9261f320d1
 	method = merge
 	cmdver = 0.4.6
