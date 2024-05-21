@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dq7m506h0ofw5"]
 
-[ext_resource type="Script" path="res://plan.gd" id="1_0t4st"]
+[ext_resource type="Script" path="res://long_cat.gd" id="1_n2m67"]
 
 [node name="Plan" type="Node3D"]
-script = ExtResource("1_0t4st")
+script = ExtResource("1_n2m67")

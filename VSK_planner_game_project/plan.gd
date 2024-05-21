@@ -163,7 +163,7 @@ func _ready() -> void:
 	planner.current_domain = the_domain
 	before_each(state1, planner, the_domain)
 	planner.verbose = 1
-	var task: Array = [["at", "package1", "location10"]]
+	var task: Array = [["at", "package1", "location10"], ["at", "package2", "airport2"]]
 	var plan: Variant = planner.find_plan(state1, task)
-	print(plan)
+	#print(plan)
 	# [["drive_truck", "truck1", "location1"], ["load_truck", "package1", "truck1"], ["drive_truck", "truck1", "airport1"], ["unload_truck", "package1", "airport1"], ["fly_plane", "plane2", "airport1"], ["load_plane", "package1", "plane2"], ["fly_plane", "plane2", "airport2"], ["unload_plane", "package1", "airport2"], ["drive_truck", "truck6", "airport2"], ["load_truck", "package1", "truck6"], ["drive_truck", "truck6", "location10"], ["unload_truck", "package1", "location10"]]
