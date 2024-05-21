@@ -41,7 +41,7 @@ func method_give_water(p_state, p_pet, p_thirst):
 
 func method_exercise_pet(p_state, p_pet, p_exercise):
 	if p_pet in p_state["pets"] and p_state["exercise"][p_pet] < 5:
-		return [["walk_pet", p_pet], ["exercise", p_pet, 5], ["location", p_pet, "neighborhood"]]
+		return [["location", p_pet, "neighborhood"], ["walk_pet", p_pet], ["exercise", p_pet, 5],]
 	return false
 
 func method_release_pet(p_state, p_pet, p_location):
