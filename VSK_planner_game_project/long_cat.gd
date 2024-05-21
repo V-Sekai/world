@@ -16,6 +16,19 @@ func release_pet(p_state, p_pet):
 	p_state["location"][p_pet] = "neighborhood"
 	return p_state
 
+func pet_pet(p_state, p_pet):
+	p_state["happiness"][p_pet] += 10
+	return p_state
+
+func play_with_pet(p_state, p_pet):
+	p_state["happiness"][p_pet] += 20
+	p_state["exercise"][p_pet] += 5
+	return p_state
+
+func train_pet(p_state, p_pet):
+	p_state["intelligence"][p_pet] += 1
+	return p_state
+
 func method_feed_pet(p_state, p_pet, p_hunger):
 	if p_pet in p_state["pets"] and p_state["hunger"][p_pet] < 5:
 		return [[p_pet, "nutrition", 5], ["hunger", p_pet, 5]]
@@ -64,19 +77,20 @@ func _ready() -> void:
 	the_domain.add_unigoal_methods("exercise", [method_exercise_pet])
 	the_domain.add_actions([feed_pet, give_water, walk_pet, release_pet])
 	planner.current_domain = the_domain
-	planner.verbose = 1
+	planner.verbose = 2
 
 	var state: Dictionary = {
-		"pets": ["toothless"],
+		"pets": ["longcat"],
 		"locations": ["home", "neighborhood"],
-		"hunger": {"toothless": 10},
-		"thirst": {"toothless": 10},
-		"exercise": {"toothless": 0},
-		"location": {"toothless": "home"},
-		"nutrition": {"toothless": 6},
-		"hydration": {"toothless": 6},
+		"hunger": {"longcat": 10},
+		"thirst": {"longcat": 10},
+		"exercise": {"longcat": 0},
+		"location": {"longcat": "home"},
+		"nutrition": {"longcat": 6},
+		"hydration": {"longcat": 6},
+		"health": {"longcat": 100},
+		"happiness": {"longcat": 50},
 	}
 
-	var task: Array = [["care_for_pet", "toothless"]]
+	var task: Array = [["care_for_pet", "longcat"]]
 	planner.find_plan(state, task)
-	# [["walk_pet", "toothless"], ["walk_pet", "toothless"], ["walk_pet", "toothless"], ["walk_pet", "toothless"], ["walk_pet", "toothless"], ["release_pet", "toothless"]]
