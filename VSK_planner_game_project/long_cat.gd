@@ -79,3 +79,4 @@ func _ready() -> void:
 
 	var task: Array = [["care_for_pet", "toothless"]]
 	planner.find_plan(state, task)
+	# [["walk_pet", "toothless"], ["walk_pet", "toothless"], ["walk_pet", "toothless"], ["walk_pet", "toothless"], ["walk_pet", "toothless"], ["release_pet", "toothless"]]
