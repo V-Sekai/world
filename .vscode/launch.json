@@ -12,7 +12,7 @@
   "configurations": [
     {
       "name": "Run the editor with V-Sekai game",
-      "type": "lldb",
+      "type": "cppvsdbg",
       "request": "launch",
       "args": ["--path", "VSK_planner_game_project", "-e"],
       "cwd": "${workspaceFolder}",
