@@ -273,3 +273,10 @@ reflections/sky_reflections/roughness_layers=6
 reflections/sky_reflections/ggx_samples=16
 shading/overrides/force_lambert_over_burley=true
 textures/default_filters/anisotropic_filtering_level=3
+
+[xr]
+
+openxr/enabled=true
+shaders/enabled=true
+openxr/enabled.macos=false
+shaders/enabled.macos=false
