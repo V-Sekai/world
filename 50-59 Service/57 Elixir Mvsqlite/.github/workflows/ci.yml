@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "*"
+  pull_request:
+    branches:
+      - "*"
+
+jobs:
+  lint:
+    runs-on: ${{ matrix.os }}
+    env:
+      MIX_ENV: dev
+    name: Lint
+    strategy:
+      matrix:
+        os: ["ubuntu-20.04"]
+        elixir: ["1.16"]
+        otp: ["26"]
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          set -e
+          curl -L https://github.com/apple/foundationdb/releases/download/7.1.53/foundationdb-clients_7.1.53-1_amd64.deb --output fdb-client.deb
+          sudo dpkg -i fdb-client.deb
+          curl -L https://github.com/apple/foundationdb/releases/download/7.1.53/foundationdb-server_7.1.53-1_amd64.deb --output fdb-server.deb
+          sudo dpkg -i fdb-server.deb
+          sudo apt update && sudo apt install -y libfuse3-dev execstack
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ matrix.otp }}
+          elixir-version: ${{ matrix.elixir }}
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - uses: actions/cache@v3
+        with:
+          path: deps
+          key: ${{ matrix.os }}-otp_${{ matrix.otp }}-elixir_${{ matrix.elixir }}-mix_${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ matrix.os }}-otp_${{ matrix.otp }}-elixir_${{ matrix.elixir }}-mix_
+      - run: mix deps.get
+      - run: mix deps.compile
+      - run: mix format --check-formatted
+      - run: clang-format --dry-run --Werror c_src/sqlite3_nif.c
+      - run: mix deps.unlock --check-unused
+      - run: mix credo --all
+      - run: cargo build --locked --release -p mvstore --manifest-path rust_src/Cargo.toml
+      - run: |
+          set -e
+          chmod +x ./rust_src/target/release/mvstore
+          export RUST_LOG=error
+          ./rust_src/target/release/mvstore --data-plane 127.0.0.1:7000 --admin-api 127.0.0.1:7001 --metadata-prefix mvstore-test --raw-data-prefix m --auto-create-namespace --cluster /etc/foundationdb/fdb.cluster &
+          sleep 1
+          curl http://localhost:7001/api/create_namespace -d '{"key":"test","metadata":""}'
+          sleep 1
+          mix test_sqlite_version
+
+  test:
+    runs-on: ${{ matrix.os }}
+    env:
+      MIX_ENV: test
+      DEBUG: "1"
+
+    name: Test Elixir ${{ matrix.elixir }}, OTP ${{ matrix.otp }}, OS ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-20.04"]
+        elixir: ["1.16", "1.15", "1.14"]
+        otp: ["26", "25", "24"]
+        exclude:
+          - elixir: "1.13"
+            otp: "26"
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          set -e
+          curl -L https://github.com/apple/foundationdb/releases/download/7.1.53/foundationdb-clients_7.1.53-1_amd64.deb --output fdb-client.deb
+          sudo dpkg -i fdb-client.deb
+          curl -L https://github.com/apple/foundationdb/releases/download/7.1.53/foundationdb-server_7.1.53-1_amd64.deb --output fdb-server.deb
+          sudo dpkg -i fdb-server.deb
+          sudo apt update && sudo apt install -y libfuse3-dev execstack
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ matrix.otp }}
+          elixir-version: ${{ matrix.elixir }}
+      - uses: egor-tensin/vs-shell@v2
+        if: runner.os == 'Windows'
+      - uses: actions/cache@v3
+        with:
+          path: deps
+          key: ${{ matrix.os }}-otp_${{ matrix.otp }}-elixir_${{ matrix.elixir }}-mix_${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ matrix.os }}-otp_${{ matrix.otp }}-elixir_${{ matrix.elixir }}-mix_
+      - run: mix deps.get --only test
+      - run: mix deps.compile
+      - run: mix compile
+      - run: cargo build --locked --release -p mvstore --manifest-path rust_src/Cargo.toml
+      - run: |
+          set -e
+          chmod +x ./rust_src/target/release/mvstore
+          export RUST_LOG=error
+          ./rust_src/target/release/mvstore --data-plane 127.0.0.1:7000 --admin-api 127.0.0.1:7001 --metadata-prefix mvstore-test --raw-data-prefix m --auto-create-namespace --cluster /etc/foundationdb/fdb.cluster &
+          sleep 1
+          curl http://localhost:7001/api/create_namespace -d '{"key":"test","metadata":""}'
+          sleep 1
+          mix test
