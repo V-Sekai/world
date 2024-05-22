@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/jarneson/godot-ply.git
+	branch = main
+	commit = bc75abdac61e4a7b0451027c500b69687235ce40
+	parent = b4b5fb32097f1bdaabe50cdd4db090eb46f706c1
+	method = merge
+	cmdver = 0.4.6

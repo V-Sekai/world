@@ -1,0 +1,8 @@
+[gd_resource type="StandardMaterial3D" load_steps=2 format=3 uid="uid://b4i0cps0lllg8"]
+
+[ext_resource type="Texture2D" uid="uid://bb6kjype86gts" path="res://addons/ply/materials/debug.png" id="1"]
+
+[resource]
+vertex_color_use_as_albedo = true
+albedo_texture = ExtResource("1")
+uv1_triplanar = true
