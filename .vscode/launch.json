@@ -12,11 +12,11 @@
   "configurations": [
     {
       "name": "Run the editor with V-Sekai game",
-      "type": "cppvsdbg",
+      "type": "lldb",
       "request": "launch",
       "args": ["--path", "VSK_planner_game_project", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/VSK_godot/bin/godot.windows.editor.double.x86_64.console.exe",
+      "program": "${workspaceFolder}/VSK_godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
     },
   ]
