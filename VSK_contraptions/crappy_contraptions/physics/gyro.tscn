@@ -1,0 +1,43 @@
+[gd_scene load_steps=7 format=3 uid="uid://dc840yjhiuclo"]
+
+[ext_resource type="Script" path="res://crappy_contraptions/physics/gyro.gd" id="1_armn7"]
+[ext_resource type="Script" path="res://addons/smoothing/smoothing.gd" id="2_18mek"]
+[ext_resource type="PackedScene" uid="uid://c7y85enk8jlrn" path="res://crappy_contraptions/physics/models/gyro.glb" id="3_uhr3k"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_eo5if"]
+
+[sub_resource type="PolygonOccluder3D" id="PolygonOccluder3D_0vcsa"]
+polygon = PackedVector2Array(-0.65, -0.5, 2.08165e-12, 0.5, 0.65, -0.5)
+
+[sub_resource type="QuadOccluder3D" id="QuadOccluder3D_sbp60"]
+
+[node name="gyro" type="RigidBody3D" groups=["build", "control", "usable"]]
+angular_damp = 20.0
+script = ExtResource("1_armn7")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+shape = SubResource("BoxShape3D_eo5if")
+
+[node name="Smoothing" type="Node3D" parent="."]
+script = ExtResource("2_18mek")
+
+[node name="Node3D" type="Node3D" parent="Smoothing"]
+
+[node name="gyro" parent="Smoothing/Node3D" instance=ExtResource("3_uhr3k")]
+
+[node name="OccluderInstance3D" type="OccluderInstance3D" parent="Smoothing/Node3D"]
+transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 0, 0, 0)
+occluder = SubResource("PolygonOccluder3D_0vcsa")
+
+[node name="OccluderInstance3D2" type="OccluderInstance3D" parent="Smoothing/Node3D"]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0, 0, 0)
+occluder = SubResource("PolygonOccluder3D_0vcsa")
+
+[node name="OccluderInstance3D3" type="OccluderInstance3D" parent="Smoothing/Node3D"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.456641, 0)
+occluder = SubResource("QuadOccluder3D_sbp60")
+
+[node name="OccluderInstance3D4" type="OccluderInstance3D" parent="Smoothing/Node3D"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, -0.451709, 0)
+occluder = SubResource("QuadOccluder3D_sbp60")

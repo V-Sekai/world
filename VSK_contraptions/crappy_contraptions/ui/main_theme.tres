@@ -1,0 +1,7 @@
+[gd_resource type="Theme" load_steps=2 format=3 uid="uid://bd7gseqffsnlf"]
+
+[ext_resource type="FontFile" uid="uid://dj0468mpo73kw" path="res://addons/exmoe_tools/fonts/Yanone_Kaffeesatz/YanoneKaffeesatz-Medium.ttf" id="1_anvtp"]
+
+[resource]
+default_font = ExtResource("1_anvtp")
+default_font_size = 24
