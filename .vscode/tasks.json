@@ -10,10 +10,10 @@
       "label": "Godot Engine",
       "type": "shell",
       "options": {
-        "cwd": "${workspaceFolder}/VSK_godot"
+        "cwd": "${workspaceFolder}/20-29 Tools/21 Godot/12.01 Godot"
       },
       "command": [
-        "scons werror=yes use_llvm=yes use_mingw=yes precision=double compiledb=yes target=editor tests=yes debug_symbols=yes"
+        "scons werror=yes precision=double compiledb=yes target=editor tests=yes debug_symbols=yes"
       ],
     },
   ]
