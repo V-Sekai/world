@@ -92,6 +92,8 @@ Modules extend Godot Engine core (C++).
 - [Image comparison](https://imgsli.com)
 - [Code Name Generator: Colors, Metal, Animals](https://www.codenamegenerator.com/)
 - [Voice Changer Guide](https://rentry.co/VoiceChangerGuide)
+- [Sapling: A Scalable, User-Friendly Source Control System](https://github.com/facebook/sapling.git)
+- [Provide the user with inverse control over the hyper-parameters through a brush stroke metaphor](https://github.com/eliemichel/DagAmendment)
 
 ## Articles
 
