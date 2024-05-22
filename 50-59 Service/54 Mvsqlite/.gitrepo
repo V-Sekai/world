@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/V-Sekai/mvsqlite.git
+	branch = main
+	commit = 2622d05838765ca82eb290e7b7d4df5e2cd72b46
+	parent = 5373a2aed1078c83ee9feb9611b0ba48b23f4339
+	method = merge
+	cmdver = 0.4.6
