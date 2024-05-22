@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai/elixir-mvsqlite.git
 	branch = main
-	commit = 736f8675bf94fdcdecabd461350f38d364b385f3
-	parent = 0296c55462873ef57fb36c0b4335e87449f182c0
+	commit = 7d54edc84932c932467df37720f53feac519cc8d
+	parent = 13d619a729943448b06de13d8ee302b5b9af94e3
 	method = merge
 	cmdver = 0.4.6
