@@ -1,0 +1,13 @@
+[gd_resource type="Theme" load_steps=2 format=3 uid="uid://bgbxb4fni1wr"]
+
+[ext_resource type="FontFile" uid="uid://qf7622sypprq" path="res://addons/exmoe_tools/fonts/Yanone_Kaffeesatz/YanoneKaffeesatz-SemiBold.ttf" id="1_y6007"]
+
+[resource]
+default_font = ExtResource("1_y6007")
+default_font_size = 24
+Label/colors/font_color = Color(1, 1, 1, 1)
+Label/colors/font_outline_color = Color(0, 0, 0, 0.498039)
+Label/colors/font_shadow_color = Color(0, 0, 0, 0.498039)
+Label/constants/outline_size = 2
+Label/constants/shadow_offset_x = 0
+Label/constants/shadow_offset_y = 2

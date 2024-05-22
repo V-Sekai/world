@@ -1,0 +1,37 @@
+[gd_scene load_steps=3 format=3 uid="uid://c7jaebv3nhvsq"]
+
+[ext_resource type="PackedScene" uid="uid://c0wxk1faqipeb" path="res://addons/exmoe_tools/splash/splash_exmoe.tscn" id="1_654a0"]
+
+[sub_resource type="GDScript" id="GDScript_jejjq"]
+script/source = "extends Control
+
+@export var splash: Node
+
+static var first_load := true
+
+func _ready() -> void:
+	if not first_load:
+		return
+
+	first_load = false
+
+	assert(splash)
+	var pack := PackedScene.new()
+	pack.pack(splash)
+	splash.queue_free()
+	SnailTransition.auto_transition(pack, null)
+"
+
+[node name="BootSplash" type="Control" node_paths=PackedStringArray("splash")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = SubResource("GDScript_jejjq")
+splash = NodePath("splash_exmoe")
+
+[node name="splash_exmoe" parent="." instance=ExtResource("1_654a0")]
+layout_mode = 1
+next_scene_path = "res://crappy_contraptions/ui/title_menu.tscn"

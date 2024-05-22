@@ -1,0 +1,62 @@
+[gd_scene load_steps=12 format=3 uid="uid://kkqfc7rkj26d"]
+
+[ext_resource type="Script" path="res://crappy_contraptions/physics/contraption.gd" id="1_7o5tq"]
+[ext_resource type="PackedScene" uid="uid://de0xrdyh6s7tl" path="res://crappy_contraptions/physics/player.tscn" id="2_thfev"]
+[ext_resource type="Material" uid="uid://d1dcxbgx8kga7" path="res://crappy_contraptions/materials/test_grid_grey.tres" id="3_v1xwt"]
+[ext_resource type="PackedScene" uid="uid://d0bndvyxq2j7a" path="res://crappy_contraptions/scenes/main_background.tscn" id="4_wmtaa"]
+[ext_resource type="Script" path="res://addons/exmoe_tools/common/follow_cam.gd" id="5_oqajo"]
+[ext_resource type="Script" path="res://crappy_contraptions/physics/safe_area.gd" id="6_nmtbp"]
+[ext_resource type="Script" path="res://crappy_contraptions/scenes/unlock.gd" id="7_svshp"]
+[ext_resource type="Script" path="res://crappy_contraptions/scenes/save_value.gd" id="8_315ki"]
+[ext_resource type="PackedScene" uid="uid://cnn3l47ist43j" path="res://crappy_contraptions/physics/level_changer.tscn" id="9_pive6"]
+[ext_resource type="FontFile" uid="uid://qf7622sypprq" path="res://addons/exmoe_tools/fonts/Yanone_Kaffeesatz/YanoneKaffeesatz-SemiBold.ttf" id="10_jjwiu"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_2vd67"]
+size = Vector3(104, 50, 104)
+
+[node name="Level2" type="Node3D"]
+script = ExtResource("1_7o5tq")
+
+[node name="player" parent="." node_paths=PackedStringArray("camera") instance=ExtResource("2_thfev")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, 1, 2.08165e-12)
+camera = NodePath("../Camera3D")
+
+[node name="CSGBox3D" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.08165e-12, -0.529541, -6.96356)
+layers = 9
+use_collision = true
+size = Vector3(6.20312, 1.05908, 18.2457)
+material = ExtResource("3_v1xwt")
+
+[node name="background" parent="." instance=ExtResource("4_wmtaa")]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+script = ExtResource("5_oqajo")
+
+[node name="Area3D" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 14.5929, 0)
+script = ExtResource("6_nmtbp")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("BoxShape3D_2vd67")
+
+[node name="Unlock" type="Node" parent="."]
+script = ExtResource("7_svshp")
+save_flag = "level_8"
+
+[node name="SaveValue" type="Node" parent="."]
+script = ExtResource("8_315ki")
+save_flag = "continue"
+save_value = "level_8"
+
+[node name="finish" parent="." instance=ExtResource("9_pive6")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 2.08165e-12, 2.08165e-12, -8.11501)
+map_path = "res://crappy_contraptions/scenes/level_9.tscn"
+
+[node name="Label3D2" type="Label3D" parent="finish"]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 5.6071e-08, 4.48378, -0.641378)
+pixel_size = 0.01
+text = "Oh no."
+font = ExtResource("10_jjwiu")
+font_size = 64
+outline_size = 24

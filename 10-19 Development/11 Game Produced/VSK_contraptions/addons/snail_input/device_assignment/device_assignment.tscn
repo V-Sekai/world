@@ -1,0 +1,75 @@
+[gd_scene load_steps=5 format=3 uid="uid://cgfm8uvoyaxs7"]
+
+[ext_resource type="Theme" uid="uid://bgbxb4fni1wr" path="res://addons/snail_input/device_assignment/ui_theme.tres" id="1_lgmvr"]
+[ext_resource type="Script" path="res://addons/snail_input/device_assignment/device_assignment.gd" id="2_vqxf7"]
+[ext_resource type="PackedScene" uid="uid://cajfcmay26qox" path="res://addons/snail_input/device_assignment/player_present.tscn" id="3_k5qtn"]
+[ext_resource type="PackedScene" uid="uid://dkyxpailuglgq" path="res://addons/snail_input/device_assignment/player_missing.tscn" id="4_u81gj"]
+
+[node name="InputTest" type="Control"]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 81.0
+offset_top = 58.0
+offset_right = -81.0
+offset_bottom = -58.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.498039)
+
+[node name="latest" type="Label" parent="ColorRect"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = -31.0
+offset_right = 74.0
+offset_bottom = -8.0
+grow_vertical = 0
+theme = ExtResource("1_lgmvr")
+text = "keyboard"
+vertical_alignment = 2
+
+[node name="Control" type="Control" parent="ColorRect"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="ColorRect/Control"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 28.0
+grow_horizontal = 2
+color = Color(0, 0, 0, 0.498039)
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ColorRect/Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_lgmvr")
+script = ExtResource("2_vqxf7")
+player_present = ExtResource("3_k5qtn")
+player_missing = ExtResource("4_u81gj")
