@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/eliemichel/DagAmendment.git
+	branch = main
+	commit = 93b66d4f59cdca4700019fc9dd060a1d33137739
+	parent = b6c2761bc3d026f9c08377757ca07d42ebabc7f5
+	method = merge
+	cmdver = 0.4.6
