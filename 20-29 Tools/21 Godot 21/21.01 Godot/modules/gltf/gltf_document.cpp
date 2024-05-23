@@ -4860,7 +4860,7 @@ Error GLTFDocument::_serialize_animations(Ref<GLTFState> p_state) {
 				t["sampler"] = samplers.size();
 				Dictionary s;
 				Vector<real_t> times;
-				const double increment = 1.0 / p_state->get_bake_fps();
+				const double increment = 1.0 / BAKE_FPS;
 				{
 					double time = 0.0;
 					bool last = false;
@@ -5902,10 +5902,7 @@ T GLTFDocument::_interpolate_track(const Vector<real_t> &p_times, const Vector<T
 	ERR_FAIL_V(p_values[0]);
 }
 
-void GLTFDocument::_import_animation(Ref<GLTFState> p_state, AnimationPlayer *p_animation_player, const GLTFAnimationIndex p_index, const bool p_trimming, const bool p_remove_immutable_tracks) {
-	if(p_state.is_null()) {
-		return;
-	}
+void GLTFDocument::_import_animation(Ref<GLTFState> p_state, AnimationPlayer *p_animation_player, const GLTFAnimationIndex p_index, const float p_bake_fps, const bool p_trimming, const bool p_remove_immutable_tracks) {
 	Ref<GLTFAnimation> anim = p_state->animations[p_index];
 
 	String anim_name = anim->get_name();
@@ -5917,7 +5914,7 @@ void GLTFDocument::_import_animation(Ref<GLTFState> p_state, AnimationPlayer *p_
 	Ref<Animation> animation;
 	animation.instantiate();
 	animation->set_name(anim_name);
-	animation->set_step(1.0 / p_state->get_bake_fps());
+	animation->set_step(1.0 / p_bake_fps);
 
 	if (anim->get_loop()) {
 		animation->set_loop_mode(Animation::LOOP_LINEAR);
@@ -6084,7 +6081,7 @@ void GLTFDocument::_import_animation(Ref<GLTFState> p_state, AnimationPlayer *p_
 				}
 			}
 
-			const double increment = 1.0 / p_state->get_bake_fps();
+			const double increment = 1.0 / p_bake_fps;
 			double time = anim_start;
 
 			Vector3 base_pos;
@@ -6161,7 +6158,7 @@ void GLTFDocument::_import_animation(Ref<GLTFState> p_state, AnimationPlayer *p_
 				}
 			} else {
 				// CATMULLROMSPLINE or CUBIC_SPLINE have to be baked, apologies.
-				const double increment = 1.0 / p_state->get_bake_fps();
+				const double increment = 1.0 / p_bake_fps;
 				double time = 0.0;
 				bool last = false;
 				while (true) {
@@ -6375,7 +6372,7 @@ GLTFAnimation::Track GLTFDocument::_convert_animation_track(Ref<GLTFState> p_sta
 			p_track.scale_track.times.clear();
 			p_track.scale_track.values.clear();
 			// CATMULLROMSPLINE or CUBIC_SPLINE have to be baked, apologies.
-			const double increment = 1.0 / p_state->get_bake_fps();
+			const double increment = 1.0 / BAKE_FPS;
 			double time = 0.0;
 			bool last = false;
 			while (true) {
@@ -6410,7 +6407,7 @@ GLTFAnimation::Track GLTFDocument::_convert_animation_track(Ref<GLTFState> p_sta
 			p_track.position_track.times.clear();
 			p_track.position_track.values.clear();
 			// CATMULLROMSPLINE or CUBIC_SPLINE have to be baked, apologies.
-			const double increment = 1.0 / p_state->get_bake_fps();
+			const double increment = 1.0 / BAKE_FPS;
 			double time = 0.0;
 			bool last = false;
 			while (true) {
@@ -6445,7 +6442,7 @@ GLTFAnimation::Track GLTFDocument::_convert_animation_track(Ref<GLTFState> p_sta
 			p_track.rotation_track.times.clear();
 			p_track.rotation_track.values.clear();
 			// CATMULLROMSPLINE or CUBIC_SPLINE have to be baked, apologies.
-			const double increment = 1.0 / p_state->get_bake_fps();
+			const double increment = 1.0 / BAKE_FPS;
 			double time = 0.0;
 			bool last = false;
 			while (true) {
@@ -6485,7 +6482,7 @@ GLTFAnimation::Track GLTFDocument::_convert_animation_track(Ref<GLTFState> p_sta
 				p_track.position_track.times.clear();
 				p_track.position_track.values.clear();
 				// CATMULLROMSPLINE or CUBIC_SPLINE have to be baked, apologies.
-				const double increment = 1.0 / p_state->get_bake_fps();
+				const double increment = 1.0 / BAKE_FPS;
 				double time = 0.0;
 				bool last = false;
 				while (true) {
@@ -6518,7 +6515,7 @@ GLTFAnimation::Track GLTFDocument::_convert_animation_track(Ref<GLTFState> p_sta
 				p_track.rotation_track.times.clear();
 				p_track.rotation_track.values.clear();
 				// CATMULLROMSPLINE or CUBIC_SPLINE have to be baked, apologies.
-				const double increment = 1.0 / p_state->get_bake_fps();
+				const double increment = 1.0 / BAKE_FPS;
 				double time = 0.0;
 				bool last = false;
 				while (true) {
@@ -6554,7 +6551,7 @@ GLTFAnimation::Track GLTFDocument::_convert_animation_track(Ref<GLTFState> p_sta
 				p_track.scale_track.times.clear();
 				p_track.scale_track.values.clear();
 				// CATMULLROMSPLINE or CUBIC_SPLINE have to be baked, apologies.
-				const double increment = 1.0 / p_state->get_bake_fps();
+				const double increment = 1.0 / BAKE_FPS;
 				double time = 0.0;
 				bool last = false;
 				while (true) {
@@ -6580,14 +6577,14 @@ GLTFAnimation::Track GLTFDocument::_convert_animation_track(Ref<GLTFState> p_sta
 			}
 		}
 	} else if (track_type == Animation::TYPE_BEZIER) {
-		const int32_t keys = anim_end * p_state->get_bake_fps();
+		const int32_t keys = anim_end * BAKE_FPS;
 		if (path.contains(":scale")) {
 			if (!p_track.scale_track.times.size()) {
 				p_track.scale_track.interpolation = gltf_interpolation;
 				Vector<real_t> new_times;
 				new_times.resize(keys);
 				for (int32_t key_i = 0; key_i < keys; key_i++) {
-					new_times.write[key_i] = key_i / p_state->get_bake_fps();
+					new_times.write[key_i] = key_i / BAKE_FPS;
 				}
 				p_track.scale_track.times = new_times;
 
@@ -6600,11 +6597,11 @@ GLTFAnimation::Track GLTFDocument::_convert_animation_track(Ref<GLTFState> p_sta
 				for (int32_t key_i = 0; key_i < keys; key_i++) {
 					Vector3 bezier_track = p_track.scale_track.values[key_i];
 					if (path.contains(":scale:x")) {
-						bezier_track.x = p_animation->bezier_track_interpolate(p_track_i, key_i / p_state->get_bake_fps());
+						bezier_track.x = p_animation->bezier_track_interpolate(p_track_i, key_i / BAKE_FPS);
 					} else if (path.contains(":scale:y")) {
-						bezier_track.y = p_animation->bezier_track_interpolate(p_track_i, key_i / p_state->get_bake_fps());
+						bezier_track.y = p_animation->bezier_track_interpolate(p_track_i, key_i / BAKE_FPS);
 					} else if (path.contains(":scale:z")) {
-						bezier_track.z = p_animation->bezier_track_interpolate(p_track_i, key_i / p_state->get_bake_fps());
+						bezier_track.z = p_animation->bezier_track_interpolate(p_track_i, key_i / BAKE_FPS);
 					}
 					p_track.scale_track.values.write[key_i] = bezier_track;
 				}
@@ -6615,7 +6612,7 @@ GLTFAnimation::Track GLTFDocument::_convert_animation_track(Ref<GLTFState> p_sta
 				Vector<real_t> new_times;
 				new_times.resize(keys);
 				for (int32_t key_i = 0; key_i < keys; key_i++) {
-					new_times.write[key_i] = key_i / p_state->get_bake_fps();
+					new_times.write[key_i] = key_i / BAKE_FPS;
 				}
 				p_track.position_track.times = new_times;
 
@@ -6625,11 +6622,11 @@ GLTFAnimation::Track GLTFDocument::_convert_animation_track(Ref<GLTFState> p_sta
 			for (int32_t key_i = 0; key_i < keys; key_i++) {
 				Vector3 bezier_track = p_track.position_track.values[key_i];
 				if (path.contains(":position:x")) {
-					bezier_track.x = p_animation->bezier_track_interpolate(p_track_i, key_i / p_state->get_bake_fps());
+					bezier_track.x = p_animation->bezier_track_interpolate(p_track_i, key_i / BAKE_FPS);
 				} else if (path.contains(":position:y")) {
-					bezier_track.y = p_animation->bezier_track_interpolate(p_track_i, key_i / p_state->get_bake_fps());
+					bezier_track.y = p_animation->bezier_track_interpolate(p_track_i, key_i / BAKE_FPS);
 				} else if (path.contains(":position:z")) {
-					bezier_track.z = p_animation->bezier_track_interpolate(p_track_i, key_i / p_state->get_bake_fps());
+					bezier_track.z = p_animation->bezier_track_interpolate(p_track_i, key_i / BAKE_FPS);
 				}
 				p_track.position_track.values.write[key_i] = bezier_track;
 			}
@@ -6639,7 +6636,7 @@ GLTFAnimation::Track GLTFDocument::_convert_animation_track(Ref<GLTFState> p_sta
 				Vector<real_t> new_times;
 				new_times.resize(keys);
 				for (int32_t key_i = 0; key_i < keys; key_i++) {
-					new_times.write[key_i] = key_i / p_state->get_bake_fps();
+					new_times.write[key_i] = key_i / BAKE_FPS;
 				}
 				p_track.rotation_track.times = new_times;
 
@@ -6648,13 +6645,13 @@ GLTFAnimation::Track GLTFDocument::_convert_animation_track(Ref<GLTFState> p_sta
 			for (int32_t key_i = 0; key_i < keys; key_i++) {
 				Quaternion bezier_track = p_track.rotation_track.values[key_i];
 				if (path.contains(":rotation:x")) {
-					bezier_track.x = p_animation->bezier_track_interpolate(p_track_i, key_i / p_state->get_bake_fps());
+					bezier_track.x = p_animation->bezier_track_interpolate(p_track_i, key_i / BAKE_FPS);
 				} else if (path.contains(":rotation:y")) {
-					bezier_track.y = p_animation->bezier_track_interpolate(p_track_i, key_i / p_state->get_bake_fps());
+					bezier_track.y = p_animation->bezier_track_interpolate(p_track_i, key_i / BAKE_FPS);
 				} else if (path.contains(":rotation:z")) {
-					bezier_track.z = p_animation->bezier_track_interpolate(p_track_i, key_i / p_state->get_bake_fps());
+					bezier_track.z = p_animation->bezier_track_interpolate(p_track_i, key_i / BAKE_FPS);
 				} else if (path.contains(":rotation:w")) {
-					bezier_track.w = p_animation->bezier_track_interpolate(p_track_i, key_i / p_state->get_bake_fps());
+					bezier_track.w = p_animation->bezier_track_interpolate(p_track_i, key_i / BAKE_FPS);
 				}
 				p_track.rotation_track.values.write[key_i] = bezier_track;
 			}
@@ -7308,7 +7305,6 @@ Node *GLTFDocument::generate_scene(Ref<GLTFState> p_state, float p_bake_fps, boo
 	ERR_FAIL_NULL_V(state, nullptr);
 	ERR_FAIL_INDEX_V(0, state->root_nodes.size(), nullptr);
 	Error err = OK;
-	p_state->set_bake_fps(p_bake_fps);
 	Node *root = _generate_scene_node_tree(state);
 	ERR_FAIL_NULL_V(root, nullptr);
 	_process_mesh_instances(state, root);
@@ -7317,7 +7313,7 @@ Node *GLTFDocument::generate_scene(Ref<GLTFState> p_state, float p_bake_fps, boo
 		root->add_child(ap, true);
 		ap->set_owner(root);
 		for (int i = 0; i < state->animations.size(); i++) {
-			_import_animation(state, ap, i, p_trimming, p_remove_immutable_tracks);
+			_import_animation(state, ap, i, p_bake_fps, p_trimming, p_remove_immutable_tracks);
 		}
 	}
 	for (KeyValue<GLTFNodeIndex, Node *> E : state->scene_nodes) {
