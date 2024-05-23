@@ -168,8 +168,6 @@ void EditorSceneExporterGLTFSettings::generate_property_list(Ref<GLTFDocument> p
 	_property_list.push_back(lossy_quality_prop);
 	PropertyInfo root_node_mode_prop = PropertyInfo(Variant::INT, "root_node_mode", PROPERTY_HINT_ENUM, "Single Root,Keep Root,Multi Root");
 	_property_list.push_back(root_node_mode_prop);
-	PropertyInfo bake_fps = PropertyInfo(Variant::FLOAT, "bake_fps");
-	_property_list.push_back(bake_fps);
 }
 
 String EditorSceneExporterGLTFSettings::get_copyright() const {
@@ -189,9 +187,11 @@ void EditorSceneExporterGLTFSettings::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_bake_fps", "bake_fps"), &EditorSceneExporterGLTFSettings::set_bake_fps);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "bake_fps"), "set_bake_fps", "get_bake_fps");
 }
+
 double EditorSceneExporterGLTFSettings::get_bake_fps() const {
 	return _bake_fps;
 }
+
 void EditorSceneExporterGLTFSettings::set_bake_fps(const double p_bake_fps) {
 	_bake_fps = p_bake_fps;
 }

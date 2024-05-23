@@ -109,14 +109,13 @@ protected:
 	static void _bind_methods();
 
 public:
+	double get_bake_fps() const {
+		return bake_fps;
+	}
 
-    double get_bake_fps() const {
-        return bake_fps;
-    }
-
-    void set_bake_fps(double value) {
-        bake_fps = value;
-    }
+	void set_bake_fps(double value) {
+		bake_fps = value;
+	}
 
 	void add_used_extension(const String &p_extension, bool p_required = false);
 	GLTFBufferViewIndex append_data_to_buffers(const Vector<uint8_t> &p_data, const bool p_deduplication);
