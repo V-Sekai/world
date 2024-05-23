@@ -35,15 +35,15 @@ SceneMergePlugin::~SceneMergePlugin() {
 }
 
 void SceneMergePlugin::_action() {
-	Node *node = EditorNode::get_singleton()->get_tree()->get_edited_scene_root();
-	if (!node) {
+	Node *root_node = EditorNode::get_singleton()->get_tree()->get_edited_scene_root();
+	if (!root_node) {
 		EditorNode::get_singleton()->show_accept(TTR("This operation can't be done without a scene."), TTR("OK"));
 		return;
 	}
-	Node *merged_node = scene_optimize->merge(node);
+	Node *merged_node = scene_optimize->merge(root_node);
 	if (merged_node) {
-		node->add_child(merged_node);
-		merged_node->set_owner(node);
+		root_node->add_child(merged_node);
+		merged_node->set_owner(root_node);
 	}
 }
 

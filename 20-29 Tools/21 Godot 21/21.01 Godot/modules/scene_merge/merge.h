@@ -104,7 +104,7 @@ public:
 		uint16_t x = 0;
 		uint16_t y = 0;
 	};
-	struct SetAtlasTexelArgs {
+	struct AtlasTextureArguments {
 		Ref<Image> atlas_data;
 		Ref<Image> source_texture;
 		AtlasLookupTexel *atlas_lookup = nullptr;
@@ -128,7 +128,7 @@ public:
 		HashMap<String, Ref<Image> > texture_atlas;
 		HashMap<int32_t, MaterialImageCache> material_image_cache;
 	};
-	static Vector2 interpolate_source_uvs(const Vector3 &bar, const SetAtlasTexelArgs *args);
+	static Vector2 interpolate_source_uvs(const Vector3 &bar, const AtlasTextureArguments *args);
 	static Pair<int, int> calculate_coordinates(const Vector2 &sourceUv, int width, int height);
 	static bool set_atlas_texel(void *param, int x, int y, const Vector3 &bar, const Vector3 &dx, const Vector3 &dy, float coverage);
 	static Node *merge(Node *p_root);

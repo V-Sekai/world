@@ -67,7 +67,7 @@ Copyright NVIDIA Corporation 2006 -- Ignacio Castano <icastano@nvidia.com>
 
 bool MeshTextureAtlas::set_atlas_texel(void *param, int x, int y, const Vector3 &bar, const Vector3 &, const Vector3 &, float) {
 	ERR_FAIL_NULL_V(param, false);
-	SetAtlasTexelArgs *args = static_cast<SetAtlasTexelArgs *>(param);
+	AtlasTextureArguments *args = static_cast<AtlasTextureArguments *>(param);
 	ERR_FAIL_NULL_V(args, false);
 	if (args->source_texture.is_valid()) {
 		const Vector2 source_uv = interpolate_source_uvs(bar, args);
@@ -140,7 +140,7 @@ Node *MeshTextureAtlas::merge(Node *p_root) {
 	mesh_merge_state.root = p_root;
 	mesh_merge_state.mesh_items.resize(1);
 	_find_all_mesh_instances(mesh_merge_state.mesh_items, p_root, p_root);
-
+	Node * merged_root = memnew(Node3D);
 	for (int32_t items_i = 0; items_i < mesh_merge_state.mesh_items.size(); items_i++) {
 		int32_t p_index = items_i;
 		Vector<MeshState> mesh_items = mesh_merge_state.mesh_items[p_index].meshes;
@@ -158,11 +158,10 @@ Node *MeshTextureAtlas::merge(Node *p_root) {
 		}
 		xatlas::PackOptions pack_options;
 		pack_options.bilinear = true;
-		pack_options.padding = 16;
+		pack_options.padding = 32;
 		pack_options.texelsPerUnit = 0.0f;
-		pack_options.bruteForce = false;
+		pack_options.bruteForce = true;
 		pack_options.blockAlign = true;
-		pack_options.resolution = 2048;
 		Vector<AtlasLookupTexel> atlas_lookup;
 		Error err = _generate_atlas(num_surfaces, uv_groups, atlas, mesh_items, material_cache, pack_options);
 		ERR_FAIL_COND_V(err != OK, root);
@@ -206,11 +205,11 @@ Node *MeshTextureAtlas::merge(Node *p_root) {
 		}
 		_generate_texture_atlas(state, "albedo");
 		Node *output_node = _output_mesh_atlas(state, p_index);
-		p_root->add_child(output_node);
-		output_node->set_owner(p_root);
+		merged_root->add_child(output_node, true);
+		output_node->set_owner(merged_root);
 		xatlas::Destroy(atlas);
 	}
-	return p_root;
+	return merged_root;
 }
 
 void MeshTextureAtlas::_generate_texture_atlas(MergeState &state, String texture_type) {
@@ -218,7 +217,7 @@ void MeshTextureAtlas::_generate_texture_atlas(MergeState &state, String texture
 	EditorProgress progress_texture_atlas("gen_mesh_atlas", TTR("Generate Atlas"), state.atlas->meshCount);
 	int step = 0;
 #endif
-	SetAtlasTexelArgs args;
+	AtlasTextureArguments args;
 	args.atlas_data = Image::create_empty(state.atlas->width, state.atlas->height, false, Image::FORMAT_RGBA8);
 	args.atlas_lookup = state.atlas_lookup.ptrw();
 	args.atlas_height = state.atlas->height;
@@ -540,7 +539,7 @@ Node *MeshTextureAtlas::_output_mesh_atlas(MergeState &state, int p_count) {
 
 			for (uint32_t v = start; v < end; v++) {
 				const xatlas::Vertex vertex = mesh.vertexArray[v];
-				ERR_BREAK_MSG(vertex.xref < 0 || vertex.xref >= static_cast<uint32_t>(state.model_vertices[mesh_i].size()), "Vertex reference not found.");
+				ERR_CONTINUE_MSG(vertex.xref < 0 || vertex.xref >= static_cast<uint32_t>(state.model_vertices[mesh_i].size()), "Vertex reference not found.");
 				const ModelVertex &sourceVertex = state.model_vertices[mesh_i][vertex.xref];
 				Vector2 uv = Vector2(vertex.uv[0] / state.atlas->width, vertex.uv[1] / state.atlas->height);
 				surface_tool->set_uv(uv);
@@ -564,29 +563,21 @@ Node *MeshTextureAtlas::_output_mesh_atlas(MergeState &state, int p_count) {
 	Ref<StandardMaterial3D> material;
 	material.instantiate();
 	HashMap<String, Ref<Image> >::Iterator A = state.texture_atlas.find("albedo");
-	Image::CompressMode compress_mode = Image::COMPRESS_ETC;
-	if (Image::_image_compress_bc_func) {
-		compress_mode = Image::COMPRESS_S3TC;
-	}
 	if (A && !A->key.is_empty()) {
 		Ref<Image> img = dilate_image(A->value);
 		print_line(vformat("Albedo image size: (%d, %d)", img->get_width(), img->get_height()));
-		img->compress(compress_mode, Image::COMPRESS_SOURCE_SRGB);
 		Ref<ImageTexture> tex = ImageTexture::create_from_image(img);
 		material->set_texture(BaseMaterial3D::TEXTURE_ALBEDO, tex);
 	}
 	material->set_cull_mode(BaseMaterial3D::CULL_DISABLED);
 	MeshInstance3D *mesh_instance = memnew(MeshInstance3D);
-	Ref<ArrayMesh> array_mesh = surface_tool_all->commit();
+	Ref<ArrayMesh> array_mesh = surface_tool_all->commit()->duplicate();
 	mesh_instance->set_mesh(array_mesh);
 	mesh_instance->set_name(state.p_name);
 	Transform3D root_transform;
-	Node3D *node_3d = memnew(Node3D);
 	mesh_instance->set_transform(root_transform.affine_inverse());
 	array_mesh->surface_set_material(0, material);
-	node_3d->add_child(mesh_instance, true);
-	mesh_instance->set_owner(node_3d);
-	return node_3d;
+	return mesh_instance;
 }
 
 bool MeshTextureAtlas::MeshState::operator==(const MeshState &rhs) const {
@@ -613,7 +604,7 @@ Pair<int, int> MeshTextureAtlas::calculate_coordinates(const Vector2 &sourceUv, 
 	return Pair<int, int>(sx, sy);
 }
 
-Vector2 MeshTextureAtlas::interpolate_source_uvs(const Vector3 &bar, const SetAtlasTexelArgs *args) {
+Vector2 MeshTextureAtlas::interpolate_source_uvs(const Vector3 &bar, const AtlasTextureArguments *args) {
 	return args->source_uvs[0] * bar.x + args->source_uvs[1] * bar.y + args->source_uvs[2] * bar.z;
 }
 int MeshTextureAtlas::godot_xatlas_print(const char *p_print_string, ...) {

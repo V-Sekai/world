@@ -62,7 +62,7 @@ TEST_CASE("[Modules][SceneMerge] MeshMergeTriangle drawAA") {
 }
 
 TEST_CASE("[Modules][SceneMerge] MeshMergeMeshInstanceWithMaterialAtlasTest") {
-	MeshTextureAtlas::SetAtlasTexelArgs args;
+	MeshTextureAtlas::AtlasTextureArguments args;
 	args.atlas_data = Image::create_empty(1024, 1024, false, Image::FORMAT_RGBA8);
 	args.atlas_data->fill(Color());
 	args.source_texture = Image::create_empty(1024, 1024, false, Image::FORMAT_RGBA8);
