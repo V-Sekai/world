@@ -156,12 +156,12 @@ Node *MeshTextureAtlas::merge_meshes(Node *p_root) {
 		}
 		xatlas::PackOptions pack_options;
 		pack_options.bilinear = true;
-		pack_options.padding = 32;
-		pack_options.texelsPerUnit = 0.0f;
+		pack_options.padding = 16;
 		pack_options.bruteForce = true;
 		pack_options.blockAlign = true;
 		pack_options.rotateCharts = false;
 		pack_options.rotateChartsToAxis = false;
+		pack_options.resolution = 8 * 1024;
 		Vector<AtlasLookupTexel> atlas_lookup;
 		Error err = _generate_atlas(num_surfaces, uv_groups, atlas, mesh_items, material_cache, pack_options);
 		ERR_FAIL_COND_V(err != OK, root);
@@ -342,7 +342,7 @@ Error MeshTextureAtlas::_generate_atlas(const int32_t p_num_meshes, Vector<Vecto
 				indexes.write[index_i] = mesh_indices[index_i];
 			}
 			for (int32_t index_i = 0; index_i < mesh_indices.size(); index_i++) {
-				Ref<Material> mat = r_meshes[mesh_i].mesh->surface_get_material(j);
+				Ref<Material> mat = r_meshes[mesh_i].mesh_instance->get_active_material(j);
 				int32_t material_i = p_material_cache.find(mat);
 				materials.write[index_i] = material_i;
 			}
@@ -551,9 +551,7 @@ Node *MeshTextureAtlas::_output_mesh_atlas(MergeState &state, int p_count) {
 			}
 			for (uint32_t i = 0; i < mesh.indexCount; i++) {
 				uint32_t index = mesh.indexArray[i];
-				if (index >= start && index < end) {
-					surface_tool->add_index(index - start);
-				}
+				surface_tool->add_index(index);
 			}
 			surface_tool->generate_tangents();
 			Ref<ArrayMesh> array_mesh = surface_tool->commit();
