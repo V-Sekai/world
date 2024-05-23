@@ -319,7 +319,7 @@ Error MeshTextureAtlas::_generate_atlas(const int32_t p_num_meshes, Vector<Vecto
 			Array mesh = r_meshes[mesh_i].mesh->surface_get_arrays(j);
 			Array indices = mesh[ArrayMesh::ARRAY_INDEX];
 			xatlas::UvMeshDecl mesh_declaration;
-			mesh_declaration.vertexCount = PackedVector2Array(mesh[Mesh::ARRAY_INDEX]).size() / 2;
+			mesh_declaration.vertexCount = PackedVector3Array(mesh[Mesh::ARRAY_VERTEX]).size();
 
 			PackedVector3Array original_data = PackedVector3Array(mesh[Mesh::ARRAY_VERTEX]);
 
@@ -594,19 +594,22 @@ bool MeshTextureAtlas::MeshState::operator==(const MeshState &rhs) const {
 	return false;
 }
 
-Pair<int, int> MeshTextureAtlas::calculate_coordinates(const Vector2 &sourceUv, int width, int height) {
+Pair<int, int> MeshTextureAtlas::calculate_coordinates(const Vector2 &p_source_uv, int p_width, int p_height) {
+	Pair<int, int> empty = Pair<int, int>(1, 1);
+	ERR_FAIL_COND_V(p_width < 0 || p_height < 0, empty);
+
 	int sx, sy;
-	if (std::isinf(sourceUv.x)) {
-		sx = 0;
+	if (std::isinf(p_source_uv.x)) {
+		sx = p_width - 1; // Map infinite x to the right edge of the texture.
 	} else {
-		float fx = sourceUv.x - std::floor(sourceUv.x);
-		sx = static_cast<int>(fx * width) % width;
+		float fx = p_source_uv.x - std::floor(p_source_uv.x);
+		sx = static_cast<int>(fx * p_width) % p_width;
 	}
-	if (std::isinf(sourceUv.y)) {
-		sy = 0;
+	if (std::isinf(p_source_uv.y)) {
+		sy = p_height - 1; // Map infinite y to the bottom edge of the texture.
 	} else {
-		float fy = sourceUv.y - std::floor(sourceUv.y);
-		sy = static_cast<int>(fy * height) % height;
+		float fy = p_source_uv.y - std::floor(p_source_uv.y);
+		sy = static_cast<int>(fy * p_height) % p_height;
 	}
 	return Pair<int, int>(sx, sy);
 }
@@ -626,6 +629,7 @@ int MeshTextureAtlas::godot_xatlas_print(const char *p_print_string, ...) {
 	}
 	return OK;
 }
+
 bool MeshTextureAtlas::MeshState::is_valid() const {
 	bool is_mesh_valid = mesh.is_valid();
 	if (!is_mesh_valid || mesh_instance == nullptr) {
@@ -641,6 +645,7 @@ bool MeshTextureAtlas::MeshState::is_valid() const {
 	}
 	return true;
 }
+
 MeshTextureAtlas::MeshTextureAtlas() {
 	xatlas::SetPrint(&godot_xatlas_print, true);
 }
