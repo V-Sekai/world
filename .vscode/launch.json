@@ -1,7 +1,4 @@
 {
-  // Use IntelliSense to learn about possible attributes.
-  // Hover to view descriptions of existing attributes.
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "options": { 
     "env": {
@@ -14,10 +11,37 @@
       "name": "Run the editor with V-Sekai game",
       "type": "lldb",
       "request": "launch",
+      "args": ["--path", "${workspaceFolder}/10-19 Game/11 Projects/11.01 V-Sekai Game", "-e"],
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/20-29 Tools/21 Godot 21/21.01 Godot/bin/godot.macos.editor.double.arm64",
+      "preLaunchTask": "Godot Engine"
+    },
+    {
+      "name": "Run the editor with Contraptions",
+      "type": "lldb",
+      "request": "launch",
       "args": ["--path", "${workspaceFolder}/10-19 Game/11 Projects/11.02 Contraptions", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/20-29 Tools/21 Godot 21/21.01 Godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
     },
+    {
+      "name": "Run the editor with Grid",
+      "type": "lldb",
+      "request": "launch",
+      "args": ["--path", "${workspaceFolder}/10-19 Game/11 Projects/11.03 Grid", "-e"],
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/20-29 Tools/21 Godot 21/21.01 Godot/bin/godot.macos.editor.double.arm64",
+      "preLaunchTask": "Godot Engine"
+    },
+    {
+      "name": "Run the editor with Planner",
+      "type": "lldb",
+      "request": "launch",
+      "args": ["--path", "${workspaceFolder}/10-19 Game/11 Projects/11.04 Planner", "-e"],
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/20-29 Tools/21 Godot 21/21.01 Godot/bin/godot.macos.editor.double.arm64",
+      "preLaunchTask": "Godot Engine"
+    }
   ]
 }
