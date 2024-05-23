@@ -46,7 +46,6 @@ Copyright (c) 2013 Thekla, Inc
 Copyright NVIDIA Corporation 2006 -- Ignacio Castano <icastano@nvidia.com>
 */
 
-
 #include "core/object/ref_counted.h"
 
 #include "core/math/vector2.h"
@@ -58,8 +57,7 @@ Copyright NVIDIA Corporation 2006 -- Ignacio Castano <icastano@nvidia.com>
 #include <cstdint>
 
 class MeshTextureAtlas {
-private:
-	static int godot_xatlas_print(const char *p_print_string, ...);
+public:
 	struct TextureData {
 		uint16_t width;
 		uint16_t height;
@@ -92,12 +90,8 @@ private:
 		Node *root = nullptr;
 	};
 
-protected:
-	static void _bind_methods();
-
-public:
 	static constexpr int32_t default_texture_length = 128;
-	static constexpr float TEXEL_SIZE = 20.0f;
+	static constexpr float TEXEL_SIZE = 5.0f;
 
 	struct AtlasLookupTexel {
 		uint16_t material_index = 0;
@@ -128,10 +122,13 @@ public:
 		HashMap<String, Ref<Image> > texture_atlas;
 		HashMap<int32_t, MaterialImageCache> material_image_cache;
 	};
-	static Vector2 interpolate_source_uvs(const Vector3 &bar, const AtlasTextureArguments *args);
-	static Pair<int, int> calculate_coordinates(const Vector2 &sourceUv, int width, int height);
 	static bool set_atlas_texel(void *param, int x, int y, const Vector3 &bar, const Vector3 &dx, const Vector3 &dy, float coverage);
-	static Node *merge(Node *p_root);
+	static Pair<int, int> calculate_coordinates(const Vector2 &sourceUv, int width, int height);
+	MeshTextureAtlas();
+	static Node *merge_meshes(Node *p_root);
+private:
+	static int godot_xatlas_print(const char *p_print_string, ...);
+	static Vector2 interpolate_source_uvs(const Vector3 &bar, const AtlasTextureArguments *args);
 	static Ref<Image> dilate_image(Ref<Image> source_image);
 	static void _find_all_mesh_instances(Vector<MeshMerge> &r_items, Node *p_current_node, const Node *p_owner);
 	static void _generate_texture_atlas(MergeState &state, String texture_type);
@@ -141,9 +138,9 @@ public:
 	static void write_uvs(const Vector<MeshState> &p_mesh_items, Vector<Vector<Vector2> > &uv_groups, Array &r_vertex_to_material, Vector<Vector<ModelVertex> > &r_model_vertices);
 	static void map_mesh_to_index_to_material(const Vector<MeshState> &mesh_items, Array &vertex_to_material, Vector<Ref<Material> > &material_cache);
 	static Node *_output_mesh_atlas(MergeState &state, int p_count);
-	MeshTextureAtlas() {
-		xatlas::SetPrint(&godot_xatlas_print, true);
-	}
+
+protected:
+	static void _bind_methods();
 };
 
 #endif // MERGE_H

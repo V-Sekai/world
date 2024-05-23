@@ -40,11 +40,7 @@ void SceneMergePlugin::_action() {
 		EditorNode::get_singleton()->show_accept(TTR("This operation can't be done without a scene."), TTR("OK"));
 		return;
 	}
-	Node *merged_node = scene_optimize->merge(root_node);
-	if (merged_node) {
-		root_node->add_child(merged_node);
-		merged_node->set_owner(root_node);
-	}
+	scene_optimize->merge(root_node);
 }
 
 SceneMergePlugin::SceneMergePlugin() {

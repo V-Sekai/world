@@ -33,5 +33,5 @@
 #include "modules/scene_merge/merge.h"
 
 Node *SceneMerge::merge(Node *p_root_node) {
-	return MeshTextureAtlas::merge(p_root_node);
+	return MeshTextureAtlas::merge_meshes(p_root_node);
 }
