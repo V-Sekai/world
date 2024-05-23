@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai-fire/godot-okhsl-picker.git
 	branch = main
-	commit = 8be7f7865cda522fd085cefa525d7223a12bff4e
-	parent = 8f6a060996096ea59806b4b987e7f2e52da85b27
+	commit = 8d93f43185a5cb6e7f7156f473233ea8dd7499e3
+	parent = 9e56da07589054541ec3c846a84493e388fa9522
 	method = merge
 	cmdver = 0.4.6
