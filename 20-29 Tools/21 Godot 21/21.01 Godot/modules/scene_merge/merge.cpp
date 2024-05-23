@@ -160,6 +160,8 @@ Node *MeshTextureAtlas::merge_meshes(Node *p_root) {
 		pack_options.texelsPerUnit = 0.0f;
 		pack_options.bruteForce = true;
 		pack_options.blockAlign = true;
+		pack_options.rotateCharts = false;
+		pack_options.rotateChartsToAxis = false;
 		Vector<AtlasLookupTexel> atlas_lookup;
 		Error err = _generate_atlas(num_surfaces, uv_groups, atlas, mesh_items, material_cache, pack_options);
 		ERR_FAIL_COND_V(err != OK, root);
@@ -220,7 +222,6 @@ void MeshTextureAtlas::_generate_texture_atlas(MergeState &state, String texture
 	args.atlas_lookup = state.atlas_lookup.ptrw();
 	args.atlas_height = state.atlas->height;
 	args.atlas_width = state.atlas->width;
-	uint32_t offset = 0;
 	for (uint32_t mesh_i = 0; mesh_i < state.atlas->meshCount; mesh_i++) {
 		const xatlas::Mesh &mesh = state.atlas->meshes[mesh_i];
 		for (uint32_t chart_i = 0; chart_i < mesh.chartCount; chart_i++) {
@@ -243,8 +244,8 @@ void MeshTextureAtlas::_generate_texture_atlas(MergeState &state, String texture
 			for (uint32_t face_i = 0; face_i < chart.faceCount; face_i++) {
 				Vector2 v[3];
 				for (uint32_t l = 0; l < 3; l++) {
-					const uint32_t index = mesh.indexArray[chart.faceArray[face_i] * 3 + l] + offset;
-					const xatlas::Vertex &vertex = mesh.vertexArray[index - offset];
+					const uint32_t index = mesh.indexArray[chart.faceArray[face_i] * 3 + l];
+					const xatlas::Vertex &vertex = mesh.vertexArray[index];
 					v[l] = Vector2(vertex.uv[0], vertex.uv[1]);
 					args.source_uvs[l].x = state.uvs[mesh_i][vertex.xref].x / img->get_width();
 					args.source_uvs[l].y = state.uvs[mesh_i][vertex.xref].y / img->get_height();
@@ -258,7 +259,6 @@ void MeshTextureAtlas::_generate_texture_atlas(MergeState &state, String texture
 		progress_texture_atlas.step(TTR("Process Mesh for Atlas: ") + texture_type + " (" + itos(step) + "/" + itos(state.atlas->meshCount) + ")", step);
 		step++;
 #endif
-		offset += mesh.vertexCount;
 	}
 	print_line(vformat("Generated atlas for %s: width=%d, height=%d", texture_type, args.atlas_data->get_width(), args.atlas_data->get_height()));
 	args.atlas_data->generate_mipmaps();
@@ -319,20 +319,19 @@ Error MeshTextureAtlas::_generate_atlas(const int32_t p_num_meshes, Vector<Vecto
 			xatlas::UvMeshDecl mesh_declaration;
 			mesh_declaration.vertexCount = PackedVector3Array(mesh[Mesh::ARRAY_VERTEX]).size();
 
-			PackedVector3Array original_data = PackedVector3Array(mesh[Mesh::ARRAY_VERTEX]);
+			PackedVector2Array original_data = PackedVector2Array(mesh[Mesh::ARRAY_TEX_UV2]);
 
 			PackedFloat32Array float_data;
-			float_data.resize(original_data.size() * 3);
+			float_data.resize(original_data.size() * 2);
 
 			for (int i = 0; i < original_data.size(); ++i) {
-				Vector3 vertex = original_data[i];
-				float_data.set(i * 3 + 0, static_cast<float>(vertex.x));
-				float_data.set(i * 3 + 1, static_cast<float>(vertex.y));
-				float_data.set(i * 3 + 2, static_cast<float>(vertex.z));
+				Vector2 vertex = original_data[i];
+				float_data.set(i * 2 + 0, static_cast<float>(vertex.x));
+				float_data.set(i * 2 + 1, static_cast<float>(vertex.y));
 			}
 
 			mesh_declaration.vertexUvData = float_data.ptr();
-			mesh_declaration.vertexStride = sizeof(float) * 3;
+			mesh_declaration.vertexStride = sizeof(float) * 2;
 			mesh_declaration.indexFormat = xatlas::IndexFormat::UInt32;
 			Vector<int32_t> mesh_indices = mesh[Mesh::ARRAY_INDEX];
 			Vector<uint32_t> indexes;
@@ -350,7 +349,6 @@ Error MeshTextureAtlas::_generate_atlas(const int32_t p_num_meshes, Vector<Vecto
 			mesh_declaration.indexCount = indexes.size();
 			mesh_declaration.indexData = indexes.ptr();
 			mesh_declaration.faceMaterialData = materials.ptr();
-			mesh_declaration.indexOffset = 0;
 			xatlas::AddMeshError error = xatlas::AddUvMesh(r_atlas, mesh_declaration);
 			print_verbose(vformat("Adding mesh %d: %s", mesh_i, xatlas::StringForEnum(error)));
 		}
@@ -591,8 +589,8 @@ bool MeshTextureAtlas::MeshState::operator==(const MeshState &rhs) const {
 
 Pair<int, int> MeshTextureAtlas::calculate_coordinates(const Vector2 &p_source_uv, int p_width, int p_height) {
 	int sx, sy;
-	sx = static_cast<int>(round(p_source_uv.x * p_width)) % p_width;
-	sy = static_cast<int>(round(p_source_uv.y * p_height)) % p_height;
+	sx = static_cast<int>(p_source_uv.x * p_width);
+	sy = static_cast<int>(p_source_uv.y * p_height);
 	return Pair<int, int>(sx, sy);
 }
 
