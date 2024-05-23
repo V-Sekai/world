@@ -587,8 +587,8 @@ bool MeshTextureAtlas::MeshState::operator==(const MeshState &rhs) const {
 
 Pair<int, int> MeshTextureAtlas::calculate_coordinates(const Vector2 &p_source_uv, int p_width, int p_height) {
 	int sx, sy;
-	sx = static_cast<int>(p_source_uv.x * p_width);
-	sy = static_cast<int>(p_source_uv.y * p_height);
+	sx = static_cast<int>(round(p_source_uv.x * p_width)) % p_width;
+	sy = static_cast<int>(round(p_source_uv.y * p_height)) % p_height;
 	return Pair<int, int>(sx, sy);
 }
 
