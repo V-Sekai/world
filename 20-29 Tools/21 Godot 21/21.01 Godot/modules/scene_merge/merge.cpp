@@ -136,7 +136,7 @@ void MeshTextureAtlas::_bind_methods() {
 
 Node *MeshTextureAtlas::merge_meshes(Node *p_root) {
 	MeshMergeState mesh_merge_state;
-	mesh_merge_state.root = p_root->duplicate();
+	mesh_merge_state.root = p_root;
 	mesh_merge_state.mesh_items.resize(1);
 	_find_all_mesh_instances(mesh_merge_state.mesh_items, p_root, p_root);
 	for (int32_t items_i = 0; items_i < mesh_merge_state.mesh_items.size(); items_i++) {
