@@ -69,7 +69,6 @@ public:
 		Vector3 normal;
 		Vector2 uv;
 	};
-	static constexpr int32_t TEXTURE_MINIMUM_SIDE = 512;
 	struct MeshState {
 		Ref<Mesh> mesh;
 		NodePath path;
@@ -89,8 +88,6 @@ public:
 		Vector<MeshMerge> mesh_items;
 		Node *root = nullptr;
 	};
-
-	static constexpr int32_t default_texture_length = 128;
 	static constexpr float TEXEL_SIZE = 5.0f;
 
 	struct AtlasLookupTexel {

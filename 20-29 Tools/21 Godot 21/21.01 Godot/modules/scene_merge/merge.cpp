@@ -72,12 +72,10 @@ bool MeshTextureAtlas::set_atlas_texel(void *param, int x, int y, const Vector3 
 	ERR_FAIL_NULL_V(args, false);
 	if (args->source_texture.is_valid()) {
 		const Vector2 source_uv = interpolate_source_uvs(bar, args);
-		int _width = args->source_texture->get_width() - 1;
-		int _height = args->source_texture->get_height() - 1;
-		Pair<int, int> coordinates = calculate_coordinates(source_uv, _width, _height);
+		Pair<int, int> coordinates = calculate_coordinates(source_uv, args->source_texture->get_width(), args->source_texture->get_height());
 		const Color color = args->source_texture->get_pixel(coordinates.first, coordinates.second);
 		args->atlas_data->set_pixel(x, y, color);
-		int32_t index = x * y + args->atlas_width;
+		int32_t index = y * args->atlas_width + x;
 		AtlasLookupTexel &lookup = args->atlas_lookup[index];
 		lookup.material_index = args->material_index;
 		lookup.x = static_cast<uint16_t>(coordinates.first);
@@ -89,7 +87,7 @@ bool MeshTextureAtlas::set_atlas_texel(void *param, int x, int y, const Vector3 
 
 void MeshTextureAtlas::_find_all_mesh_instances(Vector<MeshMerge> &r_items, Node *p_current_node, const Node *p_owner) {
 	if (!p_current_node) {
-		return; // Add null check for p_current_node
+		return;
 	}
 
 	MeshInstance3D *mi = BaseMaterial3D::cast_to<MeshInstance3D>(p_current_node);
@@ -411,16 +409,13 @@ void MeshTextureAtlas::write_uvs(const Vector<MeshState> &p_mesh_items, Vector<V
 				ERR_CONTINUE(index == -1);
 
 				uvs.write[vertex_i] = uv_arr[vertex_i];
-				uvs.write[vertex_i].x = Math::fmod(uvs.write[vertex_i].x + mesh_i, 1.0);
 
 				const Ref<Material> material = index_to_material.get(index);
 				Ref<BaseMaterial3D> Node3D_material = material;
 				const Ref<Texture2D> tex = Node3D_material->get_texture(BaseMaterial3D::TextureParam::TEXTURE_ALBEDO);
 				if (tex.is_valid()) {
-					int32_t width = (float)MAX(TEXTURE_MINIMUM_SIDE, tex->get_width());
-					int32_t height = (float)MAX(TEXTURE_MINIMUM_SIDE, tex->get_height());
-					uvs.write[vertex_i].x *= width;
-					uvs.write[vertex_i].y *= height;
+					uvs.write[vertex_i].x *= tex->get_width();
+					uvs.write[vertex_i].y *= tex->get_height();
 				}
 			}
 			r_model_vertices.write[mesh_count] = model_vertices;
@@ -482,10 +477,10 @@ void MeshTextureAtlas::map_mesh_to_index_to_material(const Vector<MeshState> &p_
 			largest_dimension = MAX(texture->get_size().x, texture->get_size().y);
 		}
 	}
-	largest_dimension = MAX(largest_dimension, default_texture_length);
 	for (int32_t mesh_i = 0; mesh_i < p_mesh_items.size(); mesh_i++) {
 		Ref<ArrayMesh> array_mesh = p_mesh_items[mesh_i].mesh;
 		array_mesh->lightmap_unwrap(Transform3D(), TEXEL_SIZE, true);
+
 		for (int32_t j = 0; j < array_mesh->get_surface_count(); j++) {
 			Array mesh = array_mesh->surface_get_arrays(j);
 			Vector<Vector3> indices = mesh[ArrayMesh::ARRAY_INDEX];
@@ -494,7 +489,7 @@ void MeshTextureAtlas::map_mesh_to_index_to_material(const Vector<MeshState> &p_
 				continue;
 			}
 			if (material->get_texture(BaseMaterial3D::TEXTURE_ALBEDO).is_null()) {
-				Ref<Image> img = Image::create_empty(default_texture_length, default_texture_length, true, Image::FORMAT_RGBA8);
+				Ref<Image> img = Image::create_empty(largest_dimension, largest_dimension, true, Image::FORMAT_RGBA8);
 				img->fill(material->get_albedo());
 				material->set_albedo(Color(1.0f, 1.0f, 1.0f));
 				Ref<ImageTexture> tex = ImageTexture::create_from_image(img);
@@ -595,22 +590,9 @@ bool MeshTextureAtlas::MeshState::operator==(const MeshState &rhs) const {
 }
 
 Pair<int, int> MeshTextureAtlas::calculate_coordinates(const Vector2 &p_source_uv, int p_width, int p_height) {
-	Pair<int, int> empty = Pair<int, int>(1, 1);
-	ERR_FAIL_COND_V(p_width < 0 || p_height < 0, empty);
-
 	int sx, sy;
-	if (std::isinf(p_source_uv.x)) {
-		sx = p_width - 1; // Map infinite x to the right edge of the texture.
-	} else {
-		float fx = p_source_uv.x - std::floor(p_source_uv.x);
-		sx = static_cast<int>(fx * p_width) % p_width;
-	}
-	if (std::isinf(p_source_uv.y)) {
-		sy = p_height - 1; // Map infinite y to the bottom edge of the texture.
-	} else {
-		float fy = p_source_uv.y - std::floor(p_source_uv.y);
-		sy = static_cast<int>(fy * p_height) % p_height;
-	}
+	sx = static_cast<int>(round(p_source_uv.x * p_width)) % p_width;
+	sy = static_cast<int>(round(p_source_uv.y * p_height)) % p_height;
 	return Pair<int, int>(sx, sy);
 }
 

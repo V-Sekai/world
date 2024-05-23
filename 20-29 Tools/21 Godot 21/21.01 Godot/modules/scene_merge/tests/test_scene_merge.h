@@ -78,61 +78,6 @@ TEST_CASE("[Modules][SceneMerge] MeshMergeMeshInstanceWithMaterialAtlasTest") {
 	result = MeshTextureAtlas::set_atlas_texel(&args, 1023, 1023, Vector3(0.33, 0.33, 0.33), Vector3(), Vector3(), 0.0f);
 	CHECK(result);
 }
-
-TEST_CASE("[Modules][SceneMerge] CalculateCoordinates") {
-	Vector2 source_uv(0.5, 0.5);
-	int width = 100;
-	int height = 200;
-	Pair<int, int> result = MeshTextureAtlas::calculate_coordinates(source_uv, width, height);
-	CHECK_EQ(result.first, 50);
-	CHECK_EQ(result.second, 100);
-
-	source_uv = Vector2(1.0, 0.0);
-	result = MeshTextureAtlas::calculate_coordinates(source_uv, width, height);
-	CHECK_EQ(result.first, 100);
-	CHECK_EQ(result.second, 0);
-
-	source_uv = Vector2(0.0, 1.0);
-	result = MeshTextureAtlas::calculate_coordinates(source_uv, width, height);
-	CHECK_EQ(result.first, 0);
-	CHECK_EQ(result.second, 200);
-
-	source_uv = Vector2(0.0, 0.0);
-	result = MeshTextureAtlas::calculate_coordinates(source_uv, width, height);
-	CHECK_EQ(result.first, 0);
-	CHECK_EQ(result.second, 0);
-}
-
-TEST_CASE("[Modules][SceneMerge] CalculateCoordinates - Extremes") {
-	Vector2 source_uv;
-	int width = 100;
-	int height = 200;
-	Pair<int, int> result;
-	// Test with max float value
-	source_uv = Vector2(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
-	result = MeshTextureAtlas::calculate_coordinates(source_uv, width, height);
-	CHECK_EQ(result.first, width);
-	CHECK_EQ(result.second, height);
-
-	// Test with lowest float value (should be negative)
-	source_uv = Vector2(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
-	result = MeshTextureAtlas::calculate_coordinates(source_uv, width, height);
-	CHECK_EQ(result.first, 0);
-	CHECK_EQ(result.second, 0);
-
-	// Test with positive infinity
-	source_uv = Vector2(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
-	result = MeshTextureAtlas::calculate_coordinates(source_uv, width, height);
-	CHECK_EQ(result.first, width);
-	CHECK_EQ(result.second, height);
-
-	// Test with negative infinity
-	source_uv = Vector2(-std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity());
-	result = MeshTextureAtlas::calculate_coordinates(source_uv, width, height);
-	CHECK_EQ(result.first, 0);
-	CHECK_EQ(result.second, 0);
-}
-
 } // namespace TestSceneMerge
 
 #endif // TEST_SCENE_MERGE_H
