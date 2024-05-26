@@ -31,6 +31,7 @@
 #include "editor_node.h"
 
 #include "core/config/project_settings.h"
+#include "core/core_string_names.h"
 #include "core/extension/gdextension_manager.h"
 #include "core/input/input.h"
 #include "core/io/config_file.h"
@@ -4150,8 +4151,9 @@ void EditorNode::update_ownership_table_for_addition_node_ancestors(Node *p_curr
 void EditorNode::update_node_from_node_modification_entry(Node *p_node, ModificationNodeEntry &p_node_modification) {
 	if (p_node) {
 		// First, attempt to restore the script property since it may affect the get_property_list method.
-		if (p_node_modification.property_table.find("script")) {
-			p_node->set_script(p_node_modification.property_table.get("script"));
+		Variant *script_table_entry = p_node_modification.property_table.getptr(CoreStringNames::get_singleton()->_to_string);
+		if (script_table_entry) {
+			p_node->set_script(*script_table_entry);
 		}
 
 		// Get properties for this node.
@@ -4160,34 +4162,35 @@ void EditorNode::update_node_from_node_modification_entry(Node *p_node, Modifica
 
 		// Get names of all valid property names.
 		HashMap<StringName, bool> property_node_reference_table;
-		for (const PropertyInfo &E2 : pinfo) {
-			if (E2.usage & PROPERTY_USAGE_STORAGE) {
-				if (E2.type == Variant::OBJECT && E2.hint == PROPERTY_HINT_NODE_TYPE) {
-					property_node_reference_table[E2.name] = true;
+		for (const PropertyInfo &E : pinfo) {
+			if (E.usage & PROPERTY_USAGE_STORAGE) {
+				if (E.type == Variant::OBJECT && E.hint == PROPERTY_HINT_NODE_TYPE) {
+					property_node_reference_table[E.name] = true;
 				} else {
-					property_node_reference_table[E2.name] = false;
+					property_node_reference_table[E.name] = false;
 				}
 			}
 		}
 
 		// Restore the modified properties for this node.
-		for (const KeyValue<StringName, Variant> &E2 : p_node_modification.property_table) {
-			if (property_node_reference_table.has(E2.key)) {
+		for (const KeyValue<StringName, Variant> &E : p_node_modification.property_table) {
+			bool *property_node_reference_table_entry = property_node_reference_table.getptr(E.key);
+			if (property_node_reference_table_entry) {
 				// If the property is a node reference, attempt to restore from the node path instead.
-				bool is_node_reference = property_node_reference_table.get(E2.key);
+				bool is_node_reference = *property_node_reference_table_entry;
 				if (is_node_reference) {
-					if (E2.value.get_type() == Variant::NODE_PATH) {
-						p_node->set(E2.key, p_node->get_node_or_null(E2.value));
+					if (E.value.get_type() == Variant::NODE_PATH) {
+						p_node->set(E.key, p_node->get_node_or_null(E.value));
 					}
 				} else {
-					p_node->set(E2.key, E2.value);
+					p_node->set(E.key, E.value);
 				}
 			}
 		}
 
 		// Restore the connections to other nodes.
-		for (const ConnectionWithNodePath &E2 : p_node_modification.connections_to) {
-			Connection conn = E2.connection;
+		for (const ConnectionWithNodePath &E : p_node_modification.connections_to) {
+			Connection conn = E.connection;
 
 			// Get the node the callable is targeting.
 			Node *target_node = cast_to<Node>(conn.callable.get_object());
@@ -4196,7 +4199,7 @@ void EditorNode::update_node_from_node_modification_entry(Node *p_node, Modifica
 			// attempt to reaccquire the closest match by using the node path
 			// we saved earlier.
 			if (!target_node || !target_node->is_queued_for_deletion()) {
-				target_node = p_node->get_node_or_null(E2.node_path);
+				target_node = p_node->get_node_or_null(E.node_path);
 			}
 
 			if (target_node) {
@@ -4210,8 +4213,8 @@ void EditorNode::update_node_from_node_modification_entry(Node *p_node, Modifica
 		}
 
 		// Restore the connections from other nodes.
-		for (const Connection &E2 : p_node_modification.connections_from) {
-			Connection conn = E2;
+		for (const Connection &E : p_node_modification.connections_from) {
+			Connection conn = E;
 
 			bool valid = p_node->has_method(conn.callable.get_method()) || Ref<Script>(p_node->get_script()).is_null() || Ref<Script>(p_node->get_script())->has_method(conn.callable.get_method());
 			ERR_CONTINUE_MSG(!valid, vformat("Attempt to connect signal '%s.%s' to nonexistent method '%s.%s'.", conn.signal.get_object()->get_class(), conn.signal.get_name(), conn.callable.get_object()->get_class(), conn.callable.get_method()));
@@ -4225,8 +4228,8 @@ void EditorNode::update_node_from_node_modification_entry(Node *p_node, Modifica
 		}
 
 		// Re-add the groups.
-		for (const Node::GroupInfo &E2 : p_node_modification.groups) {
-			p_node->add_to_group(E2.name, E2.persistent);
+		for (const Node::GroupInfo &E : p_node_modification.groups) {
+			p_node->add_to_group(E.name, E.persistent);
 		}
 	}
 }
@@ -4897,6 +4900,8 @@ String EditorNode::_get_system_info() const {
 		driver_name = "Vulkan";
 	} else if (driver_name.begins_with("opengl3")) {
 		driver_name = "GLES3";
+	} else if (driver_name == "metal") {
+		driver_name = "Metal";
 	}
 
 	// Join info.
