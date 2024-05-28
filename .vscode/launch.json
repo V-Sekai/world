@@ -43,14 +43,5 @@
       "program": "${workspaceFolder}/20-29 Tools/21 Godot 21/21.01 Godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
     },
-    {
-      "name": "Run the editor with skeleton merge",
-      "type": "lldb",
-      "request": "launch",
-      "args": ["--path", "${workspaceFolder}/../SK_skeleton_merge_cat_fire_merge_01", "-e"],
-      "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/20-29 Tools/21 Godot 21/21.01 Godot/bin/godot.macos.editor.double.arm64",
-      "preLaunchTask": "Godot Engine"
-    },
   ]
 }
