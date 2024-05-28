@@ -26,6 +26,7 @@ SnailInput="*res://addons/snail_input/snail_input.gd"
 SnailTransition="*res://addons/snail_transition/snail_transition.gd"
 DD="*res://addons/zylann.debug_draw/debug_draw.gd"
 Globals="*res://crappy_contraptions/scenes/globals.gd"
+XrInjector="*res://xr_injector/xr_injector.gd"
 
 [display]
 
