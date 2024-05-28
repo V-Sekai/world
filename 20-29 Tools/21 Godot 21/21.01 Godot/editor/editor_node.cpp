@@ -4151,9 +4151,10 @@ void EditorNode::update_ownership_table_for_addition_node_ancestors(Node *p_curr
 void EditorNode::update_node_from_node_modification_entry(Node *p_node, ModificationNodeEntry &p_node_modification) {
 	if (p_node) {
 		// First, attempt to restore the script property since it may affect the get_property_list method.
-		Variant *script_table_entry = p_node_modification.property_table.getptr(CoreStringNames::get_singleton()->_to_string);
-		if (script_table_entry) {
-			p_node->set_script(*script_table_entry);
+		StringName script_property_name = CoreStringNames::get_singleton()->_script;
+		Variant *script_property_table_entry = p_node_modification.property_table.getptr(script_property_name);
+		if (script_property_table_entry) {
+			p_node->set_script(*script_property_table_entry);
 		}
 
 		// Get properties for this node.
@@ -4193,7 +4194,7 @@ void EditorNode::update_node_from_node_modification_entry(Node *p_node, Modifica
 			Connection conn = E.connection;
 
 			// Get the node the callable is targeting.
-			Node *target_node = cast_to<Node>(conn.callable.get_object());
+			Node *target_node = Object::cast_to<Node>(conn.callable.get_object());
 
 			// If the callable object no longer exists or is marked for deletion,
 			// attempt to reaccquire the closest match by using the node path
@@ -4900,8 +4901,6 @@ String EditorNode::_get_system_info() const {
 		driver_name = "Vulkan";
 	} else if (driver_name.begins_with("opengl3")) {
 		driver_name = "GLES3";
-	} else if (driver_name == "metal") {
-		driver_name = "Metal";
 	}
 
 	// Join info.
@@ -5676,7 +5675,7 @@ void EditorNode::_add_dropped_files_recursive(const Vector<String> &p_files, Str
 }
 
 void EditorNode::_file_access_close_error_notify(const String &p_str) {
-	callable_mp_static(&EditorNode::_file_access_close_error_notify_impl).bind(p_str).call_deferred();
+	callable_mp_static(&EditorNode::_file_access_close_error_notify_impl).call_deferred(p_str);
 }
 
 void EditorNode::_file_access_close_error_notify_impl(const String &p_str) {
@@ -6262,7 +6261,7 @@ static Node *_resource_get_edited_scene() {
 }
 
 void EditorNode::_print_handler(void *p_this, const String &p_string, bool p_error, bool p_rich) {
-	callable_mp_static(&EditorNode::_print_handler_impl).bind(p_string, p_error, p_rich).call_deferred();
+	callable_mp_static(&EditorNode::_print_handler_impl).call_deferred(p_string, p_error, p_rich);
 }
 
 void EditorNode::_print_handler_impl(const String &p_string, bool p_error, bool p_rich) {

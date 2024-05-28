@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  register_types.cpp                                                    */
+/*  editor_inspector.compat.inc                                           */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,16 +28,14 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#include "register_types.h"
+#ifndef DISABLE_DEPRECATED
 
-void initialize_spirv_cross_module(ModuleInitializationLevel p_level) {
-	if (p_level != MODULE_INITIALIZATION_LEVEL_CORE) {
-		return;
-	}
+void EditorInspectorPlugin::_add_property_editor_bind_compat_92322(const String &p_for_property, Control *p_prop, bool p_add_to_end) {
+	add_property_editor(p_for_property, p_prop, p_add_to_end, "");
 }
 
-void uninitialize_spirv_cross_module(ModuleInitializationLevel p_level) {
-	if (p_level != MODULE_INITIALIZATION_LEVEL_CORE) {
-		return;
-	}
+void EditorInspectorPlugin::_bind_compatibility_methods() {
+	ClassDB::bind_compatibility_method(D_METHOD("add_property_editor", "property", "editor", "add_to_end"), &EditorInspectorPlugin::_add_property_editor_bind_compat_92322, DEFVAL(false));
 }
+
+#endif // DISABLE_DEPRECATED

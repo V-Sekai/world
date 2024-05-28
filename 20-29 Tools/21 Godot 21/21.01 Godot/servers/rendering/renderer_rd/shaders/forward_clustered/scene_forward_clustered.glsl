@@ -2288,7 +2288,7 @@ void fragment_shader(in SceneData scene_data) {
 			}
 		}
 
-#ifdef NO_IMAGE_ATOMICS
+#ifdef MOLTENVK_USED
 		imageStore(geom_facing_grid, grid_pos, uvec4(imageLoad(geom_facing_grid, grid_pos).r | facing_bits)); //store facing bits
 #else
 		imageAtomicOr(geom_facing_grid, grid_pos, facing_bits); //store facing bits
