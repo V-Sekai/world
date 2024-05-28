@@ -31,7 +31,6 @@
 #include "editor_node.h"
 
 #include "core/config/project_settings.h"
-#include "core/core_string_names.h"
 #include "core/extension/gdextension_manager.h"
 #include "core/input/input.h"
 #include "core/io/config_file.h"
@@ -672,7 +671,7 @@ void EditorNode::_notification(int p_what) {
 
 			callable_mp(this, &EditorNode::_begin_first_scan).call_deferred();
 
-			DisplayServer::get_singleton()->set_system_theme_change_callback(callable_mp(this, &EditorNode::_update_theme));
+			DisplayServer::get_singleton()->set_system_theme_change_callback(callable_mp(this, &EditorNode::_update_theme).bind(false));
 
 			/* DO NOT LOAD SCENES HERE, WAIT FOR FILE SCANNING AND REIMPORT TO COMPLETE */
 		} break;
@@ -4151,7 +4150,7 @@ void EditorNode::update_ownership_table_for_addition_node_ancestors(Node *p_curr
 void EditorNode::update_node_from_node_modification_entry(Node *p_node, ModificationNodeEntry &p_node_modification) {
 	if (p_node) {
 		// First, attempt to restore the script property since it may affect the get_property_list method.
-		StringName script_property_name = CoreStringNames::get_singleton()->_script;
+		StringName script_property_name = CoreStringNames::get_singleton()->script;
 		Variant *script_property_table_entry = p_node_modification.property_table.getptr(script_property_name);
 		if (script_property_table_entry) {
 			p_node->set_script(*script_property_table_entry);
