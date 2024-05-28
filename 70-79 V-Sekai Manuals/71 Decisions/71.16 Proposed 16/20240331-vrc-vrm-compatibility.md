@@ -12,29 +12,34 @@ The lack of compatibility between VRC and VRM can lead to inefficiencies and lim
 
 The proposed solution involves a series of steps outlined in the README below:
 
+1. DO NOT remove transparent triangles for [hair, face, body]
+1. Make sure the `Body` has the all blend shapes deleted.
 1. Add face shapes with hana tool
-2. DO NOT remove transparent triangles for [hair, face, body]
-3. Unpack the prefab.
-4. Convert to vrchat. Combine meshes, remove upper chest
-5. Delete skirt bones that are not used.
-6. Add vrcfury bounding box fix
-7. Add vrcfury direct tree
-8. Add vrcfury jerry's templates
-9. Change the eyes to move up or down [-2, 2].
-10. Make sure the `Body` has the perfect sync blend shapes. Delete closed mouth blend shape.
+2. Split the skin from the clothing using separate by material.
+3. On all the clothing delete vertex groups.
+4. Use Robust Weight Transfer for Blender to rig clothing
+6. Unpack the prefab.
+7. Convert to vrchat. Combine meshes, remove upper chest
+8. Delete skirt bones that are not used.
+9. ~~Add vrcfury bounding box fix~~
+10. Add vrcfury direct tree
+11. Add vrcfury fix write defaults
+11. ~~Add vrcfury blend shape optimizer~~
+11. Add vrcfury anchor override fix
+12. Add vrcfury jerry's templates
+12. Add vrcfury unlimited parameters
+13. ~~Change the eyes to move up or down [-2, 2].~~
+14. Make sure the `Body` has the perfect sync blend shapes.
 10. Choose either the MPEG4 blendshapes or Perfect sync. Delete one or the other.
 11. Remove empty vrc parameters
 12. Remove Physbones with missing transforms from secondary.
 13. Convert bone clusters in sphere colliders to capsule colliders to go from VERY POOR to POOR.
 14. Continue converting capsules until satisfied "POOR".
 15. The FX controller must match the name and not be temporary.
-16. Remove all face blend shapes.
-17. Use the reader to add face blend shapes (perfect sync)
-18. Delete `mouthRollUpper`, `mouthRollLower` and `mouthClose`. 
 19. Delete VRM tools.
 20. Make sure all pipeline IDs are detached.
 21. Remember to delete the upper chest from the humanoid.
-22. Eye look is behind the nose
+22. Eye look is behind the nose bridge
 23. Make sure the breast bones are parented as the same bone as the clothing chest bones correspond to.
 24. Cross eyed fix in vrcfury breaks eye tracking.
 25. Upload. (Pick a new slot. DO NOT REUSE A SLOT.)
@@ -93,7 +98,8 @@ Status: Proposed <!-- Draft | Proposed | Rejected | Accepted | Deprecated | Supe
 1. [vrc-get gui](https://github.com/vrc-get/vrc-get/releases/tag/gui-v0.1.0-beta.16)
 1. [V-Sekai · GitHub](https://github.com/v-sekai) - Official GitHub account for the V-Sekai development community focusing on social VR functionality for the Godot Engine
 2. [V-Sekai/v-sekai-game](https://github.com/v-sekai/v-sekai-game) - GitHub page for the V-Sekai open-source project bringing social VR/VRSNS/metaverse components to the Godot Engine
-4. https://vcc.vrcfury.com
-5. https://Adjerry91.github.io/VRCFaceTracking-Templates/index.json
+4. [https://vcc.vrcfury.com]
+5. [https://Adjerry91.github.io/VRCFaceTracking-Templates/index.json]
+6. [https://esperecyan.github.io/VRMConverterForVRChat/registry.json]
 
 AI assistant Aria assisted with this article.
