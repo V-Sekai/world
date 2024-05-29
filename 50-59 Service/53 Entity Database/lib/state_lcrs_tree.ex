@@ -34,10 +34,19 @@ defmodule StateLCRSTreeFilter do
       {convert_state_to_int_list(state_name), children}
     end)
     tree = convert_states_to_tree(states)
+    list = flatten_tree(tree)
 
-    buffer = %{buffer | payload: tree}
+    buffer = %{buffer | payload: list}
     {{:ok, buffer: {:output, buffer}}, state}
   end
+
+  def flatten_tree(%StateNode{} = node) do
+    Enum.reduce([node], [], fn %StateNode{state: state, first_child: first_child, next_sibling: next_sibling}, acc ->
+      [state | flatten_tree(first_child) ++ flatten_tree(next_sibling)] ++ acc
+    end)
+  end
+
+  def flatten_tree(nil), do: []
 
   def convert_state_to_int_list(state_name) do
     state_name
