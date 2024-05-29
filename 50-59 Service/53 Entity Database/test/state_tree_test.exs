@@ -5,6 +5,20 @@ defmodule StateLCRSTreeFilterTest do
   alias StateNode
   alias Membrane.Buffer
 
+  test "converts state name to a list of integers" do
+    state_name = "testState"
+    expected_result = [116, 101, 115, 116, 83, 116, 97, 116, 101]
+
+    assert StateLCRSTreeFilter.convert_state_to_int_list(state_name) == expected_result
+  end
+
+  test "returns a list of length 100 when given a long state name" do
+    state_name = String.duplicate("a", 200)
+    result = StateLCRSTreeFilter.convert_state_to_int_list(state_name)
+
+    assert length(result) == 100
+  end
+
   test "returns a single node tree when given a single state" do
     states = [{"state1", []}]
     buffer = %Buffer{payload: states}
@@ -13,7 +27,7 @@ defmodule StateLCRSTreeFilterTest do
       StateLCRSTreeFilter.handle_process(:input, buffer, nil, %{})
 
     assert %StateNode{
-             state: "state1",
+             state: ~c"state1",
              first_child: nil,
              next_sibling: nil
            } = result_buffer.payload
@@ -29,8 +43,8 @@ defmodule StateLCRSTreeFilterTest do
 
     assert %StateNode{
              first_child: nil,
-             next_sibling: %StateNode{first_child: nil, next_sibling: nil, state: "state2"},
-             state: "state1"
+             next_sibling: %StateNode{first_child: nil, next_sibling: nil, state: ~c"state2"},
+             state: ~c"state1"
            } = result_buffer
   end
 
@@ -48,11 +62,11 @@ defmodule StateLCRSTreeFilterTest do
                next_sibling: %StateNode{
                  first_child: nil,
                  next_sibling: nil,
-                 state: "state3"
+                 state: ~c"state3"
                },
-               state: "state2"
+               state: ~c"state2"
              },
-             state: "state1"
+             state: ~c"state1"
            } = result_buffer.payload
   end
 
@@ -71,7 +85,7 @@ defmodule StateLCRSTreeFilterTest do
     )
   end
 
-  @tag :skip
+  # @tag :skips
   test "benchmark handle_process/4 nested" do
     states = Enum.to_list(1..10_000) |> Enum.reduce([], fn i, acc -> [{"state#{i}", acc}] end)
     buffer = %Buffer{payload: states}
@@ -114,7 +128,7 @@ defmodule StateLCRSTreeFilterTest do
      _} = StateLCRSTreeFilter.handle_process(:input, buffer, nil, %{})
 
     assert %StateNode{
-             state: "state1",
+             state: ~c"state1",
              first_child: %StateNode{
                state: "state2",
                first_child: %StateNode{
@@ -150,6 +164,52 @@ defmodule StateLCRSTreeFilterTest do
              },
              next_sibling: nil
            } = result_buffer
+  end
+
+  def convert_tree_to_coo(tree) do
+    {rows, cols, data} = do_convert_tree_to_coo(tree, {[], [], []}, {0, 0})
+    {Enum.reverse(rows), Enum.reverse(cols), Enum.reverse(data)}
+  end
+
+  defp do_convert_tree_to_coo(nil, acc, _coords), do: acc
+
+  defp do_convert_tree_to_coo(%StateNode{state: state, first_child: fc, next_sibling: ns} = _node, {rows, cols, data}, {row, col}) do
+    acc = {[row | rows], [col | cols], [state | data]}
+
+    acc = do_convert_tree_to_coo(fc, acc, {row + 1, 0})
+    do_convert_tree_to_coo(ns, acc, {row, col + 1})
+  end
+  test "returns a tree with first child and next sibling when given three states as COO format" do
+    # Create a tree with three states
+    tree = %StateNode{
+      state: "state1",
+      first_child: %StateNode{
+        state: "state2",
+        first_child: nil,
+        next_sibling: nil
+      },
+      next_sibling: %StateNode{
+        state: "state3",
+        first_child: nil,
+        next_sibling: nil
+      }
+    }
+
+    # Convert the tree to COO format
+    {rows, cols, data} = StateLCRSTreeFilter.convert_tree_to_coo(tree)
+
+    # Check that the COO representation is as expected
+    assert rows == [0, 1, 0]
+    assert cols == [0, 0, 1]
+    assert data == ["state1", "state2", "state3"]
+  end
+
+  test "check flatten unflatten a nested tree when given a nested list of states" do
+    states = [{"state1", []}, {"state2", []}, {"state3", []}, {"state4", []}, {"state5", []}]
+    flattened_states = StateLCRSTreeFilter.flatten(states)
+    unflattened_states = StateLCRSTreeFilter.unflatten(flattened_states)
+
+    assert unflattened_states == states
   end
 
   test "check lcrs tree property" do
