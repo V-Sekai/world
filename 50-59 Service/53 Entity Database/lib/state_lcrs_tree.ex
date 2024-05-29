@@ -54,6 +54,20 @@ defmodule StateLCRSTreeFilter do
     }
   end
 
+  def convert_tree_to_coo(tree) do
+    {rows, cols, data} = do_convert_tree_to_coo(tree, {[], [], []}, {0, 0})
+    {Enum.reverse(rows), Enum.reverse(cols), Enum.reverse(data)}
+  end
+
+  defp do_convert_tree_to_coo(nil, acc, _coords), do: acc
+
+  defp do_convert_tree_to_coo(%StateNode{state: state, first_child: fc, next_sibling: ns} = _node, {rows, cols, data}, {row, col}) do
+    acc = {[row | rows], [col | cols], [state | data]}
+
+    acc = do_convert_tree_to_coo(fc, acc, {row + 1, 0})
+    do_convert_tree_to_coo(ns, acc, {row, col + 1})
+  end
+
   defp convert_siblings([]), do: nil
   defp convert_siblings([head | tail]) do
     %StateNode{
@@ -91,17 +105,4 @@ defmodule StateLCRSTreeFilter do
     end)
   end
 
-  def convert_tree_to_coo(tree) do
-    {rows, cols, data} = do_convert_tree_to_coo(tree, {[], [], []}, {0, 0})
-    {Enum.reverse(rows), Enum.reverse(cols), Enum.reverse(data)}
-  end
-
-  defp do_convert_tree_to_coo(nil, acc, _coords), do: acc
-
-  defp do_convert_tree_to_coo(%StateNode{state: state, first_child: fc, next_sibling: ns} = _node, {rows, cols, data}, {row, col}) do
-    acc = {[row | rows], [col | cols], [state | data]}
-
-    acc = do_convert_tree_to_coo(fc, acc, {row + 1, 0})
-    do_convert_tree_to_coo(ns, acc, {row, col + 1})
-  end
 end

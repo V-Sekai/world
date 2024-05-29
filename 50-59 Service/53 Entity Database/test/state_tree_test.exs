@@ -70,6 +70,16 @@ defmodule StateLCRSTreeFilterTest do
            } = result_buffer.payload
   end
 
+  test "returns a tree with first child and next sibling when given three states from coo" do
+    states = [{"state1", []}, {"state2", []}, {"state3", []}]
+    buffer = %Buffer{payload: states}
+
+    {{:ok, [buffer: {:output, result_buffer}]}, _} =
+      StateLCRSTreeFilter.handle_process(:input, buffer, nil, %{})
+    assert {[0, 0, 0], [0, 1, 2], [~c"state1", ~c"state2", ~c"state3"]} = StateLCRSTreeFilter.convert_tree_to_coo(result_buffer.payload)
+  end
+
+
   @tag :skip
   test "benchmark handle_process/4" do
     states = Enum.to_list(1..10_000) |> Enum.map(&{"state#{&1}", []})
@@ -178,30 +188,6 @@ defmodule StateLCRSTreeFilterTest do
 
     acc = do_convert_tree_to_coo(fc, acc, {row + 1, 0})
     do_convert_tree_to_coo(ns, acc, {row, col + 1})
-  end
-  test "returns a tree with first child and next sibling when given three states as COO format" do
-    # Create a tree with three states
-    tree = %StateNode{
-      state: "state1",
-      first_child: %StateNode{
-        state: "state2",
-        first_child: nil,
-        next_sibling: nil
-      },
-      next_sibling: %StateNode{
-        state: "state3",
-        first_child: nil,
-        next_sibling: nil
-      }
-    }
-
-    # Convert the tree to COO format
-    {rows, cols, data} = StateLCRSTreeFilter.convert_tree_to_coo(tree)
-
-    # Check that the COO representation is as expected
-    assert rows == [0, 1, 0]
-    assert cols == [0, 0, 1]
-    assert data == ["state1", "state2", "state3"]
   end
 
   test "check flatten unflatten a nested tree when given a nested list of states" do
