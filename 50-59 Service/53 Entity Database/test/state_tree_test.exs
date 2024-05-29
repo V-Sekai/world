@@ -79,6 +79,16 @@ defmodule StateLCRSTreeFilterTest do
     assert {[0, 0, 0], [0, 1, 2], [~c"state1", ~c"state2", ~c"state3"]} = StateLCRSTreeFilter.convert_tree_to_coo(result_buffer.payload)
   end
 
+  import Nx.Defn
+
+  defn create_tensor() do
+    Nx.tensor([[1, 2], [3, 4]])
+  end
+
+  test "create_tensor/0 returns a tensor with correct shape" do
+    tensor = create_tensor()
+    assert Nx.shape(tensor) == {2, 2}
+  end
 
   @tag :skip
   test "benchmark handle_process/4" do
