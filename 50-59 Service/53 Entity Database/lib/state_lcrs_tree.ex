@@ -65,7 +65,9 @@ defmodule StateLCRSTreeFilter do
     acc = {[row | rows], [col | cols], [state | data]}
 
     acc = do_convert_tree_to_coo(fc, acc, {row + 1, 0})
-    do_convert_tree_to_coo(ns, acc, {row, col + 1})
+    acc = do_convert_tree_to_coo(ns, acc, {row, col + 1})
+
+    acc
   end
 
   defp convert_siblings([]), do: nil
