@@ -1,2 +1,1 @@
-
-Set `$env:LIBTORCH_TARGET="cu118"`
+1. `brew install gcc make`

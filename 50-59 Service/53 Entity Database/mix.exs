@@ -26,7 +26,7 @@ defmodule EntityDatabase.MixProject do
       {:membrane_file_plugin, "~> 0.16"},
       {:benchee, "~> 1.0", only: [:dev, :test]},
       {:nx, "~> 0.5"},
-      {:torchx, "~> 0.5"},
+      {:exla, "~> 0.5"},
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
     ]
