@@ -68,76 +68,24 @@ defmodule StateLCRSTreeFilterTest do
              },
              state: ~c"state1"
            } = result_buffer.payload
-  end
+end
 
-  test "returns a tree with first child and next sibling when given three states from coo" do
-    states = [{"state1", []}, {"state2", []}, {"state3", []}]
-    buffer = %Buffer{payload: states}
-
-    {{:ok, [buffer: {:output, result_buffer}]}, _} =
-      StateLCRSTreeFilter.handle_process(:input, buffer, nil, %{})
-    assert {[0, 0, 0], [0, 1, 2], [~c"state1", ~c"state2", ~c"state3"]} = StateLCRSTreeFilter.convert_tree_to_coo(result_buffer.payload)
-  end
-
-  import Nx.Defn
-
-  defn create_tensor() do
-    Nx.tensor([[1, 2], [3, 4]])
-  end
-
-  test "create_tensor/0 returns a tensor with correct shape" do
-    tensor = create_tensor()
-    assert Nx.shape(tensor) == {2, 2}
-  end
-
-  defn create_8_000_tensor_of_u8() do
-    key = Nx.Random.key(1701)
-    {random_floats, _new_key} = Nx.Random.uniform(key, shape: {8000})
-    random_u8 = random_floats |> Nx.multiply(255) |> Nx.round() |> Nx.as_type({:u, 8})
-    random_u8
-  end
-
-  @tag :skip
-  test "create_tensor/0 returns a tensor with correct shape for 8_000 u8" do
-    tensor = create_8_000_tensor_of_u8()
-    assert Nx.shape(tensor) == {8000}
-  end
-
-  @tag :skip
-  test "benchmark_create_8_000_tensor_of_u8()" do
-    Benchee.run(%{
-      "create_8_000_tensor_of_u8" => fn -> create_8_000_tensor_of_u8() end
-    }, time: 10, warmup: 2)
-  end
-
-  @tag :skip
-  test "benchmark handle_process/4" do
-    states = Enum.to_list(1..10_000) |> Enum.map(&{"state#{&1}", []})
-    buffer = %Buffer{payload: states}
-
-    Benchee.run(
-      %{
-        "StateLCRSTreeFilter" => fn ->
-          StateLCRSTreeFilter.handle_process(:input, buffer, nil, %{})
-        end
-      },
-      time: 0.1
-    )
-  end
-
-  # @tag :skips
   test "benchmark handle_process/4 nested" do
-    states = Enum.to_list(1..10_000) |> Enum.reduce([], fn i, acc -> [{"state#{i}", acc}] end)
-    buffer = %Buffer{payload: states}
+    payloads = [
+      Enum.to_list(1..1_000) |> Enum.reduce([], fn i, acc -> [{"state#{i}", acc}] end),
+      Enum.to_list(1..10_000) |> Enum.reduce([], fn i, acc -> [{"state#{i}", acc}] end),
+      Enum.to_list(1..100_000) |> Enum.reduce([], fn i, acc -> [{"state#{i}", acc}] end),
+    ]
 
-    Benchee.run(
-      %{
-        "StateLCRSTreeFilter nested" => fn ->
-          StateLCRSTreeFilter.handle_process(:input, buffer, nil, %{})
-        end
-      },
-      time: 0.1
-    )
+    buffers = Enum.zip(["1_000", "10_000", "100_000"], payloads) |> Enum.map(fn {size, payload} ->
+      {size, %Buffer{payload: payload}}
+    end)
+
+    benchmarks = for {size, buffer} <- buffers do
+      {:"StateLCRSTreeFilter nested #{size}", fn -> StateLCRSTreeFilter.handle_process(:input, buffer, nil, %{}) end}
+    end
+
+    Benchee.run(Enum.into(benchmarks, %{}), time: 0.1)
   end
 
   test "returns a nested tree when given a nested list of states" do
@@ -204,28 +152,6 @@ defmodule StateLCRSTreeFilterTest do
              },
              next_sibling: nil
            } = result_buffer
-  end
-
-  def convert_tree_to_coo(tree) do
-    {rows, cols, data} = do_convert_tree_to_coo(tree, {[], [], []}, {0, 0})
-    {Enum.reverse(rows), Enum.reverse(cols), Enum.reverse(data)}
-  end
-
-  defp do_convert_tree_to_coo(nil, acc, _coords), do: acc
-
-  defp do_convert_tree_to_coo(%StateNode{state: state, first_child: fc, next_sibling: ns} = _node, {rows, cols, data}, {row, col}) do
-    acc = {[row | rows], [col | cols], [state | data]}
-
-    acc = do_convert_tree_to_coo(fc, acc, {row + 1, 0})
-    do_convert_tree_to_coo(ns, acc, {row, col + 1})
-  end
-
-  test "check flatten unflatten a nested tree when given a nested list of states" do
-    states = [{"state1", []}, {"state2", []}, {"state3", []}, {"state4", []}, {"state5", []}]
-    flattened_states = StateLCRSTreeFilter.flatten(states)
-    unflattened_states = StateLCRSTreeFilter.unflatten(flattened_states)
-
-    assert unflattened_states == states
   end
 
   test "check lcrs tree property" do

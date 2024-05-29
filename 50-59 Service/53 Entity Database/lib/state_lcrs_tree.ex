@@ -54,22 +54,6 @@ defmodule StateLCRSTreeFilter do
     }
   end
 
-  def convert_tree_to_coo(tree) do
-    {rows, cols, data} = do_convert_tree_to_coo(tree, {[], [], []}, {0, 0})
-    {Enum.reverse(rows), Enum.reverse(cols), Enum.reverse(data)}
-  end
-
-  defp do_convert_tree_to_coo(nil, acc, _coords), do: acc
-
-  defp do_convert_tree_to_coo(%StateNode{state: state, first_child: fc, next_sibling: ns} = _node, {rows, cols, data}, {row, col}) do
-    acc = {[row | rows], [col | cols], [state | data]}
-
-    acc = do_convert_tree_to_coo(fc, acc, {row + 1, 0})
-    acc = do_convert_tree_to_coo(ns, acc, {row, col + 1})
-
-    acc
-  end
-
   defp convert_siblings([]), do: nil
   defp convert_siblings([head | tail]) do
     %StateNode{
@@ -87,24 +71,4 @@ defmodule StateLCRSTreeFilter do
       next_sibling: convert_children(tail)
     }
   end
-
-  def unflatten(list) do
-    {tree, _} = do_unflatten(list, [])
-    tree
-  end
-
-  defp do_unflatten([], stack), do: {Enum.reverse(stack), []}
-  defp do_unflatten([{state, 0} | rest], stack), do: do_unflatten(rest, [{state, []} | stack])
-  defp do_unflatten([{state, child_count} | rest], stack) do
-    {children, rest_after_children} = Enum.split(rest, child_count)
-    {unflattened_children, []} = do_unflatten(children, [])
-    do_unflatten(rest_after_children, [{state, unflattened_children} | stack])
-  end
-
-  def flatten(tree) do
-    Enum.reduce(tree, [], fn {state, children}, acc ->
-      acc ++ [{state, length(children)} | flatten(children)]
-    end)
-  end
-
 end
