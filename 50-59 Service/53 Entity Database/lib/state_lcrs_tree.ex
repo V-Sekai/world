@@ -71,4 +71,11 @@ defmodule StateLCRSTreeFilter do
       next_sibling: convert_children(tail)
     }
   end
+  defp convert_children({state, children}) do
+    %StateNode{
+      state: state,
+      first_child: convert_children(children),
+      next_sibling: nil
+    }
+  end
 end

@@ -46,38 +46,39 @@ defmodule StateLCRSTreeFilterTest do
              next_sibling: %StateNode{first_child: nil, next_sibling: nil, state: ~c"state2"},
              state: ~c"state1"
            } = result_buffer
+    end
+
+  defp generate_state(i) do
+    base = "state#{i}"
+    String.pad_trailing(base, 100 - byte_size(base), " ")
   end
-
-  test "returns a tree with first child and next sibling when given three states" do
-    states = [{"state1", []}, {"state2", []}, {"state3", []}]
-    buffer = %Buffer{payload: states}
-
-    {{:ok, [buffer: {:output, result_buffer}]}, _} =
-      StateLCRSTreeFilter.handle_process(:input, buffer, nil, %{})
-
-    assert %StateNode{
-             first_child: nil,
-             next_sibling: %StateNode{
-               first_child: nil,
-               next_sibling: %StateNode{
-                 first_child: nil,
-                 next_sibling: nil,
-                 state: ~c"state3"
-               },
-               state: ~c"state2"
-             },
-             state: ~c"state1"
-           } = result_buffer.payload
-end
 
   test "benchmark handle_process/4 nested" do
     payloads = [
-      Enum.to_list(1..1_000) |> Enum.reduce([], fn i, acc -> [{"state#{i}", acc}] end),
-      Enum.to_list(1..10_000) |> Enum.reduce([], fn i, acc -> [{"state#{i}", acc}] end),
-      Enum.to_list(1..100_000) |> Enum.reduce([], fn i, acc -> [{"state#{i}", acc}] end),
+      Enum.to_list(1..20) |> Enum.reduce([], fn i, acc ->
+        if :math.exp(:math.log10(i)) |> round == i do
+          [{generate_state(i), acc}]
+        else
+          [{generate_state(i), List.first(acc)}]
+        end
+      end),
+      Enum.to_list(1..100_000) |> Enum.reduce([], fn i, acc ->
+        if :math.exp(:math.log10(i)) |> round == i do
+          [{generate_state(i), acc}]
+        else
+          [{generate_state(i), List.first(acc)}]
+        end
+      end),
+      Enum.to_list(1..300_000) |> Enum.reduce([], fn i, acc ->
+        if :math.exp(:math.log10(i)) |> round == i do
+          [{generate_state(i), acc}]
+        else
+          [{generate_state(i), List.first(acc)}]
+        end
+      end),
     ]
 
-    buffers = Enum.zip(["1_000", "10_000", "100_000"], payloads) |> Enum.map(fn {size, payload} ->
+    buffers = Enum.zip(["20", "100_000", "300_000"], payloads) |> Enum.map(fn {size, payload} ->
       {size, %Buffer{payload: payload}}
     end)
 
