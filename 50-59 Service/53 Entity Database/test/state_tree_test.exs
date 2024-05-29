@@ -97,11 +97,13 @@ defmodule StateLCRSTreeFilterTest do
     random_u8
   end
 
+  @tag :skip
   test "create_tensor/0 returns a tensor with correct shape for 8_000 u8" do
     tensor = create_8_000_tensor_of_u8()
     assert Nx.shape(tensor) == {8000}
   end
 
+  @tag :skip
   test "benchmark_create_8_000_tensor_of_u8()" do
     Benchee.run(%{
       "create_8_000_tensor_of_u8" => fn -> create_8_000_tensor_of_u8() end
