@@ -139,7 +139,7 @@
   "telemetry.enableCrashReporter": false,
   "sonarlint.pathToCompileCommands": "${workspaceFolder}\\godot\\compile_commands.json",
   "git.ignoreLimitWarning": true,
-  "cmake.sourceDirectory": "${workspaceFolder}/godot/platform/android/java/nativeSrcsConfigs",
+  "cmake.sourceDirectory": "/Users/ernest.lee/Desktop/world/20-29 Tools/21 Godot 21/21.01 Godot/modules/speech/thirdparty/AEC3/base/abseil/absl",
   "grammarly.selectors": [
     {
       "language": "markdown",
