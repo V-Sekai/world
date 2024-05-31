@@ -493,7 +493,7 @@ def Plane_SummaryProvider(valobj, internal_dict):
 
 
 def AABB_SummaryProvider(valobj, internal_dict):
-    # jsut print out the Vector3s
+    # just print out the Vector3s
     return "{{position= {{{0}}}, size= {{{1}}}}}".format(
         valobj.GetChildMemberWithName("position").GetSummary(),
         valobj.GetChildMemberWithName("size").GetSummary(),
