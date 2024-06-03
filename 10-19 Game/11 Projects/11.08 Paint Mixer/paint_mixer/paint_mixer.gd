@@ -133,16 +133,6 @@ const XYZ_RGB = [
 	[ 0.05568392,  -0.20417438, 1.05799454 ]
 ]
 
-## Clamps a number between a lower and upper bound.
-func clamp(v, mn, mx):
-	return min(max(v, mn), mx)
-
-
-## Converts a color channel from linear sRGB to standard RGB. x is expected to be in [0.0, 1.0].
-func compand(x):
-	if x < 0.0031308:
-		return x * 12.92
-	return 1.055 * pow(x, GAMMA_INV) - 0.055
 
 ## Finds the dot product of number arrays a and b, or the sum of the product of each element in a with that in b.
 func dot_product(a: Array, b: Array):
@@ -237,12 +227,6 @@ func spectral_upsampling(lrgb):
 	var b = max(0, min(lrgbnw[2] - lrgbnw[0], lrgbnw[2] - lrgbnw[1]))
 
 	return [w, c, m, y, r, g, b]
-
-## Converts a color channel from standard RGB to linear sRGB. x is expected to be in [0.0, 1.0].
-func uncompand(x):
-	if x < 0.04045:
-		return x / 12.92
-	return pow((x + 0.055) / 1.055, GAMMA)
 
 ## Converts xyz to sRGB.
 func xyz_to_srgb(xyz: Array):
