@@ -8,6 +8,14 @@
   },
   "configurations": [
     {
+      "name": "Run the editor",
+      "type": "lldb",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/20-29 Tools/21 Godot 21/21.01 Godot/bin/godot.macos.editor.double.arm64",
+      "preLaunchTask": "Godot Engine"
+    },
+    {
       "name": "Run the editor with V-Sekai game",
       "type": "lldb",
       "request": "launch",

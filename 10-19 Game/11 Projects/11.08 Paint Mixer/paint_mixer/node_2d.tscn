@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3 uid="uid://cje02ms160l76"]
+
+[ext_resource type="Script" path="res://paint_mixer/paint_mixer.gd" id="1_h55nw"]
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_h55nw")
