@@ -5314,7 +5314,7 @@ void GLTFDocument::_convert_csg_shape_to_gltf(CSGShape3D *p_current, GLTFNodeInd
 			}
 
 			Ref<Material> mat_surface_override = csg_mesh->surface_get_material(surface_i);
-			if (mat_surface_override.is_valid() && !mat.is_valid()) {
+			if (mat_surface_override.is_valid() && mat.is_null()) {
 				mat = mat_surface_override;
 			}
 

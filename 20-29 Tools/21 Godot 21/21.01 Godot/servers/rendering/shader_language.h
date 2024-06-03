@@ -179,6 +179,7 @@ public:
 		TK_HINT_SCREEN_TEXTURE,
 		TK_HINT_NORMAL_ROUGHNESS_TEXTURE,
 		TK_HINT_DEPTH_TEXTURE,
+		TK_HINT_TRIPLANAR_MAT,
 		TK_FILTER_NEAREST,
 		TK_FILTER_LINEAR,
 		TK_FILTER_NEAREST_MIPMAP,
@@ -674,6 +675,7 @@ public:
 				HINT_SCREEN_TEXTURE,
 				HINT_NORMAL_ROUGHNESS_TEXTURE,
 				HINT_DEPTH_TEXTURE,
+				HINT_TRIPLANAR_MAT,
 				HINT_MAX
 			};
 
@@ -717,6 +719,8 @@ public:
 		Vector<Function> vfunctions;
 		Vector<Constant> vconstants;
 		Vector<Struct> vstructs;
+
+		bool uses_triplanar_matrix = false;
 
 		ShaderNode() :
 				Node(NODE_TYPE_SHADER) {}
@@ -884,7 +888,7 @@ public:
 		bool can_discard = false;
 		bool main_function = false;
 	};
-	static bool has_builtin(const HashMap<StringName, ShaderLanguage::FunctionInfo> &p_functions, const StringName &p_name);
+	static bool has_builtin(const HashMap<StringName, ShaderLanguage::FunctionInfo> &p_functions, const StringName &p_name, bool p_check_global_funcs = false);
 
 	typedef DataType (*GlobalShaderUniformGetTypeFunc)(const StringName &p_name);
 

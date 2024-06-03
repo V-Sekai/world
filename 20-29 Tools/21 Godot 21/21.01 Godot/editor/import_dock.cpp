@@ -619,9 +619,6 @@ void ImportDock::_reimport_and_cleanup() {
 void ImportDock::_advanced_options() {
 	if (params->paths.size() == 1 && params->importer.is_valid()) {
 		params->importer->show_advanced_options(params->paths[0]);
-		// Workaround bug that causes Godot to reuse stale settings if Reimport is clicked.
-		import->set_disabled(true);
-		import_as->set_disabled(true);
 	}
 }
 
@@ -721,7 +718,7 @@ void ImportDock::_notification(int p_what) {
 	switch (p_what) {
 		case EditorSettings::NOTIFICATION_EDITOR_SETTINGS_CHANGED: {
 			if (EditorThemeManager::is_generated_theme_outdated()) {
-				imported->add_theme_style_override("normal", get_theme_stylebox(CoreStringName(normal), SNAME("LineEdit")));
+				imported->add_theme_style_override(CoreStringName(normal), get_theme_stylebox(CoreStringName(normal), SNAME("LineEdit")));
 			}
 		} break;
 
@@ -778,7 +775,7 @@ ImportDock::ImportDock() {
 	content->hide();
 
 	imported = memnew(Label);
-	imported->add_theme_style_override("normal", EditorNode::get_singleton()->get_editor_theme()->get_stylebox(CoreStringName(normal), SNAME("LineEdit")));
+	imported->add_theme_style_override(CoreStringName(normal), EditorNode::get_singleton()->get_editor_theme()->get_stylebox(CoreStringName(normal), SNAME("LineEdit")));
 	imported->set_clip_text(true);
 	content->add_child(imported);
 	HBoxContainer *hb = memnew(HBoxContainer);
