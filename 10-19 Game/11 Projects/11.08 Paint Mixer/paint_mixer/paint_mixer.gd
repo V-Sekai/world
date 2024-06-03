@@ -253,36 +253,32 @@ func xyz_to_srgb(xyz: Array):
 	return Color(r, g, b).linear_to_srgb()
 
 
-var orig_color: Color 
-var dest_color: Color
-var swatch_count = 7
+var orig_color: Color = Color.html("#00357B")
+var dest_color: Color = Color.html("#D79900")
+var swatch_count = 7 
 
 var hbox = HBoxContainer.new() 
 var textureRect = TextureRect.new() 
 	
 func _ready():
 	var dialog = Panel.new()
-	dialog.custom_minimum_size = Vector2i(2000, 500)
+	dialog.custom_minimum_size = Vector2i(2000, 1000)
 	add_child(dialog)
 
 	dialog.add_child(hbox)
 
 	var origColorPicker = ColorPicker.new()
-	origColorPicker.color = Color(1, 1, 1)
+	origColorPicker.picker_shape = ColorPicker.SHAPE_OKHSL_CIRCLE
+	origColorPicker.color = orig_color
 	origColorPicker.connect("color_changed", _on_orig_color_changed)
-	origColorPicker.presets_visible = false
-	origColorPicker.sampler_visible = false
-	origColorPicker.sliders_visible = false
 	origColorPicker.edit_alpha = false
 	hbox.add_child(origColorPicker) 
 
 	var destColorPicker = ColorPicker.new()
-	destColorPicker.color = Color(0, 0, 0)
+	destColorPicker.picker_shape = ColorPicker.SHAPE_OKHSL_CIRCLE
+	destColorPicker.color = dest_color
 	destColorPicker.connect("color_changed", _on_dest_color_changed)
-	destColorPicker.presets_visible = false
-	destColorPicker.sampler_visible = false
-	destColorPicker.sliders_visible = false
-	origColorPicker.edit_alpha = false
+	destColorPicker.edit_alpha = false
 	hbox.add_child(destColorPicker) 
 
 	var slider = HSlider.new()
@@ -294,6 +290,7 @@ func _ready():
 	hbox.add_child(slider)
 
 	hbox.add_child(textureRect) 
+	update_gradient()
 
 func _on_orig_color_changed(color: Color):
 	orig_color = color
