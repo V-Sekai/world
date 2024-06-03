@@ -261,9 +261,8 @@ var hbox = HBoxContainer.new()
 var textureRect = TextureRect.new() 
 	
 func _ready():
-	var dialog = Window.new()
-	dialog.title = "Spectral Demo"
-	dialog.min_size = Vector2i(2000, 500)
+	var dialog = Panel.new()
+	dialog.custom_minimum_size = Vector2i(2000, 500)
 	add_child(dialog)
 
 	dialog.add_child(hbox)
@@ -271,19 +270,19 @@ func _ready():
 	var origColorPicker = ColorPicker.new()
 	origColorPicker.color = Color(1, 1, 1)
 	origColorPicker.connect("color_changed", _on_orig_color_changed)
-	origColorPicker.custom_minimum_size = Vector2i(200, 200)
 	origColorPicker.presets_visible = false
 	origColorPicker.sampler_visible = false
 	origColorPicker.sliders_visible = false
+	origColorPicker.edit_alpha = false
 	hbox.add_child(origColorPicker) 
 
 	var destColorPicker = ColorPicker.new()
 	destColorPicker.color = Color(0, 0, 0)
 	destColorPicker.connect("color_changed", _on_dest_color_changed)
-	destColorPicker.custom_minimum_size = Vector2i(200, 200)
 	destColorPicker.presets_visible = false
 	destColorPicker.sampler_visible = false
 	destColorPicker.sliders_visible = false
+	origColorPicker.edit_alpha = false
 	hbox.add_child(destColorPicker) 
 
 	var slider = HSlider.new()
@@ -291,12 +290,10 @@ func _ready():
 	slider.max_value = 32
 	slider.value = swatch_count
 	slider.connect("value_changed", _on_swatch_count_changed)
-	slider.custom_minimum_size = Vector2i(200, 200)
+	slider.custom_minimum_size = Vector2(200, 200)
 	hbox.add_child(slider)
 
 	hbox.add_child(textureRect) 
-
-	dialog.popup_centered()
 
 func _on_orig_color_changed(color: Color):
 	orig_color = color
@@ -313,9 +310,9 @@ func _on_swatch_count_changed(value: float):
 func update_gradient():
 	var orig_srgb: Color = Color(orig_color.r, orig_color.g, orig_color.b)
 	var dest_srgb: Color = Color(dest_color.r, dest_color.g, dest_color.b)
-	print("Orig Color: ", orig_color)
-	print("Dest Color: ", dest_color)
-	print("Swatch Count: ", swatch_count)
+	print_verbose("Orig Color: ", orig_color)
+	print_verbose("Dest Color: ", dest_color)
+	print_verbose("Swatch Count: ", swatch_count)
 	var step = 1.0 / (swatch_count - 1)
 
 	# Count the number of ColorRects before the update.
@@ -323,7 +320,7 @@ func update_gradient():
 	for child in hbox.get_children():
 		if child is ColorRect:
 			color_rect_count_before += 1
-	print("ColorRect count before: ", color_rect_count_before)
+	print_verbose("ColorRect count before: ", color_rect_count_before)
 	var color_rects_to_remove = []
 	for i in range(hbox.get_child_count()):
 		var child = hbox.get_child(i)
@@ -336,9 +333,9 @@ func update_gradient():
 		
 	for i in range(swatch_count):
 		var fac = i * step
-		print("Interpolation Factor: ", fac)
+		print_verbose("Interpolation Factor: ", fac)
 		var trg_srgb: Color = mix(orig_srgb, dest_srgb, fac)
-		print("Mixed Color: ", trg_srgb)
+		print_verbose("Mixed Color: ", trg_srgb)
 
 		var color_rect = ColorRect.new()
 		color_rect.custom_minimum_size = Vector2i(20, 20)
@@ -346,12 +343,12 @@ func update_gradient():
 
 		# Set the color of the ColorRect.
 		color_rect.color = trg_srgb
-		print("ColorRect Color: ", color_rect.color)
+		print_verbose("ColorRect Color: ", color_rect.color)
 
 	# Count the number of ColorRects after the update.
 	var color_rect_count_after = 0
 	for child in hbox.get_children():
 		if child is ColorRect:
 			color_rect_count_after += 1
-	print("ColorRect count after: ", color_rect_count_after)
-	print("ColorRect count after: ", color_rect_count_after)
+	print_verbose("ColorRect count after: ", color_rect_count_after)
+	print_verbose("ColorRect count after: ", color_rect_count_after)
