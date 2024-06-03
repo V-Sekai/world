@@ -265,12 +265,12 @@ func _ready():
 	destColorPicker.edit_alpha = false
 	hbox.add_child(destColorPicker) 
 
-	var slider = HSlider.new()
+	var slider = VSlider.new()
 	slider.min_value = 3
 	slider.max_value = 32
 	slider.value = swatch_count
 	slider.connect("value_changed", _on_swatch_count_changed)
-	slider.custom_minimum_size = Vector2(200, 200)
+	slider.custom_minimum_size = Vector2(100, 200)
 	hbox.add_child(slider)
 
 	hbox.add_child(textureRect) 
