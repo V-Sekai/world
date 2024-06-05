@@ -1003,29 +1003,23 @@ Variant JSON::from_native(const Variant &p_variant, bool p_allow_classes, bool p
 Variant JSON::to_native(const Variant &p_json, bool p_allow_classes, bool p_allow_scripts) {
 	switch (p_json.get_type()) {
 		case Variant::BOOL: {
-			bool v = p_json;
-			return v;
+			return p_json;
 		} break;
 		case Variant::INT: {
-			int64_t v = p_json;
-			return v;
+			return p_json;
 		} break;
 		case Variant::FLOAT: {
-			double_t v = p_json;
-			return v;
+			return p_json;
 		} break;
 		case Variant::STRING: {
-			String v = p_json;
-			return v;
+			return p_json;
 		} break;
 		case Variant::STRING_NAME: {
-			StringName v = p_json;
-			return v;
+			return p_json;
 		} break;
 		case Variant::CALLABLE: {
-			Callable v;
-			// TODO: Implement handling of callable.
-			return v;
+			// TODO: fire 20240602 - Implement handling of callable.
+			return p_json;
 		} break;
 		case Variant::DICTIONARY: {
 			Dictionary d = p_json;
