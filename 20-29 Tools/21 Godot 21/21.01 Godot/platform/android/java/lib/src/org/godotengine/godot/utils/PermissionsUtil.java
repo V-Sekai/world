@@ -125,7 +125,7 @@ public final class PermissionsUtil {
 		}
 
 		activity.requestPermissions(requestedPermissions.toArray(new String[0]), REQUEST_ALL_PERMISSION_REQ_CODE);
-		return false;
+		return true;
 	}
 
 	/**
@@ -281,9 +281,8 @@ public final class PermissionsUtil {
 	public static boolean hasManifestPermission(Context context, String permission) {
 		try {
 			for (String p : getManifestPermissions(context)) {
-				if (permission.equals(p)) {
+				if (permission.equals(p))
 					return true;
-				}
 			}
 		} catch (PackageManager.NameNotFoundException ignored) {
 		}
@@ -300,9 +299,8 @@ public final class PermissionsUtil {
 	public static ArrayList<String> getManifestPermissions(Context context) throws PackageManager.NameNotFoundException {
 		PackageManager packageManager = context.getPackageManager();
 		PackageInfo packageInfo = packageManager.getPackageInfo(context.getPackageName(), PackageManager.GET_PERMISSIONS);
-		if (packageInfo.requestedPermissions == null) {
-			return new ArrayList<>();
-		}
+		if (packageInfo.requestedPermissions == null)
+			return new ArrayList<String>();
 		return new ArrayList<>(Arrays.asList(packageInfo.requestedPermissions));
 	}
 

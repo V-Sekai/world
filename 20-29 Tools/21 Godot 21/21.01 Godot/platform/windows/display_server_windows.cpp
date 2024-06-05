@@ -38,7 +38,7 @@
 #include "core/version.h"
 #include "drivers/png/png_driver_common.h"
 #include "main/main.h"
-#include "scene/resources/texture.h"
+#include "platform/windows/rendering_native_surface_windows.h"
 
 #if defined(VULKAN_ENABLED)
 #include "rendering_context_driver_vulkan_windows.h"
@@ -661,24 +661,6 @@ Point2i DisplayServerWindows::mouse_get_position() const {
 }
 
 BitField<MouseButtonMask> DisplayServerWindows::mouse_get_button_state() const {
-	BitField<MouseButtonMask> last_button_state = 0;
-
-	if (GetAsyncKeyState(VK_LBUTTON) & (1 << 15)) {
-		last_button_state.set_flag(MouseButtonMask::LEFT);
-	}
-	if (GetAsyncKeyState(VK_RBUTTON) & (1 << 15)) {
-		last_button_state.set_flag(MouseButtonMask::RIGHT);
-	}
-	if (GetAsyncKeyState(VK_MBUTTON) & (1 << 15)) {
-		last_button_state.set_flag(MouseButtonMask::MIDDLE);
-	}
-	if (GetAsyncKeyState(VK_XBUTTON1) & (1 << 15)) {
-		last_button_state.set_flag(MouseButtonMask::MB_XBUTTON1);
-	}
-	if (GetAsyncKeyState(VK_XBUTTON2) & (1 << 15)) {
-		last_button_state.set_flag(MouseButtonMask::MB_XBUTTON2);
-	}
-
 	return last_button_state;
 }
 
@@ -4018,7 +4000,7 @@ LRESULT DisplayServerWindows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 
 				mm->set_pressure((raw->data.mouse.ulButtons & RI_MOUSE_LEFT_BUTTON_DOWN) ? 1.0f : 0.0f);
 
-				mm->set_button_mask(mouse_get_button_state());
+				mm->set_button_mask(last_button_state);
 
 				Point2i c(windows[window_id].width / 2, windows[window_id].height / 2);
 
@@ -4122,7 +4104,7 @@ LRESULT DisplayServerWindows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 					mm->set_tilt(windows[window_id].last_tilt);
 					mm->set_pen_inverted(windows[window_id].last_pen_inverted);
 
-					mm->set_button_mask(mouse_get_button_state());
+					mm->set_button_mask(last_button_state);
 
 					mm->set_position(Vector2(coords.x, coords.y));
 					mm->set_global_position(Vector2(coords.x, coords.y));
@@ -4267,7 +4249,7 @@ LRESULT DisplayServerWindows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 			mm->set_alt_pressed(mods.has_flag(WinKeyModifierMask::ALT));
 			mm->set_meta_pressed(mods.has_flag(WinKeyModifierMask::META));
 
-			mm->set_button_mask(mouse_get_button_state());
+			mm->set_button_mask(last_button_state);
 
 			POINT coords; // Client coords.
 			coords.x = GET_X_LPARAM(lParam);
@@ -4397,7 +4379,7 @@ LRESULT DisplayServerWindows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 			mm->set_tilt(windows[window_id].last_tilt);
 			mm->set_pen_inverted(windows[window_id].last_pen_inverted);
 
-			mm->set_button_mask(mouse_get_button_state());
+			mm->set_button_mask(last_button_state);
 
 			mm->set_position(Vector2(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)));
 			mm->set_global_position(Vector2(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)));
@@ -4571,14 +4553,12 @@ LRESULT DisplayServerWindows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 			mb->set_alt_pressed(mods.has_flag(WinKeyModifierMask::ALT));
 			mb->set_meta_pressed(mods.has_flag(WinKeyModifierMask::META));
 
-			if (mb->is_pressed() && mb->get_button_index() >= MouseButton::WHEEL_UP && mb->get_button_index() <= MouseButton::WHEEL_RIGHT) {
-				MouseButtonMask mask = mouse_button_to_mask(mb->get_button_index());
-				BitField<MouseButtonMask> scroll_mask = mouse_get_button_state();
-				scroll_mask.set_flag(mask);
-				mb->set_button_mask(scroll_mask);
+			if (mb->is_pressed()) {
+				last_button_state.set_flag(mouse_button_to_mask(mb->get_button_index()));
 			} else {
-				mb->set_button_mask(mouse_get_button_state());
+				last_button_state.clear_flag(mouse_button_to_mask(mb->get_button_index()));
 			}
+			mb->set_button_mask(last_button_state);
 
 			mb->set_position(Vector2(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)));
 
@@ -4592,7 +4572,7 @@ LRESULT DisplayServerWindows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 						SetCapture(hWnd);
 					}
 				} else {
-					if (--pressrc <= 0 || mouse_get_button_state().is_empty()) {
+					if (--pressrc <= 0 || last_button_state.is_empty()) {
 						if (mouse_mode != MOUSE_MODE_CAPTURED) {
 							ReleaseCapture();
 						}
@@ -4617,7 +4597,8 @@ LRESULT DisplayServerWindows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 				// Send release for mouse wheel.
 				Ref<InputEventMouseButton> mbd = mb->duplicate();
 				mbd->set_window_id(window_id);
-				mbd->set_button_mask(mouse_get_button_state());
+				last_button_state.clear_flag(mouse_button_to_mask(mbd->get_button_index()));
+				mbd->set_button_mask(last_button_state);
 				mbd->set_pressed(false);
 				Input::get_singleton()->parse_input_event(mbd);
 			}
@@ -5243,29 +5224,42 @@ DisplayServer::WindowID DisplayServerWindows::_create_window(WindowMode p_mode, 
 		}
 
 #ifdef RD_ENABLED
+		Ref<RenderingNativeSurfaceWindows> windows_surface = nullptr;
+#if defined(VULKAN_ENABLED) || defined(D3D12_ENABLED)
+		if (rendering_driver == "vulkan" || rendering_driver == "d3d12") {
+			windows_surface = RenderingNativeSurfaceWindows::create(wd.hWnd, hInstance);
+		}
+#endif
+
+		if (!rendering_context) {
+			if (windows_surface.is_valid()) {
+#if defined(VULKAN_ENABLED)
+				if (rendering_driver == "vulkan") {
+					windows_surface->set_driver_type(RenderingNativeSurfaceWindows::DriverType::Vulkan);
+				}
+#endif
+#if defined(D3D12_ENABLED)
+				if (rendering_driver == "d3d12") {
+					windows_surface->set_driver_type(RenderingNativeSurfaceWindows::DriverType::D3D12);
+				}
+#endif
+				rendering_context = windows_surface->create_rendering_context();
+			}
+
+			if (rendering_context) {
+				if (rendering_context->initialize() != OK) {
+					memdelete(rendering_context);
+					rendering_context = nullptr;
+					return INVALID_WINDOW_ID;
+				}
+			}
+		}
+
 		if (rendering_context) {
-			union {
-#ifdef VULKAN_ENABLED
-				RenderingContextDriverVulkanWindows::WindowPlatformData vulkan;
-#endif
-#ifdef D3D12_ENABLED
-				RenderingContextDriverD3D12::WindowPlatformData d3d12;
-#endif
-			} wpd;
-#ifdef VULKAN_ENABLED
-			if (rendering_driver == "vulkan") {
-				wpd.vulkan.window = wd.hWnd;
-				wpd.vulkan.instance = hInstance;
-			}
-#endif
-#ifdef D3D12_ENABLED
-			if (rendering_driver == "d3d12") {
-				wpd.d3d12.window = wd.hWnd;
-			}
-#endif
-			if (rendering_context->window_create(id, &wpd) != OK) {
+			if (rendering_context->window_create(id, windows_surface) != OK) {
 				ERR_PRINT(vformat("Failed to create %s window.", rendering_driver));
 				memdelete(rendering_context);
+				windows_surface.unref();
 				rendering_context = nullptr;
 				windows.erase(id);
 				return INVALID_WINDOW_ID;
@@ -5274,6 +5268,7 @@ DisplayServer::WindowID DisplayServerWindows::_create_window(WindowMode p_mode, 
 			rendering_context->window_set_size(id, WindowRect.right - WindowRect.left, WindowRect.bottom - WindowRect.top);
 			rendering_context->window_set_vsync_mode(id, p_vsync_mode);
 			wd.context_created = true;
+			windows_surface.unref();
 		}
 #endif
 
@@ -5727,27 +5722,6 @@ DisplayServerWindows::DisplayServerWindows(const String &p_rendering_driver, Win
 
 	_register_raw_input_devices(INVALID_WINDOW_ID);
 
-#if defined(RD_ENABLED)
-#if defined(VULKAN_ENABLED)
-	if (rendering_driver == "vulkan") {
-		rendering_context = memnew(RenderingContextDriverVulkanWindows);
-	}
-#endif
-#if defined(D3D12_ENABLED)
-	if (rendering_driver == "d3d12") {
-		rendering_context = memnew(RenderingContextDriverD3D12);
-	}
-#endif
-
-	if (rendering_context) {
-		if (rendering_context->initialize() != OK) {
-			memdelete(rendering_context);
-			rendering_context = nullptr;
-			r_error = ERR_UNAVAILABLE;
-			return;
-		}
-	}
-#endif
 // Init context and rendering device
 #if defined(GLES3_ENABLED)
 
@@ -5849,7 +5823,10 @@ DisplayServerWindows::DisplayServerWindows(const String &p_rendering_driver, Win
 	}
 
 	WindowID main_window = _create_window(p_mode, p_vsync_mode, p_flags, Rect2i(window_position, p_resolution));
-	ERR_FAIL_COND_MSG(main_window == INVALID_WINDOW_ID, "Failed to create main window.");
+	if (main_window == INVALID_WINDOW_ID) {
+		r_error = ERR_UNAVAILABLE;
+		ERR_FAIL_MSG("Failed to create main window.");
+	}
 
 	joypad = new JoypadWindows(&windows[MAIN_WINDOW_ID].hWnd);
 

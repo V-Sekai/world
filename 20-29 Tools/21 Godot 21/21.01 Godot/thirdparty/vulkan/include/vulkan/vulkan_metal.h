@@ -52,28 +52,28 @@ VKAPI_ATTR VkResult VKAPI_CALL vkCreateMetalSurfaceEXT(
 #define VK_EXT_metal_objects 1
 #ifdef __OBJC__
 @protocol MTLDevice;
-typedef __unsafe_unretained id<MTLDevice> MTLDevice_id;
+typedef id<MTLDevice> MTLDevice_id;
 #else
 typedef void* MTLDevice_id;
 #endif
 
 #ifdef __OBJC__
 @protocol MTLCommandQueue;
-typedef __unsafe_unretained id<MTLCommandQueue> MTLCommandQueue_id;
+typedef id<MTLCommandQueue> MTLCommandQueue_id;
 #else
 typedef void* MTLCommandQueue_id;
 #endif
 
 #ifdef __OBJC__
 @protocol MTLBuffer;
-typedef __unsafe_unretained id<MTLBuffer> MTLBuffer_id;
+typedef id<MTLBuffer> MTLBuffer_id;
 #else
 typedef void* MTLBuffer_id;
 #endif
 
 #ifdef __OBJC__
 @protocol MTLTexture;
-typedef __unsafe_unretained id<MTLTexture> MTLTexture_id;
+typedef id<MTLTexture> MTLTexture_id;
 #else
 typedef void* MTLTexture_id;
 #endif
@@ -81,12 +81,12 @@ typedef void* MTLTexture_id;
 typedef struct __IOSurface* IOSurfaceRef;
 #ifdef __OBJC__
 @protocol MTLSharedEvent;
-typedef __unsafe_unretained id<MTLSharedEvent> MTLSharedEvent_id;
+typedef id<MTLSharedEvent> MTLSharedEvent_id;
 #else
 typedef void* MTLSharedEvent_id;
 #endif
 
-#define VK_EXT_METAL_OBJECTS_SPEC_VERSION 2
+#define VK_EXT_METAL_OBJECTS_SPEC_VERSION 1
 #define VK_EXT_METAL_OBJECTS_EXTENSION_NAME "VK_EXT_metal_objects"
 
 typedef enum VkExportMetalObjectTypeFlagBitsEXT {

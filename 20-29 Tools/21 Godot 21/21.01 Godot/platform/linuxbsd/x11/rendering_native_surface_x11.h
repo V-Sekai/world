@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  EditorWindowInfo.kt                                                   */
+/*  rendering_native_surface_x11.h                                        */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,41 +28,39 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-package org.godotengine.editor
+#ifndef RENDERING_NATIVE_SURFACE_X11_H
+#define RENDERING_NATIVE_SURFACE_X11_H
 
-/**
- * Specifies the policy for adjacent launches.
- */
-enum class LaunchAdjacentPolicy {
-	/**
-	 * Adjacent launches are disabled.
-	 */
-	DISABLED,
+#include "core/variant/native_ptr.h"
+#include "servers/rendering/rendering_native_surface.h"
 
-	/**
-	 * Adjacent launches are enabled / disabled based on the device and screen metrics.
-	 */
-	AUTO,
+#include <X11/Xlib.h>
 
-	/**
-	 * Adjacent launches are enabled.
-	 */
-	ENABLED
-}
+class RenderingNativeSurfaceX11 : public RenderingNativeSurface {
+	GDCLASS(RenderingNativeSurfaceX11, RenderingNativeSurface);
 
-/**
- * Describe the editor window to launch
- */
-data class EditorWindowInfo(
-	val windowClassName: String,
-	val windowId: Int,
-	val processNameSuffix: String,
-	val launchAdjacentPolicy: LaunchAdjacentPolicy = LaunchAdjacentPolicy.DISABLED
-) {
-	constructor(
-		windowClass: Class<*>,
-		windowId: Int,
-		processNameSuffix: String,
-		launchAdjacentPolicy: LaunchAdjacentPolicy = LaunchAdjacentPolicy.DISABLED
-	) : this(windowClass.name, windowId, processNameSuffix, launchAdjacentPolicy)
-}
+	static void _bind_methods();
+
+	::Window window;
+	Display *display;
+
+public:
+	static Ref<RenderingNativeSurfaceX11> create_api(GDExtensionConstPtr<const void> p_window, GDExtensionConstPtr<const void> p_display);
+
+	static Ref<RenderingNativeSurfaceX11> create(::Window p_window, Display *p_display);
+
+	::Window get_window() const {
+		return window;
+	};
+
+	Display *get_display() const {
+		return display;
+	};
+
+	RenderingContextDriver *create_rendering_context() override;
+
+	RenderingNativeSurfaceX11();
+	~RenderingNativeSurfaceX11();
+};
+
+#endif // RENDERING_NATIVE_SURFACE_X11_H

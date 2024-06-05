@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  rendering_context_driver_vulkan_macos.h                               */
+/*  api.cpp                                                               */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,31 +28,37 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef RENDERING_CONTEXT_DRIVER_VULKAN_MACOS_H
-#define RENDERING_CONTEXT_DRIVER_VULKAN_MACOS_H
+#include "api.h"
 
-#ifdef VULKAN_ENABLED
+#ifdef LINUXBSD_ENABLED
+#include "core/object/class_db.h"
 
-#include "drivers/vulkan/rendering_context_driver_vulkan.h"
+#ifdef WAYLAND_ENABLED
+#include "platform/linuxbsd/wayland/rendering_native_surface_wayland.h"
+#endif
 
-#import <QuartzCore/CAMetalLayer.h>
+#ifdef X11_ENABLED
+#include "platform/linuxbsd/x11/rendering_native_surface_x11.h"
+#endif
 
-class RenderingContextDriverVulkanMacOS : public RenderingContextDriverVulkan {
-private:
-	virtual const char *_get_platform_surface_extension() const override final;
+#endif
 
-protected:
-	SurfaceID surface_create(const void *p_platform_data) override final;
+void register_core_linuxbsd_api() {
+#ifdef LINUXBSD_ENABLED
+#ifdef WAYLAND_ENABLED
+	GDREGISTER_INTERNAL_CLASS(RenderingNativeSurfaceWayland);
+#endif
+#ifdef X11_ENABLED
+	GDREGISTER_INTERNAL_CLASS(RenderingNativeSurfaceX11);
+#endif
+#endif
+}
 
-public:
-	struct WindowPlatformData {
-		CAMetalLayer *const *layer_ptr;
-	};
+void unregister_core_linuxbsd_api() {
+}
 
-	RenderingContextDriverVulkanMacOS();
-	~RenderingContextDriverVulkanMacOS();
-};
+void register_linuxbsd_api() {
+}
 
-#endif // VULKAN_ENABLED
-
-#endif // RENDERING_CONTEXT_DRIVER_VULKAN_MACOS_H
+void unregister_linuxbsd_api() {
+}

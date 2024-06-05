@@ -100,10 +100,10 @@ public:
 };
 
 struct Breakpoint {
-	int id = 0;
-	bool verified = false;
+	int id;
+	bool verified;
 	Source source;
-	int line = 0;
+	int line;
 
 	bool operator==(const Breakpoint &p_other) const {
 		return source.path == p_other.source.path && line == p_other.line;
@@ -121,7 +121,7 @@ struct Breakpoint {
 };
 
 struct BreakpointLocation {
-	int line = 0;
+	int line;
 	int endLine = -1;
 
 	_FORCE_INLINE_ Dictionary to_json() const {
@@ -169,10 +169,10 @@ struct Capabilities {
 };
 
 struct Message {
-	int id = 0;
+	int id;
 	String format;
 	bool sendTelemetry = false; // Just in case :)
-	bool showUser = false;
+	bool showUser;
 	Dictionary variables;
 
 	_FORCE_INLINE_ Dictionary to_json() const {
@@ -190,8 +190,8 @@ struct Message {
 struct Scope {
 	String name;
 	String presentationHint;
-	int variablesReference = 0;
-	bool expensive = false;
+	int variablesReference;
+	bool expensive;
 
 	_FORCE_INLINE_ Dictionary to_json() const {
 		Dictionary dict;
@@ -205,7 +205,7 @@ struct Scope {
 };
 
 struct SourceBreakpoint {
-	int line = 0;
+	int line;
 
 	_FORCE_INLINE_ void from_json(const Dictionary &p_params) {
 		line = p_params["line"];
@@ -213,11 +213,11 @@ struct SourceBreakpoint {
 };
 
 struct StackFrame {
-	int id = 0;
+	int id;
 	String name;
 	Source source;
-	int line = 0;
-	int column = 0;
+	int line;
+	int column;
 
 	static uint32_t hash(const StackFrame &p_frame) {
 		return hash_murmur3_one_32(p_frame.id);
@@ -247,7 +247,7 @@ struct StackFrame {
 };
 
 struct Thread {
-	int id = 0;
+	int id;
 	String name;
 
 	_FORCE_INLINE_ Dictionary to_json() const {

@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  steam_tracker.h                                                       */
+/*  godot_runtime_api.mm                                                  */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,47 +28,28 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef STEAM_TRACKER_H
-#define STEAM_TRACKER_H
+#include "core/extension/godot_runtime_api.h"
 
-#if defined(STEAMAPI_ENABLED)
+#include "core/extension/godot_instance.h"
+#include "main/main.h"
 
-#include "core/os/os.h"
+#import "os_ios.h"
 
-// SteamTracker is used to load SteamAPI dynamic library and initialize
-// the interface, this notifies Steam that Godot editor is running and
-// allow tracking of the usage time of child instances of the engine
-// (e.g., opened projects).
-//
-// Currently, SteamAPI is not used by the engine in any way, and is not
-// exposed to the scripting APIs.
+static OS_IOS *os = nullptr;
 
-enum SteamAPIInitResult {
-	SteamAPIInitResult_OK = 0,
-	SteamAPIInitResult_FailedGeneric = 1,
-	SteamAPIInitResult_NoSteamClient = 2,
-	SteamAPIInitResult_VersionMismatch = 3,
-};
+GDExtensionObjectPtr create_godot_instance(int p_argc, char *p_argv[], GDExtensionInitializationFunction p_init_func) {
+	os = new OS_IOS();
 
-// https://partner.steamgames.com/doc/api/steam_api#SteamAPI_Init
-typedef bool (*SteamAPI_InitFunction)();
-typedef SteamAPIInitResult (*SteamAPI_InitFlatFunction)(char *r_err_msg);
+	Error err = Main::setup(p_argv[0], p_argc - 1, &p_argv[1], false, p_init_func);
+	if (err != OK) {
+		return nullptr;
+	}
 
-// https://partner.steamgames.com/doc/api/steam_api#SteamAPI_Shutdown
-typedef void (*SteamAPI_ShutdownFunction)();
+	GodotInstance *godot_instance = memnew(GodotInstance);
 
-class SteamTracker {
-	void *steam_library_handle = nullptr;
-	SteamAPI_InitFunction steam_init_function = nullptr;
-	SteamAPI_InitFlatFunction steam_init_flat_function = nullptr;
-	SteamAPI_ShutdownFunction steam_shutdown_function = nullptr;
-	bool steam_initalized = false;
+	return (GDExtensionObjectPtr)godot_instance;
+}
 
-public:
-	SteamTracker();
-	~SteamTracker();
-};
-
-#endif // STEAMAPI_ENABLED
-
-#endif // STEAM_TRACKER_H
+void destroy_godot_instance(GDExtensionObjectPtr p_godot_instance) {
+	memdelete((GodotInstance *)p_godot_instance);
+}

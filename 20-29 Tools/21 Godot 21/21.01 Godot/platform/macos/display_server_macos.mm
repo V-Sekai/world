@@ -58,6 +58,8 @@
 #include "servers/rendering/renderer_rd/renderer_compositor_rd.h"
 #endif
 
+#include "drivers/apple/rendering_native_surface_apple.h"
+
 #import <Carbon/Carbon.h>
 #import <Cocoa/Cocoa.h>
 #import <IOKit/IOCFPlugIn.h>
@@ -134,18 +136,30 @@ DisplayServerMacOS::WindowID DisplayServerMacOS::_create_window(WindowMode p_mod
 		}
 
 #if defined(RD_ENABLED)
-		if (rendering_context) {
-			union {
+		Ref<RenderingNativeSurfaceApple> apple_surface;
 #ifdef VULKAN_ENABLED
-				RenderingContextDriverVulkanMacOS::WindowPlatformData vulkan;
+		if (rendering_driver == "vulkan") {
+			apple_surface = RenderingNativeSurfaceApple::create((__bridge void *)layer);
+		}
 #endif
-			} wpd;
-#ifdef VULKAN_ENABLED
-			if (rendering_driver == "vulkan") {
-				wpd.vulkan.layer_ptr = (CAMetalLayer *const *)&layer;
+
+		if (!rendering_context) {
+			if (apple_surface.is_valid()) {
+				rendering_context = apple_surface->create_rendering_context();
 			}
-#endif
-			Error err = rendering_context->window_create(window_id_counter, &wpd);
+
+			if (rendering_context) {
+				if (rendering_context->initialize() != OK) {
+					memdelete(rendering_context);
+					rendering_context = nullptr;
+					ERR_PRINT("Could not initialize " + rendering_driver);
+					return INVALID_WINDOW_ID;
+				}
+			}
+		}
+
+		if (rendering_context) {
+			Error err = rendering_context->window_create(window_id_counter, apple_surface);
 			ERR_FAIL_COND_V_MSG(err != OK, INVALID_WINDOW_ID, vformat("Can't create a %s context", rendering_driver));
 
 			rendering_context->window_set_size(window_id_counter, p_rect.size.width, p_rect.size.height);
@@ -1421,25 +1435,11 @@ Point2i DisplayServerMacOS::mouse_get_position() const {
 	return Vector2i();
 }
 
-BitField<MouseButtonMask> DisplayServerMacOS::mouse_get_button_state() const {
-	BitField<MouseButtonMask> last_button_state = 0;
+void DisplayServerMacOS::mouse_set_button_state(BitField<MouseButtonMask> p_state) {
+	last_button_state = p_state;
+}
 
-	NSUInteger buttons = [NSEvent pressedMouseButtons];
-	if (buttons & (1 << 0)) {
-		last_button_state.set_flag(MouseButtonMask::LEFT);
-	}
-	if (buttons & (1 << 1)) {
-		last_button_state.set_flag(MouseButtonMask::RIGHT);
-	}
-	if (buttons & (1 << 2)) {
-		last_button_state.set_flag(MouseButtonMask::MIDDLE);
-	}
-	if (buttons & (1 << 3)) {
-		last_button_state.set_flag(MouseButtonMask::MB_XBUTTON1);
-	}
-	if (buttons & (1 << 4)) {
-		last_button_state.set_flag(MouseButtonMask::MB_XBUTTON2);
-	}
+BitField<MouseButtonMask> DisplayServerMacOS::mouse_get_button_state() const {
 	return last_button_state;
 }
 
@@ -3688,22 +3688,6 @@ DisplayServerMacOS::DisplayServerMacOS(const String &p_rendering_driver, WindowM
 		}
 	}
 #endif
-#if defined(RD_ENABLED)
-#if defined(VULKAN_ENABLED)
-	if (rendering_driver == "vulkan") {
-		rendering_context = memnew(RenderingContextDriverVulkanMacOS);
-	}
-#endif
-
-	if (rendering_context) {
-		if (rendering_context->initialize() != OK) {
-			memdelete(rendering_context);
-			rendering_context = nullptr;
-			r_error = ERR_CANT_CREATE;
-			ERR_FAIL_MSG("Could not initialize " + rendering_driver);
-		}
-	}
-#endif
 
 	Point2i window_position;
 	if (p_position != nullptr) {
@@ -3717,7 +3701,10 @@ DisplayServerMacOS::DisplayServerMacOS(const String &p_rendering_driver, WindowM
 	}
 
 	WindowID main_window = _create_window(p_mode, p_vsync_mode, Rect2i(window_position, p_resolution));
-	ERR_FAIL_COND(main_window == INVALID_WINDOW_ID);
+	if (main_window == INVALID_WINDOW_ID) {
+		r_error = ERR_CANT_CREATE;
+		ERR_FAIL_MSG("Could not create main window.");
+	}
 	for (int i = 0; i < WINDOW_FLAG_MAX; i++) {
 		if (p_flags & (1 << i)) {
 			window_set_flag(WindowFlags(i), true, main_window);

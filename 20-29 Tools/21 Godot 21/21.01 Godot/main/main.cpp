@@ -115,10 +115,6 @@
 #endif // DISABLE_DEPRECATED
 #endif // TOOLS_ENABLED
 
-#if defined(STEAMAPI_ENABLED)
-#include "main/steam_tracker.h"
-#endif
-
 #include "modules/modules_enabled.gen.h" // For mono.
 
 #if defined(MODULE_MONO_ENABLED) && defined(TOOLS_ENABLED)
@@ -148,10 +144,6 @@ static PackedData *packed_data = nullptr;
 static ZipArchive *zip_packed_data = nullptr;
 #endif
 static MessageQueue *message_queue = nullptr;
-
-#if defined(STEAMAPI_ENABLED)
-static SteamTracker *steam_tracker = nullptr;
-#endif
 
 // Initialized in setup2()
 static AudioServer *audio_server = nullptr;
@@ -746,6 +738,7 @@ Error Main::test_setup() {
 
 	ClassDB::set_current_api(ClassDB::API_CORE);
 #endif
+	register_core_platform_apis();
 	register_platform_apis();
 
 	// Theme needs modules to be initialized so that sub-resources can be loaded.
@@ -807,6 +800,7 @@ void Main::test_cleanup() {
 	uninitialize_modules(MODULE_INITIALIZATION_LEVEL_SCENE);
 
 	unregister_platform_apis();
+	unregister_core_platform_apis();
 	unregister_driver_types();
 	unregister_scene_types();
 
@@ -817,6 +811,7 @@ void Main::test_cleanup() {
 	GDExtensionManager::get_singleton()->deinitialize_extensions(GDExtension::INITIALIZATION_LEVEL_SERVERS);
 	uninitialize_modules(MODULE_INITIALIZATION_LEVEL_SERVERS);
 	unregister_server_types();
+	unregister_core_server_types();
 
 	EngineDebugger::deinitialize();
 	OS::get_singleton()->finalize();
@@ -841,15 +836,13 @@ void Main::test_cleanup() {
 	if (globals) {
 		memdelete(globals);
 	}
-
-	unregister_core_driver_types();
-	unregister_core_extensions();
-	uninitialize_modules(MODULE_INITIALIZATION_LEVEL_CORE);
-
 	if (engine) {
 		memdelete(engine);
 	}
 
+	unregister_core_driver_types();
+	unregister_core_extensions();
+	uninitialize_modules(MODULE_INITIALIZATION_LEVEL_CORE);
 	unregister_core_types();
 
 	OS::get_singleton()->finalize_core();
@@ -904,7 +897,7 @@ int Main::test_entrypoint(int argc, char *argv[], bool &tests_need_run) {
  *   in help, it's a bit messy and should be globalized with the setup() parsing somehow.
  */
 
-Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_phase) {
+Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_phase, GDExtensionInitializationFunction p_init_func) {
 	Thread::make_main_thread();
 	set_current_thread_safe_for_nodes(true);
 
@@ -922,6 +915,8 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 
 	register_core_types();
 	register_core_driver_types();
+
+	register_core_platform_apis();
 
 	MAIN_PRINT("Main: Initialize Globals");
 
@@ -1822,7 +1817,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	OS::get_singleton()->ensure_user_data_dir();
 
 	initialize_modules(MODULE_INITIALIZATION_LEVEL_CORE);
-	register_core_extensions(); // core extensions must be registered after globals setup and before display
+	register_core_extensions(p_init_func); // core extensions must be registered after globals setup and before display
 
 	ResourceUID::get_singleton()->load_from_cache(true); // load UUIDs from cache.
 
@@ -2453,16 +2448,13 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 
 	message_queue = memnew(MessageQueue);
 
+	// Register Core Server Types
+	register_core_server_types();
+
 	Thread::release_main_thread(); // If setup2() is called from another thread, that one will become main thread, so preventively release this one.
 	set_current_thread_safe_for_nodes(false);
 
 	OS::get_singleton()->benchmark_end_measure("Startup", "Core");
-
-#if defined(STEAMAPI_ENABLED)
-	if (editor || project_manager) {
-		steam_tracker = memnew(SteamTracker);
-	}
-#endif
 
 	if (p_second_phase) {
 		return setup2();
@@ -2501,17 +2493,16 @@ error:
 	if (globals) {
 		memdelete(globals);
 	}
+	if (engine) {
+		memdelete(engine);
+	}
 	if (packed_data) {
 		memdelete(packed_data);
 	}
 
+	unregister_core_platform_apis();
 	unregister_core_driver_types();
 	unregister_core_extensions();
-
-	if (engine) {
-		memdelete(engine);
-	}
-
 	unregister_core_types();
 
 	OS::get_singleton()->_cmdline.clear();
@@ -2523,12 +2514,6 @@ error:
 
 	OS::get_singleton()->benchmark_end_measure("Startup", "Core");
 	OS::get_singleton()->benchmark_end_measure("Startup", "Setup");
-
-#if defined(STEAMAPI_ENABLED)
-	if (steam_tracker) {
-		memdelete(steam_tracker);
-	}
-#endif
 
 	OS::get_singleton()->finalize_core();
 	locale = String();
@@ -4301,6 +4286,7 @@ void Main::cleanup(bool p_force) {
 	GDExtensionManager::get_singleton()->deinitialize_extensions(GDExtension::INITIALIZATION_LEVEL_SERVERS);
 	uninitialize_modules(MODULE_INITIALIZATION_LEVEL_SERVERS);
 	unregister_server_types();
+	unregister_core_server_types();
 
 	EngineDebugger::deinitialize();
 
@@ -4369,21 +4355,14 @@ void Main::cleanup(bool p_force) {
 	message_queue->flush();
 	memdelete(message_queue);
 
-#if defined(STEAMAPI_ENABLED)
-	if (steam_tracker) {
-		memdelete(steam_tracker);
-	}
-#endif
-
 	unregister_core_driver_types();
 	unregister_core_extensions();
 	uninitialize_modules(MODULE_INITIALIZATION_LEVEL_CORE);
+	unregister_core_types();
 
 	if (engine) {
 		memdelete(engine);
 	}
-
-	unregister_core_types();
 
 	OS::get_singleton()->benchmark_end_measure("Shutdown", "Total");
 	OS::get_singleton()->benchmark_dump();

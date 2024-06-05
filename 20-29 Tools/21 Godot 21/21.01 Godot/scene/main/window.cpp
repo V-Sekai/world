@@ -603,6 +603,17 @@ bool Window::is_in_edited_scene_root() const {
 
 void Window::_make_window() {
 	ERR_FAIL_COND(window_id != DisplayServer::INVALID_WINDOW_ID);
+	if (native_surface != nullptr) {
+		window_id = DisplayServer::get_singleton()->create_native_window(native_surface);
+		ERR_FAIL_COND(window_id == DisplayServer::INVALID_WINDOW_ID);
+
+		_update_window_size();
+
+		_update_window_callbacks();
+
+		RS::get_singleton()->viewport_set_update_mode(get_viewport_rid(), RS::VIEWPORT_UPDATE_WHEN_VISIBLE);
+		return;
+	}
 
 	if (transient && transient_to_focused) {
 		_make_transient();
@@ -675,6 +686,13 @@ void Window::_update_from_window() {
 
 void Window::_clear_window() {
 	ERR_FAIL_COND(window_id == DisplayServer::INVALID_WINDOW_ID);
+	if (native_surface != nullptr) {
+		DisplayServer::get_singleton()->delete_native_window(window_id);
+		window_id = DisplayServer::INVALID_WINDOW_ID;
+
+		RS::get_singleton()->viewport_set_update_mode(get_viewport_rid(), RS::VIEWPORT_UPDATE_DISABLED);
+		return;
+	}
 
 	bool had_focus = has_focus();
 
@@ -832,6 +850,11 @@ void Window::hide() {
 
 void Window::set_visible(bool p_visible) {
 	ERR_MAIN_THREAD_GUARD;
+	if (native_surface.is_valid()) {
+		visible = true;
+		return;
+	}
+
 	if (visible == p_visible) {
 		return;
 	}
@@ -902,6 +925,29 @@ void Window::_clear_transient() {
 			transient_parent->exclusive_child = nullptr;
 		}
 		transient_parent = nullptr;
+	}
+}
+
+void Window::set_native_surface(Ref<RenderingNativeSurface> p_native_surface) {
+	Ref<RenderingNativeSurface> new_native_handle = p_native_surface;
+	if (new_native_handle == native_surface) {
+		return;
+	}
+	if (!initialized) {
+		native_surface = new_native_handle;
+		return;
+	}
+	if (embedder) {
+		embedder->_sub_window_remove(this);
+	} else {
+		_clear_window();
+	}
+	native_surface = new_native_handle;
+	embedder = get_embedder();
+	if (embedder) {
+		embedder->_sub_window_register(this);
+	} else {
+		_make_window();
 	}
 }
 
@@ -1096,7 +1142,7 @@ void Window::_update_viewport_size() {
 	Size2i final_size;
 	Size2i final_size_override;
 	Rect2i attach_to_screen_rect(Point2i(), size);
-	double font_oversampling = 1.0;
+	float font_oversampling = 1.0;
 	window_transform = Transform2D();
 
 	if (content_scale_stretch == Window::CONTENT_SCALE_STRETCH_INTEGER) {
@@ -1215,7 +1261,7 @@ void Window::_update_viewport_size() {
 	}
 
 	bool allocate = is_inside_tree() && visible && (window_id != DisplayServer::INVALID_WINDOW_ID || embedder != nullptr);
-	bool ci_updated = _set_size(final_size, final_size_override, allocate);
+	_set_size(final_size, final_size_override, allocate);
 
 	if (window_id != DisplayServer::INVALID_WINDOW_ID) {
 		RenderingServer::get_singleton()->viewport_attach_to_screen(get_viewport_rid(), attach_to_screen_rect, window_id);
@@ -1227,14 +1273,9 @@ void Window::_update_viewport_size() {
 		if (!use_font_oversampling) {
 			font_oversampling = 1.0;
 		}
-		if (!Math::is_equal_approx(TS->font_get_global_oversampling(), font_oversampling)) {
+		if (TS->font_get_global_oversampling() != font_oversampling) {
 			TS->font_set_global_oversampling(font_oversampling);
-			ci_updated = false;
 		}
-	}
-
-	if (!ci_updated) {
-		update_canvas_items();
 	}
 
 	notification(NOTIFICATION_WM_SIZE_CHANGED);
@@ -1269,6 +1310,10 @@ bool Window::get_force_native() const {
 Viewport *Window::get_embedder() const {
 	ERR_READ_THREAD_GUARD_V(nullptr);
 	if (force_native && DisplayServer::get_singleton()->has_feature(DisplayServer::FEATURE_SUBWINDOWS) && !is_in_edited_scene_root()) {
+		return nullptr;
+	}
+
+	if (native_surface != nullptr) {
 		return nullptr;
 	}
 
@@ -2849,6 +2894,8 @@ void Window::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("set_visible", "visible"), &Window::set_visible);
 	ClassDB::bind_method(D_METHOD("is_visible"), &Window::is_visible);
+
+	ClassDB::bind_method(D_METHOD("set_native_surface", "native_surface"), &Window::set_native_surface);
 
 	ClassDB::bind_method(D_METHOD("hide"), &Window::hide);
 	ClassDB::bind_method(D_METHOD("show"), &Window::show);
