@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  rendering_native_surface_vulkan.h                                     */
+/*  rendering_context_driver_vulkan_ios.h                                 */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,44 +28,31 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef RENDERING_NATIVE_SURFACE_VULKAN_H
-#define RENDERING_NATIVE_SURFACE_VULKAN_H
-
-#include "core/variant/native_ptr.h"
-#include "servers/rendering/rendering_native_surface.h"
+#ifndef RENDERING_CONTEXT_DRIVER_VULKAN_IOS_H
+#define RENDERING_CONTEXT_DRIVER_VULKAN_IOS_H
 
 #ifdef VULKAN_ENABLED
-#ifdef USE_VOLK
-#include <volk.h>
-#else
-#include <vulkan/vulkan.h>
-#endif
-#endif
 
-class RenderingNativeSurfaceVulkan : public RenderingNativeSurface {
-	GDCLASS(RenderingNativeSurfaceVulkan, RenderingNativeSurface);
+#include "drivers/vulkan/rendering_context_driver_vulkan.h"
 
-	static void _bind_methods();
+#import <QuartzCore/CAMetalLayer.h>
 
-#ifdef VULKAN_ENABLED
-	VkSurfaceKHR vulkan_surface = VK_NULL_HANDLE;
-#endif
+class RenderingContextDriverVulkanIOS : public RenderingContextDriverVulkan {
+private:
+	virtual const char *_get_platform_surface_extension() const override final;
+
+protected:
+	SurfaceID surface_create(const void *p_platform_data) override final;
 
 public:
-	static Ref<RenderingNativeSurfaceVulkan> create_api(GDExtensionConstPtr<const void> vulkan_surface);
-
-#ifdef VULKAN_ENABLED
-	static Ref<RenderingNativeSurfaceVulkan> create(VkSurfaceKHR vulkan_surface);
-
-	VkSurfaceKHR get_vulkan_surface() const {
-		return vulkan_surface;
+	struct WindowPlatformData {
+		CAMetalLayer *const *layer_ptr;
 	};
-#endif
 
-	RenderingContextDriver *create_rendering_context() override;
-
-	RenderingNativeSurfaceVulkan();
-	~RenderingNativeSurfaceVulkan();
+	RenderingContextDriverVulkanIOS();
+	~RenderingContextDriverVulkanIOS();
 };
 
-#endif // RENDERING_NATIVE_SURFACE_VULKAN_H
+#endif // VULKAN_ENABLED
+
+#endif // RENDERING_CONTEXT_DRIVER_VULKAN_IOS_H

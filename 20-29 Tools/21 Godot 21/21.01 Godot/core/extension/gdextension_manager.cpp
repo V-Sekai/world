@@ -225,7 +225,7 @@ void GDExtensionManager::_reload_all_scripts() {
 }
 #endif // TOOLS_ENABLED
 
-void GDExtensionManager::load_extensions(GDExtensionInitializationFunction p_init_func) {
+void GDExtensionManager::load_extensions() {
 	Ref<FileAccess> f = FileAccess::open(GDExtension::get_extension_list_config_file(), FileAccess::READ);
 	while (f.is_valid() && !f->eof_reached()) {
 		String s = f->get_line().strip_edges();
@@ -236,18 +236,6 @@ void GDExtensionManager::load_extensions(GDExtensionInitializationFunction p_ini
 	}
 
 	OS::get_singleton()->load_platform_gdextensions();
-
-	if (p_init_func) {
-		Ref<GDExtension> libgodot;
-		libgodot.instantiate();
-		Error err = libgodot->initialize_extension_function(p_init_func, "lib_godot");
-		if (err != OK) {
-			ERR_PRINT("Error initializing extension function");
-		} else {
-			libgodot->set_path("res://__LibGodot");
-			GDExtensionManager::get_singleton()->load_extension("res://__LibGodot");
-		}
-	}
 }
 
 void GDExtensionManager::reload_extensions() {

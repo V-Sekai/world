@@ -31,8 +31,6 @@
 #ifndef ANDROID_API_H
 #define ANDROID_API_H
 
-void register_core_android_api();
-void unregister_core_android_api();
 void register_android_api();
 void unregister_android_api();
 

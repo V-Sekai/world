@@ -39,6 +39,7 @@
 #include "servers/rendering/rendering_device.h"
 
 #if defined(VULKAN_ENABLED)
+#import "rendering_context_driver_vulkan_ios.h"
 
 #ifdef USE_VOLK
 #include <volk.h>
