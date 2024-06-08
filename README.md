@@ -15,7 +15,7 @@ graph TD;
     PR[Project Other World] --> GE((Godot Engine));
     PR --> CL{Client};
     PR --> SE{Server};
-    GE --> G0["Godot 4.0 Release<br>Done March 2023 🚀"];
+    GE --> G0["Godot 4.0 Release<br>Done March 2023 🚀<br>Unified Godot Humanoid Skeleton 🚀"];
     G0 --> G4["Godot 4.3 Release<br>Est. July 2024 🚧"];
     PR --> CO[Contributors];
     G4 --> SE;
@@ -60,7 +60,7 @@ subgraph "Contributors"
     CO --> IF[iFire];
     IF --> FB;
     CO --> TO[Tokage];
-    TO --> AN[3D Animation 🧪];
+    TO --> AN[3D Animation 🚧];
     AN --> G4;
     CO --> LY[lyuma];
     LY --> FB;
