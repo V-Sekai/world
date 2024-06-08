@@ -18,8 +18,8 @@ graph TD;
     PR --> CO[Contributors];
     G4 --> SE;
     G4 --> CL;
-    UX --> BE;
-    CL --> HP;
+    UX --> BE[Backend];
+    CL --> HP[Human Players];
 
 subgraph "Editor Creator"
     ED{Editor} --> UN["Unidot Unity Package Importer<br>Done March 2023 - May 2024"];
