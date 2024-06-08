@@ -32,6 +32,9 @@ subgraph "Editor Creator"
     VR --> GF;
     VRM --> ED;
     ED --> VR;
+end
+
+subgraph "Backend"
     ED -->|Upload Avatars| BE;
     BE -->|Load Avatars| CL;
     SE -->|Download Avatars| CL;
