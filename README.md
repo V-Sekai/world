@@ -1,7 +1,9 @@
 # project-other-world
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+
 [![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors-)
+
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 The V-Sekai World project aims to create a virtual world using the Godot Engine client and server.
@@ -13,8 +15,8 @@ graph TD;
     PR[Project Other World] --> GE((Godot Engine));
     PR --> CL{Client};
     PR --> SE{Server};
-    GE --> G0["Godot 4.0 Release<br>Done March 2023 ✅"];
-    G0 --> G4["Godot 4.3 Release<br>Est. July 2024 🔵"];
+    GE --> G0["Godot 4.0 Release<br>Done March 2023 🚀"];
+    G0 --> G4["Godot 4.3 Release<br>Est. July 2024 🚧"];
     PR --> CO[Contributors];
     G4 --> SE;
     G4 --> CL;
@@ -22,11 +24,11 @@ graph TD;
     CL --> HP[Human Players];
 
 subgraph "Editor Creator"
-    ED{Editor} --> UN["Unidot Unity Package Importer<br>Done March 2023 - May 2024 ✅"];
-    ED --> FB["FBX 🔵"];
-    ED --> GF["glTF2.0 general release<br>Concurrent with Godot 4.0 Release ✅"];
-    ED --> VRM["VRM 1.0<br>Depends on glTF2.0 general release ✅"];
-    CSG["Constructive Solid Geometry with Manifold ⚠️"] --> ED;
+    ED{Editor} --> UN["Unidot Unity Package Importer<br>Done March 2023 - May 2024 🚀"];
+    ED --> FB["FBX 🚧"];
+    ED --> GF["glTF2.0 general release<br>Concurrent with Godot 4.0 Release 🚀"];
+    ED --> VRM["VRM 1.0<br>Depends on glTF2.0 general release 🚀"];
+    CSG["Constructive Solid Geometry with Manifold 🧪"] --> ED;
     FB --> G4;
     GF --> G0;
     VR --> GF;
@@ -38,12 +40,12 @@ subgraph "Editor Creator"
 end
 
 subgraph "Backend"
-    DB[SQLite & FoundationDB Alternative ⚠️] --> BE;
-    BE -->|Load Avatars 🟡| CL;
-    BE -->|Load Worlds 🟡| CL;
+    DB[SQLite & FoundationDB Alternative 🧪] --> BE;
+    BE -->|Load Avatars 🚧| CL;
+    BE -->|Load Worlds 🚧| CL;
     SE -->|Download Avatars| CL;
     SE -->|Download Worlds| CL;
-    VOIP[Speech VOIP Addon ⚠️] --> SE;
+    VOIP[Speech VOIP Addon 🧪] --> SE;
     VOIP --> CL;
 end
 
@@ -58,7 +60,7 @@ subgraph "Contributors"
     CO --> IF[iFire];
     IF --> FB;
     CO --> TO[Tokage];
-    TO --> AN[3D Animation ⚗️];
+    TO --> AN[3D Animation 🧪];
     AN --> G4;
     CO --> LY[lyuma];
     LY --> FB;
@@ -69,6 +71,11 @@ subgraph "Contributors"
     CO --> BP[Bioblaze Payne];
 end
 ```
+
+- Experimental (🧪): This stage is for features that are still being tested and may not be stable.
+- Feature complete (🎯): This stage is for features that have all planned functionality implemented.
+- Beta (🚧): This stage is for features that are largely complete but may still have bugs.
+- General release (🚀): This stage is for features that have been fully tested and are now released.
 
 ## Contributors ✨
 
