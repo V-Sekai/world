@@ -39,6 +39,7 @@ subgraph "Editor Creator"
     ED -->|Upload Worlds 🧪| BE;
     EM1["Experimental Mirrors: Engine Patch 🧪"] --> ED;
     EM2["Experimental Mirrors: Screenspace 🧪"] --> ED;
+    RW["Resource Whitelister 🎯"] --> ED;
 end
 
 subgraph "Backend"
