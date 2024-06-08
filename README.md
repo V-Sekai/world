@@ -11,8 +11,8 @@ The V-Sekai World project aims to create a virtual world using the Godot Engine 
 ```mermaid
 graph TD;
     A[Project Other World] --> B((Godot Engine));
-    B --> C{Client};
-    B --> D{Server};
+    A --> C{Client};
+    A --> D{Server};
     B --> Q["Godot 4.3 Release<br>Est. July 2024"];
     A --> E[Contributors];
     E --> F[Saracen];
@@ -30,6 +30,8 @@ graph TD;
     E --> L[Silent];
     E --> M[Bioblaze Payne];
     Q --> S["100 Players Concurrent"];
+    C --> S;
+    D --> S;
     S --> R["Unidot Unity Package Importer<br>Done March 2023 - May 2024"];
     A --> T["VRM 1.0 Export and Import<br>Asset Library in GDScript<br>Done Fall 2023"];
 ```
