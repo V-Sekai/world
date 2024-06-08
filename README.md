@@ -37,8 +37,8 @@ subgraph "Editor Creator"
 end
 
 subgraph "Backend"
-    BE -->|Load Avatars| CL;
-    BE -->|Load Worlds| CL;
+    BE -->|Load Avatars 🟡| CL;
+    BE -->|Load Worlds 🟡| CL;
     SE -->|Download Avatars| CL;
     SE -->|Download Worlds| CL;
     VOIP[Speech VOIP Addon ⚠️] --> SE;
