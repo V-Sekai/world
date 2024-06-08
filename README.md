@@ -51,6 +51,9 @@ graph TD;
     Y --> T;
     C --> S;
     Y --> W;
+    Y -->|Load Avatars| Z;
+    Z -->|Upload Avatars| D;
+    D -->|Download Avatars| C;
 ```
 
 ## Contributors ✨
