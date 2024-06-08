@@ -27,32 +27,36 @@ subgraph "Editor Creator"
     ED --> GF["glTF2.0 general release<br>Concurrent with Godot 4.0 Release"];
     ED --> VRM["VRM 1.0<br>Depends on glTF2.0 general release"];
     FB --> G4;
-    LY --> FB;
     GF --> G0;
     VR --> GF;
     VRM --> ED;
     ED --> VR;
+    ED -->|Upload Avatars| BE;
+    ED -->|Upload Worlds| BE;
 end
 
 subgraph "Backend"
-    ED -->|Upload Avatars| BE;
     BE -->|Load Avatars| CL;
+    BE -->|Load Worlds| CL;
     SE -->|Download Avatars| CL;
-    IF --> FB;
+    SE -->|Download Worlds| CL;
 end
 
 subgraph "100 Human Players Concurrent"
     BE --> HP;
+    HP -->|Join| BE;
 end
 
 subgraph "Contributors"
     CO --> SA[Saracen];
     SA --> UX["UI/UX Redesign"];
     CO --> IF[iFire];
+    IF --> FB;
     CO --> TO[Tokage];
     TO --> AN[3D Animation];
     AN --> G4;
     CO --> LY[lyuma];
+    LY --> FB;
     CO --> EW[EnthWyrr];
     CO --> MM[MMMaellon];
     CO --> SI[Silent];
