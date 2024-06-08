@@ -13,8 +13,8 @@ graph TD;
     PR[Project Other World] --> GE((Godot Engine));
     PR --> CL{Client};
     PR --> SE{Server};
-    GE --> G0["Godot 4.0 Release<br>Done March 2023"];
-    G0 --> G4["Godot 4.3 Release<br>Est. July 2024"];
+    GE --> G0["Godot 4.0 Release<br>Done March 2023 ✅"];
+    G0 --> G4["Godot 4.3 Release<br>Est. July 2024 🔵"];
     PR --> CO[Contributors];
     G4 --> SE;
     G4 --> CL;
@@ -22,10 +22,10 @@ graph TD;
     CL --> HP[Human Players];
 
 subgraph "Editor Creator"
-    ED{Editor} --> UN["Unidot Unity Package Importer<br>Done March 2023 - May 2024"];
-    ED --> FB[FBX];
-    ED --> GF["glTF2.0 general release<br>Concurrent with Godot 4.0 Release"];
-    ED --> VRM["VRM 1.0<br>Depends on glTF2.0 general release"];
+    ED{Editor} --> UN["Unidot Unity Package Importer<br>Done March 2023 - May 2024 ✅"];
+    ED --> FB["FBX 🔵"];
+    ED --> GF["glTF2.0 general release<br>Concurrent with Godot 4.0 Release ✅"];
+    ED --> VRM["VRM 1.0<br>Depends on glTF2.0 general release ✅"];
     FB --> G4;
     GF --> G0;
     VR --> GF;
@@ -41,7 +41,7 @@ subgraph "Backend"
     BE -->|Load Worlds| CL;
     SE -->|Download Avatars| CL;
     SE -->|Download Worlds| CL;
-    VOIP[Speech VOIP Addon] --> SE;
+    VOIP[Speech VOIP Addon ⚠️] --> SE;
     VOIP --> CL;
 end
 
