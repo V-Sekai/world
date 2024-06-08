@@ -51,6 +51,7 @@ graph TD;
     Y --> T;
     C --> S;
     Y --> W;
+    S --> Y;
 ```
 
 ## Contributors ✨
