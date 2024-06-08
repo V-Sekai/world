@@ -10,7 +10,7 @@
       "label": "Godot Engine",
       "type": "shell",
       "options": {
-        "cwd": "${workspaceFolder}/19 Godot"
+        "cwd": "${workspaceFolder}/19_Godot"
       },
       "command": [
         "scons werror=yes generate_bundle=yes precision=double compiledb=yes target=editor tests=yes debug_symbols=yes"

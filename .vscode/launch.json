@@ -19,7 +19,7 @@
       "name": "Run the editor with V-Sekai game",
       "type": "lldb",
       "request": "launch",
-      "args": ["--path", "${workspaceFolder}/10-19 Game/11 Projects/11.01 V-Sekai Game", "-e"],
+      "args": ["--path", "${workspaceFolder}/19_vekai_game", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/19 Godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
