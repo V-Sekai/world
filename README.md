@@ -52,8 +52,8 @@ graph TD;
     Y --> T;
     C --> S;
     Y --> W;
-    Y -->|Load Avatars| Z;
-    Z -->|Upload Avatars| D;
+    Y -->|Upload Avatars| Z;
+    Z -->|Load Avatars| C;
     D -->|Download Avatars| C;
     Z --> S["100 Human Players Concurrent"];
 ```
