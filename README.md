@@ -54,6 +54,7 @@ graph TD;
     Y -->|Load Avatars| Z;
     Z -->|Upload Avatars| D;
     D -->|Download Avatars| C;
+    S --> |End Goal| E["100 Human Players Concurrent"];
 ```
 
 ## Contributors ✨
