@@ -22,6 +22,7 @@ graph TD;
     G4 --> CL;
     UX --> BE[Backend];
     CL --> HP[Human Players];
+    PR --> AT
 
 subgraph "Editor Creator"
     ED{Editor} --> UN["Unidot Unity Package Importer<br>Done March 2023 - May 2024 🚀"];
@@ -74,6 +75,10 @@ subgraph "Contributors"
     CO --> SI[Silent];
     SI --> UX;
     CO --> BP[Bioblaze Payne];
+end
+
+subgraph "Appium Testing"
+    AT{Appium 🧪} --> TC["Test Cases 🧪"];
 end
 ```
 
