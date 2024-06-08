@@ -40,6 +40,7 @@ subgraph "Editor Creator"
     EM1["Experimental Mirrors: Engine Patch 🧪"] --> ED;
     EM2["Experimental Mirrors: Screenspace 🧪"] --> ED;
     RW["Resource Whitelister 🎯"] --> ED;
+    BI["Built-in Blender Importer 🚀"] --> ED;
 end
 
 subgraph "Backend"
@@ -62,6 +63,7 @@ subgraph "Contributors"
     SA --> UX["UI/UX Redesign"];
     CO --> IF[iFire];
     IF --> FB;
+    IF --> BI;
     CO --> TO[Tokage];
     TO --> AN[3D Animation 🚧];
     AN --> G4;
