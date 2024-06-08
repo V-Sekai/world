@@ -4,7 +4,28 @@
 [![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-The V-Sekai Other World Architecture project aims to create a virtual world using the Godot Engine client and server.
+The V-Sekai World project aims to create a virtual world using the Godot Engine client and server.
+
+## Fire's Roadmap
+
+```mermaid
+graph TD;
+    A[Project Other World] --> B((Godot Engine));
+    B --> C{Client};
+    B --> D{Server};
+    A --> E[Contributors];
+    E --> F[Saracen];
+    E --> G[iFire];
+    G --> N[FBX];
+    E --> H[Tokage];
+    H --> O[3D Animation];
+    E --> I[lyuma];
+    I --> P[FBX];
+    E --> J[EnthWyrr];
+    E --> K[MMMaellon];
+    E --> L[Silent];
+    E --> M[Bioblaze Payne];
+```
 
 ## Contributors ✨
 
