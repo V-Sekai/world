@@ -12,7 +12,7 @@
       "type": "lldb",
       "request": "launch",
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/20-29 Tools/21 Godot 21/21.01 Godot/bin/godot.macos.editor.double.arm64",
+      "program": "${workspaceFolder}/19 Godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
     },
     {
@@ -21,7 +21,7 @@
       "request": "launch",
       "args": ["--path", "${workspaceFolder}/10-19 Game/11 Projects/11.01 V-Sekai Game", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/20-29 Tools/21 Godot 21/21.01 Godot/bin/godot.macos.editor.double.arm64",
+      "program": "${workspaceFolder}/19 Godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
     },
     {
@@ -30,7 +30,7 @@
       "request": "launch",
       "args": ["--path", "${workspaceFolder}/10-19 Game/11 Projects/11.02 Contraptions", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/20-29 Tools/21 Godot 21/21.01 Godot/bin/godot.macos.editor.double.arm64",
+      "program": "${workspaceFolder}/19 Godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
     },
     {
@@ -39,7 +39,7 @@
       "request": "launch",
       "args": ["--path", "${workspaceFolder}/10-19 Game/11 Projects/11.03 Grid", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/20-29 Tools/21 Godot 21/21.01 Godot/bin/godot.macos.editor.double.arm64",
+      "program": "${workspaceFolder}/19 Godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
     },
     {
@@ -48,7 +48,7 @@
       "request": "launch",
       "args": ["--path", "${workspaceFolder}/10-19 Game/11 Projects/11.04 Planner", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/20-29 Tools/21 Godot 21/21.01 Godot/bin/godot.macos.editor.double.arm64",
+      "program": "${workspaceFolder}/19 Godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
     },
   ]
