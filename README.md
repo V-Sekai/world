@@ -28,7 +28,7 @@ subgraph "Editor Creator"
     ED --> FB["FBX 🚧"];
     ED --> GF["glTF2.0 general release<br>Concurrent with Godot 4.0 Release 🚀"];
     ED --> VRM["VRM 1.0<br>Depends on glTF2.0 general release 🚀"];
-    CSG["Constructive Solid Geometry with Manifold 🧪"] --> ED;
+    CSG["Constructive Solid Geometry with Manifold 🚧"] --> ED;
     FB --> G4;
     GF --> G0;
     VR --> GF;
@@ -40,7 +40,7 @@ subgraph "Editor Creator"
 end
 
 subgraph "Backend"
-    DB[SQLite & FoundationDB Alternative 🧪] --> BE;
+    DB[SQLite & FoundationDB Alternative 🎯] --> BE;
     BE -->|Load Avatars 🚧| CL;
     BE -->|Load Worlds 🚧| CL;
     SE -->|Download Avatars| CL;
