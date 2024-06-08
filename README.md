@@ -37,6 +37,8 @@ subgraph "Editor Creator"
     VR --> CL;
     ED -->|Upload Avatars| BE;
     ED -->|Upload Worlds| BE;
+    EM1["Experimental Mirrors: Engine Patch 🧪"] --> ED;
+    EM2["Experimental Mirrors: Screenspace 🧪"] --> ED;
 end
 
 subgraph "Backend"
