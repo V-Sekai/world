@@ -48,6 +48,7 @@ graph TD;
     A --> T["VRM 1.0 Export and Import<br>Asset Library in GDScript<br>Done Fall 2023"];
     T --> V;
     V --> W["VRM 1.0<br>Depends on glTF2.0 general release"];
+    Y --> T;
 ```
 
 ## Contributors ✨
