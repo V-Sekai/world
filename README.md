@@ -50,6 +50,7 @@ graph TD;
     V --> W["VRM 1.0<br>Depends on glTF2.0 general release"];
     Y --> T;
     C --> S;
+    Y --> W;
 ```
 
 ## Contributors ✨
