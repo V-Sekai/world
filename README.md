@@ -31,6 +31,7 @@ subgraph "Editor Creator"
     VR --> GF;
     VRM --> ED;
     ED --> VR;
+    VR --> CL;
     ED -->|Upload Avatars| BE;
     ED -->|Upload Worlds| BE;
 end
