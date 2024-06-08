@@ -13,6 +13,7 @@ graph TD;
     A[Project Other World] --> B((Godot Engine));
     B --> C{Client};
     B --> D{Server};
+    B --> Q["Godot 4.3 Release<br>Est. July 2024"];
     A --> E[Contributors];
     E --> F[Saracen];
     E --> G[iFire];
