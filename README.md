@@ -41,6 +41,8 @@ subgraph "Backend"
     BE -->|Load Worlds| CL;
     SE -->|Download Avatars| CL;
     SE -->|Download Worlds| CL;
+    VOIP[Speech VOIP Addon] --> SE;
+    VOIP --> CL;
 end
 
 subgraph "100 Human Players Concurrent"
