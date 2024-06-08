@@ -16,18 +16,6 @@ graph TD;
     GE --> G4["Godot 4.3 Release<br>Est. July 2024"];
     GE --> G0["Godot 4.0 Release<br>Done March 2023"];
     PR --> CO[Contributors];
-    CO --> SA[Saracen];
-    SA --> UX["UI/UX Redesign"];
-    CO --> IF[iFire];
-    CO --> TO[Tokage];
-    TO --> AN[3D Animation];
-    AN --> G4;
-    CO --> LY[lyuma];
-    CO --> EW[EnthWyrr];
-    CO --> MM[MMMaellon];
-    CO --> SI[Silent];
-    SI --> UX;
-    CO --> BP[Bioblaze Payne];
     G4 --> SE;
     G4 --> CL;
     UX --> BE;
@@ -47,10 +35,26 @@ subgraph "Editor Creator"
     ED -->|Upload Avatars| BE;
     BE -->|Load Avatars| CL;
     SE -->|Download Avatars| CL;
+    IF --> FB;
 end
 
 subgraph "100 Human Players Concurrent"
     BE --> HP;
+end
+
+subgraph "Contributors"
+    CO --> SA[Saracen];
+    SA --> UX["UI/UX Redesign"];
+    CO --> IF[iFire];
+    CO --> TO[Tokage];
+    TO --> AN[3D Animation];
+    AN --> G4;
+    CO --> LY[lyuma];
+    CO --> EW[EnthWyrr];
+    CO --> MM[MMMaellon];
+    CO --> SI[Silent];
+    SI --> UX;
+    CO --> BP[Bioblaze Payne];
 end
 ```
 
