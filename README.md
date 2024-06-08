@@ -56,7 +56,7 @@ subgraph "Contributors"
     CO --> IF[iFire];
     IF --> FB;
     CO --> TO[Tokage];
-    TO --> AN[3D Animation];
+    TO --> AN[3D Animation ⚗️];
     AN --> G4;
     CO --> LY[lyuma];
     LY --> FB;
