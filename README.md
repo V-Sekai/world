@@ -37,6 +37,7 @@ subgraph "Editor Creator"
 end
 
 subgraph "Backend"
+    DB[SQLite & FoundationDB Alternative ⚠️] --> BE;
     BE -->|Load Avatars 🟡| CL;
     BE -->|Load Worlds 🟡| CL;
     SE -->|Download Avatars| CL;
