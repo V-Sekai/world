@@ -36,7 +36,7 @@ graph TD;
     Q --> R["Unidot Unity Package Importer<br>Done March 2023 - May 2024"];
     R --> Z{Backend};
     U --> Z;
-    Z --> S["100 Human Players Concurrent"];
+    V --> Y;
     C --> Y{Editor};
     Y --> R;
     Y --> N;
@@ -48,13 +48,14 @@ graph TD;
     A --> T["VRM 1.0 Export and Import<br>Asset Library in GDScript<br>Done Fall 2023"];
     T --> V;
     V --> W["VRM 1.0<br>Depends on glTF2.0 general release"];
+    W --> Y;
     Y --> T;
     C --> S;
     Y --> W;
     Y -->|Load Avatars| Z;
     Z -->|Upload Avatars| D;
     D -->|Download Avatars| C;
-    S --> |End Goal| E["100 Human Players Concurrent"];
+    Z --> S["100 Human Players Concurrent"];
 ```
 
 ## Contributors ✨
