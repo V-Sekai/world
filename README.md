@@ -14,6 +14,8 @@ graph TD;
     A --> C{Client};
     A --> D{Server};
     B --> Q["Godot 4.3 Release<br>Est. July 2024"];
+    B --> X["Godot 4.0 Release<br>Done March 2023"];
+    X --> V["glTF2.0 general release<br>Concurrent with Godot 4.0 Release"];
     A --> E[Contributors];
     E --> F[Saracen];
     F --> U["UI/UX Redesign"];
@@ -38,7 +40,7 @@ graph TD;
     C --> S;
     D --> S;
     A --> T["VRM 1.0 Export and Import<br>Asset Library in GDScript<br>Done Fall 2023"];
-    T --> V["glTF2.0 general release<br>Done Summer 2019"];
+    T --> V;
     V --> W["VRM 1.0<br>Depends on glTF2.0 general release"];
 ```
 
