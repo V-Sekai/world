@@ -15,45 +15,39 @@ graph TD;
     PR --> SE{Server};
     GE --> G4["Godot 4.3 Release<br>Est. July 2024"];
     GE --> G0["Godot 4.0 Release<br>Done March 2023"];
-    G0 --> GF["glTF2.0 general release<br>Concurrent with Godot 4.0 Release"];
     PR --> CO[Contributors];
     CO --> SA[Saracen];
     SA --> UX["UI/UX Redesign"];
     CO --> IF[iFire];
-    IF --> FB[FBX];
-    FB --> G4;
     CO --> TO[Tokage];
     TO --> AN[3D Animation];
     AN --> G4;
     CO --> LY[lyuma];
-    LY --> FB;
-    FB --> G4;
     CO --> EW[EnthWyrr];
     CO --> MM[MMMaellon];
     CO --> SI[Silent];
     SI --> UX;
     CO --> BP[Bioblaze Payne];
-    G4 --> UN["Unidot Unity Package Importer<br>Done March 2023 - May 2024"];
-    UN --> BE{Backend};
-    UX --> BE;
-    GF --> ED;
-    CL --> ED{Editor};
-    ED --> UN;
-    ED --> FB;
-    ED --> GF;
-    G4 --> CL;
     G4 --> SE;
-    G4 --> ED;
-    PR --> VR["VRM 1.0 Export and Import<br>Asset Library in GDScript<br>Done Fall 2023"];
+    G4 --> CL;
+    UX --> BE;
+    CL --> HP;
+
+subgraph "Editor Creator"
+    ED{Editor} --> UN["Unidot Unity Package Importer<br>Done March 2023 - May 2024"];
+    ED --> FB[FBX];
+    ED --> GF["glTF2.0 general release<br>Concurrent with Godot 4.0 Release"];
+    ED --> VRM["VRM 1.0<br>Depends on glTF2.0 general release"];
+    FB --> G4;
+    LY --> FB;
+    GF --> G0;
     VR --> GF;
-    GF --> VRM["VRM 1.0<br>Depends on glTF2.0 general release"];
     VRM --> ED;
     ED --> VR;
-    CL --> HP;
-    ED --> VRM;
     ED -->|Upload Avatars| BE;
     BE -->|Load Avatars| CL;
     SE -->|Download Avatars| CL;
+end
 
 subgraph "100 Human Players Concurrent"
     BE --> HP;
