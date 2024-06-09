@@ -33,17 +33,19 @@
 #include "register_types.h"
 
 #include "core/object/class_db.h"
-#include "open_telemetry.h"
+#include "desync.h"
 
-void initialize_open_telemetry_module(ModuleInitializationLevel p_level) {
+void initialize_golang_module(ModuleInitializationLevel p_level) {
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
 	}
+	ClassDB::register_class<Desync>();
 	ClassDB::register_class<OpenTelemetry>();
 }
 
-void uninitialize_open_telemetry_module(ModuleInitializationLevel p_level) {
+void uninitialize_golang_module(ModuleInitializationLevel p_level) {
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
 	}
+	// Nothing to do here in this example.
 }

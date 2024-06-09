@@ -6,7 +6,7 @@ def can_build(env, platform):
     try:
         subprocess.check_output(["go", "--version"], stderr=subprocess.STDOUT)
     except FileNotFoundError:
-        print("Go not found. Open Telemetry build skipped.")
+        print("Go not found. desync build skipped.")
         return False
     except subprocess.CalledProcessError as e:
         pass
@@ -38,6 +38,7 @@ def can_build(env, platform):
 
 def get_doc_classes():
     return [
+        "Desync",        
         "OpenTelemetry",
     ]
 

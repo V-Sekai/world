@@ -4,27 +4,54 @@ package main
 #include <stdlib.h>
 */
 import "C"
-
 import (
-	"context"
-	"errors"
-	"log"
-	"sync"
-	"time"
-	"fmt"
-	"encoding/json"
+    "context"
+    "fmt"
+    "errors"
+    "log"
+    "sync"
+    "time"
+    "encoding/json"
 
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-	"go.opentelemetry.io/otel/sdk/resource"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	"go.opentelemetry.io/otel/trace"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"github.com/google/uuid"
+    "go.opentelemetry.io/otel"
+    "go.opentelemetry.io/otel/attribute"
+    "go.opentelemetry.io/otel/codes"
+    "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+    "go.opentelemetry.io/otel/sdk/resource"
+    sdktrace "go.opentelemetry.io/otel/sdk/trace"
+    "go.opentelemetry.io/otel/trace"
+    "google.golang.org/grpc"
+    "google.golang.org/grpc/credentials/insecure"
+    "github.com/google/uuid"
 )
+
+//export DesyncUntar
+func DesyncUntar(storeUrl *C.char, indexUrl *C.char, outputDir *C.char, cacheDir *C.char) C.int {
+    store := C.GoString(storeUrl)
+    index := C.GoString(indexUrl)
+    output := C.GoString(outputDir)
+    cache := C.GoString(cacheDir)
+
+    if store == "" || index == "" || output == "" {
+        fmt.Println("Error: storeUrl, indexUrl, and outputDir are required")
+        return 1
+    }
+
+    args := []string{"--no-same-owner", "--store", store, "--index", index, output}
+    if cache != "" {
+        args = append(args, "--cache", cache)
+    }
+
+	cmd := newUntarCommand(context.Background())
+    cmd.SetArgs(args)
+    _, err := cmd.ExecuteC()
+
+    if err != nil {
+        fmt.Printf("Error executing desync command: %v\n", err)
+        return 2
+    }
+    return 0
+}
 
 var (
 	tracerProvider *sdktrace.TracerProvider
@@ -234,25 +261,25 @@ func DeleteContext(id *C.char) {
     mu.Unlock()
 }
 
-func main() {
-	InitTracerProvider(C.CString("godot"), C.CString("localhost:4317"), C.CString("{}"))
+// func main() {
+// 	InitTracerProvider(C.CString("godot"), C.CString("localhost:4317"), C.CString("{}"))
 
-	parentSpanID := StartSpan(C.CString("parent-function"))
+// 	parentSpanID := StartSpan(C.CString("parent-function"))
 
-	childSpanID := StartSpanWithParent(C.CString("child-function"), parentSpanID)
+// 	childSpanID := StartSpanWithParent(C.CString("child-function"), parentSpanID)
 
-	AddEvent(childSpanID, C.CString("test-event"))
+// 	AddEvent(childSpanID, C.CString("test-event"))
 
-	SetAttributes(childSpanID, C.CString("{\"test-key\": \"test-value\"}"))
+// 	SetAttributes(childSpanID, C.CString("{\"test-key\": \"test-value\"}"))
 
-	RecordError(childSpanID, C.CString("test-error"))
+// 	RecordError(childSpanID, C.CString("test-error"))
 
-	EndSpan(childSpanID)
+// 	EndSpan(childSpanID)
 
-	EndSpan(parentSpanID)
+// 	EndSpan(parentSpanID)
 
-	err := Shutdown()
-	if err != nil {
-		log.Printf("Failed to shutdown TracerProvider: %s", C.GoString(err))
-	}
-}
+// 	err := Shutdown()
+// 	if err != nil {
+// 		log.Printf("Failed to shutdown TracerProvider: %s", C.GoString(err))
+// 	}
+// }
