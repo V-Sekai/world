@@ -36,9 +36,14 @@
 // Author: Dana Nau <nau@umd.edu>, July 7, 2021
 
 #include "core/io/resource.h"
+#include "core/math/plane.h"
+#include "core/os/memory.h"
+#include "core/string/print_string.h"
 #include "core/variant/typed_array.h"
+#include "core/core_bind.h"
 
 #include "modules/goal_task_planner/multigoal.h"
+#include "modules/golang/open_telemetry.h"
 
 class Domain;
 class Plan : public Resource {
@@ -59,12 +64,12 @@ class Plan : public Resource {
 	// final plan; it just will verify whether m did what it was supposed to do.
 	bool verify_goals = true;
 	static String _item_to_string(Variant p_item);
-	Variant _seek_plan(Dictionary p_state, Array p_todo_list, Array p_plan, int p_depth);
-	Variant _apply_task_and_continue(Dictionary p_state, Callable p_command, Array p_arguments);
-	Variant _apply_action_and_continue(Dictionary p_state, Array p_first_task, Array p_todo_list, Array p_plan, int p_depth);
-	Variant _refine_task_and_continue(const Dictionary p_state, const Array p_first_task, const Array p_todo_list, const Array p_plan, const int p_depth);
-	Variant _refine_multigoal_and_continue(const Dictionary p_state, const Ref<Multigoal> p_goal, const Array p_todo_list, const Array p_plan, const int p_depth);
-	Variant _refine_unigoal_and_continue(const Dictionary p_state, const Array p_first_goal, const Array p_todo_list, const Array p_plan, const int p_depth);
+	Variant _seek_plan(Dictionary p_state, Array p_todo_list, Array p_plan, int p_depth, String p_span_id);
+	Variant _apply_task_and_continue(Dictionary p_state, Callable p_command, Array p_arguments, String p_span_id);
+	Variant _apply_action_and_continue(Dictionary p_state, Array p_first_task, Array p_todo_list, Array p_plan, int p_depth, String p_span_id);
+	Variant _refine_task_and_continue(const Dictionary p_state, const Array p_first_task, const Array p_todo_list, const Array p_plan, const int p_depth, String p_span_id);
+	Variant _refine_multigoal_and_continue(const Dictionary p_state, const Ref<Multigoal> p_goal, const Array p_todo_list, const Array p_plan, const int p_depth, String p_span_id);
+	Variant _refine_unigoal_and_continue(const Dictionary p_state, const Array p_first_goal, const Array p_todo_list, const Array p_plan, const int p_depth, String p_span_id);
 
 public:
 	int get_verbose() const;
@@ -77,6 +82,9 @@ public:
 	bool get_verify_goals() const;
 	Variant find_plan(Dictionary p_state, Array p_todo_list);
 	Dictionary run_lazy_lookahead(Dictionary p_state, Array p_todo_list, int p_max_tries = 10);
+	Ref<OpenTelemetry> open_telemetry  = memnew(OpenTelemetry);
+	Plan();
+	~Plan();
 
 protected:
 	static void _bind_methods();
