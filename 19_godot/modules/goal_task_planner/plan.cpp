@@ -291,8 +291,8 @@ Variant Plan::_seek_plan(Dictionary p_state, Array p_todo_list, Array p_plan, in
 	Variant todo_item = p_todo_list.front();
 	p_todo_list = p_todo_list.slice(1);
 	if (Object::cast_to<Multigoal>(todo_item)) {
-		open_telemetry->end_span(span_uuid);
 		Variant ret = _refine_multigoal_and_continue(p_state, todo_item, p_todo_list, p_plan, p_depth, span_uuid);
+		open_telemetry->end_span(span_uuid);
 		return ret;
 	} else if (todo_item.is_array()) {
 		Array item = todo_item;
@@ -301,16 +301,16 @@ Variant Plan::_seek_plan(Dictionary p_state, Array p_todo_list, Array p_plan, in
 		Dictionary unigoals = current_domain->get_unigoal_methods();
 		Variant item_name = item.front();
 		if (actions.has(item_name)) {
-			open_telemetry->end_span(span_uuid);
 			Variant ret = _apply_action_and_continue(p_state, item, p_todo_list, p_plan, p_depth, span_uuid);
+			open_telemetry->end_span(span_uuid);
 			return ret;
 		} else if (tasks.has(item_name)) {
-			open_telemetry->end_span(span_uuid);
 			Variant ret = _refine_task_and_continue(p_state, item, p_todo_list, p_plan, p_depth, span_uuid);
+			open_telemetry->end_span(span_uuid);
 			return ret;
 		} else if (unigoals.has(item_name)) {
-			open_telemetry->end_span(span_uuid);
 			Variant ret = _refine_unigoal_and_continue(p_state, item, p_todo_list, p_plan, p_depth, span_uuid);
+			open_telemetry->end_span(span_uuid);
 			return ret;
 		}
 	}
