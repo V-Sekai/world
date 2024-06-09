@@ -30,6 +30,8 @@
 
 #include "open_telemetry.h"
 
+#include "core/io/json.h"
+
 void OpenTelemetry::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("init_tracer_provider", "name", "host", "attributes"), &OpenTelemetry::init_tracer_provider);
 	ClassDB::bind_method(D_METHOD("start_span", "name"), &OpenTelemetry::start_span);

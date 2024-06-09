@@ -34,6 +34,7 @@
 
 #include "core/object/class_db.h"
 #include "desync.h"
+#include "open_telemetry.h"
 
 void initialize_golang_module(ModuleInitializationLevel p_level) {
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {

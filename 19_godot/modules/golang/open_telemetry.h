@@ -31,11 +31,10 @@
 #ifndef OPEN_TELEMETRY_H
 #define OPEN_TELEMETRY_H
 
-#include "core/io/json.h"
 #include "core/object/ref_counted.h"
 #include "core/variant/dictionary.h"
 
-#include "libopentelemetry_c_interface.h"
+#include "libdesync_c_interface.h"
 
 class OpenTelemetry : public RefCounted {
 	GDCLASS(OpenTelemetry, RefCounted);
