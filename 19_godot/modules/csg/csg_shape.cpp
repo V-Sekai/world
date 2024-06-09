@@ -154,12 +154,34 @@ struct CSGBrush {
 		size_t material_index = 0;
 		size_t smooth_index = 0;
 		size_t invert_index = 0;
-		for (size_t property_i = 0; property_i < mesh.vertProperties.size(); property_i += CSGBrush::MANIFOLD_MAX) {
-			manifold_positions[position_index++] = Vector3(mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_POS_X], mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_POS_Y], mesh.vertProperties[property_i + MANIFOLD_PROPERTY_POS_Z]);
-			manifold_uvs[uv_index++] = Vector2(mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_UV_X], mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_UV_Y]);
-			manifold_materials[material_index++] = static_cast<int>(Math::round(mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_MATERIAL]));
-			manifold_smooths[smooth_index++] = mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_SMOOTH] > 0.5f;
-			manifold_inverts[invert_index++] = mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_INVERT] > 0.5f;
+		for (size_t property_i = 0; property_i < mesh.vertProperties.size(); property_i += mesh.numProp) {
+			// Position is guaranteed. Others are not.
+			manifold_positions[position_index++] = Vector3(
+					mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_POS_X],
+					mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_POS_Y],
+					mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_POS_Z]);
+			if (mesh.numProp >= CSGBrush::MANIFOLD_PROPERTY_UV_X) {
+				manifold_uvs[uv_index++] = Vector2(
+						mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_UV_X],
+						mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_UV_Y]);
+			} else {
+				manifold_uvs[uv_index++] = Vector2(0, 0);
+			}
+			if (mesh.numProp >= CSGBrush::MANIFOLD_PROPERTY_MATERIAL) {
+				manifold_materials[material_index++] = static_cast<int>(Math::round(mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_MATERIAL]));
+			} else {
+				manifold_materials[material_index++] = 0;
+			}
+			if (mesh.numProp >= CSGBrush::MANIFOLD_PROPERTY_SMOOTH) {
+				manifold_smooths[smooth_index++] = mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_SMOOTH] > 0.5f;
+			} else {
+				manifold_smooths[smooth_index++] = false;
+			}
+			if (mesh.numProp >= CSGBrush::MANIFOLD_PROPERTY_INVERT) {
+				manifold_inverts[invert_index++] = mesh.vertProperties[property_i + CSGBrush::MANIFOLD_PROPERTY_INVERT] > 0.5f;
+			} else {
+				manifold_inverts[invert_index++] = false;
+			}
 		}
 		faces.resize(mesh.triVerts.size() / CSGBrush::MANIFOLD_TRIANGLE);
 		constexpr int32_t order[CSGBrush::MANIFOLD_TRIANGLE] = { 0, 2, 1 };
@@ -2742,4 +2764,69 @@ CSGPolygon3D::CSGPolygon3D() {
 	path_u_distance = 1.0;
 	path_joined = false;
 	path = nullptr;
+}
+
+///////////////
+
+CSGBrush *CSGConvexHull3D::_build_brush() {
+	CSGBrush *new_brush = memnew(CSGBrush);
+
+	if (points.size() < 4) {
+		return new_brush;
+	}
+
+	std::vector<glm::vec3> converted_points;
+	for (int i = 0; i < points.size(); i++) {
+		converted_points.push_back(glm::vec3(points[i].x, points[i].y, points[i].z));
+	}
+
+	new_brush->manifold = new_brush->manifold.Hull(converted_points);
+
+	HashMap<uint32_t, Ref<Material>> mesh_materials;
+	mesh_materials[0] = material;
+	new_brush->unpack_manifold(mesh_materials);
+
+	return new_brush;
+}
+
+void CSGConvexHull3D::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("set_points", "points"), &CSGConvexHull3D::set_points);
+	ClassDB::bind_method(D_METHOD("get_points"), &CSGConvexHull3D::get_points);
+
+	ClassDB::bind_method(D_METHOD("set_material", "material"), &CSGConvexHull3D::set_material);
+	ClassDB::bind_method(D_METHOD("get_material"), &CSGConvexHull3D::get_material);
+
+	ADD_PROPERTY(PropertyInfo(Variant::PACKED_VECTOR2_ARRAY, "points"), "set_points", "get_points");
+	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "material", PROPERTY_HINT_RESOURCE_TYPE, "BaseMaterial3D,ShaderMaterial"), "set_material", "get_material");
+}
+
+void CSGConvexHull3D::set_points(const Vector<Vector3> &p_points) {
+	points = p_points;
+	_make_dirty();
+	update_gizmos();
+}
+
+Vector<Vector3> CSGConvexHull3D::get_points() const {
+	return points;
+}
+
+void CSGConvexHull3D::set_material(const Ref<Material> &p_material) {
+	material = p_material;
+	_make_dirty();
+}
+
+Ref<Material> CSGConvexHull3D::get_material() const {
+	return material;
+}
+
+CSGConvexHull3D::CSGConvexHull3D() {
+	// defaults
+	points.push_back(Vector3(0, 0, 0));
+	points.push_back(Vector3(0, 1, 0));
+	points.push_back(Vector3(1, 1, 0));
+	points.push_back(Vector3(1, 0, 0));
+	points.push_back(Vector3(0, 0, 1));
+	points.push_back(Vector3(0, 1, 1));
+	points.push_back(Vector3(1, 1, 1));
+	points.push_back(Vector3(1, 0, 1));
 }

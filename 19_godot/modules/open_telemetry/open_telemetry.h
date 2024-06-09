@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  register_types.cpp                                                    */
+/*  open_telemetry.h                                                      */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,40 +28,30 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#include "register_types.h"
+#ifndef OPEN_TELEMETRY_H
+#define OPEN_TELEMETRY_H
 
-#ifndef _3D_DISABLED
+#include "core/io/json.h"
+#include "core/object/ref_counted.h"
+#include "core/variant/dictionary.h"
 
-#include "csg_shape.h"
+#include "libopentelemetry_c_interface.h"
 
-#ifdef TOOLS_ENABLED
-#include "editor/csg_gizmos.h"
-#endif
+class OpenTelemetry : public RefCounted {
+	GDCLASS(OpenTelemetry, RefCounted);
 
-void initialize_csg_module(ModuleInitializationLevel p_level) {
-	if (p_level == MODULE_INITIALIZATION_LEVEL_SCENE) {
-		GDREGISTER_ABSTRACT_CLASS(CSGShape3D);
-		GDREGISTER_ABSTRACT_CLASS(CSGPrimitive3D);
-		GDREGISTER_CLASS(CSGMesh3D);
-		GDREGISTER_CLASS(CSGSphere3D);
-		GDREGISTER_CLASS(CSGBox3D);
-		GDREGISTER_CLASS(CSGCylinder3D);
-		GDREGISTER_CLASS(CSGTorus3D);
-		GDREGISTER_CLASS(CSGPolygon3D);
-		GDREGISTER_CLASS(CSGConvexHull3D);
-		GDREGISTER_CLASS(CSGCombiner3D);
-	}
-#ifdef TOOLS_ENABLED
-	if (p_level == MODULE_INITIALIZATION_LEVEL_EDITOR) {
-		EditorPlugins::add_by_type<EditorPluginCSG>();
-	}
-#endif
-}
+protected:
+	static void _bind_methods();
 
-void uninitialize_csg_module(ModuleInitializationLevel p_level) {
-	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
-		return;
-	}
-}
+public:
+	String init_tracer_provider(String p_name, String p_host, Dictionary p_attributes);
+	String start_span(String p_name);
+	String start_span_with_parent(String p_name, String p_parent_span_uuid);
+	void add_event(String p_span_uuid, String p_event_name);
+	void set_attributes(String p_span_uuid, Dictionary p_attributes);
+	void record_error(String p_span_uuid, String p_error);
+	void end_span(String p_span_uuid);
+	String shutdown();
+};
 
-#endif // _3D_DISABLED
+#endif // OPEN_TELEMETRY_H
