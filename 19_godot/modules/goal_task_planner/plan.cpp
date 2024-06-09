@@ -245,7 +245,7 @@ Variant Plan::_refine_unigoal_and_continue(const Dictionary p_state, const Array
 }
 
 Variant Plan::find_plan(Dictionary p_state, Array p_todo_list) {
-	String span_uuid = open_telemetry->start_span(vformat("Plan::find_plan %s", p_todo_list));
+	String span_uuid = open_telemetry->start_span("Plan::find_plan");
 	if (verbose >= 1) {
 		print_line("verbose=" + itos(verbose) + ":");
 		print_line("    state = " + _item_to_string(p_state) + "\n    todo_list = " + _item_to_string(p_todo_list));
@@ -270,7 +270,7 @@ Variant Plan::find_plan(Dictionary p_state, Array p_todo_list) {
 }
 
 Variant Plan::_seek_plan(Dictionary p_state, Array p_todo_list, Array p_plan, int p_depth, String p_span_id) {
-	String span_uuid = open_telemetry->start_span_with_parent(vformat("Plan::_seek_plan %s", p_todo_list), p_span_id);
+	String span_uuid = open_telemetry->start_span_with_parent("Plan::_seek_plan", p_span_id);
 	Dictionary attributes;
 	attributes["depth"] = p_depth;
 	attributes["plan_size"] = p_plan.size();
@@ -323,7 +323,7 @@ String Plan::_item_to_string(Variant p_item) {
 }
 
 Dictionary Plan::run_lazy_lookahead(Dictionary p_state, Array p_todo_list, int p_max_tries) {
-	String span_uuid = open_telemetry->start_span(vformat("Plan::run_lazy_lookahead %s", p_todo_list));
+	String span_uuid = open_telemetry->start_span("Plan::run_lazy_lookahead");
 	if (verbose >= 1) {
 		print_line(vformat("run_lazy_lookahead: verbose = %s, max_tries = %s", verbose, p_max_tries));
 		print_line(vformat("Initial state: %s", p_state.keys()));
