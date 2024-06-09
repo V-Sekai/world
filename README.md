@@ -65,6 +65,8 @@ subgraph "Contributors"
     CO --> IF[iFire];
     IF --> FB;
     IF --> BI;
+    IF --> OT["Open Telemetry<br>Experimental 🧪"];
+    CL --> OT;
     CO --> TO[Tokage];
     TO --> AN[3D Animation 🚧];
     AN --> G4;
@@ -75,10 +77,6 @@ subgraph "Contributors"
     CO --> SI[Silent];
     SI --> UX;
     CO --> BP[Bioblaze Payne];
-end
-
-subgraph "Appium Testing"
-    AT{Appium 🧪} --> TC["Test Cases 🧪"];
 end
 ```
 
