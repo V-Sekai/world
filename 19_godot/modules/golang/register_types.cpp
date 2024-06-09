@@ -32,15 +32,15 @@
 
 #include "register_types.h"
 
+#include "casync.h"
 #include "core/object/class_db.h"
-#include "desync.h"
 #include "open_telemetry.h"
 
 void initialize_golang_module(ModuleInitializationLevel p_level) {
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
 	}
-	ClassDB::register_class<Desync>();
+	ClassDB::register_class<Casync>();
 	ClassDB::register_class<OpenTelemetry>();
 }
 

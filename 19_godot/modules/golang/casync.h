@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  desync.h                                                              */
+/*  casync.h                                                              */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,16 +28,16 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef DESYNC_H
-#define DESYNC_H
+#ifndef CASYNC_H
+#define CASYNC_H
 
 #include "core/error/error_list.h"
 #include "core/object/ref_counted.h"
 #include "libdesync_c_interface.h"
 #include <stdio.h>
 
-class Desync : public RefCounted {
-	GDCLASS(Desync, RefCounted);
+class Casync : public RefCounted {
+	GDCLASS(Casync, RefCounted);
 
 protected:
 	static void _bind_methods();
@@ -54,7 +54,7 @@ public:
 		}
 		return OK;
 	}
-	Desync();
+	Casync();
 };
 
-#endif // DESYNC_H
+#endif // CASYNC_H
