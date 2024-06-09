@@ -11,72 +11,72 @@ The V-Sekai World project aims to create a virtual world using the Godot Engine 
 ## Fire's Development Timeline
 
 ```mermaid
-graph TD;
-    PR[Project Other World] --> GE((Godot Engine));
-    PR --> CL{Client};
-    PR --> SE{Server};
-    GE --> G0["Godot 4.0 Release<br>Done March 2023 🚀<br>Unified Godot Humanoid Skeleton 🚀"];
-    G0 --> G4["Godot 4.3 Release<br>Est. July 2024 🚧"];
-    PR --> CO[Contributors];
-    G4 --> SE;
-    G4 --> CL;
-    UX --> BE[Backend];
-    CL --> HP[Human Players];
+flowchart LR
+    PR[Project Other World] -->|Uses| GE((Godot Engine))
+    PR -->|Has| CL{Client}
+    PR -->|Has| SE{Server}
+    GE -->|Releases| G0["Godot 4.0 Release<br>Done March 2023 🚀<br>Unified Godot Humanoid Skeleton 🚀"]
+    G0 -->|Followed by| G4["Godot 4.3 Release<br>Est. July 2024 🚧"]
+    PR -->|Involves| CO[Contributors]
+    G4 -->|Used by| SE
+    G4 -->|Used by| CL
+    UX -->|Develops| BE[Backend]
+    CL -->|Interacts with| HP[Human Players]
     PR --> AT
 
 subgraph "Editor Creator"
-    ED{Editor} --> UN["Unidot Unity Package Importer<br>Done March 2023 - May 2024 🚀"];
-    ED --> FB["FBX 🚧"];
-    ED --> GF["glTF2.0 general release<br>Concurrent with Godot 4.0 Release 🚀"];
-    ED --> VRM["VRM 1.0<br>Depends on glTF2.0 general release 🚀"];
-    CSG["Constructive Solid Geometry with Manifold 🚧"] --> ED;
-    FB --> G4;
-    GF --> G0;
-    VR --> GF;
-    VRM --> ED;
-    ED --> VR;
-    VR --> CL;
-    ED -->|Upload Avatars 🧪| BE;
-    ED -->|Upload Worlds 🧪| BE;
-    EM1["Experimental Mirrors: Engine Patch 🧪"] --> ED;
-    EM2["Experimental Mirrors: Screenspace 🧪"] --> ED;
-    RW["Resource Whitelister 🎯"] --> ED;
-    BI["Built-in Blender Importer 🚀"] --> ED;
+    ED{Editor} -->|Creates| UN["Unidot Unity Package Importer<br>Done March 2023 - May 2024 🚀"]
+    ED -->|Creates| FB["FBX 🚧"]
+    ED -->|Releases| GF["glTF2.0 general release<br>Concurrent with Godot 4.0 Release 🚀"]
+    ED -->|Depends on| VRM["VRM 1.0<br>Depends on glTF2.0 general release 🚀"]
+    CSG["Constructive Solid Geometry with Manifold 🚧"] -->|Used by| ED
+    FB -->|Used by| G4
+    GF -->|Used by| G0
+    VR -->|Depends on| GF
+    VRM -->|Used by| ED
+    ED -->|Creates| VR
+    VR -->|Used by| CL
+    ED -->|Uploads Avatars 🧪| BE
+    ED -->|Uploads Worlds 🧪| BE
+    EM1["Experimental Mirrors: Engine Patch 🧪"] -->|Used by| ED
+    EM2["Experimental Mirrors: Screenspace 🧪"] -->|Used by| ED
+    RW["Resource Whitelister 🎯"] -->|Used by| ED
+    BI["Built-in Blender Importer 🚀"] -->|Used by| ED
 end
 
 subgraph "Backend"
-    DB[SQLite & FoundationDB Alternative 🎯] --> BE;
-    BE -->|Load Avatars 🚧| CL;
-    BE -->|Load Worlds 🚧| CL;
-    SE -->|Download Avatars| CL;
-    SE -->|Download Worlds| CL;
-    VOIP[Speech VOIP Addon 🧪] --> SE;
-    VOIP --> CL;
+    DB[SQLite & FoundationDB Alternative 🎯] -->|Used by| BE
+    BE -->|Loads Avatars 🚧| CL
+    BE -->|Loads Worlds 🚧| CL
+    SE -->|Downloads Avatars| CL
+    SE -->|Downloads Worlds| CL
+    VOIP[Speech VOIP Addon 🧪] -->|Used by| SE
+    VOIP -->|Used by| CL
 end
 
 subgraph "100 Human Players Concurrent"
-    BE --> HP;
-    HP -->|Join| BE;
+    BE -->|Interacts with| HP
+    HP -->|Joins| BE
 end
 
 subgraph "Contributors"
-    CO --> SA[Saracen];
-    SA --> UX["UI/UX Redesign"];
-    CO --> IF[iFire];
-    IF --> FB;
-    IF --> BI;
-    IF --> OT["Open Telemetry<br>Experimental 🧪"];
-    CL --> OT;
-    CO --> TO[Tokage];
-    TO --> AN[3D Animation 🚧];
-    AN --> G4;
-    CO --> LY[lyuma];
-    LY --> FB;
-    CO --> EW[EnthWyrr];
-    CO --> MM[MMMaellon];
-    CO --> SI[Silent];
-    SI --> UX;
-    CO --> BP[Bioblaze Payne];
+    CO -->|Includes| SA[Saracen]
+    SA -->|Works on| UX["UI/UX Redesign"]
+    CO -->|Includes| IF[iFire]
+    IF -->|Works on| FB
+    IF -->|Works on| BI
+    IF -->|Works on| OT["Open Telemetry<br>Experimental 🧪"]
+    CL -->|Uses| OT
+    CO -->|Includes| TO[Tokage]
+    TO -->|Works on| AN[3D Animation 🚧]
+    AN -->|Used by| G4
+    CO -->|Includes| LY[lyuma]
+    LY -->|Works on| FB
+    CO -->|Includes| EW[EnthWyrr]
+    CO -->|Includes| MM[MMMaellon]
+    CO -->|Includes| SI[Silent]
+    SI -->|Works on| UX
+    CO -->|Includes| BP[Bioblaze Payne]
 end
 ```
 
