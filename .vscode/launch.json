@@ -11,7 +11,7 @@
       "name": "Run the editor with V-Sekai game",
       "type": "lldb",
       "request": "launch",
-      "args": ["--path", "${workspaceFolder}/19_vekai_game", "-e"],
+      "args": ["--path", "${workspaceFolder}/11_vekai_game", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/19_godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
@@ -20,7 +20,7 @@
       "name": "Run the editor with Contraptions",
       "type": "lldb",
       "request": "launch",
-      "args": ["--path", "${workspaceFolder}/10-19 Game/11 Projects/11.02 Contraptions", "-e"],
+      "args": ["--path", "${workspaceFolder}/12_contraptions", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/19_godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
@@ -29,7 +29,7 @@
       "name": "Run the editor with Grid",
       "type": "lldb",
       "request": "launch",
-      "args": ["--path", "${workspaceFolder}/10-19 Game/11 Projects/11.03 Grid", "-e"],
+      "args": ["--path", "${workspaceFolder}/13_grid", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/19_godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
@@ -38,7 +38,7 @@
       "name": "Run the editor with Planner",
       "type": "lldb",
       "request": "launch",
-      "args": ["--path", "${workspaceFolder}/10-19 Game/11 Projects/11.04 Planner", "-e"],
+      "args": ["--path", "${workspaceFolder}/14_planner", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/19_godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
