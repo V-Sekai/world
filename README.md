@@ -78,6 +78,15 @@ subgraph "Contributors"
     SI -->|Works on| UX
     CO -->|Includes| BP[Bioblaze Payne]
 end
+  subgraph "MeshTransform"
+      MT["MeshTransform<br>Done by iFire & MarcusLoppe 🧪"] -->|Used by| ED[Existing Data]
+      IF[Input Function] -->|Works on| MT
+      T3D["3D Mesh"] -->|Tokenized into| TSeq["Sequence of Tokens"]
+      ED -->|Inputted into| TM["Transformer Model"]
+      TSeq -->|Inputted into| TM
+      TM -->|Generates| NM["New Meshes"]
+      TM -->|Modifies| EM["Existing Meshes"]
+  end
 ```
 
 - Experimental (🧪): This stage is for features that are still being tested and may not be stable.
