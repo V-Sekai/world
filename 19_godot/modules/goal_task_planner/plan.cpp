@@ -46,7 +46,7 @@ void Plan::set_verbose(int p_verbose) { verbose = p_verbose; }
 
 void Plan::set_domains(TypedArray<Domain> p_domain) { domains = p_domain; }
 
-Variant Plan::_apply_action_and_continue(Dictionary p_state, Array p_first_task, Array p_todo_list, Array p_plan, int p_depth, String p_span_id) {
+Variant Plan::_apply_action_and_continue(Dictionary p_state, Array p_first_task, Array p_todo_list, Array p_plan, int p_depth) {
 	Callable action = current_domain->get_actions()[p_first_task[0]];
 
 	if (verbose >= 2) {
@@ -66,7 +66,7 @@ Variant Plan::_apply_action_and_continue(Dictionary p_state, Array p_first_task,
 		}
 		TypedArray<Array> new_plan = p_plan;
 		new_plan.push_back(p_first_task);
-		return _seek_plan(new_state, p_todo_list, new_plan, p_depth + 1, p_span_id);
+		return _seek_plan(new_state, p_todo_list, new_plan, p_depth + 1);
 	}
 
 	if (verbose >= 3) {
@@ -87,7 +87,7 @@ Variant Plan::_apply_action_and_continue(Dictionary p_state, Array p_first_task,
 	return false;
 }
 
-Variant Plan::_refine_task_and_continue(const Dictionary p_state, const Array p_task1, const Array p_todo_list, const Array p_plan, const int p_depth, String p_span_id) {
+Variant Plan::_refine_task_and_continue(const Dictionary p_state, const Array p_task1, const Array p_todo_list, const Array p_plan, const int p_depth) {
 	Array relevant = current_domain->get_task_methods()[p_task1[0]];
 	if (verbose >= 3) {
 		print_line("Depth: " + itos(p_depth) + ", Task " + _item_to_string(p_task1) + ", Todo List " + _item_to_string(p_todo_list) + ", Plan " + _item_to_string(p_plan));
@@ -110,7 +110,7 @@ Variant Plan::_refine_task_and_continue(const Dictionary p_state, const Array p_
 			if (!p_todo_list.is_empty()) {
 				todo_list.append_array(p_todo_list);
 			}
-			Variant plan = _seek_plan(p_state, todo_list, p_plan, p_depth + 1, p_span_id);
+			Variant plan = _seek_plan(p_state, todo_list, p_plan, p_depth + 1);
 			if (plan.is_array()) {
 				return plan;
 			}
@@ -128,7 +128,7 @@ Variant Plan::_refine_task_and_continue(const Dictionary p_state, const Array p_
 	return false;
 }
 
-Variant Plan::_refine_multigoal_and_continue(const Dictionary p_state, const Ref<Multigoal> p_first_goal, const Array p_todo_list, const Array p_plan, const int p_depth, String p_span_id) {
+Variant Plan::_refine_multigoal_and_continue(const Dictionary p_state, const Ref<Multigoal> p_first_goal, const Array p_todo_list, const Array p_plan, const int p_depth) {
 	if (verbose >= 3) {
 		print_line("Depth: " + itos(p_depth) + ", Multigoal: " + p_first_goal->get_name() + ": " + _item_to_string(p_first_goal));
 	}
@@ -166,7 +166,7 @@ Variant Plan::_refine_multigoal_and_continue(const Dictionary p_state, const Ref
 			}
 			todo_list.clear();
 			todo_list = subtodo_list;
-			Variant plan = _seek_plan(p_state, todo_list, p_plan, p_depth + 1, p_span_id);
+			Variant plan = _seek_plan(p_state, todo_list, p_plan, p_depth + 1);
 			if (plan.is_array()) {
 				return plan;
 			}
@@ -180,7 +180,7 @@ Variant Plan::_refine_multigoal_and_continue(const Dictionary p_state, const Ref
 	return false;
 }
 
-Variant Plan::_refine_unigoal_and_continue(const Dictionary p_state, const Array p_goal1, const Array p_todo_list, const Array p_plan, const int p_depth, String p_span_id) {
+Variant Plan::_refine_unigoal_and_continue(const Dictionary p_state, const Array p_goal1, const Array p_todo_list, const Array p_plan, const int p_depth) {
 	if (verbose >= 3) {
 		String goals_list = vformat("Depth: %d, Goals: %s", p_depth, _item_to_string(p_goal1));
 	}
@@ -195,7 +195,7 @@ Variant Plan::_refine_unigoal_and_continue(const Dictionary p_state, const Array
 		if (verbose >= 3) {
 			print_line("Intermediate computation: Goal already achieved.");
 		}
-		return _seek_plan(p_state, p_todo_list, p_plan, p_depth + 1, p_span_id);
+		return _seek_plan(p_state, p_todo_list, p_plan, p_depth + 1);
 	}
 
 	Array relevant = current_domain->get_unigoal_methods()[state_variable_name];
@@ -226,7 +226,7 @@ Variant Plan::_refine_unigoal_and_continue(const Dictionary p_state, const Array
 			if (verbose >= 3) {
 				print_line("Depth: " + itos(p_depth) + ", Seeking todo list " + _item_to_string(todo_list));
 			}
-			Variant plan = _seek_plan(p_state, todo_list, p_plan, p_depth + 1, p_span_id);
+			Variant plan = _seek_plan(p_state, todo_list, p_plan, p_depth + 1);
 			if (plan.is_array()) {
 				return plan;
 			}
@@ -245,38 +245,21 @@ Variant Plan::_refine_unigoal_and_continue(const Dictionary p_state, const Array
 }
 
 Variant Plan::find_plan(Dictionary p_state, Array p_todo_list) {
-	String span_uuid = open_telemetry->start_span(vformat("Plan::find_plan %s", p_todo_list));
 	if (verbose >= 1) {
 		print_line("verbose=" + itos(verbose) + ":");
 		print_line("    state = " + _item_to_string(p_state) + "\n    todo_list = " + _item_to_string(p_todo_list));
 	}
-	open_telemetry->add_event(span_uuid, "Starting find_plan method");
-	Dictionary attributes;
-	attributes["state_size"] = p_state.size();
-	attributes["todo_list_size"] = p_todo_list.size();
-	open_telemetry->set_attributes(span_uuid, attributes);
 
-	Variant result = _seek_plan(p_state, p_todo_list, Array(), 0, span_uuid);
+	Variant result = _seek_plan(p_state, p_todo_list, Array(), 0);
 
 	if (verbose >= 1) {
 		print_line("result = " + _item_to_string(result));
 	}
 
-	if (!result) {
-		open_telemetry->record_error(span_uuid, "Failed to find plan");
-	}
-	open_telemetry->end_span(span_uuid);
 	return result;
 }
 
-Variant Plan::_seek_plan(Dictionary p_state, Array p_todo_list, Array p_plan, int p_depth, String p_span_id) {
-	String span_uuid = open_telemetry->start_span_with_parent(vformat("Plan::_seek_plan %s", p_todo_list), p_span_id);
-	Dictionary attributes;
-	attributes["depth"] = p_depth;
-	attributes["plan_size"] = p_plan.size();
-	attributes["todo_list_size"] = p_todo_list.size();
-	open_telemetry->set_attributes(span_uuid, attributes);
-
+Variant Plan::_seek_plan(Dictionary p_state, Array p_todo_list, Array p_plan, int p_depth) {
 	if (verbose >= 2) {
 		print_line("Depth: " + itos(p_depth) + ", Todo List: " + _item_to_string(p_todo_list));
 	}
@@ -285,15 +268,12 @@ Variant Plan::_seek_plan(Dictionary p_state, Array p_todo_list, Array p_plan, in
 		if (verbose >= 3) {
 			print_line("Depth: " + itos(p_depth) + " no more tasks or goals, return plan: " + _item_to_string(p_plan));
 		}
-		open_telemetry->end_span(span_uuid);
 		return p_plan;
 	}
 	Variant todo_item = p_todo_list.front();
 	p_todo_list = p_todo_list.slice(1);
 	if (Object::cast_to<Multigoal>(todo_item)) {
-		Variant ret = _refine_multigoal_and_continue(p_state, todo_item, p_todo_list, p_plan, p_depth, span_uuid);
-		open_telemetry->end_span(span_uuid);
-		return ret;
+		return _refine_multigoal_and_continue(p_state, todo_item, p_todo_list, p_plan, p_depth);
 	} else if (todo_item.is_array()) {
 		Array item = todo_item;
 		Dictionary actions = current_domain->get_actions();
@@ -301,20 +281,13 @@ Variant Plan::_seek_plan(Dictionary p_state, Array p_todo_list, Array p_plan, in
 		Dictionary unigoals = current_domain->get_unigoal_methods();
 		Variant item_name = item.front();
 		if (actions.has(item_name)) {
-			Variant ret = _apply_action_and_continue(p_state, item, p_todo_list, p_plan, p_depth, span_uuid);
-			open_telemetry->end_span(span_uuid);
-			return ret;
+			return _apply_action_and_continue(p_state, item, p_todo_list, p_plan, p_depth);
 		} else if (tasks.has(item_name)) {
-			Variant ret = _refine_task_and_continue(p_state, item, p_todo_list, p_plan, p_depth, span_uuid);
-			open_telemetry->end_span(span_uuid);
-			return ret;
+			return _refine_task_and_continue(p_state, item, p_todo_list, p_plan, p_depth);
 		} else if (unigoals.has(item_name)) {
-			Variant ret = _refine_unigoal_and_continue(p_state, item, p_todo_list, p_plan, p_depth, span_uuid);
-			open_telemetry->end_span(span_uuid);
-			return ret;
+			return _refine_unigoal_and_continue(p_state, item, p_todo_list, p_plan, p_depth);
 		}
 	}
-	open_telemetry->end_span(span_uuid);
 	return false;
 }
 
@@ -323,7 +296,6 @@ String Plan::_item_to_string(Variant p_item) {
 }
 
 Dictionary Plan::run_lazy_lookahead(Dictionary p_state, Array p_todo_list, int p_max_tries) {
-	String span_uuid = open_telemetry->start_span(vformat("Plan::run_lazy_lookahead %s", p_todo_list));
 	if (verbose >= 1) {
 		print_line(vformat("run_lazy_lookahead: verbose = %s, max_tries = %s", verbose, p_max_tries));
 		print_line(vformat("Initial state: %s", p_state.keys()));
@@ -372,7 +344,7 @@ Dictionary Plan::run_lazy_lookahead(Dictionary p_state, Array p_todo_list, int p
 					print_line(vformat("run_lazy_lookahead: Task: %s, %s", action_name.get_method(), action_arguments));
 				}
 
-				Dictionary new_state = _apply_task_and_continue(p_state, action_name, action.slice(1, action.size()), span_uuid);
+				Dictionary new_state = _apply_task_and_continue(p_state, action_name, action.slice(1, action.size()));
 				if (!new_state.is_empty()) {
 					if (verbose >= 2) {
 						print_line(new_state);
@@ -398,12 +370,11 @@ Dictionary Plan::run_lazy_lookahead(Dictionary p_state, Array p_todo_list, int p
 	if (verbose >= 2) {
 		print_line(vformat("run_lazy_lookahead: final state %s", p_state));
 	}
-	open_telemetry->end_span(span_uuid);
+
 	return p_state;
 }
 
-Variant Plan::_apply_task_and_continue(Dictionary p_state, Callable p_command, Array p_arguments, String p_span_id) {
-	String span_uuid = open_telemetry->start_span_with_parent(vformat("Plan::_apply_task_and_continue method %s", p_command.get_method()), p_span_id);
+Variant Plan::_apply_task_and_continue(Dictionary p_state, Callable p_command, Array p_arguments) {
 	if (verbose >= 3) {
 		print_line(vformat("_apply_task_and_continue %s, args = %s", p_command.get_method(), _item_to_string(p_arguments)));
 	}
@@ -415,14 +386,13 @@ Variant Plan::_apply_task_and_continue(Dictionary p_state, Callable p_command, A
 		if (verbose >= 3) {
 			print_line(vformat("Not applicable command %s", argument));
 		}
-		open_telemetry->end_span(span_uuid);
 		return false;
 	}
+
 	if (verbose >= 3) {
 		print_line("Applied");
 		print_line(next_state);
 	}
-	open_telemetry->end_span(span_uuid);
 	return next_state;
 }
 
@@ -453,17 +423,4 @@ bool Plan::get_verify_goals() const {
 
 void Plan::set_verify_goals(bool p_value) {
 	verify_goals = p_value;
-}
-
-Plan::Plan() {
-	String error = open_telemetry->init_tracer_provider("godot", "localhost:4317", Engine::get_singleton()->get_version_info());
-	if (!error.is_empty()) {
-		print_error(error);
-	}
-}
-
-Plan::~Plan() {
-	if (open_telemetry.is_valid()) {
-		open_telemetry->shutdown();
-	}
 }

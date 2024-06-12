@@ -230,14 +230,11 @@ func EndSpan(id *C.char) {
     }
 
     mu.Lock()
-    span, ok := spans[uuidID]
-    if ok {
-        delete(spans, uuidID)
-        span.End()
-    }
+    span := spans[uuidID]
+    delete(spans, uuidID)
     mu.Unlock()
+    span.End()
 }
-
 
 //export Shutdown
 func Shutdown() *C.char {
