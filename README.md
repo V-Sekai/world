@@ -79,7 +79,7 @@ subgraph "Contributors"
     CO -->|Includes| BP[Bioblaze Payne]
 end
   subgraph "MeshTransform"
-      MT["MeshTransform<br>Done by iFire & MarcusLoppe 🧪"] -->|Used by| ED[Existing Data]
+      MT["MeshTransform<br>Done by iFire & MarcusLoppe 🧪"] -->|Used by| ED[Editor]
       IF[Input Function] -->|Works on| MT
       T3D["3D Mesh"] -->|Tokenized into| TSeq["Sequence of Tokens"]
       ED -->|Inputted into| TM["Transformer Model"]
