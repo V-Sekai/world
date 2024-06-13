@@ -72,21 +72,25 @@ subgraph "Contributors"
     AN -->|Used by| G4
     CO -->|Includes| LY[lyuma]
     LY -->|Works on| FB
+    LY -->|Works on| MI
     CO -->|Includes| EW[EnthWyrr]
     CO -->|Includes| MM[MMMaellon]
     CO -->|Includes| SI[Silent]
     SI -->|Works on| UX
     CO -->|Includes| BP[Bioblaze Payne]
 end
-  subgraph "MeshTransform"
-      MT["MeshTransform<br>Done by iFire & MarcusLoppe 🧪"] -->|Used by| ED[Editor]
-      IF[iFire] -->|Works on| MT
-      T3D["3D Mesh"] -->|Tokenized into| TSeq["Sequence of Tokens"]
-      ED -->|Inputted into| TM["Transformer Model"]
-      TSeq -->|Inputted into| TM
-      TM -->|Generates| NM["New Meshes"]
-      TM -->|Modifies| EM["Existing Meshes"]
-  end
+subgraph "Mirrors"
+    MI["Mirrors<br>Done by Lyuma 🧪"] -->|Used by| ED[Editor]
+end
+subgraph "MeshTransform"
+    MT["MeshTransform<br>Done by iFire & MarcusLoppe 🧪"] -->|Used by| ED[Editor]
+    IF[iFire] -->|Works on| MT
+    T3D["3D Mesh"] -->|Tokenized into| TSeq["Sequence of Tokens"]
+    ED -->|Inputted into| TM["Transformer Model"]
+    TSeq -->|Inputted into| TM
+    TM -->|Generates| NM["New Meshes"]
+    TM -->|Modifies| EM["Existing Meshes"]
+end
 ```
 
 - Experimental (🧪): This stage is for features that are still being tested and may not be stable.
