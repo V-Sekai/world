@@ -44,7 +44,7 @@ subgraph "Editor Creator"
 end
 
 subgraph "Backend"
-    DB[SQLite & FoundationDB Alternative 🎯] -->|Used by| BE
+    DB[SQLite & FoundationDB Alternative 🎯] -->|Used by| BE[Backend]
     BE -->|Loads Avatars 🚧| CL
     BE -->|Loads Worlds 🚧| CL
     SE -->|Downloads Avatars| CL
