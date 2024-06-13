@@ -34,7 +34,6 @@ subgraph "Editor Creator"
     GF -->|Used by| G0
     VR -->|Depends on| GF
     VRM -->|Used by| ED
-    ED -->|Creates| VR
     VR -->|Used by| CL
     ED -->|Uploads Avatars 🧪| BE
     ED -->|Uploads Worlds 🧪| BE
