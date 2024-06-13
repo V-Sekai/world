@@ -20,7 +20,7 @@ flowchart LR
     PR -->|Involves| CO[Contributors]
     G4 -->|Used by| SE
     G4 -->|Used by| CL
-    UX -->|Develops| BE[Backend]
+    UX --> CL{Client}
     CL -->|Interacts with| HP[Human Players]
     PR --> AT
 
