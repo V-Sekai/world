@@ -48,12 +48,6 @@
 			<description>
 			</description>
 		</method>
-		<method name="shutdown">
-			<return type="String" />
-			<description>
-				Shuts down the OpenTelemetry SDK.
-			</description>
-		</method>
 		<method name="start_span">
 			<return type="String" />
 			<param index="0" name="name" type="String" />
