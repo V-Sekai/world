@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/V-Sekai-fire/Objaverse-downloader.git
+	branch = main
+	commit = 53bbf021f52d43815accedd40ee30532af60bd8c
+	parent = ac899f12bba25785e7bba43b002e4d992b8099d8
+	method = merge
+	cmdver = 0.4.6
