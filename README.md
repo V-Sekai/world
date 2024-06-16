@@ -70,7 +70,6 @@ subgraph "Contributors"
     AN -->|Used by| G4
     CO -->|Includes| LY[lyuma]
     LY -->|Works on| FB
-    LY -->|Works on| MI
     CO -->|Includes| EW[EnthWyrr]
     CO -->|Includes| MM[MMMaellon]
     CO -->|Includes| SI[Silent]
