@@ -23,8 +23,8 @@ flowchart LR
     UX --> CL{Client}
     CL -->|Interacts with| HP[Human Players]
 
-subgraph "VR Milestone"
-    VRM[VR Milestone 🧪] -->|3-4 Players| VRP[VR Players]
+subgraph "VR Multiplayer"
+    VRM[VR Multiplayer 🧪] -->|3-4 Players| VRP[VR Players]
     VRP -->|Interacts with| CL
 end
 
