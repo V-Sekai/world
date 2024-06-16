@@ -12,84 +12,78 @@ The V-Sekai World project aims to create a virtual world using the Godot Engine 
 
 ```mermaid
 flowchart LR
-    PR[Project Other World] -->|Uses| GE((Godot Engine))
-    PR -->|Has| CL{Client}
-    PR -->|Has| SE{Server}
-    GE -->|Releases| G0["Godot 4.0 Release<br>Done March 2023 🚀<br>Unified Godot Humanoid Skeleton 🚀"]
-    G0 -->|Followed by| G4["Godot 4.3 Release<br>Est. July 2024 🚧"]
-    PR -->|Involves| CO[Contributors]
-    G4 -->|Used by| SE
-    G4 -->|Used by| CL
+    CL{Client} -->|Interacts with| HP[Human Players]
+    CL -->|Uses| OT["Open Telemetry<br>Experimental 🧪"]
     UX --> CL{Client}
-    CL -->|Interacts with| HP[Human Players]
-
-subgraph "VR Multiplayer"
-    VRM[VR Multiplayer 🧪] -->|3-4 Players| VRP[VR Players]
+    G4 -->|Used by| CL
+    VR -->|Used by| CL
+    BE -->|Loads Avatars 🚧| CL
+    BE -->|Loads Worlds 🚧| CL
+    SE -->|Downloads Avatars| CL
+    SE -->|Downloads Worlds| CL
+    VOIP -->|Used by| CL
     VRP -->|Interacts with| CL
-end
+    PR -->|Has| CL{Client}
 
-subgraph "Editor Creator"
+    HP -->|Joins| BE
+    BE -->|Interacts with| HP
+    BE -->|Uploads Avatars 🧪| ED
+    BE -->|Uploads Worlds 🧪| ED
+    DB[SQLite & FoundationDB Alternative 🎯] -->|Used by| BE[Backend]
+
+    SE{Server} -->|Uses| G4
+    PR -->|Has| SE{Server}
+    VOIP[Speech VOIP Addon 🧪] -->|Used by| SE
+
+    G4["Godot 4.3 Release<br>Est. July 2024 🚧"] -->|Followed by| G0
+    FB -->|Used by| G4
+    AN -->|Used by| G4
+
+    G0["Godot 4.0 Release<br>Done March 2023 🚀<br>Unified Godot Humanoid Skeleton 🚀"] -->|Releases| GE
+    GF -->|Used by| G0
+
+    GE((Godot Engine)) -->|Uses| PR[Project Other World]
+
+    PR -->|Involves| CO[Contributors]
+    PR -->|Uses| GE
+
+    CO -->|Includes| SA[Saracen]
+    CO -->|Includes| IF[iFire]
+    CO -->|Includes| TO[Tokage]
+    CO -->|Includes| LY[lyuma]
+    CO -->|Includes| EW[EnthWyrr]
+    CO -->|Includes| MM[MMMaellon]
+    CO -->|Includes| SI[Silent]
+    CO -->|Includes| BP[Bioblaze Payne]
+
+    SA -->|Works on| UX["UI/UX Redesign"]
+    IF -->|Works on| FB
+    IF -->|Works on| BI
+    IF -->|Works on| OT
+    TO -->|Works on| AN
+    LY -->|Works on| FB
+    SI -->|Works on| UX
+
+    VRM[VR Multiplayer 🧪] -->|3-4 Players| VRP[VR Players]
+    VR -->|Depends on| GF
+    VRM -->|Used by| ED
+
     ED{Editor} -->|Creates| UN["Unidot Unity Package Importer<br>Done March 2023 - May 2024 🚀"]
     ED -->|Creates| FB["FBX 🚧"]
     ED -->|Releases| GF["glTF2.0 general release<br>Concurrent with Godot 4.0 Release 🚀"]
     ED -->|Depends on| VRM["VRM 1.0<br>Depends on glTF2.0 general release 🚀"]
     CSG["Constructive Solid Geometry with Manifold 🚧"] -->|Used by| ED
-    FB -->|Used by| G4
-    GF -->|Used by| G0
-    VR -->|Depends on| GF
-    VRM -->|Used by| ED
-    VR -->|Used by| CL
-    ED -->|Uploads Avatars 🧪| BE
-    ED -->|Uploads Worlds 🧪| BE
     EM1["Experimental Mirrors: Engine Patch 🧪"] -->|Used by| ED
     EM2["Experimental Mirrors: Screenspace 🧪"] -->|Used by| ED
     RW["Resource Whitelister 🎯"] -->|Used by| ED
     BI["Built-in Blender Importer 🚀"] -->|Used by| ED
-end
-
-subgraph "Backend"
-    DB[SQLite & FoundationDB Alternative 🎯] -->|Used by| BE[Backend]
-    BE -->|Loads Avatars 🚧| CL
-    BE -->|Loads Worlds 🚧| CL
-    SE -->|Downloads Avatars| CL
-    SE -->|Downloads Worlds| CL
-    VOIP[Speech VOIP Addon 🧪] -->|Used by| SE
-    VOIP -->|Used by| CL
-end
-
-subgraph "100 Human Players Concurrent"
-    BE -->|Interacts with| HP
-    HP -->|Joins| BE
-end
-
-subgraph "Contributors"
-    CO -->|Includes| SA[Saracen]
-    SA -->|Works on| UX["UI/UX Redesign"]
-    CO -->|Includes| IF[iFire]
-    IF -->|Works on| FB
-    IF -->|Works on| BI
-    IF -->|Works on| OT["Open Telemetry<br>Experimental 🧪"]
-    CL -->|Uses| OT
-    CO -->|Includes| TO[Tokage]
-    TO -->|Works on| AN[3D Animation 🚧]
-    AN -->|Used by| G4
-    CO -->|Includes| LY[lyuma]
-    LY -->|Works on| FB
-    CO -->|Includes| EW[EnthWyrr]
-    CO -->|Includes| MM[MMMaellon]
-    CO -->|Includes| SI[Silent]
-    SI -->|Works on| UX
-    CO -->|Includes| BP[Bioblaze Payne]
-end
-subgraph "MeshTransform"
     MT["MeshTransform<br>Done by iFire & MarcusLoppe 🧪"] -->|Used by| ED[Editor]
-    IF[iFire] -->|Works on| MT
+
     T3D["3D Mesh"] -->|Tokenized into| TSeq["Sequence of Tokens"]
     ED -->|Inputted into| TM["Transformer Model"]
     TSeq -->|Inputted into| TM
     TM -->|Generates| NM["New Meshes"]
     TM -->|Modifies| EM["Existing Meshes"]
-end
 ```
 
 - Experimental (🧪): This stage is for features that are still being tested and may not be stable.
