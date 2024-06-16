@@ -24,7 +24,7 @@ flowchart LR
     CL -->|Interacts with| HP[Human Players]
 
 subgraph "VR Milestone"
-    VRM[VR Milestone] -->|3-4 Players| VRP[VR Players]
+    VRM[VR Milestone 🧪] -->|3-4 Players| VRP[VR Players]
     VRP -->|Interacts with| CL
 end
 
