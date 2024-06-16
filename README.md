@@ -12,18 +12,18 @@ The V-Sekai World project aims to create a virtual world using the Godot Engine 
 
 ```mermaid
 flowchart LR
-    CL{Client} -->|Interacts with| HP[Human Players]
-    CL -->|Uses| OT["Open Telemetry<br>Experimental 🧪"]
-    UX --> CL{Client}
-    G4 -->|Used by| CL
-    VR -->|Used by| CL
-    BE -->|Loads Avatars 🚧| CL
-    BE -->|Loads Worlds 🚧| CL
-    SE -->|Downloads Avatars| CL
-    SE -->|Downloads Worlds| CL
-    VOIP -->|Used by| CL
-    VRP -->|Interacts with| CL
-    PR -->|Has| CL{Client}
+    VG{V-Sekai Game} -->|Interacts with| HP[Human Players]
+    VG -->|Uses| OT["Open Telemetry<br>Experimental 🧪"]
+    UX --> VG{V-Sekai Game}
+    G4 -->|Used by| VG
+    VR -->|Used by| VG
+    BE -->|Loads Avatars 🚧| VG
+    BE -->|Loads Worlds 🚧| VG
+    SE -->|Downloads Avatars| VG
+    SE -->|Downloads Worlds| VG
+    VOIP -->|Used by| VG
+    VRP -->|Interacts with| VG
+    PR -->|Has| VG{V-Sekai Game}
 
     HP -->|Joins| BE
     BE -->|Interacts with| HP
