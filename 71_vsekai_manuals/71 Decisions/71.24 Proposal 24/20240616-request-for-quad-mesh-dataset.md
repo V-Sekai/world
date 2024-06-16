@@ -6,9 +6,9 @@ Mesh Transformers, which consist of a construction worker (auto encoder) and an 
 
 ## The Problem Statement
 
-The task at hand is to create a triangle mesh to quad mesh dataset that's suitable for machine learning training. The meshes should be converted from triangles to quads, have captions, contain a maximum of 1k quads, and include at least 100 objects.
+The task at hand is to create a triangle mesh to quad mesh dataset that's suitable for machine learning training. The meshes should be converted from triangles to quads, have captions, contain a maximum of 1k quads, and include at least 100 objects, should be 100_000 objects.
 
-Note that quad mesh to triangle mesh is not the same task.
+Note that triangulating a quad mesh is not the same task.
 
 ## Describe how your proposal will work with code, pseudo-code, mock-ups, or diagrams
 
@@ -61,5 +61,7 @@ Status: Proposed
 2. [V-Sekai/v-sekai-game](https://github.com/v-sekai/v-sekai-game) - The GitHub page for the V-Sekai open-source project, which brings social VR/VRSNS/metaverse components to the Godot Engine.
 3. [objaverse_annotations](https://github.com/google-deepmind/objaverse_annotations)
 4. [V-Sekai.blue-tin-fox-models](https://github.com/V-Sekai/V-Sekai.blue-tin-fox-models)
+5. [https://github.com/maria-korosteleva/garment-pattern-generator]
+6. [https://cmp.felk.cvut.cz/t-less/index.html]
 
 AI assistant Aria assisted with this article.
