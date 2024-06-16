@@ -22,7 +22,6 @@ flowchart LR
     G4 -->|Used by| CL
     UX --> CL{Client}
     CL -->|Interacts with| HP[Human Players]
-    PR --> AT
 
 subgraph "Editor Creator"
     ED{Editor} -->|Creates| UN["Unidot Unity Package Importer<br>Done March 2023 - May 2024 🚀"]
@@ -77,9 +76,6 @@ subgraph "Contributors"
     CO -->|Includes| SI[Silent]
     SI -->|Works on| UX
     CO -->|Includes| BP[Bioblaze Payne]
-end
-subgraph "Mirrors"
-    MI["Mirrors<br>Done by Lyuma 🧪"] -->|Used by| ED[Editor]
 end
 subgraph "MeshTransform"
     MT["MeshTransform<br>Done by iFire & MarcusLoppe 🧪"] -->|Used by| ED[Editor]
