@@ -62,6 +62,8 @@ flowchart LR
     IF -->|Works on| OT
     TO -->|Works on| AN
     LY -->|Works on| FB
+    IF -->|Works on| RWP["Robust Weight Painting<br>Experimental 🧪"]
+    RWP -->|Relies on| SMT[Lyuma's Skeleton Merging Tool]
     SI -->|Works on| UX
 
     VRM[VR Multiplayer 🧪] -->|3-4 Players| VRP[VR Players]
