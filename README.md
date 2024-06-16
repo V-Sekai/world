@@ -48,7 +48,7 @@ flowchart LR
     PR -->|Uses| GE
 
     CO -->|Includes| SA[Saracen]
-    CO -->|Includes| IF[iFire]
+    CO -->|Includes| IF[iFire - Coordinates 3D pipelines, animations, devops, and engine patching]
     CO -->|Includes| TO[Tokage]
     CO -->|Includes| LY[lyuma]
     CO -->|Includes| EW[EnthWyrr]
