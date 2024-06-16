@@ -23,6 +23,11 @@ flowchart LR
     UX --> CL{Client}
     CL -->|Interacts with| HP[Human Players]
 
+subgraph "VR Milestone"
+    VRM[VR Milestone] -->|3-4 Players| VRP[VR Players]
+    VRP -->|Interacts with| CL
+end
+
 subgraph "Editor Creator"
     ED{Editor} -->|Creates| UN["Unidot Unity Package Importer<br>Done March 2023 - May 2024 🚀"]
     ED -->|Creates| FB["FBX 🚧"]
