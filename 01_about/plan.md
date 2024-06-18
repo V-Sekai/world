@@ -1,31 +1,4 @@
-# Plan
-
-```mermaid
-graph TD
-   A[BlenderGig🔥] --> B[HarukaLyumaVket2024🔥]
-   B --> E[CICDXRUnitTest🔥]
-   E --> F[ServerBackend🚫]
-   F --> G[IK🚫]
-   G --> H[Speech🚫]
-   H --> K[DESKTOP_ControllerPlayPS5🚫]
-   K --> L[VR_SteamVR🚫]
-   L --> J[Upload]
-   J --> N[PlaceholderAvatar]
-   N --> Q[VroidHub🚫]
-   Q --> O[PlaceholderWorld]
-   O --> Y[CCBYHome🚫]
-```
-
-```mermaid
-graph TD
-   subgraph CompletedTasks
-       M[PR_GodotSceneToJsonTranslator✅]
-       R[VroidHub✅]
-       V[ClothingTransferSkeletonMerge✅]
-   end
-```
-
-## Operations on the Directed Acyclic Graph (DAG)
+# Operations on the Directed Acyclic Graph (DAG)
 
 The original graph was a Directed Acyclic Graph (DAG) where each node could have multiple children. The operations performed on this DAG were aimed at transforming it into a Left-child right-sibling binary tree. Here's a description of the operations:
 

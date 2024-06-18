@@ -11,7 +11,23 @@ The V-Sekai World project aims to create a virtual world using the Godot Engine 
 ## Progress Milestones
 
 ```mermaid
+graph TD
+   B --> E[CICDXRUnitTest🔥]
+   E --> F[ServerBackend🚫]
+   F --> G[IK🚫]
+   G --> H[Speech🚫]
+   H --> K[DESKTOP_ControllerPlayPS5🚫]
+   K --> L[VR_SteamVR🚫]
+   L --> J[Upload]
+   J --> N[PlaceholderAvatar]
+   N --> Q[VroidHub🚫]
+   Q --> O[PlaceholderWorld]
+   O --> Y[CCBYHome🚫]
+```
+```mermaid
 flowchart LR
+    M[PR_GodotSceneToJsonTranslator✅]
+    V[ClothingTransferSkeletonMerge✅]
     VG{V-Sekai Game} -->|Interacts with| HP[Human Players]
     VG -->|Uses| OT["Open Telemetry<br>Experimental 🧪"]
     UX --> VG{V-Sekai Game}
