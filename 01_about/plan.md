@@ -2,9 +2,9 @@
 
 ```mermaid
 graph TD
-   A[BlenderGig🔥]
-   B[HarukaLyumaVket2024🔥] --> C[TruckCafe🚫]
-   D[VSK3Person🚫] --> E[CICDXRUnitTest🔥]
+   A[BlenderGig🔥] --> B[HarukaLyumaVket2024🔥]
+   B --> D[VSK3Person🚫]
+   D --> E[CICDXRUnitTest🔥]
    E --> F[ServerBackend🚫]
    F --> G[IK🚫]
    G --> H[Speech🚫]
