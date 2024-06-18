@@ -3,14 +3,13 @@
 ```mermaid
 graph TD
    A[BlenderGig🔥] --> B[HarukaLyumaVket2024🔥]
-   B --> D[VSK3Person🚫]
-   D --> E[CICDXRUnitTest🔥]
+   B --> E[CICDXRUnitTest🔥]
    E --> F[ServerBackend🚫]
    F --> G[IK🚫]
    G --> H[Speech🚫]
    H --> K[DESKTOP_ControllerPlayPS5🚫]
    K --> L[VR_SteamVR🚫]
-   F --> J[Upload]
+   L --> J[Upload]
    J --> M[PR_GodotSceneToJsonTranslator✅]
    M --> N[PlaceholderAvatar]
    N --> Q[VroidHub🚫]
@@ -20,11 +19,11 @@ graph TD
    O --> Y[CCBYHome🚫]
    Y --> I[UINext😴]
    I --> S[AvatarNext😴]
-   S --> T[BlenderFeminineVRM1😴]
+   Q --> T[BlenderFeminineVRM1😴]
    T --> U[BlenderMasculineVRM1😴]
    U --> W[RobustWeightTransfer😴]
    W --> Z[HANDOFF_3DMeshFoundationLLM😴]
-   J --> X[CCBYGallery😴]
+   Z --> X[CCBYGallery😴]
    X --> P[VisualAnomalyDetectionTool😴]
 ```
 
