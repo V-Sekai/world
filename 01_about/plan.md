@@ -10,21 +10,19 @@ graph TD
    H --> K[DESKTOP_ControllerPlayPS5🚫]
    K --> L[VR_SteamVR🚫]
    L --> J[Upload]
-   J --> M[PR_GodotSceneToJsonTranslator✅]
-   M --> N[PlaceholderAvatar]
+   J --> N[PlaceholderAvatar]
    N --> Q[VroidHub🚫]
-   Q --> R[VroidHub✅]
-   R --> V[ClothingTransferSkeletonMerge✅]
-   V --> O[PlaceholderWorld]
+   Q --> O[PlaceholderWorld]
    O --> Y[CCBYHome🚫]
-   Y --> I[UINext😴]
-   I --> S[AvatarNext😴]
-   Q --> T[BlenderFeminineVRM1😴]
-   T --> U[BlenderMasculineVRM1😴]
-   U --> W[RobustWeightTransfer😴]
-   W --> Z[HANDOFF_3DMeshFoundationLLM😴]
-   Z --> X[CCBYGallery😴]
-   X --> P[VisualAnomalyDetectionTool😴]
+```
+
+```mermaid
+graph TD
+   subgraph CompletedTasks
+       M[PR_GodotSceneToJsonTranslator✅]
+       R[VroidHub✅]
+       V[ClothingTransferSkeletonMerge✅]
+   end
 ```
 
 ## Operations on the Directed Acyclic Graph (DAG)
