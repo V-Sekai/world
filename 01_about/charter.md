@@ -1,4 +1,4 @@
-# V-Sekai Charter
+# V-Sekai Charter (JUNE 8 2020)
 
 Mozilla Builders Summer MVP Lab
 (SUBMITTED ON JUNE 8 2020)
