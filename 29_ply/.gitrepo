@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/jarneson/godot-ply.git
 	branch = main
-	commit = bc75abdac61e4a7b0451027c500b69687235ce40
-	parent = b4b5fb32097f1bdaabe50cdd4db090eb46f706c1
+	commit = 4457a19e0316aeabcf81badfb7e0b906410a97b9
+	parent = c1ac92cbe4703270a4f0a395497e25f4bd2bce66
 	method = merge
 	cmdver = 0.4.6
