@@ -13,16 +13,14 @@ The V-Sekai World project aims to create a virtual world using the Godot Engine 
 ```mermaid
 flowchart TD
   subgraph iFirePendingMilestones
-    IF --> E[SimulatorCICD🔥]
-    E --> F[ServerBackend🚫]
     BlenderGig[BlenderGig🔥]
-    Vket2024[Vket2024🔥]
   end
   subgraph LyumaPendingMilestones
     LY --> G[IK🚫]
   end
   subgraph PendingMilestones
-    SomedayMaybe --> H[Speech🚫]
+    E[SimulatorCICD🔥] --> F[ServerBackend🚫]
+    F[ServerBackend🚫] --> H[Speech🚫]
     H --> K[DESKTOP_ControllerPlayPS5🚫]
     K --> L[VR_SteamVR🚫]
     L --> J[Upload]
