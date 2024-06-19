@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai-fire/Objaverse-downloader.git
 	branch = main
-	commit = cc2b674959df962a551383742ec249f0b75058ce
-	parent = dc0aa7ae0322994b373cb850a4e5f2f2c32a0baf
+	commit = 1e74ee63e0f9f4591d6cc1357d5a513fe85c3dbc
+	parent = 13639c544c07470f0caf1a3e15f33450e2f3164c
 	method = merge
 	cmdver = 0.4.6
