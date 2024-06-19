@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai/TOOL_model_explorer.git
 	branch = main
-	commit = 4434d443c5c3b1dc553472184952c65b0c2920f5
-	parent = 813be369a903faaf01eb9060fba347381cbc6d6c
+	commit = 9a8a5bff7ef4ffb38aa28c47122eaf2b35daac44
+	parent = 7bbecbd148d7f8ee2965b77a5be01a34b12c326b
 	method = merge
 	cmdver = 0.4.6
