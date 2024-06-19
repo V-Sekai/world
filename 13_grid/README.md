@@ -4,6 +4,8 @@
 [![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
+> :warning: **Warning**: This tool uses a custom fork of Godot for 4.3 FBX import. [groups-4.x](https://github.com/V-Sekai/godot)
+
 V-Sekai.xr-grid is a VR interaction tool.
 
 ## Contributors ✨
