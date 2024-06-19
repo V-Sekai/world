@@ -8,102 +8,116 @@
 
 The V-Sekai World project aims to create a virtual world using the Godot Engine client and server.
 
-## Progress Milestones
+## Milestones
 
 ```mermaid
-graph TD
-   B --> E[CICDXRUnitTest🔥]
-   E --> F[ServerBackend🚫]
-   F --> G[IK🚫]
-   G --> H[Speech🚫]
-   H --> K[DESKTOP_ControllerPlayPS5🚫]
-   K --> L[VR_SteamVR🚫]
-   L --> J[Upload]
-   J --> N[PlaceholderAvatar]
-   N --> Q[VroidHub🚫]
-   Q --> O[PlaceholderWorld]
-   O --> Y[CCBYHome🚫]
-```
+flowchart TD
+  subgraph iFirePendingMilestones
+    IF --> E[SimulatorCICD🔥]
+    E --> F[ServerBackend🚫]
+    BlenderGig[BlenderGig🔥]
+    Vket2024[Vket2024🔥]
+  end
+  subgraph LyumaPendingMilestones
+    LY --> G[IK🚫]
+  end
+  subgraph PendingMilestones
+    SomedayMaybe --> H[Speech🚫]
+    H --> K[DESKTOP_ControllerPlayPS5🚫]
+    K --> L[VR_SteamVR🚫]
+    L --> J[Upload]
+    J --> N[PlaceholderAvatar]
+    N --> Q[VroidHub🚫]
+    Q --> O[PlaceholderWorld]
+    O --> Y[CCBYHome🚫]
+    ItchGithubActions
+    docker-gocd-agent-centos-8-groups
+    docker-groups
+    docker-uro
+    godot-groups
+    groups-editor-export
+    groups-export
+    model-explorer-export
+  end
+  subgraph Milestones
+      M[PR_GodotSceneToJsonTranslator✅]
+      V[ClothingTransferSkeletonMerge✅]
+      VG{V-Sekai Game} -->|Interacts with| HP[Human Players]
+      VG -->|Uses| OT["Open Telemetry<br>Experimental 🧪"]
+      UX --> VG{V-Sekai Game}
+      G4 -->|Used by| VG
+      VR -->|Used by| VG
+      BE -->|Loads Avatars 🚧| VG
+      BE -->|Loads Worlds 🚧| VG
+      SE -->|Downloads Avatars| VG
+      SE -->|Downloads Worlds| VG
+      VOIP -->|Used by| VG
+      VRP -->|Interacts with| VG
+      PR -->|Has| VG{V-Sekai Game}
 
-```mermaid
-flowchart LR
-    M[PR_GodotSceneToJsonTranslator✅]
-    V[ClothingTransferSkeletonMerge✅]
-    VG{V-Sekai Game} -->|Interacts with| HP[Human Players]
-    VG -->|Uses| OT["Open Telemetry<br>Experimental 🧪"]
-    UX --> VG{V-Sekai Game}
-    G4 -->|Used by| VG
-    VR -->|Used by| VG
-    BE -->|Loads Avatars 🚧| VG
-    BE -->|Loads Worlds 🚧| VG
-    SE -->|Downloads Avatars| VG
-    SE -->|Downloads Worlds| VG
-    VOIP -->|Used by| VG
-    VRP -->|Interacts with| VG
-    PR -->|Has| VG{V-Sekai Game}
+      HP -->|Joins| BE
+      BE -->|Interacts with| HP
+      BE -->|Uploads Avatars 🧪| ED
+      BE -->|Uploads Worlds 🧪| ED
+      DB[SQLite & FoundationDB Alternative 🎯] -->|Used by| BE[Backend]
 
-    HP -->|Joins| BE
-    BE -->|Interacts with| HP
-    BE -->|Uploads Avatars 🧪| ED
-    BE -->|Uploads Worlds 🧪| ED
-    DB[SQLite & FoundationDB Alternative 🎯] -->|Used by| BE[Backend]
+      SE{Server} -->|Uses| G4
+      PR -->|Has| SE{Server}
+      VOIP[Speech VOIP Addon 🧪] -->|Used by| SE
 
-    SE{Server} -->|Uses| G4
-    PR -->|Has| SE{Server}
-    VOIP[Speech VOIP Addon 🧪] -->|Used by| SE
+      G4["Godot 4.3 Release<br>Est. July 2024 🚧"] -->|Followed by| G0
+      FB -->|Used by| G4
+      AN -->|Used by| G4
 
-    G4["Godot 4.3 Release<br>Est. July 2024 🚧"] -->|Followed by| G0
-    FB -->|Used by| G4
-    AN -->|Used by| G4
+      G0["Godot 4.0 Release<br>Done March 2023 🚀<br>Unified Godot Humanoid Skeleton 🚀"] -->|Releases| GE
+      GF -->|Used by| G0
 
-    G0["Godot 4.0 Release<br>Done March 2023 🚀<br>Unified Godot Humanoid Skeleton 🚀"] -->|Releases| GE
-    GF -->|Used by| G0
+      GE((Godot Engine)) -->|Uses| PR[Project Other World]
 
-    GE((Godot Engine)) -->|Uses| PR[Project Other World]
+      PR -->|Involves| CO[Contributors]
+      PR -->|Uses| GE
 
-    PR -->|Involves| CO[Contributors]
-    PR -->|Uses| GE
+      CO -->|Includes| SA[Saracen]
+      CO -->|Includes| IF[iFire - Coordinates 3D pipelines, animations, devops, and engine patching]
+      CO -->|Includes| TO[Tokage]
+      CO -->|Includes| LY[lyuma]
+      CO -->|Includes| EW[EnthWyrr]
+      CO -->|Includes| MM[MMMaellon]
+      CO -->|Includes| SI[Silent]
+      CO -->|Includes| BP[Bioblaze Payne]
 
-    CO -->|Includes| SA[Saracen]
-    CO -->|Includes| IF[iFire - Coordinates 3D pipelines, animations, devops, and engine patching]
-    CO -->|Includes| TO[Tokage]
-    CO -->|Includes| LY[lyuma]
-    CO -->|Includes| EW[EnthWyrr]
-    CO -->|Includes| MM[MMMaellon]
-    CO -->|Includes| SI[Silent]
-    CO -->|Includes| BP[Bioblaze Payne]
+      SA -->|Works on| UX["UI/UX Redesign"]
+      IF -->|Works on| FB
+      IF -->|Works on| BI
+      IF -->|Works on| OT
+      TO -->|Works on| AN
+      LY -->|Works on| FB
+      IF -->|Works on| RWP["Robust Weight Painting<br>Experimental 🧪"]
+      RWP -->|Relies on| SMT[Lyuma's Skeleton Merging Tool]
+      SI -->|Works on| UX
 
-    SA -->|Works on| UX["UI/UX Redesign"]
-    IF -->|Works on| FB
-    IF -->|Works on| BI
-    IF -->|Works on| OT
-    TO -->|Works on| AN
-    LY -->|Works on| FB
-    IF -->|Works on| RWP["Robust Weight Painting<br>Experimental 🧪"]
-    RWP -->|Relies on| SMT[Lyuma's Skeleton Merging Tool]
-    SI -->|Works on| UX
+      VRM[VR Multiplayer 🧪] -->|3-4 Players| VRP[VR Players]
+      VR -->|Depends on| GF
+      VRM -->|Used by| ED
 
-    VRM[VR Multiplayer 🧪] -->|3-4 Players| VRP[VR Players]
-    VR -->|Depends on| GF
-    VRM -->|Used by| ED
+      ED{Editor} -->|Creates| UN["Unidot Unity Package Importer<br>Done March 2023 - May 2024 🚀"]
+      ED -->|Creates| FB["FBX 🚧"]
+      ED -->|Releases| GF["glTF2.0 general release<br>Concurrent with Godot 4.0 Release 🚀"]
+      ED -->|Depends on| VRM["VRM 1.0<br>Depends on glTF2.0 general release 🚀"]
+      CSG["Constructive Solid Geometry with Manifold 🚧"] -->|Used by| ED
+      EM1["Experimental Mirrors: Engine Patch 🧪"] -->|Used by| ED
+      EM2["Experimental Mirrors: Screenspace 🧪"] -->|Used by| ED
+      RW["Resource Whitelister 🎯"] -->|Used by| ED
+      BI["Built-in Blender Importer 🚀"] -->|Used by| ED
+      MT["MeshTransform<br>Done by iFire & MarcusLoppe 🧪"] -->|Used by| ED[Editor]
 
-    ED{Editor} -->|Creates| UN["Unidot Unity Package Importer<br>Done March 2023 - May 2024 🚀"]
-    ED -->|Creates| FB["FBX 🚧"]
-    ED -->|Releases| GF["glTF2.0 general release<br>Concurrent with Godot 4.0 Release 🚀"]
-    ED -->|Depends on| VRM["VRM 1.0<br>Depends on glTF2.0 general release 🚀"]
-    CSG["Constructive Solid Geometry with Manifold 🚧"] -->|Used by| ED
-    EM1["Experimental Mirrors: Engine Patch 🧪"] -->|Used by| ED
-    EM2["Experimental Mirrors: Screenspace 🧪"] -->|Used by| ED
-    RW["Resource Whitelister 🎯"] -->|Used by| ED
-    BI["Built-in Blender Importer 🚀"] -->|Used by| ED
-    MT["MeshTransform<br>Done by iFire & MarcusLoppe 🧪"] -->|Used by| ED[Editor]
-
-    T3D["3D Mesh"] -->|Tokenized into| TSeq["Sequence of Tokens"]
-    ED -->|Inputted into| TM["Transformer Model"]
-    TSeq -->|Inputted into| TM
-    TM -->|Generates| NM["New Meshes"]
-    TM -->|Modifies| EM["Existing Meshes"]
-```
+      T3D["3D Mesh"] -->|Tokenized into| TSeq["Sequence of Tokens"]
+      ED -->|Inputted into| TM["Transformer Model"]
+      TSeq -->|Inputted into| TM
+      TM -->|Generates| NM["New Meshes"]
+      TM -->|Modifies| EM["Existing Meshes"]
+  end
+````
 
 - Experimental (🧪): This stage is for features that are still being tested and may not be stable.
 - Feature complete (🎯): This stage is for features that have all planned functionality implemented.
