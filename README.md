@@ -172,7 +172,7 @@ Check all that apply.
 
 Optional Video
 
-https://www.youtube.com/watch?v=j2PTDXG1Hc4
+~~https://www.youtube.com/watch?v=j2PTDXG1Hc4~~
 
 Why does your idea matter: How will it help deliver on the full promise of the internet, or make the internet more awesome? \*
 The core principles of the Internet are openness and communication. We see VR as the basis for a new frontier of communication products, Social VR platforms. Hastened by the closure and general failings of the once-open source High Fidelity platform, we are now in desperate need of open source alternatives to the growing number of closed source VR-compatible walled gardens in development.
@@ -221,9 +221,9 @@ Not at this time
 
 We have created a Slack Channel and GitHub repository and issues list where you can post your project and look for teammates. You can also pivot or abandon your project as you connect with teammates:
 
-GitHub: https://github.com/fix-the-internet/spring-mvp-lab/issues
+GitHub: ~~https://github.com/fix-the-internet/spring-mvp-lab/issues~~
 
-Slack: https://join.slack.com/t/mozillabuilders/shared_invite/zt-czo6bp37-R9I5mKJVYPtCkTQFu1NLWw
+Slack: ~~https://join.slack.com/t/mozillabuilders/shared_invite/zt-czo6bp37-R9I5mKJVYPtCkTQFu1NLWw~~
 
 Describe your work plan.
 
@@ -297,7 +297,7 @@ Godot Engine, k3s, Elixir, OAuth, CockroachDB, nginx, Fedora, CentOS 8, Digital 
 
 - Link to simple sketches (can be as simple as paper and pencil) of your product or idea
 
-https://cdn.discordapp.com/attachments/659137056991346708/718332831687901224/vsekai-sketch.png
+~~https://cdn.discordapp.com/attachments/659137056991346708/718332831687901224/vsekai-sketch.png~~
 
 Links to mockups, prototypes, pitches.
 
