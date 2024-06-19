@@ -28,14 +28,13 @@ flowchart TD
     N --> Q[VroidHub🚫]
     Q --> O[PlaceholderWorld]
     O --> Y[CCBYHome🚫]
-    ItchGithubActions
-    docker-gocd-agent-centos-8-groups
-    docker-groups
-    docker-uro
-    godot-groups
-    groups-editor-export
-    groups-export
-    model-explorer-export
+    docker-gocd-agent-centos-8-groups-github-actions
+    docker-groups-github-actions
+    docker-uro-github-actions
+    godot-groups-github-actions
+    groups-editor-export-github-actions
+    groups-export-github-actions-itch
+    model-explorer-export-github-actions-itch
   end
   subgraph Milestones
       M[PR_GodotSceneToJsonTranslator✅]
