@@ -14,12 +14,12 @@ The V-Sekai World project aims to create a virtual world using the Godot Engine 
 flowchart TD
   subgraph iFirePendingMilestones
     PaperWork[PaperWork🔥]
-    BlenderGig[BlenderGig🔥]
   end
   subgraph LyumaPendingMilestones
     LY --> G[IK🚫]
   end
   subgraph PendingMilestones
+    BlenderGig[BlenderGig🔥] --> E[SimulatorCICD🔥]
     E[SimulatorCICD🔥] --> F[ServerBackend🚫]
     F[ServerBackend🚫] --> H[Speech🚫]
     H --> K[DESKTOP_ControllerPlayPS5🚫]
@@ -115,7 +115,7 @@ flowchart TD
       TM -->|Generates| NM["New Meshes"]
       TM -->|Modifies| EM["Existing Meshes"]
   end
-````
+```
 
 - Experimental (🧪): This stage is for features that are still being tested and may not be stable.
 - Feature complete (🎯): This stage is for features that have all planned functionality implemented.
