@@ -87,6 +87,8 @@ func _on_get_request_completed(result, _response_code, _headers, body):
 	if key_value_pairs and key_value_pairs.has("data") and key_value_pairs["data"].length() > 0:
 		var results = JSON.parse_string(key_value_pairs["data"])
 		for element in results:
+			if not element:
+				continue
 			if not element.has("url"):
 				continue
 			var download_url: String = element["url"]
