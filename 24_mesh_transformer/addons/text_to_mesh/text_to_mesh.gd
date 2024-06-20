@@ -100,7 +100,8 @@ func _on_download_request_completed(result, response_code, _headers, body):
 	print(result)
 	if response_code == 200:
 		print("Download successful!")
-		var file_path = "res://addons/text_to_mesh/temporary/mesh.obj"
+		var os_time = Time.get_unix_time_from_system()
+		var file_path = "res://addons/text_to_mesh/temporary/mesh_" + str(os_time) + ".obj"
 		var file = FileAccess.open(file_path, FileAccess.WRITE)
 		if file:
 			file.store_buffer(body)
@@ -114,6 +115,7 @@ func _on_download_request_completed(result, response_code, _headers, body):
 			root.add_child(mesh_instance, true)
 			mesh_instance.owner = root
 			DirAccess.remove_absolute(file_path)
+			EditorInterface.get_resource_filesystem().scan()
 		else:
 			print("Failed to open file.")
 	else:
