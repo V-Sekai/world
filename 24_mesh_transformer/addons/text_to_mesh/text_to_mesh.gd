@@ -4,7 +4,7 @@ extends EditorPlugin
 var http_request_post: HTTPRequest = HTTPRequest.new()
 var http_request_get: HTTPRequest = HTTPRequest.new()
 var http_request_download: HTTPRequest = HTTPRequest.new()
-const api_endpoint = "https://ifire-text-to-mesh.hf.space/call/predict"
+const api_endpoint = "https://ifire-text-to-mesh-preview.hf.space/call/predict"
 const const_obj_parse = preload("res://addons/obj_exporter/ObjParse.gd")
 
 var button : Button
@@ -60,7 +60,9 @@ func send_request(config: Dictionary) -> void:
 
 func _on_post_request_completed(_result, _response_code, _headers, body):
 	print("_on_post_request_completed")
-	var json_result = JSON.parse_string(body.get_string_from_utf8())
+	var body_string = body.get_string_from_utf8()
+	print(body_string)
+	var json_result = JSON.parse_string(body_string)
 	print(json_result)
 	if json_result.has("event_id"):
 		var event_id = json_result.get("event_id")
@@ -103,8 +105,11 @@ func _on_download_request_completed(result, response_code, _headers, body: Packe
 		print("Download successful!")
 		var obj_string = body.get_string_from_utf8()
 		var mesh_resource: Mesh = const_obj_parse.load_obj_from_buffer(obj_string, Dictionary())
-		var mesh_instance = MeshInstance3D.new()
+		var mesh_instance: MeshInstance3D = MeshInstance3D.new()
 		mesh_instance.mesh = mesh_resource
+		var material = StandardMaterial3D.new()
+		material.cull_mode = StandardMaterial3D.CULL_DISABLED
+		mesh_instance.material_override = material
 		var root = EditorInterface.get_edited_scene_root()
 		root.add_child(mesh_instance, true)
 		mesh_instance.owner = root

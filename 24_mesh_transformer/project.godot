@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Mesh Transformer Game Project"
-run/main_scene="res://addons/text_to_mesh/control.tscn"
+run/main_scene="res://addons/text_to_mesh/sample.tscn"
 config/features=PackedStringArray("4.3", "Double Precision", "Forward Plus")
 config/icon="res://icon.svg"
 
