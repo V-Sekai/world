@@ -19,6 +19,7 @@ flowchart TD
     LY --> G[IK🚫]
   end
   subgraph PendingMilestones
+    IF --> PaperWork[PaperWork🔥]
     PaperWork[PaperWork🔥] --> E[SimulatorCICD🔥]
     E[SimulatorCICD🔥] --> F[ServerBackend🚫]
     F[ServerBackend🚫] --> H[Speech🚫]
