@@ -260,6 +260,7 @@ static func _create_obj(obj: String, mats: Dictionary) -> Mesh:
 				st.add_triangle_fan(fan_v, fan_vt, PackedColorArray(), PackedVector2Array(), fan_vn, [])
 		
 		st.index()
+		st.generate_normals()
 		
 		mesh = st.commit(mesh)
 	
