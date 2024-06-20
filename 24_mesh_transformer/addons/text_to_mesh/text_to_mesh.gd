@@ -108,14 +108,14 @@ func _on_download_request_completed(result, response_code, _headers, body):
 			file.close()
 			print("File saved successfully!")
 			EditorInterface.get_resource_filesystem().scan()
-			var mesh_resource = ResourceLoader.load(file_path, "ArrayMesh").duplicate(true)
+			await get_tree().process_frame
+			var mesh_resource: ArrayMesh = ResourceLoader.load(file_path)
 			var mesh_instance = MeshInstance3D.new()
 			mesh_instance.mesh = mesh_resource
 			var root = EditorInterface.get_edited_scene_root()
 			root.add_child(mesh_instance, true)
 			mesh_instance.owner = root
 			DirAccess.remove_absolute(file_path)
-			EditorInterface.get_resource_filesystem().scan()
 		else:
 			print("Failed to open file.")
 	else:
