@@ -4,7 +4,7 @@ extends EditorPlugin
 var http_request_post: HTTPRequest = HTTPRequest.new()
 var http_request_get: HTTPRequest = HTTPRequest.new()
 var http_request_download: HTTPRequest = HTTPRequest.new()
-const api_endpoint = "https://marcusloren-meshgpt.hf.space/call/predict"
+const api_endpoint = "https://ifire-text-to-mesh.hf.space/call/predict"
 
 var button : Button
 var line_edit : LineEdit
@@ -65,7 +65,7 @@ func _on_post_request_completed(_result, _response_code, _headers, body):
 		var event_id = json_result.get("event_id")
 		print("_on_post_request_completed::connect")
 		print("_on_post_request_completed::request")
-		var err: Error = http_request_get.request("https://marcusloren-meshgpt.hf.space/call/predict/" + str(event_id))
+		var err: Error = http_request_get.request(api_endpoint + "/" + str(event_id))
 		print(err)
 		await http_request_get.request_completed
 
@@ -113,6 +113,7 @@ func _on_download_request_completed(result, response_code, _headers, body):
 			var root = EditorInterface.get_edited_scene_root()
 			root.add_child(mesh_instance, true)
 			mesh_instance.owner = root
+			DirAccess.remove_absolute(file_path)
 		else:
 			print("Failed to open file.")
 	else:
