@@ -10,6 +10,8 @@ const const_obj_parse = preload("res://addons/obj_exporter/ObjParse.gd")
 var button : Button
 var line_edit : LineEdit
 
+var hf_token : String
+	
 func _enter_tree() -> void:
 	line_edit = LineEdit.new()
 	line_edit.text = "hat"
@@ -22,6 +24,7 @@ func _enter_tree() -> void:
 	add_child(http_request_post)
 	add_child(http_request_get)
 	add_child(http_request_download)
+	hf_token = OS.get_environment("HF_TOKEN")
 
 func show_error_dialog(message: String) -> void:
 	var dialog = AcceptDialog.new()
@@ -52,7 +55,10 @@ func send_request(config: Dictionary) -> void:
 	if not http_request_post.is_connected("request_completed", _on_post_request_completed):
 		http_request_post.connect("request_completed", _on_post_request_completed)
 	print("_ready::request")
-	var err: Error = http_request_post.request(api_endpoint, ["Content-Type: application/json"], HTTPClient.METHOD_POST, json_data)
+	var headers = ["Content-Type: application/json"]
+	if not hf_token.is_empty():
+		headers.append("Authorization: Bearer " + hf_token)
+	var err: Error = http_request_post.request(api_endpoint, headers, HTTPClient.METHOD_POST, json_data)
 	print(err)
 	if not http_request_get.is_connected("request_completed", _on_get_request_completed):
 		http_request_get.connect("request_completed", _on_get_request_completed)
@@ -68,7 +74,10 @@ func _on_post_request_completed(_result, _response_code, _headers, body):
 		var event_id = json_result.get("event_id")
 		print("_on_post_request_completed::connect")
 		print("_on_post_request_completed::request")
-		var err: Error = http_request_get.request(api_endpoint + "/" + str(event_id))
+		var headers = []
+		if not hf_token.is_empty():
+			headers.append("Authorization: Bearer " + hf_token)
+		var err: Error = http_request_get.request(api_endpoint + "/" + str(event_id), headers)
 		print(err)
 		await http_request_get.request_completed
 
@@ -98,7 +107,10 @@ func _on_get_request_completed(result, _response_code, _headers, body):
 			if not http_request_download.is_connected("request_completed", _on_download_request_completed):
 				http_request_download.connect("request_completed", _on_download_request_completed)
 			print(download_url)
-			var err: Error = http_request_download.request(download_url)
+			var headers = []
+			if not hf_token.is_empty():
+				headers.append("Authorization: Bearer " + hf_token)
+			var err: Error = http_request_download.request(download_url, headers)
 			print(err)
 			await http_request_download.request_completed
 
