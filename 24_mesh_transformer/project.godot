@@ -19,6 +19,10 @@ config/icon="res://icon.svg"
 
 OBJExporter="*res://addons/obj_exporter/OBJExporter.tscn"
 
+[editor]
+
+movie_writer/movie_file="/Users/ernest.lee/Documents/mesh_transformer_movie_maker.avi"
+
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/obj_exporter/plugin.cfg", "res://addons/text_to_mesh/plugin.cfg")
