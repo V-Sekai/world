@@ -15,6 +15,10 @@ run/main_scene="res://addons/text_to_mesh/control.tscn"
 config/features=PackedStringArray("4.3", "Double Precision", "Forward Plus")
 config/icon="res://icon.svg"
 
+[autoload]
+
+OBJExporter="*res://addons/obj_exporter/OBJExporter.tscn"
+
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/text_to_mesh/plugin.cfg")
+enabled=PackedStringArray("res://addons/obj_exporter/plugin.cfg", "res://addons/text_to_mesh/plugin.cfg")

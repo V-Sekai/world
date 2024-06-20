@@ -5,3 +5,19 @@
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="."]
+
+[node name="MeshInstance3D4" type="MeshInstance3D" parent="."]
+
+[node name="MeshInstance3D5" type="MeshInstance3D" parent="."]
+
+[node name="MeshInstance3D6" type="MeshInstance3D" parent="."]
+
+[node name="MeshInstance3D7" type="MeshInstance3D" parent="."]
+
+[node name="MeshInstance3D8" type="MeshInstance3D" parent="."]
+
+[node name="MeshInstance3D9" type="MeshInstance3D" parent="."]
+
+[node name="MeshInstance3D10" type="MeshInstance3D" parent="."]

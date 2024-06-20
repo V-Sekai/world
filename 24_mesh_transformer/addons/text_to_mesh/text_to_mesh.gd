@@ -5,6 +5,7 @@ var http_request_post: HTTPRequest = HTTPRequest.new()
 var http_request_get: HTTPRequest = HTTPRequest.new()
 var http_request_download: HTTPRequest = HTTPRequest.new()
 const api_endpoint = "https://ifire-text-to-mesh.hf.space/call/predict"
+const const_obj_parse = preload("res://addons/obj_exporter/ObjParse.gd")
 
 var button : Button
 var line_edit : LineEdit
@@ -95,29 +96,18 @@ func _on_get_request_completed(result, _response_code, _headers, body):
 			print(err)
 			await http_request_download.request_completed
 
-func _on_download_request_completed(result, response_code, _headers, body):
+func _on_download_request_completed(result, response_code, _headers, body: PackedByteArray):
 	print("_on_download_request_completed")
 	print(result)
 	if response_code == 200:
 		print("Download successful!")
-		var os_time = Time.get_unix_time_from_system()
-		var file_path = "res://addons/text_to_mesh/temporary/mesh_" + str(os_time) + ".obj"
-		var file = FileAccess.open(file_path, FileAccess.WRITE)
-		if file:
-			file.store_buffer(body)
-			file.close()
-			print("File saved successfully!")
-			EditorInterface.get_resource_filesystem().scan()
-			await get_tree().process_frame
-			var mesh_resource: ArrayMesh = ResourceLoader.load(file_path)
-			var mesh_instance = MeshInstance3D.new()
-			mesh_instance.mesh = mesh_resource
-			var root = EditorInterface.get_edited_scene_root()
-			root.add_child(mesh_instance, true)
-			mesh_instance.owner = root
-			DirAccess.remove_absolute(file_path)
-		else:
-			print("Failed to open file.")
+		var obj_string = body.get_string_from_utf8()
+		var mesh_resource: Mesh = const_obj_parse.load_obj_from_buffer(obj_string, Dictionary())
+		var mesh_instance = MeshInstance3D.new()
+		mesh_instance.mesh = mesh_resource
+		var root = EditorInterface.get_edited_scene_root()
+		root.add_child(mesh_instance, true)
+		mesh_instance.owner = root
 	else:
 		print("Download failed with response code: ", response_code)
 
