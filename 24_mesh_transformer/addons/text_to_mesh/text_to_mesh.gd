@@ -86,6 +86,8 @@ func _on_get_request_completed(result, _response_code, _headers, body):
 	print(key_value_pairs)
 	if key_value_pairs and key_value_pairs.has("data") and key_value_pairs["data"].length() > 0:
 		var results = JSON.parse_string(key_value_pairs["data"])
+		if not results:
+			return
 		for element in results:
 			if element == null:
 				continue
