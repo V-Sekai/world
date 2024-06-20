@@ -4,7 +4,7 @@ extends EditorPlugin
 var http_request_post: HTTPRequest = HTTPRequest.new()
 var http_request_get: HTTPRequest = HTTPRequest.new()
 var http_request_download: HTTPRequest = HTTPRequest.new()
-const api_endpoint = "https://ifire-text-to-mesh-preview.hf.space/call/predict"
+const api_endpoint = "http://127.0.0.1:7860/call/predict"
 const const_obj_parse = preload("res://addons/obj_exporter/ObjParse.gd")
 
 var button : Button
@@ -103,7 +103,7 @@ func _on_get_request_completed(result, _response_code, _headers, body):
 			if not element.has("url"):
 				continue
 			var download_url: String = element["url"]
-			download_url = download_url.replace(".hf.space/c/file=", ".hf.space/file=")
+			download_url = download_url.replace("/c/file=", "/file=")
 			if not http_request_download.is_connected("request_completed", _on_download_request_completed):
 				http_request_download.connect("request_completed", _on_download_request_completed)
 			print(download_url)
