@@ -8,7 +8,7 @@ func _ready() -> void:
 	print("_ready")
 	var api_endpoint = "https://marcusloren-meshgpt.hf.space/call/predict"
 	var data = {
-		"data": ["egg", 1, 0]
+		"data": ["chair", 1, 0]
 	}
 	var json_data = JSON.stringify(data)
 	self.add_child(http_request_post)
