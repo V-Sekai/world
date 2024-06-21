@@ -43,34 +43,27 @@ flowchart TD
 ```mermaid
 flowchart TD
   subgraph Milestones
-      M[PR_GodotSceneToJsonTranslator✅]
+      M[PullRequest_GodotSceneToJsonTranslator✅]
       V[ClothingTransferSkeletonMerge✅]
       VG{V-Sekai Game} -->|Interacts with| HP[Human Players]
       VG -->|Uses| OT["Open Telemetry<br>Experimental 🧪"]
-      UX[UX] --> VG{V-Sekai Game}
-      G4[G4] -->|Used by| VG
-      VR[VR] -->|Used by| VG
-      BE[BE] -->|Loads Avatars 🚧| VG
+      UX[UserExperience] --> VG{V-Sekai Game}
+      G4["Godot 4.3 Release<br>Est. July 2024 🚧"] -->|Used by| VG
+      VR[VirtualReality] -->|Used by| VG
+      BE[Backend] -->|Loads Avatars 🚧| VG
       BE -->|Loads Worlds 🚧| VG
-      SE[SE] -->|Downloads Avatars| VG
+      SE[Server] -->|Downloads Avatars| VG
       SE -->|Downloads Worlds| VG
-      VOIP[VOIP] -->|Used by| VG
-      VRP[VRP] -->|Interacts with| VG
-      PR[PR] -->|Has| VG{V-Sekai Game}
-
+      VOIP[VoiceOverInternetProtocol] -->|Used by| VG
+      VRP[VirtualRealityPlatform] -->|Interacts with| VG
       HP -->|Joins| BE
       BE -->|Interacts with| HP
-      BE -->|Uploads Avatars 🧪| ED[ED]
+      BE -->|Uploads Avatars 🧪| ED[Editor]
       BE -->|Uploads Worlds 🧪| ED
       DB[SQLite & FoundationDB Alternative 🎯] -->|Used by| BE[Backend]
-
       SE{Server} -->|Uses| G4
-      PR -->|Has| SE{Server}
       VOIP[Speech VOIP Addon 🧪] -->|Used by| SE
-
-      G4["Godot 4.3 Release<br>Est. July 2024 🚧"] -->|Followed by| G0[G0]
-      FB[FB] -->|Used by| G4
-      AN[AN] -->|Used by| G4
+      AN[Animation] -->|Used by| G4
   end
 ```
 
