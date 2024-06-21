@@ -1,5 +1,6 @@
 ## MIT License
 ## 
+## Copyright (c) 2024-present K. S. Ernest (iFire) Lee
 ## Copyright (c) 2023 Ronald van Wijnen
 ## 
 ## Permission is hereby granted, free of charge, to any person obtaining a
