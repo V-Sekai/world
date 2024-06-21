@@ -13,30 +13,30 @@ The V-Sekai World project aims to create a virtual world using the Godot Engine 
 ```mermaid
 flowchart TD
   subgraph iFirePendingMilestones
-    IF --> BlenderGig[BlenderGig🔥]
+    IF[iFire] --> BlenderGig[BlenderGig🔥]
   end
   subgraph LyumaPendingMilestones
-    LY --> G[IK🚫]
+    LY[Lyuma] --> G[IK🚫]
   end
   subgraph PendingMilestones
-    IF --> PaperWork[PaperWork🔥]
+    IF[iFire] --> PaperWork[PaperWork🔥]
     PaperWork[PaperWork🔥] --> E[SimulatorCICD🔥]
     E[SimulatorCICD🔥] --> F[ServerBackend🚫]
     F[ServerBackend🚫] --> H[Speech🚫]
-    H --> K[DESKTOP_ControllerPlayPS5🚫]
-    K --> L[VR_SteamVR🚫]
-    L --> J[Upload]
-    J --> N[PlaceholderAvatar]
-    N --> Q[VroidHub🚫]
-    Q --> O[PlaceholderWorld]
-    O --> Y[CCBYHome🚫]
-    docker-gocd-agent-centos-8-groups-github-actions
-    docker-groups-github-actions
-    docker-uro-github-actions
-    godot-groups-github-actions
-    groups-editor-export-github-actions
-    groups-export-github-actions-itch
-    model-explorer-export-github-actions-itch
+    H[Speech🚫] --> K[DESKTOP_ControllerPlayPS5🚫]
+    K[DESKTOP_ControllerPlayPS5🚫] --> L[VR_SteamVR🚫]
+    L[VR_SteamVR🚫] --> J[Upload]
+    J[Upload] --> N[PlaceholderAvatar]
+    N[PlaceholderAvatar] --> Q[VroidHub🚫]
+    Q[VroidHub🚫] --> O[PlaceholderWorld]
+    O[PlaceholderWorld] --> Y[CCBYHome🚫]
+    docker-gocd-agent-centos-8-groups-github-actions[docker-gocd-agent-centos-8-groups-github-actions]
+    docker-groups-github-actions[docker-groups-github-actions]
+    docker-uro-github-actions[docker-uro-github-actions]
+    godot-groups-github-actions[godot-groups-github-actions]
+    groups-editor-export-github-actions[groups-editor-export-github-actions]
+    groups-export-github-actions-itch[groups-export-github-actions-itch]
+    model-explorer-export-github-actions-itch[model-explorer-export-github-actions-itch]
   end
 ```
 
@@ -47,20 +47,20 @@ flowchart TD
       V[ClothingTransferSkeletonMerge✅]
       VG{V-Sekai Game} -->|Interacts with| HP[Human Players]
       VG -->|Uses| OT["Open Telemetry<br>Experimental 🧪"]
-      UX --> VG{V-Sekai Game}
-      G4 -->|Used by| VG
-      VR -->|Used by| VG
-      BE -->|Loads Avatars 🚧| VG
+      UX[UX] --> VG{V-Sekai Game}
+      G4[G4] -->|Used by| VG
+      VR[VR] -->|Used by| VG
+      BE[BE] -->|Loads Avatars 🚧| VG
       BE -->|Loads Worlds 🚧| VG
-      SE -->|Downloads Avatars| VG
+      SE[SE] -->|Downloads Avatars| VG
       SE -->|Downloads Worlds| VG
-      VOIP -->|Used by| VG
-      VRP -->|Interacts with| VG
-      PR -->|Has| VG{V-Sekai Game}
+      VOIP[VOIP] -->|Used by| VG
+      VRP[VRP] -->|Interacts with| VG
+      PR[PR] -->|Has| VG{V-Sekai Game}
 
       HP -->|Joins| BE
       BE -->|Interacts with| HP
-      BE -->|Uploads Avatars 🧪| ED
+      BE -->|Uploads Avatars 🧪| ED[ED]
       BE -->|Uploads Worlds 🧪| ED
       DB[SQLite & FoundationDB Alternative 🎯] -->|Used by| BE[Backend]
 
@@ -68,12 +68,17 @@ flowchart TD
       PR -->|Has| SE{Server}
       VOIP[Speech VOIP Addon 🧪] -->|Used by| SE
 
-      G4["Godot 4.3 Release<br>Est. July 2024 🚧"] -->|Followed by| G0
-      FB -->|Used by| G4
-      AN -->|Used by| G4
+      G4["Godot 4.3 Release<br>Est. July 2024 🚧"] -->|Followed by| G0[G0]
+      FB[FB] -->|Used by| G4
+      AN[AN] -->|Used by| G4
+  end
+```
 
-      G0["Godot 4.0 Release<br>Done March 2023 🚀<br>Unified Godot Humanoid Skeleton 🚀"] -->|Releases| GE
-      GF -->|Used by| G0
+```mermaid
+flowchart TD
+  subgraph Milestones
+      G0["Godot 4.0 Release<br>Done March 2023 🚀<br>Unified Godot Humanoid Skeleton 🚀"] -->|Releases| GE[Godot Engine]
+      GF[GF] -->|Used by| G0
 
       GE((Godot Engine)) -->|Uses| PR[Project Other World]
 
@@ -90,18 +95,18 @@ flowchart TD
       CO -->|Includes| BP[Bioblaze Payne]
 
       SA -->|Works on| UX["UI/UX Redesign"]
-      IF -->|Works on| FB
-      IF -->|Works on| BI
-      IF -->|Works on| OT
-      TO -->|Works on| AN
+      IF -->|Works on| FB[FB]
+      IF -->|Works on| BI[BI]
+      IF -->|Works on| OT[OT]
+      TO -->|Works on| AN[AN]
       LY -->|Works on| FB
       IF -->|Works on| RWP["Robust Weight Painting<br>Experimental 🧪"]
       RWP -->|Relies on| SMT[Lyuma's Skeleton Merging Tool]
       SI -->|Works on| UX
 
       VRM[VR Multiplayer 🧪] -->|3-4 Players| VRP[VR Players]
-      VR -->|Depends on| GF
-      VRM -->|Used by| ED
+      VR[VR] -->|Depends on| GF
+      VRM -->|Used by| ED[Editor]
 
       ED{Editor} -->|Creates| UN["Unidot Unity Package Importer<br>Done March 2023 - May 2024 🚀"]
       ED -->|Creates| FB["FBX 🚧"]
