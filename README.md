@@ -38,6 +38,10 @@ flowchart TD
     groups-export-github-actions-itch
     model-explorer-export-github-actions-itch
   end
+```
+
+```mermaid
+flowchart TD
   subgraph Milestones
       M[PR_GodotSceneToJsonTranslator✅]
       V[ClothingTransferSkeletonMerge✅]
