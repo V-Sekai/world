@@ -47,8 +47,8 @@ LABEL gocd.version="24.1.0" \
   gocd.full.version="24.1.0-18867" \
   gocd.git.sha="a60529cdf34a96de310bc05e2041f2ac23014707"
 
-ADD export WRAPPERARCH=$(if [ "$TARGETARCH" == "arm64" ]; then echo arm-64; else echo x86-64; fi) && \
-  https://github.com/krallin/tini/releases/download/v0.19.0/tini-static-${TARGETARCH} /usr/local/sbin/tini
+RUN export WRAPPERARCH=$(if [ "$TARGETARCH" == "arm64" ]; then echo arm-64; else echo x86-64; fi) && \
+    curl -L -o /usr/local/sbin/tini https://github.com/krallin/tini/releases/download/v0.19.0/tini-static-${WRAPPERARCH}
 
 # force encoding
 ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_ALL=en_US.UTF-8
