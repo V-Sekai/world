@@ -31,7 +31,7 @@ RUN curl --fail --location --silent --show-error "https://download.gocd.org/bina
     mv -v /go-agent-24.1.0/logs /go-agent/logs && \
     mv -v /go-agent-24.1.0/run /go-agent/run && \
     mv -v /go-agent-24.1.0/wrapper-config /go-agent/wrapper-config && \
-    WRAPPERARCH=$(if [ $TARGETARCH == amd64 ]; then echo x86-64; elif [ $TARGETARCH == arm64 ]; then echo arm-64; else echo $TARGETARCH is unknown!; exit 1; fi) && \
+    WRAPPERARCH=$(if [ "$TARGETARCH" == "amd64" ]; then echo x86-64; elif [ "$TARGETARCH" == "arm64" ]; then echo arm-64; else echo $TARGETARCH is unknown!; exit 1; fi) && \
     mv -v /go-agent-24.1.0/wrapper/wrapper-linux-$WRAPPERARCH* /go-agent/wrapper/ && \
     mv -v /go-agent-24.1.0/wrapper/libwrapper-linux-$WRAPPERARCH* /go-agent/wrapper/ && \
     mv -v /go-agent-24.1.0/wrapper/wrapper.jar /go-agent/wrapper/ && \
