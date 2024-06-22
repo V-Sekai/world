@@ -201,5 +201,3 @@ RUN curl -O https://download.blender.org/release/Blender4.1/blender-4.1.1-linux-
     rm blender-4.1.1-linux-x64.tar.xz && \
     ln -s /opt/blender-4.1.1-linux-x64/blender /usr/local/bin/blender
 USER go
-RUN git config --global url.git@gitlab.com:.insteadOf https://gitlab.com/
-
