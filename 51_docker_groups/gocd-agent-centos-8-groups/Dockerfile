@@ -151,7 +151,7 @@ RUN yum install -y \
 RUN git clone https://github.com/tpoechtrager/osxcross.git /osxcross
 COPY MacOSX14.2.sdk.tar.xz /osxcross/tarballs
 
-RUN cd /osxcross && export PATH=$PATH:target/bin && UNATTENDED=1 ./build.sh
+RUN cd /osxcross && export PATH=$PATH:target/bin && INSTALLPREFIX=target UNATTENDED=1 ./build.sh
 
 RUN cd /osxcross && export PATH=$PATH:target/bin && DISABLE_PARALLEL_ARCH_BUILD=1 ./build_compiler_rt.sh
 
