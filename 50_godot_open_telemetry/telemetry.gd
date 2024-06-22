@@ -16,6 +16,16 @@ func _log_callback(log_message: Dictionary) -> void:
 		"log.severity": log_message["type"],
 		"log.message": log_message["text"]
 	}
+	
+	if log_message.has("file"):
+		attrs["log.file"] = log_message["file"]
+	if log_message.has("line"):
+		attrs["log.line"] = log_message["line"]
+	if log_message.has("function"):
+		attrs["log.function"] = log_message["function"]
+	if log_message.has("rationale"):
+		attrs["log.rationale"] = log_message["rationale"]
+
 	var span_id = otel.start_span_with_parent("log", root_span_id)
 	otel.set_attributes(span_id, attrs)
 	if log_message["type"] == "error":
