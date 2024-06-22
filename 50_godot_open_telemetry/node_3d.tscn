@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://siwi6u4u4uhx"]
+
+[ext_resource type="Script" path="res://node_3d.gd" id="2_r8eb8"]
+
+[node name="Node3D" type="Node3D"]
+
+[node name="Node3D" type="Node3D" parent="."]
+script = ExtResource("2_r8eb8")
+
+[node name="Timer" type="Timer" parent="Node3D"]
+autostart = true
+
+[connection signal="timeout" from="Node3D/Timer" to="Node3D" method="_on_timer_timeout"]
