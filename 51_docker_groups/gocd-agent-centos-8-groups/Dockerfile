@@ -145,12 +145,13 @@ RUN yum install -y \
     ccache \
     ninja-build \
     speech-dispatcher-devel \
-    git-lfs
+    git-lfs \
+    cmake
 
-RUN git clone https://github.com/tpoechtrager/osxcross.git -b b8e6ccbaecd977edf6bb009f08c5c0b3ef72f805 /osxcross
+RUN git clone https://github.com/tpoechtrager/osxcross.git /osxcross
 COPY MacOSX14.2.sdk.tar.xz /osxcross/tarballs
 
-RUN export UNATTENDED=1 && \
+RUN cd /osxcross && export UNATTENDED=1 && \
     CLANG_VERSION=16.0.0 ENABLE_CLANG_INSTALL=1 INSTALLPREFIX=target ./build_apple_clang.sh && \
     export PATH=$PATH:target/bin && \
     ./build.sh && \
