@@ -97,58 +97,64 @@ RUN yum group install -y "Development Tools"
 
 RUN yum group install -y "Additional Development"
 
-RUN yum install -y python3-pip 
-RUN yum install -y mingw64-winpthreads 
-RUN yum install -y mingw32-winpthreads 
-RUN yum install -y mingw64-winpthreads-static 
-RUN yum install -y mingw32-winpthreads-static 
-RUN yum install -y libstdc++-static 
-RUN yum install -y mingw64-filesystem 
-RUN yum install -y mingw32-filesystem
-RUN yum install -y bash 
-RUN yum install -y libX11-devel 
-RUN yum install -y libXcursor-devel 
-RUN yum install -y libXrandr-devel 
-RUN yum install -y libXinerama-devel 
-RUN yum install -y libXi-devel 
-RUN yum install -y mesa-libGL-devel 
-RUN yum install -y alsa-lib-devel 
-RUN yum install -y pulseaudio-libs-devel 
-RUN yum install -y freetype-devel 
-RUN yum install -y openssl-devel 
-RUN yum install -y libudev-devel 
-RUN yum install -y mesa-libGLU-devel 
-RUN yum install -y libpng-devel
-RUN yum install -y llvm-devel 
-RUN yum install -y clang 
-RUN yum install -y llvm-devel 
-RUN yum install -y libxml2-devel 
-RUN yum install -y libuuid-devel 
-RUN yum install -y openssl-devel 
-RUN yum install -y bash 
-RUN yum install -y patch 
-RUN yum install -y libstdc++-static 
-RUN yum install -y make 
-RUN yum install -y git 
-RUN yum install -y bzip2 
-RUN yum install -y xz 
-RUN yum install -y yasm 
-RUN yum install -y xorg-x11-server-Xvfb 
-RUN yum install -y pkgconfig 
-RUN yum install -y mesa-dri-drivers 
-RUN yum install -y java-11-openjdk 
-RUN yum install -y java-11-openjdk-devel 
-RUN yum install -y ncurses-compat-libs 
-RUN yum install -y unzip 
-RUN yum install -y which 
-RUN yum install -y gcc 
-RUN yum install -y gcc-c++ 
-RUN yum install -y libatomic-static 
-RUN yum install -y libatomic 
-RUN yum install -y ccache 
-RUN yum install -y ninja-build 
-RUN yum install -y speech-dispatcher-devel
-RUN yum install -y git-lfs
+RUN yum install -y \
+    python3-pip \
+    mingw64-winpthreads \
+    mingw32-winpthreads \
+    mingw64-winpthreads-static \
+    mingw32-winpthreads-static \
+    libstdc++-static \
+    mingw64-filesystem \
+    mingw32-filesystem \
+    bash \
+    libX11-devel \
+    libXcursor-devel \
+    libXrandr-devel \
+    libXinerama-devel \
+    libXi-devel \
+    mesa-libGL-devel \
+    alsa-lib-devel \
+    pulseaudio-libs-devel \
+    freetype-devel \
+    openssl-devel \
+    libudev-devel \
+    mesa-libGLU-devel \
+    libpng-devel \
+    llvm-devel \
+    clang \
+    libxml2-devel \
+    libuuid-devel \
+    patch \
+    make \
+    git \
+    bzip2 \
+    xz \
+    yasm \
+    xorg-x11-server-Xvfb \
+    pkgconfig \
+    mesa-dri-drivers \
+    java-11-openjdk \
+    java-11-openjdk-devel \
+    ncurses-compat-libs \
+    unzip \
+    which \
+    gcc \
+    gcc-c++ \
+    libatomic-static \
+    libatomic \
+    ccache \
+    ninja-build \
+    speech-dispatcher-devel \
+    git-lfs
+
+RUN git clone https://github.com/tpoechtrager/osxcross.git -b b8e6ccbaecd977edf6bb009f08c5c0b3ef72f805 /osxcross
+COPY MacOSX14.2.sdk.tar.xz /osxcross/tarballs
+
+RUN export UNATTENDED=1 && \
+    CLANG_VERSION=16.0.0 ENABLE_CLANG_INSTALL=1 INSTALLPREFIX=target ./build_apple_clang.sh && \
+    export PATH=$PATH:target/bin && \
+    ./build.sh && \
+    DISABLE_PARALLEL_ARCH_BUILD=1 ./build_compiler_rt.sh
 
 RUN alternatives --set ld /usr/bin/ld.gold && git lfs install && alternatives --set python /usr/bin/python3
 RUN pip3 install -U pip && pip3 install -U scons
