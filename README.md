@@ -19,7 +19,7 @@ flowchart TD
     LY[Lyuma] --> G[IK🚫]
   end
   subgraph PendingMilestones
-    E[SimulatorCICD🔥] --> F[ServerBackend🚫]
+    F[CommandTraceswithServerBackend🚫]
     F[ServerBackend🚫] --> H[Speech🚫]
     H[Speech🚫] --> K[DESKTOP_ControllerPlayPS5🚫]
     K[DESKTOP_ControllerPlayPS5🚫] --> L[VR_SteamVR🚫]
