@@ -151,10 +151,7 @@ RUN yum install -y \
 RUN git clone https://github.com/tpoechtrager/osxcross.git /osxcross
 COPY MacOSX14.2.sdk.tar.xz /osxcross/tarballs
 
-RUN cd /osxcross && export UNATTENDED=1 && \
-    CLANG_VERSION=16.0.0 ENABLE_CLANG_INSTALL=1 INSTALLPREFIX=target ./build_apple_clang.sh > /dev/null 2>&1
-
-RUN cd /osxcross && export PATH=$PATH:target/bin && ./build.sh
+RUN cd /osxcross && export PATH=$PATH:target/bin && UNATTENDED=1 ./build.sh
 
 RUN cd /osxcross && export PATH=$PATH:target/bin && DISABLE_PARALLEL_ARCH_BUILD=1 ./build_compiler_rt.sh
 
