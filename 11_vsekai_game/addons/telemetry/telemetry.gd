@@ -1,11 +1,19 @@
-extends Node3D
+@tool
+extends Node
 
 var otel: OpenTelemetry = OpenTelemetry.new()
 var root_span_id: String
 
 func _ready() -> void:
+	var args = OS.get_cmdline_args()
+	if not "--telemetry" in args:
+		print("OpenTelemetry disabled.")
+		return
+	print("Initializing OpenTelemetry.")
 	LogManager.register_log_capture_buffered(_log_callback)
-	var version_info = Engine.get_version_info()
+	var version_info: Dictionary = Engine.get_version_info()
+	version_info["version"] = VSKVersion.get_build_label()
+	version_info["editor"] = Engine.is_editor_hint()
 	var error: String = otel.init_tracer_provider(ProjectSettings.get_setting("application/config/name"), "collector.aspecto.io", version_info, "9f6c7761-67c3-47b5-82b5-34671de23229")
 	if not error.is_empty():
 		print("Error initializing OpenTelemetry: ", error)
@@ -29,8 +37,7 @@ func _log_callback(log_message: Dictionary) -> void:
 	var span_id = otel.start_span_with_parent("log", root_span_id)
 	otel.set_attributes(span_id, attrs)
 	if log_message["type"] == "error":
-        var error_name = log_message["text"]
-		otel.record_error(span_id, error_name)
+		otel.record_error(span_id, log_message["text"])
 	else:
 		otel.add_event(span_id, log_message["type"])
 	otel.end_span(span_id)
