@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/V-Sekai-fire/osxcross.git
+	branch = master
+	commit = 0c3f1151dba7989243cf3bef9efce2e8dba24d7e
+	parent = 5bd41d801c30ad9bed601d9bbf8aa56cebe88a21
+	method = merge
+	cmdver = 0.4.6
