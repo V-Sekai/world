@@ -104,11 +104,7 @@ RUN yum install -y mingw64-winpthreads-static
 RUN yum install -y mingw32-winpthreads-static 
 RUN yum install -y libstdc++-static 
 RUN yum install -y mingw64-filesystem 
-RUN yum install -y mingw32-filesystem 
-RUN yum install -y mingw64-pkg-config 
-RUN yum install -y mingw32-pkg-config 
-RUN yum install -y mingw64-zlib-static 
-RUN yum install -y mingw32-zlib-static 
+RUN yum install -y mingw32-filesystem
 RUN yum install -y bash 
 RUN yum install -y libX11-devel 
 RUN yum install -y libXcursor-devel 
@@ -122,8 +118,7 @@ RUN yum install -y freetype-devel
 RUN yum install -y openssl-devel 
 RUN yum install -y libudev-devel 
 RUN yum install -y mesa-libGLU-devel 
-RUN yum install -y libpng-devel 
-RUN yum install -y xar-devel 
+RUN yum install -y libpng-devel
 RUN yum install -y llvm-devel 
 RUN yum install -y clang 
 RUN yum install -y llvm-devel 
@@ -153,13 +148,14 @@ RUN yum install -y libatomic
 RUN yum install -y ccache 
 RUN yum install -y ninja-build 
 RUN yum install -y speech-dispatcher-devel
+RUN yum install -y git-lfs
 
 RUN alternatives --set ld /usr/bin/ld.gold && git lfs install && alternatives --set python /usr/bin/python3
 RUN pip3 install -U pip && pip3 install -U scons
-RUN mkdir /opt/llvm-mingw && curl -L https://github.com/mstorsjo/llvm-mingw/releases/download/20220906/llvm-mingw-20220906-ucrt-ubuntu-18.04-x86_64.tar.xz | tar -Jxf - --strip 1 -C /opt/llvm-mingw
+RUN mkdir /opt/llvm-mingw && curl -L https://github.com/mstorsjo/llvm-mingw/releases/download/20240619/llvm-mingw-20240619-ucrt-ubuntu-20.04-x86_64.tar.xz | tar -Jxf - --strip 1 -C /opt/llvm-mingw
 RUN git clone https://github.com/emscripten-core/emsdk /opt/emsdk && /opt/emsdk/emsdk install latest && /opt/emsdk/emsdk activate latest && curl -L -o ispc.tgz 'https://github.com/ispc/ispc/releases/download/v1.15.0/ispc-v1.15.0-linux.tar.gz' && tar -zxf ispc.tgz ispc-v1.15.0-linux/bin/ispc && mv ispc-v1.15.0-linux/bin/ispc /usr/local/bin/ispc && rmdir -p ispc-v1.15.0-linux/bin
 
-RUN cd /usr/local/bin && curl -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default && unzip butler.zip && rm butler.zip && butler -V && butler -V && cd && butler -V
+RUN cd /usr/local/bin && curl -L -o butler.zip https://broth.itch.zone/butler/linux-amd64/15.21.0/archive/default && unzip butler.zip && rm butler.zip && butler -V && butler -V && cd && butler -V
 
 ENV ANDROID_SDK_ROOT=/root/sdk
 ENV ANDROID_NDK_VERSION=23.2.8568313
