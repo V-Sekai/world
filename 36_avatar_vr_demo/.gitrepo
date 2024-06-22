@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/V-Sekai/avatar_vr_demo.git
+	branch = master
+	commit = 57a20235ad5607cae8d526f5e989f506775522e6
+	parent = 6c6a6efee11287697cbd24db8c010fa9274c76dc
+	method = merge
+	cmdver = 0.4.6

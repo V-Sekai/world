@@ -1,0 +1,73 @@
+[gd_scene load_steps=7 format=3 uid="uid://o5o67ubkba33"]
+
+[ext_resource type="Environment" uid="uid://cfw4h62tpa2nv" path="res://avatar_vr_demo/scenes/hut_env.tres" id="1_rwmmv"]
+[ext_resource type="PackedScene" uid="uid://doafhtfvstuff" path="res://avatar_vr_demo/core/player_controller.tscn" id="3_6dvvs"]
+[ext_resource type="PackedScene" uid="uid://cmx3ucbbmfhst" path="res://addons/V-Sekai.xr-mirror/mirror.tscn" id="4_rka68"]
+[ext_resource type="PackedScene" uid="uid://c76ltxt3hfdu4" path="res://avatar_vr_demo/models/cc0_hut.gltf" id="5_d0has"]
+[ext_resource type="Shader" path="res://addons/V-Sekai.xr-mirror/mirror.gdshader" id="5_sxbms"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_41xys"]
+resource_local_to_scene = true
+render_priority = 0
+shader = ExtResource("5_sxbms")
+shader_parameter/use_screenspace = false
+shader_parameter/albedo_color = Color(1, 1, 1, 1)
+
+[node name="GameMap" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = ExtResource("1_rwmmv")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 0, 0, 0)
+light_bake_mode = 1
+shadow_enabled = true
+directional_shadow_blend_splits = true
+
+[node name="PlayerController" parent="." instance=ExtResource("3_6dvvs")]
+
+[node name="PlayerMovementController" parent="PlayerController" index="0" node_paths=PackedStringArray("player_controller", "xr_origin", "xr_camera", "position_interpolation")]
+player_controller = NodePath("..")
+xr_origin = NodePath("../PositionInterp/RotationInterp/XROrigin3D")
+xr_camera = NodePath("../PositionInterp/RotationInterp/XROrigin3D/XRCamera3D")
+position_interpolation = NodePath("../PositionInterp")
+
+[node name="PlayerMovementHeadOffset" parent="PlayerController/PlayerMovementController" index="0" node_paths=PackedStringArray("character_body")]
+character_body = NodePath("../..")
+
+[node name="PlayerMovementTurn" parent="PlayerController/PlayerMovementController" index="2" node_paths=PackedStringArray("rotation_interpolation")]
+rotation_interpolation = NodePath("../../PositionInterp/RotationInterp")
+
+[node name="RotationInterp" parent="PlayerController/PositionInterp" index="0" node_paths=PackedStringArray("anchor_node")]
+anchor_node = NodePath("XROrigin3D/XRCamera3D")
+
+[node name="XROrigin3D" parent="PlayerController/PositionInterp/RotationInterp" index="0" node_paths=PackedStringArray("xr_camera", "player_movement_controller")]
+xr_camera = NodePath("XRCamera3D")
+player_movement_controller = NodePath("../../../PlayerMovementController")
+
+[node name="Mirror" parent="." node_paths=PackedStringArray("left_camera", "right_camera", "origin", "leftvp", "rightvp") instance=ExtResource("4_rka68")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1.4, -2.4)
+surface_material_override/0 = SubResource("ShaderMaterial_41xys")
+left_camera = NodePath("LeftViewport/Camera3D")
+right_camera = NodePath("RightViewport/Camera3D")
+origin = NodePath("../PlayerController/PositionInterp/RotationInterp/XROrigin3D")
+leftvp = NodePath("LeftViewport")
+rightvp = NodePath("RightViewport")
+
+[node name="cc0_hut" parent="." instance=ExtResource("5_d0has")]
+
+[node name="OmniLight3D" type="OmniLight3D" parent="cc0_hut/PendantLight" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+distance_fade_enabled = true
+omni_shadow_mode = 0
+
+[node name="ReflectionProbe" type="ReflectionProbe" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+size = Vector3(10, 6, 6)
+origin_offset = Vector3(0, -1, 0)
+box_projection = true
+enable_shadows = true
+cull_mask = 1
+
+[editable path="PlayerController"]
+[editable path="cc0_hut"]
