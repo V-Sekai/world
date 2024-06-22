@@ -152,10 +152,11 @@ RUN git clone https://github.com/tpoechtrager/osxcross.git /osxcross
 COPY MacOSX14.2.sdk.tar.xz /osxcross/tarballs
 
 RUN cd /osxcross && export UNATTENDED=1 && \
-    CLANG_VERSION=16.0.0 ENABLE_CLANG_INSTALL=1 INSTALLPREFIX=target ./build_apple_clang.sh && \
-    export PATH=$PATH:target/bin && \
-    ./build.sh && \
-    DISABLE_PARALLEL_ARCH_BUILD=1 ./build_compiler_rt.sh
+    CLANG_VERSION=16.0.0 ENABLE_CLANG_INSTALL=1 INSTALLPREFIX=target ./build_apple_clang.sh
+
+RUN cd /osxcross && export PATH=$PATH:target/bin && ./build.sh
+
+RUN cd /osxcross && export PATH=$PATH:target/bin && DISABLE_PARALLEL_ARCH_BUILD=1 ./build_compiler_rt.sh
 
 RUN alternatives --set ld /usr/bin/ld.gold && git lfs install && alternatives --set python /usr/bin/python3
 RUN pip3 install -U pip && pip3 install -U scons
