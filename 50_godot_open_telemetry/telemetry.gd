@@ -29,7 +29,8 @@ func _log_callback(log_message: Dictionary) -> void:
 	var span_id = otel.start_span_with_parent("log", root_span_id)
 	otel.set_attributes(span_id, attrs)
 	if log_message["type"] == "error":
-		otel.record_error(span_id, str(get_stack()))
+        var error_name = log_message["text"]
+		otel.record_error(span_id, error_name)
 	else:
 		otel.add_event(span_id, log_message["type"])
 	otel.end_span(span_id)
