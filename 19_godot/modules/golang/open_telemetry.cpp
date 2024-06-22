@@ -33,7 +33,7 @@
 #include "core/io/json.h"
 
 void OpenTelemetry::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("init_tracer_provider", "name", "host", "attributes"), &OpenTelemetry::init_tracer_provider);
+	ClassDB::bind_method(D_METHOD("init_tracer_provider", "name", "host", "attributes", "token"), &OpenTelemetry::init_tracer_provider);
 	ClassDB::bind_method(D_METHOD("start_span", "name"), &OpenTelemetry::start_span);
 	ClassDB::bind_method(D_METHOD("start_span_with_parent", "name", "parent_span_uuid"), &OpenTelemetry::start_span_with_parent);
 	ClassDB::bind_method(D_METHOD("add_event", "span_uuid", "event_name"), &OpenTelemetry::add_event);
@@ -42,7 +42,7 @@ void OpenTelemetry::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("end_span", "span_uuid"), &OpenTelemetry::end_span);
 }
 
-String OpenTelemetry::init_tracer_provider(String p_name, String p_host, Dictionary p_attributes) {
+String OpenTelemetry::init_tracer_provider(String p_name, String p_host, Dictionary p_attributes, String p_token) {
 	CharString cs = p_name.utf8();
 	char *cstr = cs.ptrw();
 	CharString c_host = p_host.utf8();
@@ -50,7 +50,9 @@ String OpenTelemetry::init_tracer_provider(String p_name, String p_host, Diction
 	String json_attributes = JSON::stringify(p_attributes, "", true, true);
 	CharString c_json_attributes = json_attributes.utf8();
 	char *cstr_json_attributes = c_json_attributes.ptrw();
-	const char *result = InitTracerProvider(cstr, cstr_host, cstr_json_attributes);
+	CharString c_token = p_token.utf8();
+	char *cstr_token = c_token.ptrw();
+	const char *result = InitTracerProvider(cstr, cstr_host, cstr_json_attributes, cstr_token);
 	return String(result);
 }
 

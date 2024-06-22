@@ -43,7 +43,7 @@ protected:
 	static void _bind_methods();
 
 public:
-	String init_tracer_provider(String p_name, String p_host, Dictionary p_attributes);
+	String init_tracer_provider(String p_name, String p_host, Dictionary p_attributes, String p_token);
 	String start_span(String p_name);
 	String start_span_with_parent(String p_name, String p_parent_span_uuid);
 	void add_event(String p_span_uuid, String p_event_name);

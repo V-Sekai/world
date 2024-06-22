@@ -6,7 +6,7 @@ var root_span_id: String
 func _ready() -> void:
 	LogManager.register_log_capture_buffered(_log_callback)
 	var version_info = Engine.get_version_info()
-	var error: String = otel.init_tracer_provider("godot_engine", "localhost:4317", version_info)
+	var error: String = otel.init_tracer_provider(ProjectSettings.get_setting("application/config/name"), "collector.aspecto.io", version_info, "9f6c7761-67c3-47b5-82b5-34671de23229")
 	if not error.is_empty():
 		print("Error initializing OpenTelemetry: ", error)
 	root_span_id = otel.start_span("client")
