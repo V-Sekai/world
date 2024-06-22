@@ -162,28 +162,6 @@ RUN git clone https://github.com/emscripten-core/emsdk /opt/emsdk && /opt/emsdk/
 
 RUN cd /usr/local/bin && curl -L -o butler.zip https://broth.itch.zone/butler/linux-amd64/15.21.0/archive/default && unzip butler.zip && rm butler.zip && butler -V && butler -V && cd && butler -V
 
-ENV ANDROID_SDK_ROOT=/root/sdk
-ENV ANDROID_NDK_VERSION=23.2.8568313
-ENV ANDROID_NDK_ROOT=${ANDROID_SDK_ROOT}/ndk/${ANDROID_NDK_VERSION}
-
-# Install necessary packages and setup Android SDK and NDK
-RUN dnf -y install --setopt=install_weak_deps=False \
-    java-17-openjdk-devel ncurses-compat-libs && \
-    mkdir -p sdk && cd sdk && \
-    export CMDLINETOOLS=commandlinetools-linux-11076708_latest.zip && \
-    curl -LO https://dl.google.com/android/repository/${CMDLINETOOLS} && \
-    unzip ${CMDLINETOOLS} && \
-    rm ${CMDLINETOOLS} && \
-    yes | cmdline-tools/bin/sdkmanager --sdk_root="${ANDROID_SDK_ROOT}" --licenses && \
-    cmdline-tools/bin/sdkmanager --sdk_root="${ANDROID_SDK_ROOT}" "ndk;${ANDROID_NDK_VERSION}" 'cmdline-tools;latest' 'build-tools;34.0.0' 'platforms;android-34' 'cmake;3.22.1'
-
-# Download and setup Android SDK tools
-RUN curl -LO https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip && \
-    unzip sdk-tools-linux-4333796.zip -d /opt/android && \
-    rm sdk-tools-linux-4333796.zip && \
-    yes | /opt/android/tools/bin/sdkmanager --licenses && \
-    /opt/android/tools/bin/sdkmanager ndk-bundle 'platforms;android-23' 'build-tools;19.1.0' 'build-tools;28.0.3' 'platforms;android-28'
-
 RUN curl -LO https://go.dev/dl/go1.22.4.linux-amd64.tar.gz && \
     rm -rf /usr/local/go && \
     tar -C /usr/local -xzf go1.22.4.linux-amd64.tar.gz && \
