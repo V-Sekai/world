@@ -114,7 +114,6 @@ jobs:
 
     call_vsekai_game_workflow:
         runs-on: ubuntu-latest
-        needs: build
         steps:
             - name: Checkout code
               uses: actions/checkout@v2
