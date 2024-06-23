@@ -492,7 +492,8 @@ jobs:
           DO_SPACES_ACCESS_KEY: ${{ secrets.DO_SPACES_ACCESS_KEY }}
           DO_SPACES_SECRET_KEY: ${{ secrets.DO_SPACES_SECRET_KEY }}
         run: |
-          s3cmd --access_key=$DO_SPACES_ACCESS_KEY \
+          s3cmd --no-config \
+            --access_key=$DO_SPACES_ACCESS_KEY \
             --secret_key=$DO_SPACES_SECRET_KEY \ 
             --host=sfo3.digitaloceanspaces.com \
             --host_bucket='%(bucket)s.sfo3.digitaloceanspaces.com' \
