@@ -391,6 +391,24 @@ jobs:
           name: archive
           path: "archive"
 
+      - name: Download linux-editor-deploy-windows-editor artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: linux-editor-deploy-windows-editor
+          path: "./archive/"
+
+      - name: Download linux-editor-deploy-linux-editor artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: linux-editor-deploy-linux-editor
+          path: "./archive/"
+
+      - name: Download macos-editor-deploy-macos-editor artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: macos-editor-deploy-macos-editor
+          path: "./archive/"
+
       - name: Generate index.html
         run: |
           echo "<!DOCTYPE html>" > ./archive/index.html
