@@ -13,7 +13,7 @@ The V-Sekai World project aims to create a virtual world using the Godot Engine 
 ```mermaid
 flowchart TD
   subgraph iFirePendingMilestones
-    IF[iFire] --> F[CommandTraceswithServerBackend🚫]
+    IF[iFire] --> F[ServerBackend🚫]
     PaperWork[PaperWork🔥]
   end
   subgraph LyumaPendingMilestones
@@ -68,6 +68,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   subgraph Milestones
+      F[CommandTraceswithServerBackend🚫]
       G0["Godot 4.0 Release<br>Done March 2023 🚀<br>Unified Godot Humanoid Skeleton 🚀"] -->|Releases| GE[Godot Engine]
       GF[GF] -->|Used by| G0
 
