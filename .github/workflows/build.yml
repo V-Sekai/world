@@ -99,9 +99,11 @@ jobs:
           wget https://github.com/apple/foundationdb/releases/download/7.1.29/foundationdb-clients_7.1.29-1_amd64.deb
           wget https://github.com/apple/foundationdb/releases/download/7.1.29/foundationdb-server_7.1.29-1_amd64.deb
           wget https://github.com/apple/foundationdb/releases/download/7.1.29/foundationdb-7.1.29-x64.msi
+          wget https://github.com/apple/foundationdb/releases/download/7.1.29/FoundationDB-7.1.29_arm64.pkg
           mv foundationdb-clients_7.1.29-1_amd64.deb archive/
           mv foundationdb-server_7.1.29-1_amd64.deb archive/
           mv foundationdb-7.1.29-x64.msi archive/
+          mv FoundationDB-7.1.29_arm64.pkg archive/
 
       - name: Generate index.html
         if: github.ref == 'refs/heads/main'
