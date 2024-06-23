@@ -130,66 +130,66 @@ jobs:
     runs-on: ${{ matrix.runs-on }}
     name: ${{ matrix.name }}
     strategy:
-    fail-fast: false
-    matrix:
-      include:
-        - name: linux_editor_win_deploy
-          runs-on: ubuntu-22.04
-          cache-name: linux-editor-deploy-windows-editor
-          target: editor
-          tests: false
-          sconsflags: linker=gold precision=double use_mingw=yes
-          doc-test: false
-          bin: ./godot/bin/godot.linuxbsd.editor.double.x86_64
-          deploy-bin: ./godot/bin/godot.windows.editor.double.x86_64.exe
-          editor-bin-name: godot.windows.editor.double.x86_64.exe
-          proj-conv: false
-          artifact: true
-          platform: linuxbsd
-          deploy: true
-          deploy-pdb: true
-          deploy-platform: windows
-          export-platform: Windows
-          arch: _x86_64
-          deploy-platform-target: editor
+      fail-fast: false
+      matrix:
+        include:
+          - name: linux_editor_win_deploy
+            runs-on: ubuntu-22.04
+            cache-name: linux-editor-deploy-windows-editor
+            target: editor
+            tests: false
+            sconsflags: linker=gold precision=double use_mingw=yes
+            doc-test: false
+            bin: ./godot/bin/godot.linuxbsd.editor.double.x86_64
+            deploy-bin: ./godot/bin/godot.windows.editor.double.x86_64.exe
+            editor-bin-name: godot.windows.editor.double.x86_64.exe
+            proj-conv: false
+            artifact: true
+            platform: linuxbsd
+            deploy: true
+            deploy-pdb: true
+            deploy-platform: windows
+            export-platform: Windows
+            arch: _x86_64
+            deploy-platform-target: editor
 
-        - name: linux_editor_linux_deploy
-          runs-on: ubuntu-22.04
-          cache-name: linux-editor-deploy-linux-editor
-          target: editor
-          tests: false
-          sconsflags: linker=gold precision=double use_llvm=yes
-          doc-test: false
-          bin: ./godot/bin/godot.linuxbsd.editor.double.x86_64.llvm
-          deploy-bin: ./godot/bin/godot.linuxbsd.editor.double.x86_64.llvm
-          editor-bin-name: godot.linuxbsd.editor.double.x86_64.llvm
-          proj-conv: false
-          artifact: true
-          platform: linuxbsd
-          deploy: true
-          deploy-platform: linux
-          export-platform: Linux
-          arch: _x86_64
-          deploy-platform-target: editor
+          - name: linux_editor_linux_deploy
+            runs-on: ubuntu-22.04
+            cache-name: linux-editor-deploy-linux-editor
+            target: editor
+            tests: false
+            sconsflags: linker=gold precision=double use_llvm=yes
+            doc-test: false
+            bin: ./godot/bin/godot.linuxbsd.editor.double.x86_64.llvm
+            deploy-bin: ./godot/bin/godot.linuxbsd.editor.double.x86_64.llvm
+            editor-bin-name: godot.linuxbsd.editor.double.x86_64.llvm
+            proj-conv: false
+            artifact: true
+            platform: linuxbsd
+            deploy: true
+            deploy-platform: linux
+            export-platform: Linux
+            arch: _x86_64
+            deploy-platform-target: editor
 
-        - name: macos_editor_macos_deploy
-          runs-on: "macos-latest"
-          cache-name: macos-editor-deploy-macos-editor
-          target: editor
-          tests: false
-          sconsflags: linker=gold precision=double
-          doc-test: false
-          bin: ./godot/bin/godot.macos.editor.double.arm64
-          deploy-bin: ./godot/bin/godot.macos.editor.double.arm64
-          editor-bin-name: godot.macos.editor.double.arm64
-          proj-conv: false
-          artifact: true
-          platform: macos
-          deploy: true
-          deploy-platform: macos
-          export-platform: Mac
-          arch: _arm64
-          deploy-platform-target: editor
+          - name: macos_editor_macos_deploy
+            runs-on: "macos-latest"
+            cache-name: macos-editor-deploy-macos-editor
+            target: editor
+            tests: false
+            sconsflags: linker=gold precision=double
+            doc-test: false
+            bin: ./godot/bin/godot.macos.editor.double.arm64
+            deploy-bin: ./godot/bin/godot.macos.editor.double.arm64
+            editor-bin-name: godot.macos.editor.double.arm64
+            proj-conv: false
+            artifact: true
+            platform: macos
+            deploy: true
+            deploy-platform: macos
+            export-platform: Mac
+            arch: _arm64
+            deploy-platform-target: editor
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
