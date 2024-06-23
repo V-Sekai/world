@@ -173,33 +173,33 @@ jobs:
                 name: archive
                 path: archive/
 
-  deploy:
-    if: github.ref == 'refs/heads/main'
-    needs: index
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    deploy:
+        if: github.ref == 'refs/heads/main'
+        needs: index
+        runs-on: ubuntu-latest
+        steps:
+        - name: Checkout code
+          uses: actions/checkout@v2
 
-      - name: Download artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: archive
-          path: "archive"
+        - name: Download artifact
+          uses: actions/download-artifact@v2
+          with:
+            name: archive
+            path: "archive"
 
-      - name: Setup s3cmd
-        run: |
-            sudo apt-get install -y s3cmd
-            echo "[default]" > /home/runner/.s3cfg
-            # Write a how to setup the access and secret keys.
-            # https://docs.digitalocean.com/products/spaces/reference/s3cmd-usage/#upload-files-to-a-space
-            # https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions
-            echo "access_key = ${{ secrets.DO_SPACES_ACCESS_KEY }}" >> /home/runner/.s3cfg
-            echo "secret_key = ${{ secrets.DO_SPACES_SECRET_KEY }}" >> /home/runner/.s3cfg
-            echo "host_base = sfo3.digitaloceanspaces.com" >> /home/runner/.s3cfg
-            echo "host_bucket = %(bucket)s.sfo3.digitaloceanspaces.com" >> /home/runner/.s3cfg
-            echo "enable_https = True" >> /home/runner/.s3cfg
+        - name: Setup s3cmd
+          run: |
+                sudo apt-get install -y s3cmd
+                echo "[default]" > /home/runner/.s3cfg
+                # Write a how to setup the access and secret keys.
+                # https://docs.digitalocean.com/products/spaces/reference/s3cmd-usage/#upload-files-to-a-space
+                # https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions
+                echo "access_key = ${{ secrets.DO_SPACES_ACCESS_KEY }}" >> /home/runner/.s3cfg
+                echo "secret_key = ${{ secrets.DO_SPACES_SECRET_KEY }}" >> /home/runner/.s3cfg
+                echo "host_base = sfo3.digitaloceanspaces.com" >> /home/runner/.s3cfg
+                echo "host_bucket = %(bucket)s.sfo3.digitaloceanspaces.com" >> /home/runner/.s3cfg
+                echo "enable_https = True" >> /home/runner/.s3cfg
 
-      - name: Upload to S3
-        run: |
-            s3cmd --config=/home/runner/.s3cfg put archive/* s3://molassesbamboo/V-Sekai/v-sekai-game --recursive
+        - name: Upload to S3
+          run: |
+                s3cmd --config=/home/runner/.s3cfg put archive/* s3://molassesbamboo/V-Sekai/v-sekai-game --recursive
