@@ -61,7 +61,7 @@ jobs:
       - name: Run CMake, Install, Copy to Archive, and Clean Up
         run: |
           root_dir=$(pwd)
-          for dir in PIPELINE_geodesiac_path PIPELINE_intrinsic_triangulations; do
+          for dir in 31_geodesiac_path 32_intrinsic_triangulations; do
             build_dir=${root_dir}/other/$dir/build
             install_dir=${root_dir}/other/${dir}_install
             archive_dir=${root_dir}/archive/${dir}_install/
