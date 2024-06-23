@@ -202,7 +202,7 @@ jobs:
         if: ${{ matrix.platform == 'linux' }}
         run: |
           sudo apt-get install -qq binutils
-          shell: bash
+        shell: bash
 
       - name: Install MinGW
         if: ${{ matrix.deploy-platform == 'windows' }}
@@ -212,7 +212,7 @@ jobs:
           sudo apt-get install mingw-w64
           sudo update-alternatives --set x86_64-w64-mingw32-gcc /usr/bin/x86_64-w64-mingw32-gcc-posix
           sudo update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix
-          shell: bash
+        shell: bash
 
       - name: Setup Godot build cache
         uses: ./.github/actions/godot-cache
@@ -236,7 +236,7 @@ jobs:
         if: ${{ matrix.platform == 'web' ||  matrix.deploy-platform == 'web'}}
         run: |
           emcc -v
-          shell: bash
+        shell: bash
 
       - name: Setup python, scons and golang
         uses: ./.github/actions/godot-deps
@@ -286,7 +286,7 @@ jobs:
           chmod +x ${{ matrix.bin }}
           ${{ matrix.bin }} --headless --xr-mode off --export-pack ${{ matrix.export-platform }}  `pwd`/${{ env.GAME_NAME }}${{ matrix.deploy-platform }}.pck --path . || true
           timeout-minutes: 10
-          shell: bash
+        shell: bash
 
       - name: Prepare artifacts
         if: ${{ matrix.deploy }}
@@ -317,7 +317,7 @@ jobs:
 
           cp -rf `pwd`/${{ env.GAME_NAME }}${{ matrix.deploy-platform }}.pck $TARGET/${{ env.GAME_NAME }}${{ matrix.deploy-platform }}.pck
           7z a -r $TARGET.zip $TARGET
-          shell: bash
+        shell: bash
 
       - name: Upload Godot Artifact Export
         if: ${{ matrix.deploy }}
@@ -331,13 +331,13 @@ jobs:
         if: ${{ matrix.build-mono }}
         run: |
           ${{ matrix.bin }} --headless --generate-mono-glue ./modules/mono/glue || true
-          shell: bash
+        shell: bash
 
       - name: Build .NET solutions
         if: ${{ matrix.build-mono }}
         run: |
           ./modules/mono/build_scripts/build_assemblies.py --godot-output-dir=./bin --godot-platform=linuxbsd
-          shell: bash
+        shell: bash
 
       - name: Unit tests
         if: ${{ matrix.tests }}
@@ -345,7 +345,7 @@ jobs:
           ${{ matrix.bin }} --version
           ${{ matrix.bin }} --help
           ${{ matrix.bin }} --test --headless
-          shell: bash
+        shell: bash
 
       - name: Check for class reference updates
         if: ${{ matrix.doc-test }}
@@ -354,7 +354,7 @@ jobs:
           echo -e "If a diff is shown, it means that your code/doc changes are incomplete and you should update the class reference with --doctool.\n\n"
           ${{ matrix.bin }} --doctool --headless 2>&1 > /dev/null || true
           git diff --color --exit-code && ! git ls-files --others --exclude-standard | sed -e 's/^/New doc file missing in PR: /' | grep 'xml$'
-          shell: bash
+        shell: bash
 
       - name: Test project converter
         if: ${{ matrix.proj-conv }}
@@ -365,13 +365,13 @@ jobs:
           ${{ matrix.bin }} --headless --validate-conversion-3to4
           cd ..
           rm converter_test -rf
-          shell: bash
+        shell: bash
 
       - name: Prepare artifact
         if: ${{ matrix.artifact }}
         run: |
           chmod +x godot/bin/godot.* || true
-          shell: bash
+        shell: bash
 
       - name: Upload artifact
         uses: ./.github/actions/upload-artifact
