@@ -156,7 +156,7 @@ jobs:
           path: archive/
 
   deploy:
-    # if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch'
     needs: build
     runs-on: ubuntu-latest
     steps:
