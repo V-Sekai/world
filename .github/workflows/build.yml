@@ -173,24 +173,24 @@ jobs:
             arch: _x86_64
             deploy-platform-target: editor
 
-        #   - name: macos_editor_macos_deploy
-        #     runs-on: "macos-latest"
-        #     cache-name: macos-editor-deploy-macos-editor
-        #     target: editor
-        #     tests: false
-        #     sconsflags: linker=gold precision=double
-        #     doc-test: false
-        #     bin: ./godot/bin/godot.macos.editor.double.arm64
-        #     deploy-bin: ./godot/bin/godot.macos.editor.double.arm64
-        #     editor-bin-name: godot.macos.editor.double.arm64
-        #     proj-conv: false
-        #     artifact: true
-        #     platform: macos
-        #     deploy: true
-        #     deploy-platform: macos
-        #     export-platform: Mac
-        #     arch: _arm64
-        #     deploy-platform-target: editor
+          - name: macos_editor_macos_deploy
+            runs-on: "macos-latest"
+            cache-name: macos-editor-deploy-macos-editor
+            target: editor
+            tests: false
+            sconsflags: linker=gold precision=double
+            doc-test: false
+            bin: ./godot/bin/godot.macos.editor.double.arm64
+            deploy-bin: ./godot/bin/godot.macos.editor.double.arm64
+            editor-bin-name: godot.macos.editor.double.arm64
+            proj-conv: false
+            artifact: true
+            platform: macos
+            deploy: true
+            deploy-platform: macos
+            export-platform: Mac
+            arch: _arm64
+            deploy-platform-target: editor
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
