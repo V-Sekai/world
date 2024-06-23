@@ -15,6 +15,7 @@ concurrency:
 env:
   GAME_NAME: vsekai_game_
   GODOT_REF: groups-4.3.2024-06-19T122756Z
+  VSK_GAME_BRANCH: 7ebac31f495b952d659bff42dcbea7234e27fc1d
   GODOT_REPOSITORY: v-sekai/godot
   SCONSFLAGS: verbose=yes warnings=extra werror=no module_text_server_fb_enabled=yes use_thinlto=yes
   DOTNET_NOLOGO: true
@@ -196,7 +197,11 @@ jobs:
         with:
           egress-policy: audit
 
-      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v3.5.2
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          repository: V-Sekai/v-sekai-game
+          ref: ${{ env.VSK_GAME_BRANCH }}
 
       - name: Linux dependencies for gold linker
         if: ${{ matrix.platform == 'linux' }}
