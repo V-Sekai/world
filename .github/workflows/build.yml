@@ -373,12 +373,6 @@ jobs:
           mv foundationdb-7.1.29-x64.msi archive/
           mv FoundationDB-7.1.29_arm64.pkg archive/
 
-      - name: Upload Archive
-        uses: actions/upload-artifact@v2
-        with:
-          name: archive
-          path: archive/
-
       - name: Download linux-editor-deploy-windows-editor artifact
         uses: actions/download-artifact@v2
         with:
