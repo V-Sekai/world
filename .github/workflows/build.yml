@@ -484,10 +484,6 @@ jobs:
         run: |
           npm install -g spaces-cli
 
-      - name: Setup spaces-cli
-        run: |
-          spaces-cli setup --access-key-id ${{ secrets.DO_SPACES_ACCESS_KEY }} --secret-access-key ${{ secrets.DO_SPACES_SECRET_KEY }} --space molassesbamboo --region sfo3
-
       - name: Upload archive
         run: |
-          spaces-cli upload archive/* --upload-to V-Sekai/v-sekai-game --space molassesbamboo.sfo3
+          spaces-cli upload archive/* --upload-to V-Sekai/v-sekai-game --access-key-id ${{ secrets.DO_SPACES_ACCESS_KEY }} --secret-access-key ${{ secrets.DO_SPACES_SECRET_KEY }} --space molassesbamboo --region sfo3
