@@ -286,6 +286,11 @@ jobs:
     name: Generate index.html
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        include:
+          - triplet: x86_64-unknown-linux-gnu
+
     steps:
       - name: Checkout desync
         uses: actions/checkout@v2
@@ -335,7 +340,7 @@ jobs:
           key: ${{ runner.os }}-cmake-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-cmake-
-      
+
       - run: chmod +x ./archive/desync-linux-amd64
 
       - name: Install Ninja Build
