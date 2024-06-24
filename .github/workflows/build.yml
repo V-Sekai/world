@@ -48,6 +48,8 @@ jobs:
             deploy-pdb: true
             deploy-platform: windows
             export-platform: Windows
+            build-arch: x86_64
+            deploy-arch: x86_64
             arch: _x86_64
             deploy-platform-target: editor
 
@@ -67,6 +69,8 @@ jobs:
             deploy: true
             deploy-platform: linux
             export-platform: Linux
+            build-arch: x86_64
+            deploy-arch: x86_64
             arch: _x86_64
             deploy-platform-target: editor
 
@@ -75,10 +79,10 @@ jobs:
             cache-name: macos-editor-deploy-macos-editor
             target: editor
             tests: false
-            sconsflags: linker=gold precision=double
+            sconsflags: linker=gold precision=double generate_bundle=yes
             doc-test: false
             bin: ./godot/bin/godot.macos.editor.double.arm64
-            deploy-bin: ./godot/bin/godot.macos.editor.double.arm64
+            deploy-bin: ./godot/bin/godot_macos_editor_double.app
             editor-bin-name: godot.macos.editor.double.arm64
             proj-conv: false
             artifact: true
@@ -86,7 +90,74 @@ jobs:
             deploy: true
             deploy-platform: macos
             export-platform: Mac
+            build-arch: arm64
+            deploy-arch: arm64
             arch: _arm64
+            deploy-platform-target: editor
+
+          # - name: linux_editor_android_arm32_deploy
+          #   runs-on: ubuntu-22.04
+          #   cache-name: linux-editor-deploy-android-editor
+          #   target: editor
+          #   tests: false
+          #   sconsflags: linker=gold precision=double
+          #   doc-test: false
+          #   bin: ./godot/bin/godot.linuxbsd.editor.double.arm64
+          #   deploy-bin: ./godot/bin/libgodot.android.editor.double.arm64.so
+          #   editor-bin-name: godot.linuxbsd.editor.double.arm64
+          #   proj-conv: false
+          #   artifact: true
+          #   platform: linuxbsd
+          #   deploy: false
+          #   deploy-pdb: true
+          #   deploy-platform: android
+          #   export-platform: Android
+          #   build-arch: arm64
+          #   deploy-arch: arm32
+          #   arch: _arm32
+          #   deploy-platform-target: editor
+
+          # - name: linux_editor_android_arm64_deploy
+          #   runs-on: ubuntu-22.04
+          #   cache-name: linux-editor-deploy-android-editor
+          #   target: editor
+          #   tests: false
+          #   sconsflags: linker=gold precision=double
+          #   doc-test: false
+          #   bin: ./godot/bin/godot.linuxbsd.editor.double.arm64
+          #   deploy-bin: ./godot/bin/libgodot.android.editor.double.arm32.so
+          #   editor-bin-name: godot.linuxbsd.editor.double.arm64
+          #   proj-conv: false
+          #   artifact: true
+          #   platform: linuxbsd
+          #   deploy: true
+          #   deploy-pdb: true
+          #   deploy-platform: android
+          #   export-platform: Android
+          #   build-arch: arm32
+          #   deploy-arch: arm64
+          #   arch: _arm64
+          #   deploy-platform-target: editor
+
+          - name: linux_editor_web_deploy
+            runs-on: ubuntu-22.04
+            cache-name: linux-editor-deploy-web-editor
+            target: editor
+            tests: false
+            sconsflags: linker=gold precision=double
+            doc-test: false
+            bin: ./godot/bin/godot.linuxbsd.editor.double.x86_64
+            deploy-bin: ./godot/bin/godot.web.editor.double.x86_64.html
+            editor-bin-name: godot.web.editor.double.x86_64.html
+            proj-conv: false
+            artifact: true
+            platform: linuxbsd
+            deploy: false
+            deploy-platform: web
+            export-platform: Web
+            build-arch: x86_64
+            deploy-arch: wasm
+            arch: _x86_64
             deploy-platform-target: editor
     steps:
       - name: Harden Runner
