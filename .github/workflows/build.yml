@@ -466,25 +466,13 @@ jobs:
           name: archive
           path: archive/
 
-  deploy:
-    if: github.ref == 'refs/heads/main'
-    needs: [index]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Download artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: archive
-          path: "archive"
-
       - name: Install spaces-cli
+        if: github.ref == 'refs/heads/main'
         run: |
           npm install -g spaces-cli
 
       - name: Upload archive
+        if: github.ref == 'refs/heads/main'
         env:
           DO_SPACES_ACCESS_KEY: ${{ secrets.DO_SPACES_ACCESS_KEY }}
           DO_SPACES_SECRET_KEY: ${{ secrets.DO_SPACES_SECRET_KEY }}
