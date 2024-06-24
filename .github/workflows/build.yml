@@ -425,34 +425,34 @@ jobs:
 
           # Windows
           echo "<h3>Windows</h3>" >> ./archive/index.html
-          echo "<pre><code>./desync-windows-amd64.exe untar -s https://molassesbamboo.sfo3.digitaloceanspaces.com/v-sekai/v-sekai-game/store -i https://molassesbamboo.sfo3.digitaloceanspaces.com/v-sekai/v-sekai-game/vsk_game.caidx VSK_game --no-same-owner</code></pre>" >> ./archive/index.html
-          echo "<pre><code>./desync-windows-amd64.exe untar -s https://molassesbamboo.sfo3.digitaloceanspaces.com/v-sekai/v-sekai-game/store -i https://molassesbamboo.sfo3.digitaloceanspaces.com/v-sekai/v-sekai-game/vsk_godot.caidx VSK_godot --no-same-owner</code></pre>" >> ./archive/index.html
+          echo "<pre><code>./desync-windows-amd64.exe untar -s https://v-sekai.github.io/v-sekai-other-world/store -i https://v-sekai.github.io/v-sekai-other-world/vsk_game.caidx VSK_game --no-same-owner</code></pre>" >> ./archive/index.html
+          echo "<pre><code>./desync-windows-amd64.exe untar -s https://v-sekai.github.io/v-sekai-other-world/store -i https://v-sekai.github.io/v-sekai-other-world/vsk_godot.caidx VSK_godot --no-same-owner</code></pre>" >> ./archive/index.html
 
           # Mac
           echo "<h3>Mac</h3>" >> ./archive/index.html
-          echo "<pre><code>./desync-macos-amd64 untar -s https://molassesbamboo.sfo3.digitaloceanspaces.com/v-sekai/v-sekai-game/store -i https://molassesbamboo.sfo3.digitaloceanspaces.com/v-sekai/v-sekai-game/vsk_game.caidx VSK_game --no-same-owner</code></pre>" >> ./archive/index.html
-          echo "<pre><code>./desync-macos-amd64 untar -s https://molassesbamboo.sfo3.digitaloceanspaces.com/v-sekai/v-sekai-game/store -i https://molassesbamboo.sfo3.digitaloceanspaces.com/v-sekai/v-sekai-game/vsk_godot.caidx VSK_godot --no-same-owner</code></pre>" >> ./archive/index.html
+          echo "<pre><code>./desync-macos-amd64 untar -s https://v-sekai.github.io/v-sekai-other-world/store -i https://v-sekai.github.io/v-sekai-other-world/vsk_game.caidx VSK_game --no-same-owner</code></pre>" >> ./archive/index.html
+          echo "<pre><code>./desync-macos-amd64 untar -s https://v-sekai.github.io/v-sekai-other-world/store -i https://v-sekai.github.io/v-sekai-other-world/vsk_godot.caidx VSK_godot --no-same-owner</code></pre>" >> ./archive/index.html
 
           # Linux
           echo "<h3>Linux</h3>" >> ./archive/index.html
-          echo "<pre><code>./desync-linux-amd64 untar -s https://molassesbamboo.sfo3.digitaloceanspaces.com/v-sekai/v-sekai-game/store -i https://molassesbamboo.sfo3.digitaloceanspaces.com/v-sekai/v-sekai-game/vsk_game.caidx VSK_game --no-same-owner</code></pre>" >> ./archive/index.html
-          echo "<pre><code>./desync-linux-amd64 untar -s https://molassesbamboo.sfo3.digitaloceanspaces.com/v-sekai/v-sekai-game/store -i https://molassesbamboo.sfo3.digitaloceanspaces.com/v-sekai/v-sekai-game/vsk_godot.caidx VSK_godot --no-same-owner</code></pre>" >> ./archive/index.html
+          echo "<pre><code>./desync-linux-amd64 untar -s https://v-sekai.github.io/v-sekai-other-world/store -i https://v-sekai.github.io/v-sekai-other-world/vsk_game.caidx VSK_game --no-same-owner</code></pre>" >> ./archive/index.html
+          echo "<pre><code>./desync-linux-amd64 untar -s https://v-sekai.github.io/v-sekai-other-world/store -i https://v-sekai.github.io/v-sekai-other-world/vsk_godot.caidx VSK_godot --no-same-owner</code></pre>" >> ./archive/index.html
 
           echo "<ul>" >> ./archive/index.html
           # List desync binaries first
           for file in $(ls ./archive/desync-* 2> /dev/null); do
           stripped_file=$(echo "$file" | sed 's|./archive/||')
-          echo "<li><a href=\"https://molassesbamboo.sfo3.digitaloceanspaces.com/v-sekai/v-sekai-game/$stripped_file\">$stripped_file</a></li>" >> ./archive/index.html
+          echo "<li><a href=\"https://v-sekai.github.io/v-sekai-other-world/$stripped_file\">$stripped_file</a></li>" >> ./archive/index.html
           done
           # Then list caidx files
           for file in $(ls ./archive/*.caidx 2> /dev/null); do
           stripped_file=$(echo "$file" | sed 's|./archive/||')
-          echo "<li><a href=\"https://molassesbamboo.sfo3.digitaloceanspaces.com/v-sekai/v-sekai-game/$stripped_file\">$stripped_file</a></li>" >> ./archive/index.html
+          echo "<li><a href=\"https://v-sekai.github.io/v-sekai-other-world/$stripped_file\">$stripped_file</a></li>" >> ./archive/index.html
           done
           # Then list the remaining files
           find ./archive -type f ! -name 'desync-*' ! -name '*.caidx' | while read file; do
           stripped_file=$(echo "$file" | sed 's|./archive/||')
-          echo "<li><a href=\"https://molassesbamboo.sfo3.digitaloceanspaces.com/v-sekai/v-sekai-game/$stripped_file\">$stripped_file</a></li>" >> ./archive/index.html
+          echo "<li><a href=\"https://v-sekai.github.io/v-sekai-other-world/$stripped_file\">$stripped_file</a></li>" >> ./archive/index.html
           done
           echo "</ul>" >> ./archive/index.html
           echo "</body>" >> ./archive/index.html
