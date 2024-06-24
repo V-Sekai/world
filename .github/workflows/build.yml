@@ -448,4 +448,13 @@ jobs:
           DO_SPACES_ACCESS_KEY: ${{ secrets.DO_SPACES_ACCESS_KEY }}
           DO_SPACES_SECRET_KEY: ${{ secrets.DO_SPACES_SECRET_KEY }}
         run: |
-          spaces-cli upload archive/* --upload-to V-Sekai/v-sekai-game --access-key-id $DO_SPACES_ACCESS_KEY --secret-access-key $DO_SPACES_SECRET_KEY --space molassesbamboo --region sfo3 --access public
+          for item in archive/*; do
+              echo "Processing $item"
+              if [ -d "$item" ]; then
+                  # $item is a directory
+                  spaces-cli upload "$item" --upload-to V-Sekai/v-sekai-game/"$(basename "$item")" --access-key-id $DO_SPACES_ACCESS_KEY --secret-access-key $DO_SPACES_SECRET_KEY --space molassesbamboo --region sfo3 --access public
+              else
+                  # $item is a file
+                  spaces-cli upload "$item" --upload-to V-Sekai/v-sekai-game --access-key-id $DO_SPACES_ACCESS_KEY --secret-access-key $DO_SPACES_SECRET_KEY --space molassesbamboo --region sfo3 --access public
+              fi
+          done
