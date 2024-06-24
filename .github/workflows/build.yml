@@ -480,17 +480,14 @@ jobs:
           name: archive
           path: "archive"
 
-      # Write a how to setup the access and secret keys.
-      # https://docs.digitalocean.com/products/spaces/reference/s3cmd-usage/#upload-files-to-a-space
-      # https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions
-      - name: 
-        uses: s3-actions/s3cmd@v1.6.1
-        with:
-          provider: digitalocean
-          region: SFO3
-          access_key: ${{ secrets.DO_SPACES_ACCESS_KEY }}
-          secret_key: ${{ secrets.DO_SPACES_SECRET_KEY }}
-        
+      - name: Install spaces-cli
+        run: |
+          npm install -g spaces-cli
+
+      - name: Setup spaces-cli
+        run: |
+          spaces-cli setup --access-key-id ${{ secrets.DO_SPACES_ACCESS_KEY }} --secret-access-key ${{ secrets.DO_SPACES_SECRET_KEY }} --space molassesbamboo --region sfo3
+
       - name: Upload archive
         run: |
-          s3cmd put archive/* s3://molassesbamboo/V-Sekai/v-sekai-game --recursive
+          spaces-cli upload archive/* --upload-to V-Sekai/v-sekai-game --space molassesbamboo.sfo3
