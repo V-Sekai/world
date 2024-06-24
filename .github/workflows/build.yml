@@ -486,7 +486,7 @@ jobs:
       - name: 
         uses: s3-actions/s3cmd@v1.6.1
         with:
-          provider: DigitalOcean
+          provider: digitalocean
           region: SFO3
           access_key: ${{ secrets.DO_SPACES_ACCESS_KEY }}
           secret_key: ${{ secrets.DO_SPACES_SECRET_KEY }}
