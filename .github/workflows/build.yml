@@ -320,6 +320,22 @@ jobs:
         with:
           path: other
 
+      - name: Cache Go modules
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Cache CMake build
+        uses: actions/cache@v2
+        with:
+          path: other/**/build
+          key: ${{ runner.os }}-cmake-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-cmake-
+      
       - run: chmod +x ./archive/desync-linux-amd64
 
       - name: Install Ninja Build
