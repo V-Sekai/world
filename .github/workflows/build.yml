@@ -483,20 +483,16 @@ jobs:
       - name: Setup s3cmd
         run: |
           sudo apt-get install -y s3cmd
-
-      - name: Upload to S3
-        env:
+          echo "[default]" > .s3cfg
           # Write a how to setup the access and secret keys.
           # https://docs.digitalocean.com/products/spaces/reference/s3cmd-usage/#upload-files-to-a-space
           # https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions
-          DO_SPACES_ACCESS_KEY: ${{ secrets.DO_SPACES_ACCESS_KEY }}
-          DO_SPACES_SECRET_KEY: ${{ secrets.DO_SPACES_SECRET_KEY }}
+          echo "access_key = ${{ secrets.DO_SPACES_ACCESS_KEY }}" >> .s3cfg
+          echo "secret_key = ${{ secrets.DO_SPACES_SECRET_KEY }}" >> .s3cfg
+          echo "host_base = sfo3.digitaloceanspaces.com" >> .s3cfg
+          echo "host_bucket = %(bucket)s.sfo3.digitaloceanspaces.com" >> .s3cfg
+          echo "enable_https = True" >> .s3cfg
+
+      - name: Upload to S3
         run: |
-          s3cmd --no-config \
-            --access_key=$DO_SPACES_ACCESS_KEY \
-            --secret_key=$DO_SPACES_SECRET_KEY \ 
-            --host=sfo3.digitaloceanspaces.com \
-            --host_bucket='%(bucket)s.sfo3.digitaloceanspaces.com' \
-            --enable_https=True \
-            put archive/* s3://molassesbamboo/V-Sekai/v-sekai-game \ 
-            --recursive
+          s3cmd --config=.s3cfg put archive/* s3://molassesbamboo/V-Sekai/v-sekai-game --recursive
