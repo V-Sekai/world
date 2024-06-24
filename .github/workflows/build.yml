@@ -417,25 +417,6 @@ jobs:
       - name: Install Ninja Build
         run: sudo apt-get update && sudo apt-get install -y libglfw3-dev libxinerama-dev libxcursor-dev libxi-dev libsuitesparse-dev libmetis-dev ninja-build
 
-      - name: Run CMake, Install, Copy to Archive, and Clean Up
-        run: |
-          root_dir=$(pwd)
-          for dir in 31_geodesiac_path 32_intrinsic_triangulations; do
-              build_dir=${root_dir}/other/$dir/build
-              install_dir=${root_dir}/other/${dir}_install
-              archive_dir=${root_dir}/archive/${dir}_install/
-
-              mkdir -p $build_dir
-              cd $build_dir
-
-              cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$install_dir -G Ninja ${root_dir}/other/$dir
-              ninja
-              cmake --install .
-              cp -r $install_dir $archive_dir
-
-              rm -rf ${root_dir}/other/$dir/*
-          done
-
       - name: Package Code
         # This script is used to package the code into chunks of 64MB. The chunk size of 64MB is a recommendation from a large game studio's CDN engineering team.
         run: |
