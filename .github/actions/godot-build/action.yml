@@ -48,17 +48,14 @@ runs:
         mkdir -p bin modules/mono/glue 
         cd godot
         if [[ "${{ inputs.deploy }}" == "true" ]]; then
-          PLATFORM=${{ inputs.deploy-platform }}
-          TARGET=${{ inputs.deploy-platform-target }}
-          ARCH=${{ inputs.deploy-arch }}
+          export PLATFORM=${{ inputs.deploy-platform }}
+          export TARGET=${{ inputs.deploy-platform-target }}
+          export ARCH=${{ inputs.deploy-arch }}
         else
-          PLATFORM=${{ inputs.platform }}
-          TARGET=${{ inputs.target }}
-          ARCH=${{ inputs.build-arch }}
+          export PLATFORM=${{ inputs.platform }}
+          export TARGET=${{ inputs.target }}
+          export ARCH=${{ inputs.build-arch }}
         fi
         echo "Building with flags:" platform=$PLATFORM target=$TARGET tests=${{ inputs.tests }} ${{ env.SCONSFLAGS }}
         if [ "$TARGET" != "editor" ]; then rm -rf editor; fi  # Ensure we don't include editor code.
-        scons platform=$PLATFORM target=$TARGET arch=$ARCH tests=${{ inputs.tests }} ${{ env.SCONSFLAGS }}
-        cp -r bin/* ../bin        
-        cp -r modules/mono/glue/* ../modules/mono/glue
-        ls -l ../bin
+        scons platform=$PLATFORM target=$TARGET tests=${{ inputs.tests }} ${{ env.SCONSFLAGS }} arch=$ARCH

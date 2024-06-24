@@ -15,7 +15,7 @@ concurrency:
 env:
   GAME_NAME: vsekai_game_
   GODOT_REF: groups-4.3.2024-06-19T122756Z
-  VSK_GAME_BRANCH: 7ebac31f495b952d659bff42dcbea7234e27fc1d
+  VSK_GAME_BRANCH: eb6d5cdb2f2196abed5aebbfbf936dbbe1a97a72
   GODOT_REPOSITORY: v-sekai/godot
   SCONSFLAGS: verbose=yes warnings=extra werror=no module_text_server_fb_enabled=yes use_thinlto=yes
   DOTNET_NOLOGO: true
@@ -95,49 +95,21 @@ jobs:
             arch: _arm64
             deploy-platform-target: editor
 
-          # - name: linux_editor_android_arm32_deploy
-          #   runs-on: ubuntu-22.04
-          #   cache-name: linux-editor-deploy-android-editor
-          #   target: editor
-          #   tests: false
-          #   sconsflags: linker=gold precision=double
-          #   doc-test: false
-          #   bin: ./godot/bin/godot.linuxbsd.editor.double.arm64
-          #   deploy-bin: ./godot/bin/libgodot.android.editor.double.arm64.so
-          #   editor-bin-name: godot.linuxbsd.editor.double.arm64
-          #   proj-conv: false
-          #   artifact: true
-          #   platform: linuxbsd
-          #   deploy: false
-          #   deploy-pdb: true
-          #   deploy-platform: android
-          #   export-platform: Android
-          #   build-arch: arm64
-          #   deploy-arch: arm32
-          #   arch: _arm32
-          #   deploy-platform-target: editor
-
-          # - name: linux_editor_android_arm64_deploy
-          #   runs-on: ubuntu-22.04
-          #   cache-name: linux-editor-deploy-android-editor
-          #   target: editor
-          #   tests: false
-          #   sconsflags: linker=gold precision=double
-          #   doc-test: false
-          #   bin: ./godot/bin/godot.linuxbsd.editor.double.arm64
-          #   deploy-bin: ./godot/bin/libgodot.android.editor.double.arm32.so
-          #   editor-bin-name: godot.linuxbsd.editor.double.arm64
-          #   proj-conv: false
-          #   artifact: true
-          #   platform: linuxbsd
-          #   deploy: true
-          #   deploy-pdb: true
-          #   deploy-platform: android
-          #   export-platform: Android
-          #   build-arch: arm32
-          #   deploy-arch: arm64
-          #   arch: _arm64
-          #   deploy-platform-target: editor
+          - name: linux_editor_android_arm64_deploy
+            runs-on: ubuntu-22.04
+            cache-name: linux-editor-deploy-android-editor
+            target: editor
+            tests: false
+            sconsflags: linker=gold precision=double
+            doc-test: false
+            bin: ./godot/bin/libgodot.android.editor.double.arm32.so
+            editor-bin-name: libgodot.android.editor.double.arm32.so
+            proj-conv: false
+            artifact: true
+            platform: android
+            deploy: false
+            build-arch: arm64
+            arch: _arm64
 
           - name: linux_editor_web_deploy
             runs-on: ubuntu-22.04
@@ -167,9 +139,13 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Checkout code
+        uses: actions/checkout@v2
         with:
           repository: V-Sekai/v-sekai-game
           ref: ${{ env.VSK_GAME_BRANCH }}
+          path: game
 
       - name: Linux dependencies for gold linker
         if: ${{ matrix.platform == 'linux' }}
@@ -211,7 +187,7 @@ jobs:
           emcc -v
         shell: bash
 
-      - name: Setup python, scons and golang
+      - name: Setup godot, python, scons and golang
         uses: ./.github/actions/godot-deps
         with:
           godot-ref: ${{ env.GODOT_REF }}
@@ -233,7 +209,9 @@ jobs:
           platform: ${{ matrix.platform }}
           target: ${{ matrix.target }}
           tests: ${{ matrix.tests }}
+          build-arch: ${{ matrix.build-arch }}
           deploy: ${{ matrix.deploy }}
+          deploy-arch: ${{ matrix.deploy-arch }}
           deploy-platform: ${{ matrix.deploy-platform }}
           deploy-platform-target: ${{ matrix.deploy-platform-target }}
 
@@ -244,10 +222,41 @@ jobs:
           sconsflags: ${{ env.SCONSFLAGS }} ${{ matrix.sconsflags }}
           platform: ${{ matrix.platform }}
           target: ${{ matrix.target }}
+          build-arch: ${{ matrix.build-arch }}
           tests: false
           deploy: false
+          deploy-arch: ${{ matrix.deploy-arch }}
           deploy-platform: ${{ matrix.platform }}
           deploy-platform-target: ${{ matrix.target }}
+
+      - name: Compilation
+        if: ${{ matrix.deploy-platform == 'android' && matrix.build-arch == 'arm64' }}
+        uses: ./.github/actions/godot-build
+        with:
+          sconsflags: ${{ env.SCONSFLAGS }} ${{ matrix.sconsflags }}
+          platform: ${{ matrix.platform }}
+          target: ${{ matrix.target }}
+          build-arch: ${{ matrix.build-arch }}
+          tests: false
+          deploy: false
+
+      - name: Generate APK
+        if: ${{ matrix.deploy-platform == 'android' && matrix.build-arch == 'arm64' }}
+        run: |
+          cd godot/platform/android/java
+          ./gradlew generateGodotTemplates
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v2
+        if: ${{ matrix.deploy-platform == 'android' && matrix.build-arch == 'arm64' }}
+        with:
+          name: android_release_apk
+          path: godot/bin/android_release.apk
+
+      - name: Remove godot engine directory
+        shell: bash
+        run: |
+            rm -rf godot
 
       - name: Generate build constants
         uses: ./.github/actions/vsk-generate-constants
@@ -257,7 +266,7 @@ jobs:
         run: |
           mkdir -p .godot/editor .godot/imported export_${{ matrix.deploy-platform }}
           chmod +x ${{ matrix.bin }}
-          ${{ matrix.bin }} --headless --xr-mode off --export-pack ${{ matrix.export-platform }}  `pwd`/${{ env.GAME_NAME }}${{ matrix.deploy-platform }}.pck --path . || true
+          ${{ matrix.bin }} --headless --xr-mode off --export-pack ${{ matrix.export-platform }}  `pwd`/${{ env.GAME_NAME }}${{ matrix.deploy-platform }}.pck --path game || true
         timeout-minutes: 20
         shell: bash
 
