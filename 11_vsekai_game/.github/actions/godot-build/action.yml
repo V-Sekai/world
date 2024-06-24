@@ -7,8 +7,14 @@ inputs:
   tests:
     description: Unit tests.
     default: false
+  build-arch:
+    description: Arch.
+    default: false
   deploy:
     description: Deploy game.
+    default: false
+  deploy-arch:
+    description: Deploy arch.
     default: false
   deploy-platform:
     description: Deploy game platform.
@@ -44,13 +50,15 @@ runs:
         if [[ "${{ inputs.deploy }}" == "true" ]]; then
           PLATFORM=${{ inputs.deploy-platform }}
           TARGET=${{ inputs.deploy-platform-target }}
+          ARCH=${{ inputs.deploy-arch }}
         else
           PLATFORM=${{ inputs.platform }}
           TARGET=${{ inputs.target }}
+          ARCH=${{ inputs.build-arch }}
         fi
         echo "Building with flags:" platform=$PLATFORM target=$TARGET tests=${{ inputs.tests }} ${{ env.SCONSFLAGS }}
         if [ "$TARGET" != "editor" ]; then rm -rf editor; fi  # Ensure we don't include editor code.
-        scons platform=$PLATFORM target=$TARGET tests=${{ inputs.tests }} ${{ env.SCONSFLAGS }}
+        scons platform=$PLATFORM target=$TARGET arch=$ARCH tests=${{ inputs.tests }} ${{ env.SCONSFLAGS }}
         cp -r bin/* ../bin        
         cp -r modules/mono/glue/* ../modules/mono/glue
         ls -l ../bin
