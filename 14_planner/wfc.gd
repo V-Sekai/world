@@ -29,9 +29,12 @@ const possible_types = {
 		"next": ["A", "B"]
 	},
 	"B": {
-		"next": ["A"]
+		"next": ["A", "C"]
+	},
+	"C": {
+		"next": ["B"]
 	}
-}
+};
 
 var direction_names = ["next"]
 
@@ -93,8 +96,24 @@ func collapse_wave_function(state: Dictionary) -> Variant:
 	
 	var possible_tiles: Array = state[key]["possible_tiles"]
 	possible_tiles.shuffle()
-	var chosen_tile = possible_tiles.front()
-	possible_tiles.pop_front()
+	
+	# Ensure the chosen tile is valid
+	var chosen_tile = null
+	for tile in possible_tiles:
+		if key > 0:
+			var prev_tile = state[key - 1]["tile"]
+			if tile in possible_types[prev_tile]["next"]:
+				chosen_tile = tile
+				break
+		else:
+			chosen_tile = tile
+			break
+	
+	if chosen_tile == null:
+		print("No valid tile found, restarting...")
+		return false
+	
+	possible_tiles.erase(chosen_tile)
 	result[0].append(key)
 	result[0].append(chosen_tile)
 	return result
@@ -112,18 +131,15 @@ func meta_collapse_wave_function(state):
 		todo_list.append(["meta_collapse_wave_function"])
 		return todo_list
 
-func print_ascii_art(state, width):
-	var ascii_art = ""
-	for i in range(width):
-		for j in range(width):
-			if state[i * width + j]["tile"] != null:
-				# Use the first letter of the tile type as its symbol
-				var symbol = state[i * width + j]["tile"]
-				ascii_art += "(" + str(i) + "," + str(j) + "):" + symbol + " "
-			else:
-				ascii_art += "(" + str(i) + "," + str(j) + "):null "
-		ascii_art += "\n"
-	print(ascii_art)
+func is_valid_sequence(state):
+	for i in range(len(state) - 1):
+		var currentType = state[i]["tile"]
+		print(currentType)
+		if currentType != null:
+			var nextType = state[i + 1]["tile"]
+			if nextType != null and nextType not in possible_types[currentType]["next"]:
+				return false
+	return true
 
 func _ready() -> void:
 	var planner: Plan = Plan.new()
@@ -150,4 +166,4 @@ func _ready() -> void:
 	var result = planner.find_plan(state, wfc_array)
 	print(result)
 	print(state)
-	print_ascii_art(state, tile_width)
+	print(is_valid_sequence(state))
