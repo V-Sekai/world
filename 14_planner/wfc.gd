@@ -84,59 +84,60 @@ const possible_types = {
 
 var direction_names = ["above", "below", "left", "right"]
 
-const tile_width = 2
-
-func set_tile_state(state, coordinate, chosen_tile) -> Dictionary:
-	if state.has(coordinate) and typeof(state[coordinate]) == TYPE_DICTIONARY:
-		state[coordinate]["tile"] = chosen_tile
-		if state[coordinate]["possible_tiles"].has(chosen_tile):
-			state[coordinate]["possible_tiles"].erase(chosen_tile)
-	return state
-
-func remove_possible_tile(state, coordinate, chosen_tile) -> Dictionary:
-	if state.has(coordinate):
-		if state[coordinate].has("possible_tiles"):
-			var possible_tiles = state[coordinate]["possible_tiles"]
-			var index_of_chosen_tile = possible_tiles.find(chosen_tile)
-			if index_of_chosen_tile != -1:
-				possible_tiles.remove(index_of_chosen_tile)
-	return state
-
 
 func update_possible_tiles(state, key, chosen_tile):
 	var x = key % tile_width
 	var y = key / tile_width
 
-	var directions = [[0, -1], [0, 1], [-1, 0], [1, 0]]
+	var new_direction_names = direction_names
 	var todos = []
-	var set_tiles = []
-	for direction in directions:
-		var nx = x + direction[0]
-		var ny = y + direction[1]
+	for direction_name in new_direction_names:
+		var nx = x
+		var ny = y
+
+		if direction_name == "up":
+			ny -= 1
+		elif direction_name == "down":
+			ny += 1
+		elif direction_name == "left":
+			nx -= 1
+		elif direction_name == "right":
+			nx += 1
+
 		if tile_width != 1:
 			nx = (nx + tile_width) % tile_width
 			ny = (ny + tile_width) % tile_width
 
 		var neighbor_key = ny * tile_width + nx
-		if tile_width == 1:
-			todos.append(["set_tile_state", neighbor_key, chosen_tile])
-			todos.append(["remove_possible_tile", neighbor_key, chosen_tile])
-			return
-
 		if neighbor_key in state and "possible_tiles" in state[neighbor_key]:
 			var neighbor_possible_tiles = state[neighbor_key]["possible_tiles"]
-			
-			if chosen_tile in neighbor_possible_tiles:
-				var new_possible_tiles = []
-				for tile in neighbor_possible_tiles:
-					if tile != chosen_tile:
-						new_possible_tiles.append(tile)
-				if new_possible_tiles.size() > 0: 
-					if neighbor_key not in set_tiles:
-						todos.append(["set_tile_state", neighbor_key, chosen_tile])
-						set_tiles.append(neighbor_key)
-		todos.append(["remove_possible_tile", neighbor_key, chosen_tile])
+
+			# Check if the chosen_tile is possible in this direction
+			if direction_name in neighbor_possible_tiles and chosen_tile in neighbor_possible_tiles[direction_name]:
+				neighbor_possible_tiles[direction_name].erase(chosen_tile)
+				todos.append(["set_tile_state", neighbor_key, neighbor_possible_tiles])
+				todos.append(["remove_possible_tiles", key, neighbor_possible_tiles])
 	return todos
+
+
+const tile_width = 2
+
+func set_tile_state(state, coordinate, chosen_tile) -> Dictionary:
+	if state.has(coordinate):
+		state[coordinate]["tile"] = chosen_tile
+		if state[coordinate]["possible_tiles"].has(chosen_tile):
+			state[coordinate]["possible_tiles"].erase(chosen_tile)
+	return state
+
+func remove_possible_tiles(state, coordinate, chosen_tiles: Array) -> Dictionary:
+	if state.has(coordinate):
+		if state[coordinate].has("possible_tiles"):
+			var possible_tiles = state[coordinate]["possible_tiles"]
+			for tile in chosen_tiles:
+				var index_of_chosen_tile = possible_tiles.find(tile)
+				if index_of_chosen_tile != -1:
+					possible_tiles.erase(index_of_chosen_tile)
+	return state
 
 ## Function to find the square with the lowest entropy
 func calculate_square(state):
@@ -161,13 +162,10 @@ func collapse_wave_function(state: Dictionary) -> Variant:
 			return false
 	
 	var possible_tiles = state[key]["possible_tiles"]
-	
-	for chosen_tile in possible_tiles:
-		var actions = [["set_tile_state", key, chosen_tile]]
-		return actions
-
-	print("No valid tile choices for key ", key, ", restarting...")
-	return false
+	possible_tiles.shuffle()
+	var chosen_tile = possible_tiles[0]
+	possible_tiles.erase(chosen_tile)
+	return [["set_tile_state", key, chosen_tile], ["remove_possible_tiles", key, possible_tiles]]
 
 ## Meta collapse_wave_function
 func meta_collapse_wave_function(state):
@@ -190,26 +188,24 @@ func print_ascii_art(state, width):
 			if state[i * width + j]["tile"] != null:
 				# Use the first letter of the tile type as its symbol
 				var symbol = state[i * width + j]["tile"]
-				ascii_art += symbol
+				ascii_art += "(" + str(i) + "," + str(j) + "):" + symbol + " "
 			else:
-				ascii_art += "null"
-			ascii_art += " "
+				ascii_art += "(" + str(i) + "," + str(j) + "):null "
 		ascii_art += "\n"
 	print(ascii_art)
-
 
 func _ready() -> void:
 	var planner: Plan = Plan.new()
 	var the_domain: Domain = Domain.new()
 	planner.current_domain = the_domain
 
-	the_domain.add_actions([set_tile_state, remove_possible_tile])
+	the_domain.add_actions([set_tile_state, remove_possible_tiles])
 	the_domain.add_task_methods("collapse_wave_function", [collapse_wave_function])
 	the_domain.add_task_methods("meta_collapse_wave_function", [meta_collapse_wave_function])
 	the_domain.add_task_methods("update_possible_tiles", [update_possible_tiles])
 
 	planner.current_domain = the_domain
-	planner.verbose = 1
+	planner.verbose = 0
 
 	var state = {}
 	for i in range(tile_width):
@@ -218,13 +214,14 @@ func _ready() -> void:
 				"tile": null,
 				"possible_tiles": possible_types.keys()
 			}
-	#var middle_key = (tile_width * tile_width) / 2
-	#state[middle_key] = {
-	#"tile": "land_1",
-	#"possible_tiles": ["land_1"]
-	#}
+	# var middle_key = (tile_width * tile_width) / 2
+	# state[middle_key] = {
+	# 	"tile": "land_1",
+	# 	"possible_tiles": ["land_1"]
+	# }
 	var wfc_array: Array
-	for i in range(tile_width * tile_width):
-		wfc_array.append(["meta_collapse_wave_function"])
+	wfc_array.append(["meta_collapse_wave_function"])
 	var result = planner.find_plan(state, wfc_array)
+	print(result)
+	print(state)
 	print_ascii_art(state, tile_width)
