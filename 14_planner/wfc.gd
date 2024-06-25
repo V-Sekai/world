@@ -1,5 +1,7 @@
 extends Node3D
 
+# https://robertheaton.com/2018/12/17/wavefunction-collapse-algorithm/
+
 # Function to calculate entropy of a square
 func _calculate_entropy(square) -> int:
 	return len(square["possible_tiles"])
