@@ -55,7 +55,7 @@ func update_possible_tiles(state, coordinates, chosen_tile):
 	return todos
 
 
-const tile_width = 4
+const tile_width = 25
 
 func set_tile_state(state, coordinate, chosen_tile) -> Dictionary:
 	if state.has(coordinate):
@@ -123,8 +123,6 @@ func meta_collapse_wave_function(state):
 	if all_tiles_have_state(state):
 		return []
 	else:
-		var new_state = state.duplicate()  # Create a copy of the state to try collapse_wave_function
-		
 		# Instead of directly calling collapse_wave_function, add it to the todo_list
 		var todo_list = [["collapse_wave_function"]]
 		
@@ -152,7 +150,7 @@ func _ready() -> void:
 	the_domain.add_task_methods("update_possible_tiles", [update_possible_tiles])
 
 	planner.current_domain = the_domain
-	planner.verbose = 1
+	planner.verbose = 0
 
 	var state = {}
 	for i in range(tile_width):
@@ -163,7 +161,8 @@ func _ready() -> void:
 			}
 	var wfc_array: Array
 	wfc_array.append(["meta_collapse_wave_function"])
-	var result = planner.find_plan(state, wfc_array)
-	print(result)
-	print(state)
-	print(is_valid_sequence(state))
+	planner.find_plan(state, wfc_array)
+	if is_valid_sequence(state):
+		print("The sequence is valid.")
+	else:
+		print("The sequence is not valid.")
