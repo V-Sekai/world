@@ -1,4 +1,4 @@
-extends Node3D
+extends RefCounted
 
 # https://robertheaton.com/2018/12/17/wavefunction-collapse-algorithm/
 
