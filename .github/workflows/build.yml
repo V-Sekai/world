@@ -431,6 +431,9 @@ jobs:
         with:
           name: vsekai_game_macos
           path: other/vsekai_game_macos
+      
+      - name: Add execute permissions
+        run: chmod +x other/vsekai_game_macos/godot_macos_editor_double.app/Contents/MacOS/Godot
 
       - name: Download vsekai_game_windows
         uses: actions/download-artifact@v2
