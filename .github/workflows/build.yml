@@ -102,9 +102,9 @@ jobs:
             tests: false
             sconsflags: linker=gold precision=double
             doc-test: false
-            bin: ./godot/bin/godot.linuxbsd.editor.double.arm64
-            deploy-bin: ./godot/bin/libgodot.android.editor.double.arm64.so
-            editor-bin-name: godot.linuxbsd.editor.double.arm64
+            bin: ./godot/bin/godot.linuxbsd.editor.double.arm32
+            deploy-bin: ./godot/bin/libgodot.android.editor.double.arm32.so
+            editor-bin-name: godot.linuxbsd.editor.double.arm32
             proj-conv: false
             artifact: true
             platform: linuxbsd
@@ -125,7 +125,7 @@ jobs:
             sconsflags: linker=gold precision=double
             doc-test: false
             bin: ./godot/bin/godot.linuxbsd.editor.double.arm64
-            deploy-bin: ./godot/bin/libgodot.android.editor.double.arm32.so
+            deploy-bin: ./godot/bin/libgodot.android.editor.double.arm64.so
             editor-bin-name: godot.linuxbsd.editor.double.arm64
             proj-conv: false
             artifact: true
