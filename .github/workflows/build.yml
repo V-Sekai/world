@@ -401,6 +401,9 @@ jobs:
         with:
           path: other
       
+      - name: Add execute permissions
+        run: chmod +x other/vsekai_game_macos/godot_macos_editor_double.app/Contents/MacOS/Godot
+
       - name: Cache Go modules
         uses: actions/cache@v2
         with:
