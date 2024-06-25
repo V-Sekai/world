@@ -463,18 +463,18 @@ jobs:
 
           # Windows
           echo "<h3>Windows</h3>" >> ./archive/index.html
-          echo "<pre><code>./desync-windows-amd64.exe untar -s https://v-sekai.github.io/world/store -i https://v-sekai.github.io/world/vsk_game.caidx VSK_game --no-same-owner</code></pre>" >> ./archive/index.html
-          echo "<pre><code>./desync-windows-amd64.exe untar -s https://v-sekai.github.io/world/store -i https://v-sekai.github.io/world/vsk_godot.caidx VSK_godot --no-same-owner</code></pre>" >> ./archive/index.html
+          echo "<pre><code>./desync-windows-amd64.exe untar -s https://v-sekai.github.io/world/store -i https://v-sekai.github.io/world/11_vsekai_game.caidx VSK_game --no-same-owner</code></pre>" >> ./archive/index.html
+          echo "<pre><code>./desync-windows-amd64.exe untar -s https://v-sekai.github.io/world/store -i https://v-sekai.github.io/world/19_godot.caidx VSK_godot --no-same-owner</code></pre>" >> ./archive/index.html
 
           # Mac
           echo "<h3>Mac</h3>" >> ./archive/index.html
-          echo "<pre><code>./desync-macos-amd64 untar -s https://v-sekai.github.io/world/store -i https://v-sekai.github.io/world/vsk_game.caidx VSK_game --no-same-owner</code></pre>" >> ./archive/index.html
-          echo "<pre><code>./desync-macos-amd64 untar -s https://v-sekai.github.io/world/store -i https://v-sekai.github.io/world/vsk_godot.caidx VSK_godot --no-same-owner</code></pre>" >> ./archive/index.html
+          echo "<pre><code>./desync-macos-amd64 untar -s https://v-sekai.github.io/world/store -i https://v-sekai.github.io/world/11_vsekai_game.caidx VSK_game --no-same-owner</code></pre>" >> ./archive/index.html
+          echo "<pre><code>./desync-macos-amd64 untar -s https://v-sekai.github.io/world/store -i https://v-sekai.github.io/world/19_godot.caidx VSK_godot --no-same-owner</code></pre>" >> ./archive/index.html
 
           # Linux
           echo "<h3>Linux</h3>" >> ./archive/index.html
-          echo "<pre><code>./desync-linux-amd64 untar -s https://v-sekai.github.io/world/store -i https://v-sekai.github.io/world/vsk_game.caidx VSK_game --no-same-owner</code></pre>" >> ./archive/index.html
-          echo "<pre><code>./desync-linux-amd64 untar -s https://v-sekai.github.io/world/store -i https://v-sekai.github.io/world/vsk_godot.caidx VSK_godot --no-same-owner</code></pre>" >> ./archive/index.html
+          echo "<pre><code>./desync-linux-amd64 untar -s https://v-sekai.github.io/world/store -i https://v-sekai.github.io/world/11_vsekai_game.caidx VSK_game --no-same-owner</code></pre>" >> ./archive/index.html
+          echo "<pre><code>./desync-linux-amd64 untar -s https://v-sekai.github.io/world/store -i https://v-sekai.github.io/world/19_godot.caidx VSK_godot --no-same-owner</code></pre>" >> ./archive/index.html
 
           echo "<ul>" >> ./archive/index.html
           # List desync binaries first
