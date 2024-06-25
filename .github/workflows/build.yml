@@ -396,30 +396,11 @@ jobs:
         with:
           path: other
 
-      - name: Download linux-editor-deploy-linux-editor
+      - name: Download all artifacts
         uses: actions/download-artifact@v2
         with:
-          name: linux-editor-deploy-linux-editor
-          path: other/linux-editor-deploy-linux-editor
-
-      - name: Download linux-editor-deploy-web-editor
-        uses: actions/download-artifact@v2
-        with:
-          name: linux-editor-deploy-web-editor
-          path: other/linux-editor-deploy-web-editor
-
-      - name: Download linux-editor-deploy-windows-editor
-        uses: actions/download-artifact@v2
-        with:
-          name: linux-editor-deploy-windows-editor
-          path: other/linux-editor-deploy-windows-editor
-
-      - name: Download macos-editor-deploy-macos-editor
-        uses: actions/download-artifact@v2
-        with:
-          name: macos-editor-deploy-macos-editor
-          path: other/macos-editor-deploy-macos-editor
-
+          path: other
+      
       - name: Cache Go modules
         uses: actions/cache@v2
         with:
