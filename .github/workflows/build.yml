@@ -95,49 +95,49 @@ jobs:
             arch: _arm64
             deploy-platform-target: editor
 
-          # - name: linux_editor_android_arm32_deploy
-          #   runs-on: ubuntu-22.04
-          #   cache-name: linux-editor-deploy-android-editor
-          #   target: editor
-          #   tests: false
-          #   sconsflags: linker=gold precision=double
-          #   doc-test: false
-          #   bin: ./godot/bin/godot.linuxbsd.editor.double.arm64
-          #   deploy-bin: ./godot/bin/libgodot.android.editor.double.arm64.so
-          #   editor-bin-name: godot.linuxbsd.editor.double.arm64
-          #   proj-conv: false
-          #   artifact: true
-          #   platform: linuxbsd
-          #   deploy: false
-          #   deploy-pdb: true
-          #   deploy-platform: android
-          #   export-platform: Android
-          #   build-arch: arm64
-          #   deploy-arch: arm32
-          #   arch: _arm32
-          #   deploy-platform-target: editor
+          - name: linux_editor_android_arm32_deploy
+            runs-on: ubuntu-22.04
+            cache-name: linux-editor-deploy-android-editor
+            target: editor
+            tests: false
+            sconsflags: linker=gold precision=double
+            doc-test: false
+            bin: ./godot/bin/godot.linuxbsd.editor.double.arm32
+            deploy-bin: ./godot/bin/libgodot.android.editor.double.arm32.so
+            editor-bin-name: godot.linuxbsd.editor.double.arm32
+            proj-conv: false
+            artifact: true
+            platform: linuxbsd
+            deploy: false
+            deploy-pdb: true
+            deploy-platform: android
+            export-platform: Android
+            build-arch: arm64
+            deploy-arch: arm32
+            arch: _arm32
+            deploy-platform-target: editor
 
-          # - name: linux_editor_android_arm64_deploy
-          #   runs-on: ubuntu-22.04
-          #   cache-name: linux-editor-deploy-android-editor
-          #   target: editor
-          #   tests: false
-          #   sconsflags: linker=gold precision=double
-          #   doc-test: false
-          #   bin: ./godot/bin/godot.linuxbsd.editor.double.arm64
-          #   deploy-bin: ./godot/bin/libgodot.android.editor.double.arm32.so
-          #   editor-bin-name: godot.linuxbsd.editor.double.arm64
-          #   proj-conv: false
-          #   artifact: true
-          #   platform: linuxbsd
-          #   deploy: true
-          #   deploy-pdb: true
-          #   deploy-platform: android
-          #   export-platform: Android
-          #   build-arch: arm32
-          #   deploy-arch: arm64
-          #   arch: _arm64
-          #   deploy-platform-target: editor
+          - name: linux_editor_android_arm64_deploy
+            runs-on: ubuntu-22.04
+            cache-name: linux-editor-deploy-android-editor
+            target: editor
+            tests: false
+            sconsflags: linker=gold precision=double
+            doc-test: false
+            bin: ./godot/bin/godot.linuxbsd.editor.double.arm64
+            deploy-bin: ./godot/bin/libgodot.android.editor.double.arm64.so
+            editor-bin-name: godot.linuxbsd.editor.double.arm64
+            proj-conv: false
+            artifact: true
+            platform: linuxbsd
+            deploy: true
+            deploy-pdb: true
+            deploy-platform: android
+            export-platform: Android
+            build-arch: arm32
+            deploy-arch: arm64
+            arch: _arm64
+            deploy-platform-target: editor
 
           - name: linux_editor_web_deploy
             runs-on: ubuntu-22.04
