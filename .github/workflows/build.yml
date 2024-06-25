@@ -420,6 +420,24 @@ jobs:
           name: macos-editor-deploy-macos-editor
           path: other/macos-editor-deploy-macos-editor
 
+      - name: Download vsekai_game_linux
+        uses: actions/download-artifact@v2
+        with:
+          name: vsekai_game_linux
+          path: other/vsekai_game_linux
+
+      - name: Download vsekai_game_macos
+        uses: actions/download-artifact@v2
+        with:
+          name: vsekai_game_macos
+          path: other/vsekai_game_macos
+
+      - name: Download vsekai_game_windows
+        uses: actions/download-artifact@v2
+        with:
+          name: vsekai_game_windows
+          path: other/vsekai_game_windows
+
       - name: Cache Go modules
         uses: actions/cache@v2
         with:
