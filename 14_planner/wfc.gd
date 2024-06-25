@@ -4,7 +4,6 @@ extends Node3D
 func _calculate_entropy(square) -> int:
 	return len(square["possible_tiles"])
 
-# Function to find the square with the lowest entropy
 func _find_lowest_entropy_square(state) -> Variant:
 	var min_entropy = INF
 	var min_squares = []
@@ -12,7 +11,7 @@ func _find_lowest_entropy_square(state) -> Variant:
 		var square = state[key]
 		if len(square["possible_tiles"]) <= 1: # Skip if the square is solved
 			continue
-		var entropy = _calculate_entropy(square)
+		var entropy = len(square["possible_tiles"])
 		if entropy < min_entropy:
 			min_entropy = entropy
 			min_squares = [key]
@@ -26,107 +25,39 @@ func _find_lowest_entropy_square(state) -> Variant:
 	return chosen_key
 
 const possible_types = {
-	"sea_1": {
-		"below": ["coast_1", "coast_2"],
-		"left": ["sea_2", "sea_3", "sea_4", "coast_1", "coast_3"],
-		"right": ["sea_2", "sea_3", "sea_4", "coast_1", "coast_3"],
-		"above": ["sea_2", "sea_3", "sea_4", "coast_1", "coast_3"]
+	"A": {
+		"next": ["A", "B"]
 	},
-	"sea_2": {
-		"below": ["coast_1", "coast_2"],
-		"left": ["sea_1", "sea_3", "sea_4", "coast_1", "coast_3"],
-		"right": ["sea_1", "sea_3", "sea_4", "coast_1", "coast_3"],
-		"above": ["sea_1", "sea_3", "sea_4", "coast_1", "coast_3"]
-	},
-	"sea_3": {
-		"below": ["coast_1", "coast_2"],
-		"left": ["sea_1", "sea_2", "sea_4", "coast_1", "coast_3"],
-		"right": ["sea_1", "sea_2", "sea_4", "coast_1", "coast_3"],
-		"above": ["sea_1", "sea_2", "sea_4", "coast_1", "coast_3"]
-	},
-	"sea_4": {
-		"below": ["coast_1", "coast_2"],
-		"left": ["sea_1", "sea_2", "sea_3", "coast_1", "coast_3"],
-		"right": ["sea_1", "sea_2", "sea_3", "coast_1", "coast_3"],
-		"above": ["sea_1", "sea_2", "sea_3", "coast_1", "coast_3"]
-	},
-	"coast_1": {
-		"below": ["land_1", "land_2"],
-		"left": ["sea_1", "sea_2", "sea_3", "sea_4", "coast_2", "coast_3"],
-		"right": ["sea_1", "sea_2", "sea_3", "sea_4", "coast_2", "coast_3"],
-		"above": ["sea_1", "sea_2", "sea_3", "sea_4", "coast_2", "coast_3"]
-	},
-	"coast_2": {
-		"below": ["land_1", "land_2"],
-		"left": ["sea_1", "sea_2", "sea_3", "sea_4", "coast_1", "coast_3"],
-		"right": ["sea_1", "sea_2", "sea_3", "sea_4", "coast_1", "coast_3"],
-		"above": ["sea_1", "sea_2", "sea_3", "sea_4", "coast_1", "coast_3"]
-	},
-	"coast_3": {
-		"below": ["land_1", "land_2"],
-		"left": ["sea_1", "sea_2", "sea_3", "sea_4", "coast_1", "coast_2"],
-		"right": ["sea_1", "sea_2", "sea_3", "sea_4", "coast_1", "coast_2"],
-		"above": ["sea_1", "sea_2", "sea_3", "sea_4", "coast_1", "coast_2"]
-	},
-	"land_1": {
-		"below": ["coast_1", "coast_2", "coast_3"],
-		"left": ["coast_1", "coast_2", "coast_3", "land_2"],
-		"right": ["coast_1", "coast_2", "coast_3", "land_2"],
-		"above": ["coast_1", "coast_2", "coast_3"]
-	},
-	"land_2": {
-		"below": ["coast_1", "coast_2", "coast_3"],
-		"left": ["coast_1", "coast_2", "coast_3", "land_1"],
-		"right": ["coast_1", "coast_2", "coast_3", "land_1"],
-		"above": ["coast_1", "coast_2", "coast_3"]
+	"B": {
+		"next": ["A"]
 	}
 }
 
-var direction_names = ["above", "below", "left", "right"]
+var direction_names = ["next"]
 
+func array_difference(a1: Array, a2: Array) -> Array:
+	var diff = []
+	for element in a1:
+		if element not in a2:
+			diff.append(element)
+	return diff
 
-func update_possible_tiles(state, key, chosen_tile):
-	var x = key % tile_width
-	var y = key / tile_width
-
-	var new_direction_names = direction_names
+func update_possible_tiles(state, coordinates, chosen_tile):
 	var todos = []
-	for direction_name in new_direction_names:
-		var nx = x
-		var ny = y
-
-		if direction_name == "up":
-			ny -= 1
-		elif direction_name == "down":
-			ny += 1
-		elif direction_name == "left":
-			nx -= 1
-		elif direction_name == "right":
-			nx += 1
-
-		if tile_width != 1:
-			nx = (nx + tile_width) % tile_width
-			ny = (ny + tile_width) % tile_width
-
-		var neighbor_key = ny * tile_width + nx
-		if neighbor_key in state and "possible_tiles" in state[neighbor_key]:
-			var neighbor_possible_tiles = state[neighbor_key]["possible_tiles"]
-
-			# Check if the chosen_tile is possible in this direction
-			if direction_name in neighbor_possible_tiles and chosen_tile in neighbor_possible_tiles[direction_name]:
-				neighbor_possible_tiles[direction_name].erase(chosen_tile)
-				todos.append(["set_tile_state", neighbor_key, neighbor_possible_tiles])
-				todos.append(["remove_possible_tiles", key, neighbor_possible_tiles])
+	if state.has(coordinates) and "possible_tiles" in state[coordinates]:
+		var possible_tiles = state[coordinates]["possible_tiles"]
+		var difference = array_difference(possible_tiles, possible_types[chosen_tile]["next"])
+		todos.append(["remove_possible_tiles", coordinates, difference])
+		todos.append(["set_tile_state", coordinates, possible_tiles])
 	return todos
 
 
-const tile_width = 2
+const tile_width = 4
 
 func set_tile_state(state, coordinate, chosen_tile) -> Dictionary:
 	if state.has(coordinate):
 		state[coordinate]["tile"] = chosen_tile
-		if state[coordinate]["possible_tiles"].has(chosen_tile):
-			state[coordinate]["possible_tiles"].erase(chosen_tile)
+		state[coordinate]["possible_tiles"] = [chosen_tile]
 	return state
 
 func remove_possible_tiles(state, coordinate, chosen_tiles: Array) -> Dictionary:
@@ -134,9 +65,7 @@ func remove_possible_tiles(state, coordinate, chosen_tiles: Array) -> Dictionary
 		if state[coordinate].has("possible_tiles"):
 			var possible_tiles = state[coordinate]["possible_tiles"]
 			for tile in chosen_tiles:
-				var index_of_chosen_tile = possible_tiles.find(tile)
-				if index_of_chosen_tile != -1:
-					possible_tiles.erase(index_of_chosen_tile)
+				possible_tiles.erase(tile)
 	return state
 
 ## Function to find the square with the lowest entropy
@@ -152,6 +81,7 @@ func all_tiles_have_state(state):
 	return true
 
 func collapse_wave_function(state: Dictionary) -> Variant:
+	var result = [["set_tile_state"]]
 	var key = _find_lowest_entropy_square(state)
 	
 	if key == null:
@@ -161,11 +91,13 @@ func collapse_wave_function(state: Dictionary) -> Variant:
 			print("Contradiction found, restarting...")
 			return false
 	
-	var possible_tiles = state[key]["possible_tiles"]
+	var possible_tiles: Array = state[key]["possible_tiles"]
 	possible_tiles.shuffle()
-	var chosen_tile = possible_tiles[0]
-	possible_tiles.erase(chosen_tile)
-	return [["set_tile_state", key, chosen_tile], ["remove_possible_tiles", key, possible_tiles]]
+	var chosen_tile = possible_tiles.front()
+	possible_tiles.pop_front()
+	result[0].append(key)
+	result[0].append(chosen_tile)
+	return result
 
 ## Meta collapse_wave_function
 func meta_collapse_wave_function(state):
@@ -173,13 +105,12 @@ func meta_collapse_wave_function(state):
 		return []
 	else:
 		var new_state = state.duplicate()  # Create a copy of the state to try collapse_wave_function
-		new_state = collapse_wave_function(new_state)
 		
-		if new_state:
-			return [["collapse_wave_function"], ["meta_collapse_wave_function"]]
-		else:
-			print("Contradiction found in meta_collapse_wave_function, restarting...")
-			return [["meta_collapse_wave_function"]]
+		# Instead of directly calling collapse_wave_function, add it to the todo_list
+		var todo_list = [["collapse_wave_function"]]
+		
+		todo_list.append(["meta_collapse_wave_function"])
+		return todo_list
 
 func print_ascii_art(state, width):
 	var ascii_art = ""
@@ -205,7 +136,7 @@ func _ready() -> void:
 	the_domain.add_task_methods("update_possible_tiles", [update_possible_tiles])
 
 	planner.current_domain = the_domain
-	planner.verbose = 0
+	planner.verbose = 1
 
 	var state = {}
 	for i in range(tile_width):
@@ -214,11 +145,6 @@ func _ready() -> void:
 				"tile": null,
 				"possible_tiles": possible_types.keys()
 			}
-	# var middle_key = (tile_width * tile_width) / 2
-	# state[middle_key] = {
-	# 	"tile": "land_1",
-	# 	"possible_tiles": ["land_1"]
-	# }
 	var wfc_array: Array
 	wfc_array.append(["meta_collapse_wave_function"])
 	var result = planner.find_plan(state, wfc_array)
