@@ -217,7 +217,6 @@ func collapse_wave_function(state: Dictionary) -> Array:
 
 	if chosen_tile == null:
 		# If no valid tile was found, choose a random tile
-		possible_tiles.shuffle()
 		chosen_tile = possible_tiles[0]
 
 	possible_tiles.erase(chosen_tile)
