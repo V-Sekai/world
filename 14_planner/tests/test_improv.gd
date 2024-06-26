@@ -24,7 +24,7 @@ func test_array_difference():
 
 func test_find_plan():
 	var state = {}
-	for i in range(6):
+	for i in range(5):
 		var possible_tiles = []
 		for graph in wfc.possible_types["@graph"]:
 			possible_tiles.append(graph["@id"])
@@ -38,5 +38,4 @@ func test_find_plan():
 	var is_valid = wfc.is_valid_sequence(state)
 	assert_true(is_valid, "The sequence is valid.")
 	gut.p(result)
-	assert_eq_deep(result, [["set_tile_state", 0, "[name]"], ["set_tile_state", 1, ": I have a"], ["set_tile_state", 2, "[:animal]"], ["set_tile_state", 3, "who is"], ["set_tile_state", 4, "[years]"], ["set_tile_state", 5, "years old."]])
-	
+	assert_eq_deep(result, [["set_tile_state", 0, "Bob"], ["set_tile_state", 1, ": I have a"], ["set_tile_state", 2, "parrot"], ["set_tile_state", 3, "who is"], ["set_tile_state", 4, "7 years old."]])

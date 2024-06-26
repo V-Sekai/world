@@ -39,30 +39,67 @@ const possible_types = {
   "@graph": [
 	{
 	  "@id": "root",
-	  "next": ["[name]"]
+	  "next": ["Bob", "Alice", "Carol"]
 	},
 	{
-	  "@id": "[name]",
+	  "@id": "Bob",
 	  "next": [": I have a"]
 	},
 	{
-	  "@id": ": I have a",
-	  "next": ["[:animal]"]
+	  "@id": "Alice",
+	  "next": [": I have a"],
+	  "tags": [["class", "mammal"]]
 	},
 	{
-	  "@id": "[:animal]",
-	  "next": ["who is"]
+	  "@id": "Carol",
+	  "next": [": I have a"],
+	  "tags": [["class", "bird"]]
+	},
+	{
+	  "@id": ": I have a",
+	  "next": ["dog", "cat", "parrot"]
+	},
+	{
+	  "@id": "dog",
+	  "next": ["who is"],
+	  "tags": [["class", "mammal"]]
+	},
+	{
+	  "@id": "cat",
+	  "next": ["who is"],
+	  "tags": [["class", "mammal"]]
+	},
+	{
+	  "@id": "parrot",
+	  "next": ["who is"],
+	  "tags": [["class", "bird"]]
 	},
 	{
 	  "@id": "who is",
-	  "next": ["[years]"]
+	  "next": ["2 years old.", "3 years old.", "4 years old.", "5 years old.", "6 years old.", "7 years old."]
 	},
 	{
-	  "@id": "[years]",
-	  "next": ["years old."]
+	  "@id": "2 years old.",
+	  "next": ["end"]
 	},
 	{
-	  "@id": "years old.",
+	  "@id": "3 years old.",
+	  "next": ["end"]
+	},
+	{
+	  "@id": "4 years old.",
+	  "next": ["end"]
+	},
+	{
+	  "@id": "5 years old.",
+	  "next": ["end"]
+	},
+	{
+	  "@id": "6 years old.",
+	  "next": ["end"]
+	},
+	{
+	  "@id": "7 years old.",
 	  "next": ["end"]
 	},
 	{
@@ -167,7 +204,7 @@ func meta_collapse_wave_function(state):
 func is_valid_sequence(state: Dictionary) -> bool:
 	# Convert the @graph array into a dictionary for easier access
 	var possible_types_dict = {}
-	for i in range(possible_types["@graph"].size()):
+	for i in range(possible_types["@graph"].size() - 1):
 		var item = possible_types["@graph"][i]
 		possible_types_dict[item["@id"]] = item["next"]
 
