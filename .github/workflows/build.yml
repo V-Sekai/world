@@ -14,8 +14,8 @@ concurrency:
 
 env:
   GAME_NAME: vsekai_game_
-  GODOT_REF: groups-4.3.2024-06-19T122756Z
-  VSK_GAME_BRANCH: 7ebac31f495b952d659bff42dcbea7234e27fc1d
+  GODOT_REF: groups-4.3.2024-06-26T122053Z
+  VSK_GAME_BRANCH: abbb9eb9b9a2291734c1c52c82df0ebfd6d14792
   GODOT_REPOSITORY: v-sekai/godot
   SCONSFLAGS: verbose=yes warnings=extra werror=no module_text_server_fb_enabled=yes use_thinlto=yes
   DOTNET_NOLOGO: true
