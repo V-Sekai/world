@@ -33,6 +33,7 @@
 
 #include "scene/3d/node_3d.h"
 #include "servers/resonanceaudio/resonance_audio_wrapper.h"
+#include "servers/audio_server.h"
 
 class Area3D;
 struct AudioFrame;
@@ -93,6 +94,8 @@ private:
 	Vector<AudioFrame> _update_panning();
 
 	uint32_t area_mask = 1;
+
+	AudioServer::PlaybackType playback_type = AudioServer::PlaybackType::PLAYBACK_TYPE_DEFAULT;
 
 	bool emission_angle_enabled = false;
 	float emission_angle = 45.0;
@@ -195,6 +198,9 @@ public:
 
 	bool has_stream_playback();
 	Ref<AudioStreamPlayback> get_stream_playback();
+
+	AudioServer::PlaybackType get_playback_type() const;
+	void set_playback_type(AudioServer::PlaybackType p_playback_type);
 
 	AudioStreamPlayer3D();
 	~AudioStreamPlayer3D();
