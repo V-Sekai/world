@@ -23,7 +23,6 @@ func test_find_plan():
 		state[i] = { "tile": null, "possible_tiles": possible_tiles }
 	var wfc_array: Array = []
 	wfc_array.append(["meta_collapse_wave_function"])
-	state[2] = { "tile": "Alice", "possible_tiles": ["Alice"] }
 	var planner = Plan.new()
 	planner.current_domain = wfc
 	planner.verbose = 1
