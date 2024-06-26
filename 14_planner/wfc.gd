@@ -1,6 +1,12 @@
-extends RefCounted
+extends Domain
 
 # https://robertheaton.com/2018/12/17/wavefunction-collapse-algorithm/
+
+func _init() -> void:
+	add_actions([set_tile_state, remove_possible_tiles])
+	add_task_methods("collapse_wave_function", [collapse_wave_function])
+	add_task_methods("meta_collapse_wave_function", [meta_collapse_wave_function])
+	add_task_methods("update_possible_tiles", [update_possible_tiles])
 
 # Function to calculate entropy of a square
 func _calculate_entropy(square) -> int:
@@ -40,7 +46,9 @@ const possible_types = {
 
 var direction_names = ["next"]
 
-func array_difference(a1: Array, a2: Array) -> Array:
+const tile_width = 4
+
+static func array_difference(a1: Array, a2: Array) -> Array:
 	var diff = []
 	for element in a1:
 		if element not in a2:
@@ -56,8 +64,6 @@ func update_possible_tiles(state, coordinates, chosen_tile):
 		todos.append(["set_tile_state", coordinates, possible_tiles])
 	return todos
 
-
-const tile_width = 25
 
 func set_tile_state(state, coordinate, chosen_tile) -> Dictionary:
 	if state.has(coordinate):
@@ -93,7 +99,6 @@ func collapse_wave_function(state: Dictionary) -> Variant:
 		if all_tiles_have_state(state):
 			return []
 		else:
-			print("Contradiction found, restarting...")
 			return false
 	
 	var possible_tiles: Array = state[key]["possible_tiles"]
@@ -112,7 +117,6 @@ func collapse_wave_function(state: Dictionary) -> Variant:
 			break
 	
 	if chosen_tile == null:
-		print("No valid tile found, restarting...")
 		return false
 	
 	possible_tiles.erase(chosen_tile)
@@ -125,46 +129,15 @@ func meta_collapse_wave_function(state):
 	if all_tiles_have_state(state):
 		return []
 	else:
-		# Instead of directly calling collapse_wave_function, add it to the todo_list
 		var todo_list = [["collapse_wave_function"]]
-		
 		todo_list.append(["meta_collapse_wave_function"])
 		return todo_list
 
 func is_valid_sequence(state):
 	for i in range(len(state) - 1):
 		var currentType = state[i]["tile"]
-		print(currentType)
 		if currentType != null:
 			var nextType = state[i + 1]["tile"]
 			if nextType != null and nextType not in possible_types[currentType]["next"]:
 				return false
 	return true
-
-func _ready() -> void:
-	var planner: Plan = Plan.new()
-	var the_domain: Domain = Domain.new()
-	planner.current_domain = the_domain
-
-	the_domain.add_actions([set_tile_state, remove_possible_tiles])
-	the_domain.add_task_methods("collapse_wave_function", [collapse_wave_function])
-	the_domain.add_task_methods("meta_collapse_wave_function", [meta_collapse_wave_function])
-	the_domain.add_task_methods("update_possible_tiles", [update_possible_tiles])
-
-	planner.current_domain = the_domain
-	planner.verbose = 0
-
-	var state = {}
-	for i in range(tile_width):
-		for j in range(tile_width):
-			state[i * tile_width + j] = {
-				"tile": null,
-				"possible_tiles": possible_types.keys()
-			}
-	var wfc_array: Array
-	wfc_array.append(["meta_collapse_wave_function"])
-	planner.find_plan(state, wfc_array)
-	if is_valid_sequence(state):
-		print("The sequence is valid.")
-	else:
-		print("The sequence is not valid.")

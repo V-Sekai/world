@@ -11,7 +11,6 @@ config_version=5
 [application]
 
 config/name="Planner Game Project"
-run/main_scene="res://Plan.tscn"
 config/features=PackedStringArray("4.3", "Double Precision", "Forward Plus")
 config/icon="res://icon.svg"
 

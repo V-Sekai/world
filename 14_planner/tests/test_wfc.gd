@@ -3,11 +3,7 @@ extends "res://addons/gut/test.gd"
 var wfc: RefCounted
 
 func before_each():
-	# Create an instance of the class we're testing
 	wfc = load("res://wfc.gd").new()
-
-func after_each():
-	pass
 
 func test_calculate_entropy():
 	var square = {"possible_tiles": ["A", "B", "C"]}
@@ -25,3 +21,22 @@ func test_array_difference():
 	var a1 = ["A", "B", "C"]
 	var a2 = ["B"]
 	assert_eq(wfc.array_difference(a1, a2), ["A", "C"])
+
+func test_find_plan():
+	var state = {}
+	for i in range(wfc.tile_width):
+		for j in range(wfc.tile_width):
+			state[i * wfc.tile_width + j] = {
+				"tile": null,
+				"possible_tiles": wfc.possible_types.keys()
+			}
+	var wfc_array: Array
+	wfc_array.append(["meta_collapse_wave_function"])
+	var planner = Plan.new()
+	planner.current_domain = wfc
+	planner.find_plan(state, wfc_array)
+	planner.verbose = 0
+	if wfc.is_valid_sequence(state):
+		assert_true(true, "The sequence is valid.")
+	else:
+		assert_true(false, "The sequence is not valid.")

@@ -1,4 +1,4 @@
-extends Node3D
+extends "res://addons/gut/test.gd"
 
 func feed_pet(p_state, p_pet, p_food):
 	p_state["hunger"][p_pet] -= p_food["nutrition"]
@@ -64,7 +64,7 @@ func task_care_for_pet(p_state, p_pet):
 	multigoal.state = goals
 	return [multigoal]
 
-func _ready() -> void:
+func test_ready() -> void:
 	var planner: Plan = Plan.new()
 	var the_domain: Domain = Domain.new()
 
@@ -77,7 +77,7 @@ func _ready() -> void:
 	the_domain.add_unigoal_methods("exercise", [method_exercise_pet])
 	the_domain.add_actions([feed_pet, give_water, walk_pet, release_pet])
 	planner.current_domain = the_domain
-	planner.verbose = 2
+	planner.verbose = 0
 
 	var state: Dictionary = {
 		"pets": ["longcat"],
@@ -93,4 +93,6 @@ func _ready() -> void:
 	}
 
 	var task: Array = [["care_for_pet", "longcat"]]
-	planner.find_plan(state, task)
+	var result = planner.find_plan(state, task)
+	print(result)
+	assert_eq_deep(result, [["release_pet", "longcat"], ["walk_pet", "longcat"], ["walk_pet", "longcat"], ["walk_pet", "longcat"], ["walk_pet", "longcat"], ["walk_pet", "longcat"]])

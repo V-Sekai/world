@@ -1,4 +1,4 @@
-extends Node
+extends "res://addons/gut/test.gd"
 
 func drive_truck(p_state, p_truck, p_location):
 	p_state["truck_at"][p_truck] = p_location
@@ -104,7 +104,7 @@ func method_move_between_city(p_state, p_object, p_location):
 			return [["at", p_object, airport_1], ["at", p_object, airport_2], ["at", p_object, p_location]]
 	return false
 
-func before_each(p_state, p_planner, p_the_domain):
+func _before_each(p_state, p_planner, p_the_domain):
 	assert(p_planner != null)
 	assert(p_the_domain != null)
 	p_planner.set_verbose(0)
@@ -157,13 +157,12 @@ var the_domain: Domain
 @export
 var state1: Dictionary 
 
-func _ready() -> void:
+func test_ready() -> void:
 	planner = Plan.new()
 	the_domain = Domain.new()
 	planner.current_domain = the_domain
-	before_each(state1, planner, the_domain)
-	planner.verbose = 1
+	_before_each(state1, planner, the_domain)
+	planner.verbose = 0
 	var task: Array = [["at", "package1", "location10"], ["at", "package2", "airport2"]]
 	var plan: Variant = planner.find_plan(state1, task)
-	#print(plan)
-	# [["drive_truck", "truck1", "location1"], ["load_truck", "package1", "truck1"], ["drive_truck", "truck1", "airport1"], ["unload_truck", "package1", "airport1"], ["fly_plane", "plane2", "airport1"], ["load_plane", "package1", "plane2"], ["fly_plane", "plane2", "airport2"], ["unload_plane", "package1", "airport2"], ["drive_truck", "truck6", "airport2"], ["load_truck", "package1", "truck6"], ["drive_truck", "truck6", "location10"], ["unload_truck", "package1", "location10"]]
+	assert_eq_deep(plan, [["drive_truck", "truck1", "location1"], ["load_truck", "package1", "truck1"], ["drive_truck", "truck1", "airport1"], ["unload_truck", "package1", "airport1"], ["fly_plane", "plane2", "airport1"], ["load_plane", "package1", "plane2"], ["fly_plane", "plane2", "airport2"], ["unload_plane", "package1", "airport2"], ["drive_truck", "truck6", "airport2"], ["load_truck", "package1", "truck6"], ["drive_truck", "truck6", "location10"], ["unload_truck", "package1", "location10"], ["drive_truck", "truck1", "location2"], ["load_truck", "package2", "truck1"], ["drive_truck", "truck1", "airport1"], ["unload_truck", "package2", "airport1"], ["fly_plane", "plane2", "airport1"], ["load_plane", "package2", "plane2"], ["fly_plane", "plane2", "airport2"], ["unload_plane", "package2", "airport2"]])
