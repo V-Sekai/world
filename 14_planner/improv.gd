@@ -32,6 +32,8 @@ func _find_lowest_entropy_square(state) -> Variant:
 	var chosen_key = min_squares[0]
 	return chosen_key
 
+# "Graph grammars extend formal string-based grammars to graphs. We use the algebraic approach, specifically Double-Pushout Graph Grammars (DPO), borrowing terms from category theory. #Coding #GraphGrammars"
+
 const possible_types = {
   "@context": {
 	"next": "http://v-sekai.com/wfc-next"
