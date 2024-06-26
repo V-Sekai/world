@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai/TOOL_cloth_dynamics.git
 	branch = main
-	commit = 39235f42e8183e716fc7c53c5d024ff37c34f317
-	parent = b4c31ce1fed9ea5c758f5ecd814e163fbafc0639
+	commit = 83cebf2a4e4bbefedd42b7007dee2e75855519a0
+	parent = 342fa5570ddfe19bafb3a8583be236f84cf2839b
 	method = merge
 	cmdver = 0.4.6
