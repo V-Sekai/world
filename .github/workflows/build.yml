@@ -108,7 +108,7 @@ jobs:
             proj-conv: false
             artifact: true
             platform: linuxbsd
-            deploy: false
+            deploy: true
             deploy-pdb: true
             deploy-platform: android
             export-platform: Android
