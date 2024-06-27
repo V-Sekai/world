@@ -95,49 +95,27 @@ jobs:
             arch: _arm64
             deploy-platform-target: editor
 
-          # - name: linux_editor_android_arm32_deploy
-          #   runs-on: ubuntu-22.04
-          #   cache-name: linux-editor-deploy-android-editor
-          #   target: editor
-          #   tests: false
-          #   sconsflags: linker=gold precision=double
-          #   doc-test: false
-          #   bin: ./godot/bin/godot.linuxbsd.editor.double.arm64
-          #   deploy-bin: ./godot/bin/libgodot.android.editor.double.arm64.so
-          #   editor-bin-name: godot.linuxbsd.editor.double.arm64
-          #   proj-conv: false
-          #   artifact: true
-          #   platform: linuxbsd
-          #   deploy: false
-          #   deploy-pdb: true
-          #   deploy-platform: android
-          #   export-platform: Android
-          #   build-arch: arm64
-          #   deploy-arch: arm32
-          #   arch: _arm32
-          #   deploy-platform-target: editor
-
-          # - name: linux_editor_android_arm64_deploy
-          #   runs-on: ubuntu-22.04
-          #   cache-name: linux-editor-deploy-android-editor
-          #   target: editor
-          #   tests: false
-          #   sconsflags: linker=gold precision=double
-          #   doc-test: false
-          #   bin: ./godot/bin/godot.linuxbsd.editor.double.arm64
-          #   deploy-bin: ./godot/bin/libgodot.android.editor.double.arm32.so
-          #   editor-bin-name: godot.linuxbsd.editor.double.arm64
-          #   proj-conv: false
-          #   artifact: true
-          #   platform: linuxbsd
-          #   deploy: true
-          #   deploy-pdb: true
-          #   deploy-platform: android
-          #   export-platform: Android
-          #   build-arch: arm32
-          #   deploy-arch: arm64
-          #   arch: _arm64
-          #   deploy-platform-target: editor
+          - name: linux_editor_android_arm64_deploy
+            runs-on: ubuntu-22.04
+            cache-name: linux-editor-deploy-android-editor
+            target: editor
+            tests: false
+            sconsflags: linker=gold precision=double use_llvm=yes
+            doc-test: false
+            bin: ./godot/bin/godot.linuxbsd.editor.double.x86_64.llvm
+            deploy-bin: ./godot/platform/android/java/lib/libs/tools/debug/armeabi-v7a/libgodot_android.so
+            editor-bin-name: libgodot_android.so
+            proj-conv: false
+            artifact: true
+            platform: linuxbsd
+            deploy: false
+            deploy-pdb: true
+            deploy-platform: android
+            export-platform: Android
+            build-arch: x86_64
+            deploy-arch: arm64
+            arch: _arm64
+            deploy-platform-target: editor
 
           - name: linux_editor_web_deploy
             runs-on: ubuntu-22.04
@@ -242,7 +220,7 @@ jobs:
           deploy-platform-target: ${{ matrix.deploy-platform-target }}
 
       - name: Compilation
-        if: ${{ matrix.deploy-platform == 'windows' || matrix.deploy-platform == 'web' }}
+        if: ${{ matrix.deploy-platform == 'windows' || matrix.deploy-platform == 'web' || matrix.deploy-platform == 'android' }}
         uses: ./.github/actions/godot-world-build
         with:
           sconsflags: ${{ env.SCONSFLAGS }} ${{ matrix.sconsflags }}
