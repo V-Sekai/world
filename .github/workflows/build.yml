@@ -100,8 +100,8 @@ jobs:
             sconsflags: linker=gold precision=double
             doc-test: false
             bin: ./godot/bin/godot.linuxbsd.editor.double.x86_64
-            deploy-bin: ./godot/bin/godot.web.editor.double.x86_64.html
-            editor-bin-name: godot.web.editor.double.x86_64.html
+            deploy-bin: ./godot/bin/godot.web.editor.double.wasm32.zip
+            editor-bin-name: godot.web.editor.double.wasm32.zip
             proj-conv: false
             artifact: true
             platform: linuxbsd
@@ -235,9 +235,10 @@ jobs:
           export TARGET=${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}
           mkdir -p $TARGET
 
-          # If deploy platform is windows, append .exe to the binary
           if [ "${{ matrix.deploy-platform }}" == "windows" ]; then
               cp -rf ${{ matrix.deploy-bin }} $TARGET/${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}.exe
+          elif [ "${{ matrix.deploy-platform }}" == "web" ]; then
+              unzip godot.web.editor.double.wasm32.zip -d $TARGET
           else
               cp -rf ${{ matrix.deploy-bin }} $TARGET/${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}
           fi
