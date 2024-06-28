@@ -94,27 +94,6 @@ jobs:
             deploy-arch: arm64
             arch: _arm64
             deploy-platform-target: editor
-
-          - name: linux_editor_web_deploy
-            runs-on: ubuntu-22.04
-            cache-name: linux-editor-deploy-web-editor
-            target: editor
-            tests: false
-            sconsflags: linker=gold precision=double
-            doc-test: false
-            bin: ./godot/bin/godot.linuxbsd.editor.double.x86_64
-            deploy-bin: ./godot/bin/godot.web.editor.double.x86_64.html
-            editor-bin-name: godot.web.editor.double.x86_64.html
-            proj-conv: false
-            artifact: true
-            platform: linuxbsd
-            deploy: false
-            deploy-platform: web
-            export-platform: Web
-            build-arch: x86_64
-            deploy-arch: wasm
-            arch: _x86_64
-            deploy-platform-target: editor
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
