@@ -2,19 +2,24 @@
 
 ## The Context
 
-In the current development landscape, there is a growing need for more efficient and flexible ways to handle virtual machine (VM) binaries. This proposal was inspired by a conversation between Fire and ホロ on June 27, 2024.
+In the current development landscape, there is a growing need for more efficient and flexible ways to handle gdextension binaries. This proposal was inspired by a conversation between Fire and ホロ on June 27, 2024.
 
 ## The Problem Statement
 
-The traditional approach to handling RISCV binaries can be cumbersome and inefficient. There is a need for a method that allows RISCV binaries to function like shared libraries, increasing their flexibility and usability.
+Traditionally we have to compile gdextension for like 5-10 platform variants which is inefficient.
 
 ## Describe how your proposal will work with code, pseudo-code, mock-ups, or diagrams
 
-Fire proposed an idea where all the RISCV binaries are only methods, functioning like shared libraries. This could potentially allow wrapping up the entire gdextension API.
+Fire proposed an idea where many gdextension modules can be compiled as RISCV binaries.
+
+Functioning like shared libraries via librisc emulation both as an intepreter or a register machine. 
+
+This could potentially allow wrapping up the entire gdextension API.
 
 Here's an example of how function calls into the guest VM could work:
 
 ```c
+// See further reading section.
 // Host:
 int ret = machine.vmcall("test", 111, 222, "333");
 printf("test returned %d\n", ret);
@@ -27,6 +32,8 @@ int test(int a, int b, const char* c) {
 ```
 
 This approach would make arbitrary function calls into the VM guest possible. The functions must be C ABI, and if you use the string name, the function must be in the symbol table.
+
+This can also be a future approach into compiling gdscript bytecode as more performant code via string templating the bytecode as c and compiling it, but that is reserved for future work.
 
 ## The Benefits
 
@@ -41,8 +48,8 @@ This approach would make arbitrary function calls into the VM guest possible. Th
 
 ## The Road Not Taken
 
-- Continuing with the traditional approach of handling RISCV binaries.
-- Exploring other methods of improving the efficiency and flexibility of RISCV binaries.
+- Exploring other methods of improving flexibility of loading binaries - like wasm.
+- Holo has given me an implementation of riscv processors in godot engine via zig language.
 
 ## The Infrequent Use Case
 
