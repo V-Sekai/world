@@ -91,26 +91,6 @@ jobs:
             deploy-arch: arm64
             arch: arm64
             deploy-target: editor
-
-          - name: linux_editor_web_deploy
-            runs-on: ubuntu-22.04
-            cache-name: linux-editor-deploy-web-editor
-            target: editor
-            tests: false
-            sconsflags: linker=gold precision=double
-            doc-test: false
-            bin: ./godot/bin/godot.linuxbsd.editor.double.x86_64
-            deploy-bin: ./godot/bin/godot.web.editor.double.wasm32.zip
-            editor-bin-name: godot.web.editor.double.wasm32.zip
-            proj-conv: false
-            artifact: true
-            platform: linuxbsd
-            deploy: true
-            deploy-platform: web
-            export-platform: Web
-            deploy-arch: auto
-            arch: x86_64
-            deploy-target: editor
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
@@ -153,19 +133,6 @@ jobs:
         if: ${{ matrix.platform == 'macos' }}
         run: |
           sh ./.github/install_vulkan_sdk_macos.sh
-
-      - name: Set up Emscripten latest
-        if: ${{ matrix.platform == 'web' ||  matrix.deploy-platform == 'web'}}
-        uses: mymindstorm/setup-emsdk@6ab9eb1bda2574c4ddb79809fc9247783eaf9021 # v14
-        with:
-          version: ${{env.EM_VERSION}}
-          actions-cache-folder: ${{env.EM_CACHE_FOLDER}}
-
-      - name: Verify Emscripten setup
-        if: ${{ matrix.platform == 'web' ||  matrix.deploy-platform == 'web'}}
-        run: |
-          emcc -v
-        shell: bash
 
       - name: Setup python, scons and golang
         uses: ./.github/actions/godot-world-deps
@@ -237,8 +204,6 @@ jobs:
 
           if [ "${{ matrix.deploy-platform }}" == "windows" ]; then
               cp -rf ${{ matrix.deploy-bin }} $TARGET/${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}.exe
-          elif [ "${{ matrix.deploy-platform }}" == "web" ]; then
-              unzip godot.web.editor.double.wasm32.zip -d $TARGET
           else
               cp -rf ${{ matrix.deploy-bin }} $TARGET/${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}
           fi
