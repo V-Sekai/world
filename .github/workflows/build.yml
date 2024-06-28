@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  GAME_NAME: vsekai_game_
+  GAME_NAME: vsekai_game
   GODOT_REF: groups-4.3.2024-06-26T122053Z
   VSK_GAME_BRANCH: 70892822d21e47b0cb7e36436b042a8ce19e481f
   GODOT_REPOSITORY: v-sekai/godot
@@ -48,10 +48,9 @@ jobs:
             deploy-pdb: true
             deploy-platform: windows
             export-platform: Windows
-            build-arch: x86_64
             deploy-arch: x86_64
-            arch: _x86_64
-            deploy-platform-target: editor
+            arch: x86_64
+            deploy-target: editor
 
           - name: linux_editor_linux_deploy
             runs-on: ubuntu-22.04
@@ -69,10 +68,9 @@ jobs:
             deploy: true
             deploy-platform: linux
             export-platform: Linux
-            build-arch: x86_64
             deploy-arch: x86_64
-            arch: _x86_64
-            deploy-platform-target: editor
+            arch: x86_64
+            deploy-target: editor
 
           - name: macos_editor_macos_deploy
             runs-on: "macos-latest"
@@ -90,31 +88,9 @@ jobs:
             deploy: true
             deploy-platform: macos
             export-platform: Mac
-            build-arch: arm64
             deploy-arch: arm64
-            arch: _arm64
-            deploy-platform-target: editor
-
-          - name: linux_editor_web_deploy
-            runs-on: ubuntu-22.04
-            cache-name: linux-editor-deploy-web-editor
-            target: editor
-            tests: false
-            sconsflags: linker=gold precision=double
-            doc-test: false
-            bin: ./godot/bin/godot.linuxbsd.editor.double.x86_64
-            deploy-bin: ./godot/bin/godot.web.editor.double.x86_64.html
-            editor-bin-name: godot.web.editor.double.x86_64.html
-            proj-conv: false
-            artifact: true
-            platform: linuxbsd
-            deploy: false
-            deploy-platform: web
-            export-platform: Web
-            build-arch: x86_64
-            deploy-arch: wasm
-            arch: _x86_64
-            deploy-platform-target: editor
+            arch: arm64
+            deploy-target: editor
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
@@ -158,19 +134,6 @@ jobs:
         run: |
           sh ./.github/install_vulkan_sdk_macos.sh
 
-      - name: Set up Emscripten latest
-        if: ${{ matrix.platform == 'web' ||  matrix.deploy-platform == 'web'}}
-        uses: mymindstorm/setup-emsdk@6ab9eb1bda2574c4ddb79809fc9247783eaf9021 # v14
-        with:
-          version: ${{env.EM_VERSION}}
-          actions-cache-folder: ${{env.EM_CACHE_FOLDER}}
-
-      - name: Verify Emscripten setup
-        if: ${{ matrix.platform == 'web' ||  matrix.deploy-platform == 'web'}}
-        run: |
-          emcc -v
-        shell: bash
-
       - name: Setup python, scons and golang
         uses: ./.github/actions/godot-world-deps
         with:
@@ -194,20 +157,18 @@ jobs:
           target: ${{ matrix.target }}
           tests: ${{ matrix.tests }}
           deploy: ${{ matrix.deploy }}
-          deploy-platform: ${{ matrix.deploy-platform }}
-          deploy-platform-target: ${{ matrix.deploy-platform-target }}
+          arch: ${{ matrix.arch }}
 
       - name: Compilation
-        if: ${{ matrix.deploy-platform == 'windows' || matrix.deploy-platform == 'web' }}
+        if: ${{ matrix.deploy }}
         uses: ./.github/actions/godot-world-build
         with:
           sconsflags: ${{ env.SCONSFLAGS }} ${{ matrix.sconsflags }}
-          platform: ${{ matrix.platform }}
-          target: ${{ matrix.target }}
+          platform: ${{ matrix.deploy-platform }}
+          target: ${{ matrix.deploy-target }}
           tests: false
           deploy: false
-          deploy-platform: ${{ matrix.platform }}
-          deploy-platform-target: ${{ matrix.target }}
+          arch: ${{ matrix.deploy-arch }}
 
       - name: Generate build constants
         uses: ./.github/actions/vsk-generate-constants
@@ -217,7 +178,7 @@ jobs:
         run: |
           mkdir -p .godot/editor .godot/imported export_${{ matrix.deploy-platform }}
           chmod +x ${{ matrix.bin }}
-          ${{ matrix.bin }} --headless --xr-mode off --export-pack ${{ matrix.export-platform }}  `pwd`/${{ env.GAME_NAME }}${{ matrix.deploy-platform }}.pck --path game || true
+          ${{ matrix.bin }} --headless --xr-mode off --export-pack ${{ matrix.export-platform }}  `pwd`/${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}.pck --path game || true
         timeout-minutes: 20
         shell: bash
 
@@ -226,29 +187,28 @@ jobs:
         run: |
           ls
           # Check if the .pck file exists
-          if [ ! -f ./${{ env.GAME_NAME }}${{ matrix.deploy-platform }}.pck ]; then
-              echo "Error: ${{ env.GAME_NAME }}${{ matrix.deploy-platform }}.pck does not exist."
+          if [ ! -f ./${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}.pck ]; then
+              echo "Error: ${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}.pck does not exist."
               exit 1
           fi
 
           # Check if the path to the .pck file is correct
-          if [ ! -f `pwd`/${{ env.GAME_NAME }}${{ matrix.deploy-platform }}.pck ]; then
-              echo "Error: The path to ${{ env.GAME_NAME }}${{ matrix.deploy-platform }}.pck is incorrect."
+          if [ ! -f `pwd`/${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}.pck ]; then
+              echo "Error: The path to ${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}.pck is incorrect."
               exit 1
           fi
 
-          rm -rf ${{ env.GAME_NAME }}${{ matrix.deploy-platform }}
-          export TARGET=${{ env.GAME_NAME }}${{ matrix.deploy-platform }}
+          rm -rf ${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}
+          export TARGET=${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}
           mkdir -p $TARGET
 
-          # If deploy platform is windows, append .exe to the binary
           if [ "${{ matrix.deploy-platform }}" == "windows" ]; then
-              cp -rf ${{ matrix.deploy-bin }} $TARGET/${{ env.GAME_NAME }}${{ matrix.deploy-platform }}.exe
+              cp -rf ${{ matrix.deploy-bin }} $TARGET/${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}.exe
           else
-              cp -rf ${{ matrix.deploy-bin }} $TARGET/${{ env.GAME_NAME }}${{ matrix.deploy-platform }}
+              cp -rf ${{ matrix.deploy-bin }} $TARGET/${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}
           fi
 
-          cp -rf `pwd`/${{ env.GAME_NAME }}${{ matrix.deploy-platform }}.pck $TARGET/${{ env.GAME_NAME }}${{ matrix.deploy-platform }}.pck
+          cp -rf `pwd`/${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}.pck $TARGET/${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}.pck
           7z a -r $TARGET.zip $TARGET
         shell: bash
 
@@ -256,9 +216,9 @@ jobs:
         if: ${{ matrix.deploy }}
         uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
-          name: ${{ env.GAME_NAME }}${{ matrix.deploy-platform }}
+          name: ${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}
           path: |
-            ${{ env.GAME_NAME }}${{ matrix.deploy-platform }}
+            ${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}
 
       - name: Generate C# glue
         if: ${{ matrix.build-mono }}
@@ -360,7 +320,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           path: other
-      
+
       - name: Cache Go modules
         uses: actions/cache@v2
         with:
@@ -381,7 +341,6 @@ jobs:
 
       - name: Install Ninja Build
         run: sudo apt-get update && sudo apt-get install -y libglfw3-dev libxinerama-dev libxcursor-dev libxi-dev libsuitesparse-dev libmetis-dev ninja-build
-
 
       - name: Package Cockroachdb
         run: |

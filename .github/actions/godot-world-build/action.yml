@@ -3,25 +3,16 @@ description: Build Godot with the provided options.
 inputs:
   target:
     description: Build target (editor, template_release, template_debug).
-    default: "editor"
+    default: editor
   tests:
     description: Unit tests.
     default: false
-  build-arch:
+  arch:
     description: Arch.
     default: auto
   deploy:
     description: Deploy game.
     default: false
-  deploy-arch:
-    description: Deploy arch.
-    default: auto
-  deploy-platform:
-    description: Deploy game platform.
-    required: false
-  deploy-platform-target:
-    description: Deploy game target.
-    required: false
   platform:
     description: Target platform.
     required: false
@@ -47,15 +38,9 @@ runs:
       run: |
         mkdir -p bin modules/mono/glue 
         cd godot
-        if [[ "${{ inputs.deploy }}" == "true" ]]; then
-          PLATFORM=${{ inputs.deploy-platform }}
-          TARGET=${{ inputs.deploy-platform-target }}
-          ARCH=${{ inputs.deploy-arch }}
-        else
-          PLATFORM=${{ inputs.platform }}
-          TARGET=${{ inputs.target }}
-          ARCH=${{ inputs.build-arch }}
-        fi
+        export PLATFORM=${{ inputs.platform }}
+        export TARGET=${{ inputs.target }}
+        export ARCH=${{ inputs.arch }}
         echo "Building with flags:" platform=$PLATFORM target=$TARGET tests=${{ inputs.tests }} ${{ env.SCONSFLAGS }}
         if [ "$TARGET" != "editor" ]; then rm -rf editor; fi  # Ensure we don't include editor code.
         scons platform=$PLATFORM target=$TARGET arch=$ARCH tests=${{ inputs.tests }} ${{ env.SCONSFLAGS }}
