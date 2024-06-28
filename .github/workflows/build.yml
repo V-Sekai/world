@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  GAME_NAME: vsekai_game_
+  GAME_NAME: vsekai_game
   GODOT_REF: groups-4.3.2024-06-26T122053Z
   VSK_GAME_BRANCH: 70892822d21e47b0cb7e36436b042a8ce19e481f
   GODOT_REPOSITORY: v-sekai/godot
