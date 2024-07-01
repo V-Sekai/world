@@ -86,7 +86,7 @@ static func plan_to_graph_grammar(todo_list: Array, state: Dictionary) -> GraphG
 	var final_edge_labels = PackedStringArray(["next"])
 	var production_rules: Array[GraphGrammar.ProductionRule]
 	var initial_nonterminal_symbol = todo_list[0][0]
-
+	
 	var node_labels_dict = {}
 	for i in range(todo_list.size()):
 		var node = todo_list[i][0]
@@ -98,14 +98,19 @@ static func plan_to_graph_grammar(todo_list: Array, state: Dictionary) -> GraphG
 			node_labels_dict[node] = true
 
 		# If this is the last node in the todo list, add it to the list of terminal node labels
-		if i == todo_list.size() - 1:
+		# Exclude the initial nonterminal symbol from being added to terminal node labels
+		if i == todo_list.size() - 1 and node != initial_nonterminal_symbol:
 			terminal_node_labels.append(node)
 
 		# For each possible tile, create a production rule from the current node to that tile
 		for tile in possible_tiles:
+			# Add the tile to the list of all possible node labels if it's not already there
+			if !node_labels_dict.has(tile):
+				node_labels.append(tile)
+				node_labels_dict[tile] = true
+
 			var rule = GraphGrammar.ProductionRule.new("ex:rule" + str(i), "gg:Rule", node, [{"node": tile, "edge": "next"}])
 			production_rules.append(rule)
 
 	var graph_grammar = GraphGrammar.new("ex:myGraphGrammar", "gg:GraphGrammar", node_labels, terminal_node_labels, edge_labels, final_edge_labels, production_rules, initial_nonterminal_symbol)
-
 	return graph_grammar
