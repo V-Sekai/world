@@ -21,17 +21,16 @@ class GraphGrammar:
 	}
 	@export var id: String = "ex:myGraphGrammar"
 	@export var type: String = "gg:GraphGrammar"
-	@export var initialized: bool = false
 	class ProductionRule:
 		@export var id: String
 		@export var type: String
 		@export var left_hand_side: String
 		@export var right_hand_side: Array
 		func _init(_id: String, _type: String, _left_hand_side: String, _right_hand_side: Array):
-			self.id = _id
-			self.type = _type
-			self.left_hand_side = _left_hand_side
-			self.right_hand_side = _right_hand_side
+			id = _id
+			type = _type
+			left_hand_side = _left_hand_side
+			right_hand_side = _right_hand_side
 
 	@export var node_labels: PackedStringArray
 	@export var terminal_node_labels: PackedStringArray
@@ -48,7 +47,18 @@ class GraphGrammar:
 			if !set_dict.has(element):
 				return false
 		return true
+
 	func _init(_id: String, _type: String, _node_labels: PackedStringArray, _terminal_node_labels: PackedStringArray, _edge_labels: PackedStringArray, _final_edge_labels: PackedStringArray, _production_rules: Array[ProductionRule], _initial_nonterminal_symbol: String):
+		# Initialize with valid but non-empty default values
+		id = _id if _id != "" else "default_id"
+		type = _type if _type != "" else "default_type"
+		node_labels = _node_labels if not _node_labels.is_empty() else PackedStringArray(["default_node_label"])
+		terminal_node_labels = _terminal_node_labels if not _terminal_node_labels.is_empty() else PackedStringArray(["default_terminal_node_label"])
+		edge_labels = _edge_labels if not _edge_labels.is_empty() else PackedStringArray(["default_edge_label"])
+		final_edge_labels = _final_edge_labels if not _final_edge_labels.is_empty() else PackedStringArray(["default_final_edge_label"])
+		production_rules = _production_rules if not _production_rules.is_empty() else [ProductionRule()]
+		initial_nonterminal_symbol = _initial_nonterminal_symbol if not _initial_nonterminal_symbol.is_empty() else "default_initial_nonterminal_symbol"
+
 		if !all_in_array(_terminal_node_labels, _node_labels):
 			push_error("All terminal node labels must be in the set of all possible node labels.")
 			return
@@ -69,15 +79,17 @@ class GraphGrammar:
 				if !_edge_labels.has(rhs["edge"]):
 					push_error("Each edge in the right-hand side of each production rule must be a possible edge label.")
 					return
-		self.id = _id
-		self.type = _type
-		self.node_labels = _node_labels
-		self.terminal_node_labels = _terminal_node_labels
-		self.edge_labels = _edge_labels
-		self.final_edge_labels = _final_edge_labels
-		self.production_rules = _production_rules
-		self.initial_nonterminal_symbol = _initial_nonterminal_symbol
-		self.initialized = true
+
+		# If no errors, set the actual values
+		id = _id
+		type = _type
+		node_labels = _node_labels
+		terminal_node_labels = _terminal_node_labels
+		edge_labels = _edge_labels
+		final_edge_labels = _final_edge_labels
+		production_rules = _production_rules
+		initial_nonterminal_symbol = _initial_nonterminal_symbol
+
 
 static func plan_to_graph_grammar(todo_list: Array, state: Dictionary) -> GraphGrammar:
 	var node_labels = PackedStringArray()
