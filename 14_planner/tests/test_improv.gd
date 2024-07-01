@@ -2,7 +2,7 @@ extends "res://addons/gut/test.gd"
 
 var wfc: RefCounted
 
-const graph_grammar = preload("res://graph_grammar.gd")
+const const_graph_grammar = preload("res://graph_grammar.gd")
 
 
 func before_each():
@@ -30,13 +30,13 @@ func test_find_plan():
 	planner.verbose = 0
 	gut.p(todo_list)
 	gut.p(state)
-	var graph_grammar = graph_grammar.plan_to_graph_grammar(todo_list, state)
+	var graph_grammar = const_graph_grammar.plan_to_graph_grammar(todo_list, state)
 	gut.p(graph_grammar)
 	var result = planner.find_plan(state, todo_list)
 	#var is_valid = wfc.is_valid_sequence(state)
 	#assert_true(is_valid, "The sequence is valid.")
 	gut.p(result)
 	gut.p(state)
-	graph_grammar = graph_grammar.plan_to_graph_grammar(result, state)
+	graph_grammar = const_graph_grammar.plan_to_graph_grammar(result, state)
 	gut.p(graph_grammar)
 	assert_eq_deep(result, [["set_tile_state", 0, "root"], ["set_tile_state", 1, "Bob"], ["set_tile_state", 2, ": I have a"], ["set_tile_state", 3, "dog"], ["set_tile_state", 4, "who is"], ["set_tile_state", 5, "2 years old."], ["set_tile_state", 6, "end"]])
