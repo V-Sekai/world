@@ -1740,16 +1740,14 @@ void SceneTreeDock::_node_replace_owner(Node *p_base, Node *p_node, Node *p_root
 }
 
 void SceneTreeDock::_node_make_local_recursively_inner(Vector<Node *> p_bases, Node *p_node, Node *p_root) {
-	Ref<EditorUndoRedoManager> undo_redo = editor_data->get_undo_redo();
-
 	if (p_bases.has(p_node->get_owner()) && p_node != p_root) {
-		undo_redo->add_do_method(p_node, "set_owner", p_root);
-		undo_redo->add_undo_method(p_node, "set_owner", p_node->get_owner());
+		EditorUndoRedoManager::get_singleton()->add_do_method(p_node, "set_owner", p_root);
+		EditorUndoRedoManager::get_singleton()->add_undo_method(p_node, "set_owner", p_node->get_owner());
 
 		if (!p_node->get_scene_file_path().is_empty()) {
 			p_bases.push_back(p_node);
-			undo_redo->add_do_method(p_node, "set_scene_file_path", "");
-			undo_redo->add_undo_method(p_node, "set_scene_file_path", p_node->get_scene_file_path());
+			EditorUndoRedoManager::get_singleton()->add_do_method(p_node, "set_scene_file_path", "");
+			EditorUndoRedoManager::get_singleton()->add_undo_method(p_node, "set_scene_file_path", p_node->get_scene_file_path());
 		}
 	}
 
@@ -1759,11 +1757,9 @@ void SceneTreeDock::_node_make_local_recursively_inner(Vector<Node *> p_bases, N
 }
 
 void SceneTreeDock::_node_make_local_recursively(Vector<Node *> p_bases, Node *p_node, Node *p_root) {
-	Ref<EditorUndoRedoManager> undo_redo = editor_data->get_undo_redo();
-
 	// Check for the first node
-	undo_redo->add_do_method(p_node, "set_scene_file_path", "");
-	undo_redo->add_undo_method(p_node, "set_scene_file_path", p_node->get_scene_file_path());
+	EditorUndoRedoManager::get_singleton()->add_do_method(p_node, "set_scene_file_path", "");
+	EditorUndoRedoManager::get_singleton()->add_undo_method(p_node, "set_scene_file_path", p_node->get_scene_file_path());
 
 	_node_make_local_recursively_inner(p_bases, p_node, p_root);
 }
@@ -3726,7 +3722,7 @@ void SceneTreeDock::_tree_rmb(const Vector2 &p_menu_pos) {
 					menu->add_check_item(TTR("Editable Children"), TOOL_SCENE_EDITABLE_CHILDREN);
 					menu->set_item_shortcut(-1, ED_GET_SHORTCUT("scene_tree/toggle_editable_children"));
 					menu->add_check_item(TTR("Load As Placeholder"), TOOL_SCENE_USE_PLACEHOLDER);
-					if (selection[0]->get_owner() == EditorNode::get_singleton()->get_edited_scene()) {
+					if (selection.front() && selection.front()->get()->get_owner() == EditorNode::get_singleton()->get_edited_scene()) {
 						menu->add_item(TTR("Make Local"), TOOL_SCENE_MAKE_LOCAL);
 						menu->add_item(TTR("Make Local Recursively"), TOOL_SCENE_MAKE_LOCAL_RECURSIVELY);
 					}
