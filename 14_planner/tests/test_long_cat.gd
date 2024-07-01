@@ -94,5 +94,5 @@ func test_ready() -> void:
 
 	var task: Array = [["care_for_pet", "longcat"]]
 	var result = planner.find_plan(state, task)
-	print(result)
+	gut.p(result)
 	assert_eq_deep(result, [["release_pet", "longcat"], ["walk_pet", "longcat"], ["walk_pet", "longcat"], ["walk_pet", "longcat"], ["walk_pet", "longcat"], ["walk_pet", "longcat"]])
