@@ -1290,22 +1290,21 @@ void SceneTreeDock::_tool_selected(int p_tool, bool p_confirm_override) {
 				Node *node = e->get();
 				if (node) {
 					Node *root = EditorNode::get_singleton()->get_edited_scene();
-					Ref<EditorUndoRedoManager> undo_redo = editor_data->get_undo_redo();
 					if (!root) {
 						break;
 					}
 
 					ERR_FAIL_COND(node->get_owner() != root);
 					ERR_FAIL_COND(node->get_scene_file_path().is_empty());
-					undo_redo->create_action(TTR("Make Local Recursively"));
+					EditorUndoRedoManager::get_singleton()->create_action(TTR("Make Local Recursively"));
 
 					Vector<Node *> base_nodes;
 					base_nodes.push_back(node);
 					_node_make_local_recursively(base_nodes, node, root);
 
-					undo_redo->add_do_method(scene_tree, "update_tree");
-					undo_redo->add_undo_method(scene_tree, "update_tree");
-					undo_redo->commit_action();
+					EditorUndoRedoManager::get_singleton()->add_do_method(scene_tree, "update_tree");
+					EditorUndoRedoManager::get_singleton()->add_undo_method(scene_tree, "update_tree");
+					EditorUndoRedoManager::get_singleton()->commit_action();
 				}
 			}
 		} break;
