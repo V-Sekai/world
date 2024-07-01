@@ -3,7 +3,7 @@ extends "res://addons/gut/test.gd"
 var wfc: RefCounted
 
 const const_graph_grammar = preload("res://graph_grammar.gd")
-
+var improv = preload("res://improv.gd").new()
 
 func before_each():
 	wfc = load("res://improv.gd").new()
@@ -21,7 +21,7 @@ func test_find_plan():
 	var state = {}
 	for i in range(7):
 		var possible_tiles = []
-		for graph in wfc.possible_types["gg:nodeLabels"]:
+		for graph in improv.possible_types.node_labels:
 			possible_tiles.append(graph)
 		state[i] = { "tile": null, "possible_tiles": possible_tiles }
 	var todo_list: Array = [["meta_collapse_wave_function"]]

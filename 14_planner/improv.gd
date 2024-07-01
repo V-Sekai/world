@@ -32,150 +32,107 @@ func _find_lowest_entropy_square(state) -> Variant:
 	var chosen_key = min_squares[0]
 	return chosen_key
 
-# # Graph Grammars
-# Graph grammars extend formal string-based grammars to graphs. We use the algebraic approach, specifically Double-Pushout Graph Grammars (DPO), borrowing terms from category theory.
-# **Coding** and **GraphGrammars** are key concepts in this context.
-# For more details, refer to the [source](https://liacs.leidenuniv.nl/assets/PDF/TechRep/tr95-34.pdf).
-# # Definition 1: EdNCE Grammar
-# An **edNCE grammar** is a structured set, or tuple, `G = (Λ, Ξ, Σ, Π, P, S)` where:
-# - `Λ` represents the set of all possible node labels,
-# - `Ξ`, which is a subset of `Λ`, represents the set of terminal node labels,
-# - `Σ` represents the set of all possible edge labels,
-# - `Π`, which is a subset of `Σ`, represents the set of final edge labels,
-# - `P` is the finite set of production rules,
-# - `S` is the initial nonterminal symbol, which belongs to the set difference of `Λ` and `Ξ`.
-# A production rule is defined as `X -> (D, C)`, where `X` is a nonterminal symbol that belongs to the set difference of `Λ` and `Ξ`, `D` is a graph over `Λ` and `Σ`, and `C` is a subset of the Cartesian product of `Λ`, `Λ`, `V(D)`, and `fin; outg`.
-
-const possible_types = {
-  "@context": {
-	"gg": "http://v-sekai.com/graphgrammar#",
-	"ex": "http://v-sekai.com/ex#"
-  },
-  "@id": "ex:myGraphGrammar",
-  "@type": "gg:GraphGrammar",
-  "gg:nodeLabels": ["root", "Bob", "Alice", "Carol", ": I have a", "dog", "cat", "parrot", "who is", "2 years old.", "3 years old.", "4 years old.", "5 years old.", "6 years old.", "7 years old.", "end"],
-  "gg:terminalNodeLabels": ["end"],
-  "gg:edgeLabels": ["next"],
-  "gg:finalEdgeLabels": ["next"],
-  "gg:productionRules": [
-	{
-	  "@id": "ex:rule1",
-	  "@type": "gg:Rule",
-	  "gg:leftHandSide": "root",
-	  "gg:rightHandSide": [{"node": "Bob", "edge": "next"}, {"node": "Alice", "edge": "next"}, {"node": "Carol", "edge": "next"}]
-	},
-	{
-	  "@id": "ex:rule2",
-	  "@type": "gg:Rule",
-	  "gg:leftHandSide": "Bob",
-	  "gg:rightHandSide": [{"node": ": I have a", "edge": "next"}]
-	},
-	{
-	  "@id": "ex:rule3",
-	  "@type": "gg:Rule",
-	  "gg:leftHandSide": "Alice",
-	  "gg:rightHandSide": [{"node": ": I have a", "edge": "next"}]
-	},
-	{
-	  "@id": "ex:rule4",
-	  "@type": "gg:Rule",
-	  "gg:leftHandSide": "Carol",
-	  "gg:rightHandSide": [{"node": ": I have a", "edge": "next"}]
-	},
-	{
-	  "@id": "ex:rule5",
-	  "@type": "gg:Rule",
-	  "gg:leftHandSide": ": I have a",
-	  "gg:rightHandSide": [{"node": "dog", "edge": "next"}, {"node": "cat", "edge": "next"}, {"node": "parrot", "edge": "next"}]
-	},
-	{
-	  "@id": "ex:rule6",
-	  "@type": "gg:Rule",
-	  "gg:leftHandSide": "dog",
-	  "gg:rightHandSide": [{"node": "who is", "edge": "next"}]
-	},
-	{
-	  "@id": "ex:rule7",
-	  "@type": "gg:Rule",
-	  "gg:leftHandSide": "cat",
-	  "gg:rightHandSide": [{"node": "who is", "edge": "next"}]
-	},
-	{
-	  "@id": "ex:rule8",
-	  "@type": "gg:Rule",
-	  "gg:leftHandSide": "parrot",
-	  "gg:rightHandSide": [{"node": "who is", "edge": "next"}]
-	},
-	{
-	  "@id": "ex:rule9",
-	  "@type": "gg:Rule",
-	  "gg:leftHandSide": "who is",
-	  "gg:rightHandSide": [{"node": "2 years old.", "edge": "next"}, {"node": "3 years old.", "edge": "next"}, {"node": "4 years old.", "edge": "next"}, {"node": "5 years old.", "edge": "next"}, {"node": "6 years old.", "edge": "next"}, {"node": "7 years old.", "edge": "next"}]
-	},
-	{
-	  "@id": "ex:rule10",
-	  "@type": "gg:Rule",
-	  "gg:leftHandSide": "2 years old.",
-	  "gg:rightHandSide": [{"node": "end", "edge": "next"}]
-	},
-	{
-	  "@id": "ex:rule11",
-	  "@type": "gg:Rule",
-	  "gg:leftHandSide": "3 years old.",
-	  "gg:rightHandSide": [{"node": "end", "edge": "next"}]
-	},
-	{
-	  "@id": "ex:rule12",
-	  "@type": "gg:Rule",
-	  "gg:leftHandSide": "4 years old.",
-	  "gg:rightHandSide": [{"node": "end", "edge": "next"}]
-	},
-	{
-	  "@id": "ex:rule13",
-	  "@type": "gg:Rule",
-	  "gg:leftHandSide": "5 years old.",
-	  "gg:rightHandSide": [{"node": "end", "edge": "next"}]
-	},
-	{
-	  "@id": "ex:rule14",
-	  "@type": "gg:Rule",
-	  "gg:leftHandSide": "6 years old.",
-	  "gg:rightHandSide": [{"node": "end", "edge": "next"}]
-	},
-	{
-	  "@id": "ex:rule15",
-	  "@type": "gg:Rule",
-	  "gg:leftHandSide": "7 years old.",
-	  "gg:rightHandSide": [{"node": "end", "edge": "next"}]
+## # Graph Grammars
+## Graph grammars extend formal string-based grammars to graphs. We use the algebraic approach, specifically Double-Pushout Graph Grammars (DPO), borrowing terms from category theory.
+## **Coding** and **GraphGrammars** are key concepts in this context.
+## For more details, refer to the [source](https://liacs.leidenuniv.nl/assets/PDF/TechRep/tr95-34.pdf).
+## # Definition 1: EdNCE Grammar
+## An **edNCE grammar** is a structured set, or tuple, `G = (Λ, Ξ, Σ, Π, P, S)` where:
+## - `Λ` represents the set of all possible node labels,
+## - `Ξ`, which is a subset of `Λ`, represents the set of terminal node labels,
+## - `Σ` represents the set of all possible edge labels,
+## - `Π`, which is a subset of `Σ`, represents the set of final edge labels,
+## - `P` is the finite set of production rules,
+## - `S` is the initial nonterminal symbol, which belongs to the set difference of `Λ` and `Ξ`.
+## A production rule is defined as `X -> (D, C)`, where `X` is a nonterminal symbol that belongs to the set difference of `Λ` and `Ξ`, `D` is a graph over `Λ` and `Σ`, and `C` is a subset of the Cartesian product of `Λ`, `Λ`, `V(D)`, and `fin; outg`.
+class GraphGrammar:
+	const CONTEXT = {
+		"gg": "http://v-sekai.com/graphgrammar#",
+		"ex": "http://v-sekai.com/ex#"
 	}
-  ],
-  "gg:initialNonterminalSymbol": "root"
-}
+	var id: String = "ex:myGraphGrammar"
+	var type: String = "gg:GraphGrammar"
+	class ProductionRule:
+		var id: String
+		var type: String
+		var left_hand_side: String
+		var right_hand_side: Array
+		func _init(_id: String, _type: String, _left_hand_side: String, _right_hand_side: Array):
+			self.id = _id
+			self.type = _type
+			self.left_hand_side = _left_hand_side
+			self.right_hand_side = _right_hand_side
+	var node_labels: PackedStringArray
+	var terminal_node_labels: PackedStringArray
+	var edge_labels: PackedStringArray
+	var final_edge_labels: PackedStringArray
+	var production_rules: Array[ProductionRule]
+	var initial_nonterminal_symbol: String
+	func _init(_id: String, _type: String, _node_labels: PackedStringArray, _terminal_node_labels: PackedStringArray, _edge_labels: PackedStringArray, _final_edge_labels: PackedStringArray, _production_rules: Array[ProductionRule], _initial_nonterminal_symbol: String):
+		self.id = _id
+		self.type = _type
+		self.node_labels = _node_labels
+		self.terminal_node_labels = _terminal_node_labels
+		self.edge_labels = _edge_labels
+		self.final_edge_labels = _final_edge_labels
+		self.production_rules = _production_rules
+		self.initial_nonterminal_symbol = _initial_nonterminal_symbol
+
+var possible_types: GraphGrammar = null
+
+func _fill():
+	var production_rules = [
+		possible_types.ProductionRule.new("ex:rule1", "gg:Rule", "root", [{"node": "Bob", "edge": "next"}, {"node": "Alice", "edge": "next"}, {"node": "Carol", "edge": "next"}]),
+		possible_types.ProductionRule.new("ex:rule2", "gg:Rule", "Bob", [{"node": ": I have a", "edge": "next"}]),
+		possible_types.ProductionRule.new("ex:rule3", "gg:Rule", "Alice", [{"node": ": I have a", "edge": "next"}]),
+		possible_types.ProductionRule.new("ex:rule4", "gg:Rule", "Carol", [{"node": ": I have a", "edge": "next"}]),
+		possible_types.ProductionRule.new("ex:rule5", "gg:Rule", ": I have a", [{"node": "dog", "edge": "next"}, {"node": "cat", "edge": "next"}, {"node": "parrot", "edge": "next"}]),
+		possible_types.ProductionRule.new("ex:rule6", "gg:Rule", "dog", [{"node": "who is", "edge": "next"}]),
+		possible_types.ProductionRule.new("ex:rule7", "gg:Rule", "cat", [{"node": "who is", "edge": "next"}]),
+		possible_types.ProductionRule.new("ex:rule8", "gg:Rule", "parrot", [{"node": "who is", "edge": "next"}]),
+		possible_types.ProductionRule.new("ex:rule9", "gg:Rule", "who is", [{"node": "2 years old.", "edge": "next"}, {"node": "3 years old.", "edge": "next"}, {"node": "4 years old.", "edge": "next"}, {"node": "5 years old.", "edge": "next"}, {"node": "6 years old.", "edge": "next"}, {"node": "7 years old.", "edge": "next"}]),
+		possible_types.ProductionRule.new("ex:rule10", "gg:Rule", "2 years old.", [{"node": "end", "edge": "next"}]),
+		possible_types.ProductionRule.new("ex:rule11", "gg:Rule", "3 years old.", [{"node": "end", "edge": "next"}]),
+		possible_types.ProductionRule.new("ex:rule12", "gg:Rule", "4 years old.", [{"node": "end", "edge": "next"}]),
+		possible_types.ProductionRule.new("ex:rule13", "gg:Rule", "5 years old.", [{"node": "end", "edge": "next"}]),
+		possible_types.ProductionRule.new("ex:rule14", "gg:Rule", "6 years old.", [{"node": "end", "edge": "next"}]),
+		possible_types.ProductionRule.new("ex:rule15", "gg:Rule", "7 years old.", [{"node": "end", "edge": "next"}])
+	]
+	possible_types = GraphGrammar.new(
+	"ex:myGraphGrammar", 
+	"gg:GraphGrammar", 
+	["root", "Bob", "Alice", "Carol", ": I have a", "dog", "cat", "parrot", "who is", "2 years old.", "3 years old.", "4 years old.", "5 years old.", "6 years old.", "7 years old.", "end"], 
+	["end"], 
+	["next"], 
+	["next"], 
+	production_rules,
+	"root"
+)
 
 func update_possible_tiles(state, coordinates, chosen_tile):
 	var todos = []
-	
+
 	# Return early if chosen_tile is null
 	if chosen_tile == null:
 		return todos
 
 	if state.has(coordinates) and "possible_tiles" in state[coordinates]:
 		var possible_tiles = state[coordinates]["possible_tiles"]
-		
+
 		# Find the right-hand side nodes for the chosen tile
 		var next_nodes = []
-		for rule in possible_types["gg:productionRules"]:
-			if rule["gg:leftHandSide"] == chosen_tile:
-				for node in rule["gg:rightHandSide"]:
+		for rule in possible_types.production_rules:
+			if rule.left_hand_side == chosen_tile:
+				for node in rule.right_hand_side:
 					next_nodes.append(node['node'])
 				break
-		
+
 		var difference = array_difference(possible_tiles, next_nodes)
-		
+
 		# Remove the tiles that are not in the next nodes
 		for tile in difference:
 			possible_tiles.erase(tile)
-		
+
 		todos.append(["remove_possible_tiles", coordinates, difference])
 		todos.append(["set_tile_state", coordinates, possible_tiles])
 	return todos
