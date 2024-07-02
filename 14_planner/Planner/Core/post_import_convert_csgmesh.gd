@@ -10,11 +10,7 @@ func _post_import(scene):
 		csg_mesh.name = node.name
 		node.queue_free()
 		node.replace_by(csg_mesh, true)
-		var mtoon_material: ShaderMaterial = ShaderMaterial.new()
-		var mtoon_shader = load("res://addons/Godot-MToon-Shader/mtoon.gdshader")
-		mtoon_material.shader = mtoon_shader
-		mtoon_material.set_shader_parameter("_ShadeColor", Color(0, 0, 0))
-		mtoon_material.set_script(load("res://addons/Godot-MToon-Shader/inspector_mtoon.gd"))
-		csg_mesh.material = mtoon_material
-
+		var material: StandardMaterial3D = StandardMaterial3D.new()
+		material.albedo_texture = preload("res://Planner/Art/Brick/Manifold/bevel-hq-plate-corner_colormap.png")
+		csg_mesh.material = material
 	return scene
