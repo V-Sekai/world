@@ -8,7 +8,6 @@ func _init() -> void:
 	add_actions([set_tile_state, remove_possible_tiles])
 	add_task_methods("collapse_wave_function", [collapse_wave_function])
 	add_task_methods("meta_collapse_wave_function", [meta_collapse_wave_function])
-	add_task_methods("update_possible_tiles", [update_possible_tiles])
 	var production_rules: Array[const_graph_grammar.GraphGrammar.ProductionRule] = [
 		const_graph_grammar.GraphGrammar.ProductionRule.new("ex:rule1", "gg:Rule", "root", [{"node": "Bob", "edge": "next"}, {"node": "Alice", "edge": "next"}, {"node": "Carol", "edge": "next"}]),
 		const_graph_grammar.GraphGrammar.ProductionRule.new("ex:rule2", "gg:Rule", "Bob", [{"node": ": I have a", "edge": "next"}]),
@@ -61,33 +60,18 @@ func _find_lowest_entropy_square(state) -> Variant:
 	var chosen_key = min_squares[0]
 	return chosen_key
 
-func update_possible_tiles(state, coordinates, chosen_tile):
-	var todos = []
+var rng_seed = hash("Godot Engine")
+var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
-	# Return early if chosen_tile is null
-	if chosen_tile == null:
-		return todos
-
-	if state.has(coordinates) and "possible_tiles" in state[coordinates]:
-		var possible_tiles = state[coordinates]["possible_tiles"]
-
-		# Find the right-hand side nodes for the chosen tile
-		var next_nodes = []
-		for rule in possible_types.production_rules:
-			if rule.left_hand_side == chosen_tile:
-				for node in rule.right_hand_side:
-					next_nodes.append(node['node'])
-				break
-
-		var difference = array_difference(possible_tiles, next_nodes)
-
-		# Remove the tiles that are not in the next nodes
-		for tile in difference:
-			possible_tiles.erase(tile)
-
-		todos.append(["remove_possible_tiles", coordinates, difference])
-		todos.append(["set_tile_state", coordinates, possible_tiles])
-	return todos
+func custom_shuffle(array: Array, rng: RandomNumberGenerator) -> Array:
+	var n = array.size()
+	while n > 1:
+		n -= 1
+		var k = rng.randi() % (n + 1)
+		var value = array[k]
+		array[k] = array[n]
+		array[n] = value
+	return array
 
 static func array_difference(a1: Array, a2: Array) -> Array:
 	var diff = []
@@ -117,6 +101,8 @@ func collapse_wave_function(state: Dictionary) -> Array:
 		var previous_tile = state[key - 1]["tile"]
 		for rule in possible_types.production_rules:
 			if rule.left_hand_side == previous_tile:
+				rng.seed = rng_seed
+				rule.right_hand_side = custom_shuffle(rule.right_hand_side, rng)
 				for node in rule.right_hand_side:
 					if node['node'] in possible_tiles:
 						chosen_tile = node['node']

@@ -43,4 +43,4 @@ func test_find_plan():
 	graph_grammar = const_graph_grammar.plan_to_graph_grammar(result, state)
 	gut.p("Graph Grammar: ")
 	gut.p(JSON.from_native(graph_grammar, true, true))
-	assert_eq_deep(result, [["set_tile_state", 0, "root"], ["set_tile_state", 1, "Bob"], ["set_tile_state", 2, ": I have a"], ["set_tile_state", 3, "dog"], ["set_tile_state", 4, "who is"], ["set_tile_state", 5, "2 years old."], ["set_tile_state", 6, "end"]])
+	assert_eq_deep(result, [["set_tile_state", 0, "root"], ["set_tile_state", 1, "Carol"], ["set_tile_state", 2, ": I have a"], ["set_tile_state", 3, "parrot"], ["set_tile_state", 4, "who is"], ["set_tile_state", 5, "7 years old."], ["set_tile_state", 6, "end"]])
