@@ -56,7 +56,7 @@ class GraphGrammar:
 		terminal_node_labels = _terminal_node_labels if not _terminal_node_labels.is_empty() else PackedStringArray(["default_terminal_node_label"])
 		edge_labels = _edge_labels if not _edge_labels.is_empty() else PackedStringArray(["default_edge_label"])
 		final_edge_labels = _final_edge_labels if not _final_edge_labels.is_empty() else PackedStringArray(["default_final_edge_label"])
-		production_rules = _production_rules if not _production_rules.is_empty() else [ProductionRule()]
+		production_rules = _production_rules if not _production_rules.is_empty() else [ProductionRule.new("default_production_rule_id", "default_rule_type", "default_left_hand_side", [])]
 		initial_nonterminal_symbol = _initial_nonterminal_symbol if not _initial_nonterminal_symbol.is_empty() else "default_initial_nonterminal_symbol"
 
 		if !all_in_array(_terminal_node_labels, _node_labels):
