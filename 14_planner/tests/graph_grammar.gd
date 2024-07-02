@@ -54,32 +54,36 @@ func _init(_id: String, _type: String, _node_labels: PackedStringArray, _termina
 	id = _id if _id != "" else "default_id"
 	type = _type if _type != "" else "default_type"
 	node_labels = _node_labels if not _node_labels.is_empty() else PackedStringArray(["default_node_label"])
-	terminal_node_labels = _terminal_node_labels if not _terminal_node_labels.is_empty() else PackedStringArray(["default_terminal_node_label"])
+	terminal_node_labels = _terminal_node_labels if not _terminal_node_labels.is_empty() else PackedStringArray(["default_terminal_label"])
 	edge_labels = _edge_labels if not _edge_labels.is_empty() else PackedStringArray(["default_edge_label"])
 	final_edge_labels = _final_edge_labels if not _final_edge_labels.is_empty() else PackedStringArray(["default_final_edge_label"])
 	production_rules = _production_rules if not _production_rules.is_empty() else [ProductionRule.new("default_production_rule_id", "default_rule_type", "default_left_hand_side", [])]
-	initial_nonterminal_symbol = _initial_nonterminal_symbol if not _initial_nonterminal_symbol.is_empty() else "default_initial_nonterminal_symbol"
+	initial_nonterminal_symbol = _initial_nonterminal_symbol if not _initial_nonterminal_symbol.is_empty() else "default_initial_nonterminal"
 
 	if !all_in_array(_terminal_node_labels, _node_labels):
-		push_error("All terminal node labels must be in the set of all possible node labels.")
+		push_error("All terminal node labels must be in the set of all possible node labels. Problematic labels: " + str(_terminal_node_labels))
 		return
 	if !all_in_array(_final_edge_labels, _edge_labels):
-		push_error("All final edge labels must be in the set of all possible edge labels.")
+		push_error("All final edge labels must be in the set of all possible edge labels. Problematic labels: " + str(_final_edge_labels))
 		return
 	if _terminal_node_labels.has(_initial_nonterminal_symbol):
-		push_error("The initial nonterminal symbol must not be a terminal node label.")
+		push_error("The initial nonterminal symbol must not be a terminal node label. Problematic symbol: " + str(_initial_nonterminal_symbol))
+		return
+	if !node_labels.has(_initial_nonterminal_symbol):
+		push_error("The initial nonterminal symbol must be in the node labels. Problematic symbol: " + str(_initial_nonterminal_symbol))
 		return
 	for rule in _production_rules:
 		if !_node_labels.has(rule.left_hand_side):
-			push_error("The left-hand side of each production rule must be a possible node label.")
+			push_error("The left-hand side of each production rule must be a possible node label. Problematic label: " + str(rule.left_hand_side))
 			return
 		for rhs in rule.right_hand_side:
-			if !_node_labels.has(rhs["node"]):
-				push_error("Each node in the right-hand side of each production rule must be a possible node label.")
-				return
-			if !_edge_labels.has(rhs["edge"]):
-				push_error("Each edge in the right-hand side of each production rule must be a possible edge label.")
-				return
+			if rhs["edge"] == "next":
+				if !_node_labels.has(rhs["node"]):
+					push_error("Each node in the right-hand side of each production rule must be a possible node label. Problematic node: " + str(rhs["node"]))
+					return
+				if !_edge_labels.has(rhs["edge"]):
+					push_error("Each edge in the right-hand side of each production rule must be a possible edge label. Problematic edge: " + str(rhs["edge"]))
+					return
 
 	# If no errors, set the actual values
 	id = _id

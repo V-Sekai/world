@@ -98,12 +98,12 @@ func collapse_wave_function(state: Dictionary) -> Array:
 
 	# If this is the first tile, choose a starting tile
 	if key == 0:
-		chosen_tile = state["is_tile"][key]
+		chosen_tile = possible_types.initial_nonterminal_symbol
 	else:
 		# Otherwise, choose a tile based on the previous tile and the graph grammar rules
 		var previous_tile = state["is_tile"][key - 1]
 		for rule in possible_types.production_rules:
-			if rule.left_hand_side == previous_tile:
+			if rule.left_hand_side in previous_tile:
 				rng.seed = rng_seed
 				rule.right_hand_side = custom_shuffle(rule.right_hand_side, rng)
 				for node in rule.right_hand_side:
@@ -115,11 +115,12 @@ func collapse_wave_function(state: Dictionary) -> Array:
 
 	if chosen_tile == null:
 		# If no valid tile was found, choose a random tile
-		chosen_tile = possible_tiles[0]
+		rng.seed = rng_seed
+		chosen_tile = custom_shuffle(possible_tiles, rng).front()
 
 	possible_tiles.erase(chosen_tile)
-	result[0].append(key)
-	result[0].append(chosen_tile)
+	result.front().append(key)
+	result.front().append(chosen_tile)
 	return result
 
 
