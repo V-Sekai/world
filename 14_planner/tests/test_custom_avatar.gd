@@ -5,16 +5,23 @@ func test_custom_avatar_find_plan():
 	var animator_setup = GraphGrammar.ProductionRule.new("AnimatorSetup", "gg:Rule", "setup_animators", [{"node": "Set up your animators as normal.", "edge": "next"}])
 	var post_setup = GraphGrammar.ProductionRule.new("PostSetup", "gg:Rule", "Drag and drop the outfit prefab onto the avatar.", [{"node": "after_setup", "edge": "next"}])
 	var merge_bones = GraphGrammar.ProductionRule.new("MergeBones", "gg:Rule", "after_setup", [{"node": "The component will automatically merge the bone hierarchy with the original avatar's bones.", "edge": "next"}])
+	var setup_bone_proxies = GraphGrammar.ProductionRule.new("SetupBoneProxies", "gg:Rule", "after_setup", [{"node": "Set up bone proxies for all collider objects.", "edge": "next"}])
+	var setup_cloth_colliders = GraphGrammar.ProductionRule.new("SetupClothColliders", "gg:Rule", "SetupBoneProxies", [{"node": "Ensure cloth colliders are working correctly.", "edge": "next"}])
+	var setup_blendshape_sync = GraphGrammar.ProductionRule.new("SetupBlendshapeSync", "gg:Rule", "SetupClothColliders", [{"node": "Set up blendshape sync components for Skirt and Tops.", "edge": "next"}])
+	
 	var production_rules: Array[GraphGrammar.ProductionRule]
 	production_rules.append(drag_drop_outfit)
 	production_rules.append(animator_setup)
 	production_rules.append(post_setup)
 	production_rules.append(merge_bones)
+	production_rules.append(setup_bone_proxies)
+	production_rules.append(setup_cloth_colliders)
+	production_rules.append(setup_blendshape_sync)
 
 	var possible_types = GraphGrammar.new(
 		"ex:myGraphGrammar", 
 		"gg:GraphGrammar", 
-		["setup_outfit_prefab", "setup_animators", "Drag and drop the outfit prefab onto the avatar.", "after_setup", "The component will automatically merge the bone hierarchy with the original avatar's bones.", "end"], 
+		["setup_outfit_prefab", "setup_animators", "Drag and drop the outfit prefab onto the avatar.", "after_setup", "The component will automatically merge the bone hierarchy with the original avatar's bones.", "Set up bone proxies for all collider objects.", "Ensure cloth colliders are working correctly.", "Set up blendshape sync components for Skirt and Tops.", "end"], 
 		["end"], 
 		["next"], 
 		["next"], 
