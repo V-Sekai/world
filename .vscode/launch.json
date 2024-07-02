@@ -13,7 +13,7 @@
       "request": "launch",
       "args": ["--path", "${workspaceFolder}/14_planner", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/19_godot/bin/godot.macos.editor.double.arm64",
+      "program": "${workspaceFolder}/19_godot/bin/godot.windows.editor.double.x86_64",
       "preLaunchTask": "Godot Engine"
     },
   ]
