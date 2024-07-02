@@ -69,9 +69,7 @@ func test_find_plan():
 		state = merge_dicts(state, {"has_possible_tiles": {i: possible_tiles}})
 		state = merge_dicts(state, {"is_tile": {i: null}})
 	
-	var todo_list: Array = [["meta_collapse_wave_function"]]
-	assert_eq_deep(todo_list, [["meta_collapse_wave_function"]])
-	gut.p("State: ")
+	var todo_list: Array = [["meta_collapse_wave_function", planner.current_domain.GridDimensions.new()]]
 	gut.p(state)
 	assert_eq_deep(state, { "has_possible_tiles": { 0: ["root", "Bob", "Alice", "Carol", ": I have a", "dog", "cat", "parrot", "who is", "2 years old.", "3 years old.", "4 years old.", "5 years old.", "6 years old.", "7 years old.", "end"], 1: ["root", "Bob", "Alice", "Carol", ": I have a", "dog", "cat", "parrot", "who is", "2 years old.", "3 years old.", "4 years old.", "5 years old.", "6 years old.", "7 years old.", "end"], 2: ["root", "Bob", "Alice", "Carol", ": I have a", "dog", "cat", "parrot", "who is", "2 years old.", "3 years old.", "4 years old.", "5 years old.", "6 years old.", "7 years old.", "end"], 3: ["root", "Bob", "Alice", "Carol", ": I have a", "dog", "cat", "parrot", "who is", "2 years old.", "3 years old.", "4 years old.", "5 years old.", "6 years old.", "7 years old.", "end"], 4: ["root", "Bob", "Alice", "Carol", ": I have a", "dog", "cat", "parrot", "who is", "2 years old.", "3 years old.", "4 years old.", "5 years old.", "6 years old.", "7 years old.", "end"], 5: ["root", "Bob", "Alice", "Carol", ": I have a", "dog", "cat", "parrot", "who is", "2 years old.", "3 years old.", "4 years old.", "5 years old.", "6 years old.", "7 years old.", "end"], 6: ["root", "Bob", "Alice", "Carol", ": I have a", "dog", "cat", "parrot", "who is", "2 years old.", "3 years old.", "4 years old.", "5 years old.", "6 years old.", "7 years old.", "end"] }, "is_tile": { 0: null, 1: null, 2: null, 3: null, 4: null, 5: null, 6: null } })
 	var result = planner.find_plan(state, todo_list)

@@ -51,7 +51,7 @@ func test_custom_avatar_find_plan():
 			possible_tiles.append(graph)
 		state = merge_dicts(state, {"has_possible_tiles": {i: possible_tiles}})
 		state = merge_dicts(state, {"is_tile": {i: null}})
-	var todo_list: Array = [["meta_collapse_wave_function"]]
+	var todo_list: Array = [["meta_collapse_wave_function", planner.current_domain.GridDimensions.new()]]
 	planner.verbose = 0
 	gut.p("Todo list: ")
 	gut.p(todo_list)

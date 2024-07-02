@@ -83,8 +83,18 @@ func set_tile_state(state: Dictionary, coordinate, chosen_tile) -> Dictionary:
 	if state["is_tile"].has(coordinate):
 		state["is_tile"][coordinate] = chosen_tile
 	return state
+	
+class GridDimensions:
+	var width = INF
+	var height = 1
+	var depth = 1
 
-func collapse_wave_function(state: Dictionary) -> Array:
+	func _init(width = INF, height = 1, depth = 1):
+		self.width = width
+		self.height = height
+		self.depth = depth
+		
+func collapse_wave_function(state: Dictionary, grid_dimension: GridDimensions) -> Array:
 	var result = [[]]
 	var key = _find_lowest_entropy_square(state)
 
@@ -135,14 +145,14 @@ static func print_side_effect(state, message) -> Dictionary:
 	return state
 
 
-func meta_collapse_wave_function(state):
+func meta_collapse_wave_function(state, grid_dimension: GridDimensions):
 	var old_state = state["is_tile"].duplicate()  # Save the old is_tile for comparison
 	for key in state["has_possible_tiles"]:
 		if state["has_possible_tiles"][key].size() == 0:
 			return []
 	if not all_tiles_have_state(state):
-		var todo_list = [["collapse_wave_function"]]
-		todo_list.append(["meta_collapse_wave_function"])
+		var todo_list = [["collapse_wave_function", grid_dimension]]
+		todo_list.append(["meta_collapse_wave_function", grid_dimension])
 		return todo_list
 	elif state["is_tile"] == old_state:  # If the is_tile hasn't changed, stop the recursion
 		return []
@@ -169,7 +179,7 @@ func meta_collapse_wave_function(state):
 	if all_tiles_have_state(state) or state["is_tile"] == old_state:
 		return []
 	else:
-		return [["meta_collapse_wave_function"]]
+		return [["meta_collapse_wave_function", grid_dimension]]
 
 
 func is_valid_sequence(state: Dictionary) -> bool:
