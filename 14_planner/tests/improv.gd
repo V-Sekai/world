@@ -70,7 +70,7 @@ func collapse_wave_function(state: Dictionary) -> Array:
 
 	# If this is the first tile, choose a starting tile
 	if key == 0:
-		chosen_tile = "root"
+		chosen_tile = state[key]["tile"]
 	else:
 		# Otherwise, choose a tile based on the previous tile and the graph grammar rules
 		var previous_tile = state[key - 1]["tile"]

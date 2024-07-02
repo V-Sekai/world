@@ -4,10 +4,12 @@ func test_calculate_entropy():
 	var square = {"possible_tiles": ["A", "B", "C"]}
 	assert_eq(Improv._calculate_entropy(square), 3)
 
+
 func test_array_difference():
 	var a1 = ["A", "B", "C"]
 	var a2 = ["B"]
 	assert_eq(Improv.array_difference(a1, a2), ["A", "C"])
+
 
 func test_find_plan():
 	var state = {}
