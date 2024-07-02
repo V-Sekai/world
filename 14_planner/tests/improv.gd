@@ -7,7 +7,7 @@ class_name Improv
 @export var possible_types: GraphGrammar = null
 
 func _init() -> void:
-	add_actions([set_tile_state, remove_possible_tiles])
+	add_actions([set_tile_state])
 	add_task_methods("collapse_wave_function", [collapse_wave_function])
 	add_task_methods("meta_collapse_wave_function", [meta_collapse_wave_function])
 	
@@ -15,25 +15,28 @@ func _init() -> void:
 static func _calculate_entropy(square) -> int:
 	return len(square["possible_tiles"])
 
+
 static func _find_lowest_entropy_square(state) -> Variant:
 	var min_entropy = INF
 	var min_squares = []
-	for key in state:
-		var square = state[key]
-		if len(square["possible_tiles"]) <= 1: # Skip if the square is solved
+	
+	for key in state["has_possible_tiles"]:
+		var possible_tiles = state["has_possible_tiles"][key]
+		if len(possible_tiles) <= 1: # Skip if the square is solved
 			continue
-		var entropy = len(square["possible_tiles"])
+		var entropy = len(possible_tiles)
 		if entropy < min_entropy:
 			min_entropy = entropy
 			min_squares = [key]
 		elif entropy == min_entropy:
 			min_squares.append(key)
-	
+
 	if len(min_squares) == 0:
 		return null
-	
+
 	var chosen_key = min_squares[0]
 	return chosen_key
+
 
 var rng_seed = hash("Godot Engine")
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
@@ -55,6 +58,31 @@ static func array_difference(a1: Array, a2: Array) -> Array:
 			diff.append(element)
 	return diff
 
+## Function to find the square with the lowest entropy
+func calculate_square(state):
+	return _find_lowest_entropy_square(state)
+
+# Function to check if all tiles have a state
+func all_tiles_have_state(state: Dictionary) -> bool:
+	for key in state.keys():
+		if key.begins_with("is_tile"):
+			for sub_key in state[key].keys():
+				if state[key][sub_key] == null:
+					return false
+		elif key.begins_with("has_possible_tiles"):
+			for sub_key in state[key].keys():
+				if typeof(state[key][sub_key]) != TYPE_ARRAY or state[key][sub_key].is_empty():
+					return false
+	return true
+
+
+func set_tile_state(state: Dictionary, coordinate, chosen_tile) -> Dictionary:
+	if state["has_possible_tiles"].has(coordinate):
+		state["has_possible_tiles"][coordinate] = [chosen_tile]
+	if state["is_tile"].has(coordinate):
+		state["is_tile"][coordinate] = chosen_tile
+	return state
+
 func collapse_wave_function(state: Dictionary) -> Array:
 	var result = [["set_tile_state"]]
 	var key = _find_lowest_entropy_square(state)
@@ -65,15 +93,15 @@ func collapse_wave_function(state: Dictionary) -> Array:
 		else:
 			return []
 
-	var possible_tiles: Array = state[key]["possible_tiles"]
+	var possible_tiles: Array = state["has_possible_tiles"][key]
 	var chosen_tile = null
 
 	# If this is the first tile, choose a starting tile
 	if key == 0:
-		chosen_tile = state[key]["tile"]
+		chosen_tile = state["is_tile"][key]
 	else:
 		# Otherwise, choose a tile based on the previous tile and the graph grammar rules
-		var previous_tile = state[key - 1]["tile"]
+		var previous_tile = state["is_tile"][key - 1]
 		for rule in possible_types.production_rules:
 			if rule.left_hand_side == previous_tile:
 				rng.seed = rng_seed
@@ -94,58 +122,41 @@ func collapse_wave_function(state: Dictionary) -> Array:
 	result[0].append(chosen_tile)
 	return result
 
-func set_tile_state(state, coordinate, chosen_tile) -> Dictionary:
-	if state.has(coordinate):
-		state[coordinate]["tile"] = chosen_tile
-		state[coordinate]["possible_tiles"] = [chosen_tile]
-	return state
 
-func remove_possible_tiles(state, coordinate, chosen_tiles: Array) -> Dictionary:
-	if state.has(coordinate):
-		if state[coordinate].has("possible_tiles"):
-			var possible_tiles = state[coordinate]["possible_tiles"]
-			for tile in chosen_tiles:
-				possible_tiles.erase(tile)
-	return state
-
-## Function to find the square with the lowest entropy
-func calculate_square(state):
-	return _find_lowest_entropy_square(state)
-
-# Function to check if all tiles have a state
-func all_tiles_have_state(state):
-	for key in state:
-		var square = state[key]
-		if square["tile"] == null or len(square["possible_tiles"]) != 1: # If a square's tile is null or doesn't have exactly one possible tile, it doesn't have a state yet
-			return false
-	return true
-	
 func meta_collapse_wave_function(state):
-	var old_state = state.duplicate()  # Save the old state for comparison
-	for key in state:
-		if 'type' in state[key] and state[key]['type'] == "gg:initialNonterminalSymbol":
+	var old_state = state["is_tile"].duplicate()  # Save the old is_tile for comparison
+	for key in state["has_possible_tiles"]:
+		if state["has_possible_tiles"][key].size() == 0:
 			return []
 	if not all_tiles_have_state(state):
 		var todo_list = [["collapse_wave_function"]]
 		todo_list.append(["meta_collapse_wave_function"])
 		return todo_list
-	elif old_state == state:  # If the state hasn't changed, stop the recursion
+	elif state["is_tile"] == old_state:  # If the is_tile hasn't changed, stop the recursion
 		return []
 	else:
 		var possible_tiles = []
 		for graph in possible_types["gg:nodeLabels"]:
 			possible_tiles.append(graph)
-		state[0] = { "tile": null, "possible_tiles": possible_tiles }
+		state["has_possible_tiles"][0] = possible_tiles  # Set the first tile's possible tiles
+		state["is_tile"][0] = null  # Set the first tile to null
 		
 		# Remove null states if 'end' is found
-		for key in state:
-			if state[key]['tile'] == "gg:initialNonterminalSymbol":
-				var new_state = {}
-				for k in state.keys():
-					if state[k]['tile'] != null:
-						new_state[k] = state[k]
-				state = new_state
+		for key in state["is_tile"]:
+			if state["is_tile"][key] in possible_types.terminal_node_labels:  # Check for 'end' symbol
+				var new_state = { "has_possible_tiles": {}, "is_tile": {} }
+				for k in state["is_tile"].keys():
+					if state["is_tile"][k] != null:
+						new_state["has_possible_tiles"][k] = state["has_possible_tiles"][k]
+						new_state["is_tile"][k] = state["is_tile"][k]
+				state.clear()  # Clear the original state
+				state.update(new_state)  # Update the original state with the new state
 				break
+
+	# Check conditions again before recursive call
+	if all_tiles_have_state(state) or state["is_tile"] == old_state:
+		return []
+	else:
 		return [["meta_collapse_wave_function"]]
 
 
