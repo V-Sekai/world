@@ -2,11 +2,8 @@ extends "res://addons/gut/test.gd"
 
 var wfc: RefCounted
 
-const const_graph_grammar = preload("res://graph_grammar.gd")
-
 class Improv extends Domain:
 	# https://robertheaton.com/2018/12/17/wavefunction-collapse-algorithm/
-	const const_graph_grammar = preload("res://graph_grammar.gd")
 	
 	@export var possible_types = null
 
@@ -14,24 +11,24 @@ class Improv extends Domain:
 		add_actions([set_tile_state, remove_possible_tiles])
 		add_task_methods("collapse_wave_function", [collapse_wave_function])
 		add_task_methods("meta_collapse_wave_function", [meta_collapse_wave_function])
-		var production_rules: Array[const_graph_grammar.GraphGrammar.ProductionRule] = [
-			const_graph_grammar.GraphGrammar.ProductionRule.new("ex:rule1", "gg:Rule", "root", [{"node": "Bob", "edge": "next"}, {"node": "Alice", "edge": "next"}, {"node": "Carol", "edge": "next"}]),
-			const_graph_grammar.GraphGrammar.ProductionRule.new("ex:rule2", "gg:Rule", "Bob", [{"node": ": I have a", "edge": "next"}]),
-			const_graph_grammar.GraphGrammar.ProductionRule.new("ex:rule3", "gg:Rule", "Alice", [{"node": ": I have a", "edge": "next"}]),
-			const_graph_grammar.GraphGrammar.ProductionRule.new("ex:rule4", "gg:Rule", "Carol", [{"node": ": I have a", "edge": "next"}]),
-			const_graph_grammar.GraphGrammar.ProductionRule.new("ex:rule5", "gg:Rule", ": I have a", [{"node": "dog", "edge": "next"}, {"node": "cat", "edge": "next"}, {"node": "parrot", "edge": "next"}]),
-			const_graph_grammar.GraphGrammar.ProductionRule.new("ex:rule6", "gg:Rule", "dog", [{"node": "who is", "edge": "next"}]),
-			const_graph_grammar.GraphGrammar.ProductionRule.new("ex:rule7", "gg:Rule", "cat", [{"node": "who is", "edge": "next"}]),
-			const_graph_grammar.GraphGrammar.ProductionRule.new("ex:rule8", "gg:Rule", "parrot", [{"node": "who is", "edge": "next"}]),
-			const_graph_grammar.GraphGrammar.ProductionRule.new("ex:rule9", "gg:Rule", "who is", [{"node": "2 years old.", "edge": "next"}, {"node": "3 years old.", "edge": "next"}, {"node": "4 years old.", "edge": "next"}, {"node": "5 years old.", "edge": "next"}, {"node": "6 years old.", "edge": "next"}, {"node": "7 years old.", "edge": "next"}]),
-			const_graph_grammar.GraphGrammar.ProductionRule.new("ex:rule10", "gg:Rule", "2 years old.", [{"node": "end", "edge": "next"}]),
-			const_graph_grammar.GraphGrammar.ProductionRule.new("ex:rule11", "gg:Rule", "3 years old.", [{"node": "end", "edge": "next"}]),
-			const_graph_grammar.GraphGrammar.ProductionRule.new("ex:rule12", "gg:Rule", "4 years old.", [{"node": "end", "edge": "next"}]),
-			const_graph_grammar.GraphGrammar.ProductionRule.new("ex:rule13", "gg:Rule", "5 years old.", [{"node": "end", "edge": "next"}]),
-			const_graph_grammar.GraphGrammar.ProductionRule.new("ex:rule14", "gg:Rule", "6 years old.", [{"node": "end", "edge": "next"}]),
-			const_graph_grammar.GraphGrammar.ProductionRule.new("ex:rule15", "gg:Rule", "7 years old.", [{"node": "end", "edge": "next"}])
+		var production_rules: Array[GraphGrammar.ProductionRule] = [
+			GraphGrammar.ProductionRule.new("ex:rule1", "gg:Rule", "root", [{"node": "Bob", "edge": "next"}, {"node": "Alice", "edge": "next"}, {"node": "Carol", "edge": "next"}]),
+			GraphGrammar.ProductionRule.new("ex:rule2", "gg:Rule", "Bob", [{"node": ": I have a", "edge": "next"}]),
+			GraphGrammar.ProductionRule.new("ex:rule3", "gg:Rule", "Alice", [{"node": ": I have a", "edge": "next"}]),
+			GraphGrammar.ProductionRule.new("ex:rule4", "gg:Rule", "Carol", [{"node": ": I have a", "edge": "next"}]),
+			GraphGrammar.ProductionRule.new("ex:rule5", "gg:Rule", ": I have a", [{"node": "dog", "edge": "next"}, {"node": "cat", "edge": "next"}, {"node": "parrot", "edge": "next"}]),
+			GraphGrammar.ProductionRule.new("ex:rule6", "gg:Rule", "dog", [{"node": "who is", "edge": "next"}]),
+			GraphGrammar.ProductionRule.new("ex:rule7", "gg:Rule", "cat", [{"node": "who is", "edge": "next"}]),
+			GraphGrammar.ProductionRule.new("ex:rule8", "gg:Rule", "parrot", [{"node": "who is", "edge": "next"}]),
+			GraphGrammar.ProductionRule.new("ex:rule9", "gg:Rule", "who is", [{"node": "2 years old.", "edge": "next"}, {"node": "3 years old.", "edge": "next"}, {"node": "4 years old.", "edge": "next"}, {"node": "5 years old.", "edge": "next"}, {"node": "6 years old.", "edge": "next"}, {"node": "7 years old.", "edge": "next"}]),
+			GraphGrammar.ProductionRule.new("ex:rule10", "gg:Rule", "2 years old.", [{"node": "end", "edge": "next"}]),
+			GraphGrammar.ProductionRule.new("ex:rule11", "gg:Rule", "3 years old.", [{"node": "end", "edge": "next"}]),
+			GraphGrammar.ProductionRule.new("ex:rule12", "gg:Rule", "4 years old.", [{"node": "end", "edge": "next"}]),
+			GraphGrammar.ProductionRule.new("ex:rule13", "gg:Rule", "5 years old.", [{"node": "end", "edge": "next"}]),
+			GraphGrammar.ProductionRule.new("ex:rule14", "gg:Rule", "6 years old.", [{"node": "end", "edge": "next"}]),
+			GraphGrammar.ProductionRule.new("ex:rule15", "gg:Rule", "7 years old.", [{"node": "end", "edge": "next"}])
 		]
-		possible_types = const_graph_grammar.GraphGrammar.new(
+		possible_types = GraphGrammar.new(
 			"ex:myGraphGrammar", 
 			"gg:GraphGrammar", 
 			["root", "Bob", "Alice", "Carol", ": I have a", "dog", "cat", "parrot", "who is", "2 years old.", "3 years old.", "4 years old.", "5 years old.", "6 years old.", "7 years old.", "end"], 
@@ -43,10 +40,10 @@ class Improv extends Domain:
 		)
 		
 	# Function to calculate entropy of a square
-	func _calculate_entropy(square) -> int:
+	static func _calculate_entropy(square) -> int:
 		return len(square["possible_tiles"])
 
-	func _find_lowest_entropy_square(state) -> Variant:
+	static func _find_lowest_entropy_square(state) -> Variant:
 		var min_entropy = INF
 		var min_squares = []
 		for key in state:
@@ -181,9 +178,9 @@ class Improv extends Domain:
 
 
 	func is_valid_sequence(state: Dictionary) -> bool:
-		# Convert the gg:productionRules array into a dictionary for easier access
+		# Convert the gg:GraphGrammar.ProductionRules array into a dictionary for easier access
 		var possible_types_dict = {}
-		for rule in possible_types["gg:productionRules"]:
+		for rule in possible_types["gg:GraphGrammar.ProductionRules"]:
 			var item_id = rule["@id"]
 			var next_items = []
 			for node in rule["gg:rightHandSide"]:
@@ -211,12 +208,12 @@ class Improv extends Domain:
 
 func test_calculate_entropy():
 	var square = {"possible_tiles": ["A", "B", "C"]}
-	assert_eq(wfc._calculate_entropy(square), 3)
+	assert_eq(Improv._calculate_entropy(square), 3)
 
 func test_array_difference():
 	var a1 = ["A", "B", "C"]
 	var a2 = ["B"]
-	assert_eq(wfc.array_difference(a1, a2), ["A", "C"])
+	assert_eq(Improv.array_difference(a1, a2), ["A", "C"])
 
 func test_find_plan():
 	var state = {}
@@ -234,15 +231,10 @@ func test_find_plan():
 	gut.p(todo_list)
 	gut.p("State: ")
 	gut.p(state)
-	var graph_grammar: const_graph_grammar.GraphGrammar  = const_graph_grammar.plan_to_graph_grammar(todo_list, state)
 	gut.p("Graph Grammar: ")
-	gut.p(JSON.from_native(graph_grammar, true, true))
 	var result = planner.find_plan(state, todo_list)
 	gut.p("Result: ")
 	gut.p(result)
 	gut.p("State: ")
 	gut.p(state)
-	graph_grammar = const_graph_grammar.plan_to_graph_grammar(result, state)
-	gut.p("Graph Grammar: ")
-	gut.p(JSON.from_native(graph_grammar, true, true))
 	assert_eq_deep(result, [["set_tile_state", 0, "root"], ["set_tile_state", 1, "Carol"], ["set_tile_state", 2, ": I have a"], ["set_tile_state", 3, "parrot"], ["set_tile_state", 4, "who is"], ["set_tile_state", 5, "7 years old."], ["set_tile_state", 6, "end"]])
