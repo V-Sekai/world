@@ -8,7 +8,6 @@ func merge_dicts(dict1, dict2):
 			dict1[key] = dict2[key]
 	return dict1
 
-
 func test_custom_avatar_find_plan():
 	var drag_drop_outfit = GraphGrammar.ProductionRule.new("ex:drag_drop_outfit", "gg:Rule", "setup_outfit_prefab", [{"node": "Drag and drop the outfit prefab onto the avatar.", "edge": "description"}, {"node": "setup_animators", "edge": "next"}])
 	var animator_setup = GraphGrammar.ProductionRule.new("ex:animator_setup", "gg:Rule", "setup_animators", [{"node": "Set up your animators as normal.", "edge": "description"}, {"node": "after_setup", "edge": "next"}])
@@ -43,6 +42,9 @@ func test_custom_avatar_find_plan():
 	var planner = Plan.new()
 	planner.current_domain = Improv.new()
 	planner.current_domain.possible_types = possible_types
+	var callable_array: Array[Callable]
+	for element: String in possible_types.node_labels:
+		planner.current_domain.add_task_methods(element, [planner.current_domain.apply_graph_grammar_node])
 	for i in range(planner.current_domain.possible_types.node_labels.size()):
 		var possible_tiles = []
 		for graph in planner.current_domain.possible_types.node_labels:
@@ -61,5 +63,5 @@ func test_custom_avatar_find_plan():
 	gut.p(result)
 	gut.p("State: ")
 	gut.p(state)
-	assert_eq_deep(result, [["set_tile_state", 0, "setup_outfit_prefab"], ["set_tile_state", 1, "setup_animators"], ["set_tile_state", 2, "after_setup"], ["set_tile_state", 3, "merge_bones"], ["set_tile_state", 4, "setup_bone_proxies"], ["set_tile_state", 5, "setup_cloth_colliders"], ["set_tile_state", 6, "setup_blendshape_sync"]]
+	assert_eq_deep(result, [["print_side_effect", "setup_outfit_prefab"], ["set_tile_state", 0, "setup_outfit_prefab"], ["print_side_effect", "setup_animators"], ["set_tile_state", 1, "setup_animators"], ["print_side_effect", "after_setup"], ["set_tile_state", 2, "after_setup"], ["print_side_effect", "merge_bones"], ["set_tile_state", 3, "merge_bones"], ["print_side_effect", "setup_bone_proxies"], ["set_tile_state", 4, "setup_bone_proxies"], ["print_side_effect", "setup_cloth_colliders"], ["set_tile_state", 5, "setup_cloth_colliders"], ["print_side_effect", "setup_blendshape_sync"], ["set_tile_state", 6, "setup_blendshape_sync"]]
 	)

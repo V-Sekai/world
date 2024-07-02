@@ -7,7 +7,8 @@ class_name Improv
 @export var possible_types: GraphGrammar = null
 
 func _init() -> void:
-	add_actions([set_tile_state])
+	add_actions([set_tile_state, print_side_effect])
+	add_task_methods("apply_graph_grammar_node", [apply_graph_grammar_node])
 	add_task_methods("collapse_wave_function", [collapse_wave_function])
 	add_task_methods("meta_collapse_wave_function", [meta_collapse_wave_function])
 	
@@ -84,7 +85,7 @@ func set_tile_state(state: Dictionary, coordinate, chosen_tile) -> Dictionary:
 	return state
 
 func collapse_wave_function(state: Dictionary) -> Array:
-	var result = [["set_tile_state"]]
+	var result = [[]]
 	var key = _find_lowest_entropy_square(state)
 
 	if key == null:
@@ -119,9 +120,19 @@ func collapse_wave_function(state: Dictionary) -> Array:
 		chosen_tile = custom_shuffle(possible_tiles, rng).front()
 
 	possible_tiles.erase(chosen_tile)
+	result.front().append("apply_graph_grammar_node")
+	result.front().append("is_tile")
 	result.front().append(key)
 	result.front().append(chosen_tile)
 	return result
+
+func apply_graph_grammar_node(state, predicate, subject, object) -> Variant:
+	return [["print_side_effect", object], ["set_tile_state", subject, object]]
+
+
+static func print_side_effect(state, message) -> Dictionary:
+	print(message)
+	return state
 
 
 func meta_collapse_wave_function(state):
