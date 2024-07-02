@@ -131,6 +131,7 @@ func apply_graph_grammar_node(state, predicate, subject, object) -> Variant:
 
 
 static func print_side_effect(state, message) -> Dictionary:
+	print(message)
 	return state
 
 
