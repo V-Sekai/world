@@ -13,7 +13,7 @@
         "cwd": "${workspaceFolder}/19_Godot"
       },
       "command": [
-        "scons werror=yes compiledb=yes dev_build=no use_mingw=yes use_llvm=yes generate_bundle=no precision=double compiledb=yes target=editor tests=yes debug_symbols=yes"
+        "scons werror=no compiledb=yes dev_build=no use_mingw=yes use_llvm=yes generate_bundle=no precision=double compiledb=yes target=editor tests=yes debug_symbols=yes"
       ],
     },
   ]
