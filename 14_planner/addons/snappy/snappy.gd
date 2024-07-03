@@ -90,35 +90,51 @@ func _on_selection_changed():
 
 func find_meshes(node : Node3D) -> Array:
 	var meshes : Array = []
-	if node is MeshInstance3D:
+	
+	if node is MeshInstance3D or node is CSGMesh3D:
 		meshes.append(node)
+		print(node)
+	
 	for child in node.get_children():
 		if child is Node3D:
 			meshes += find_meshes(child)
+			
 	return meshes
+
 
 func find_closest_point(meshes : Array, from : Vector3, direction : Vector3) -> Vector3:
 	var closest := VECTOR_INF
 	var closest_distance := INF
-
+	
 	# We will not use the distance between the vertex and the from position,
 	# (that would always be the vertex closest to the camera). Instead we
 	# use the distance between the vertex and the ray under the mouse cursor.
 	# Ideally we would use the 2d distance of the unprojected vertices,
 	# however unprojecting every vertex can have a performance penalty for
 	# large meshes. This is a good balance between performance and accuracy.
+	
 	var segment_start := from
 	var segment_end := from + direction
-
+	
 	for mesh in meshes:
-		var vertices = mesh.get_mesh().get_faces()
+		var vertices 
+		if mesh is MeshInstance3D:
+			# Access the Mesh instance directly to get its vertices
+			vertices = mesh.get_mesh().get_faces()
+			
+		elif mesh is CSGMesh3D:
+			# For CSGMesh instances, access their `mesh` property and use it as a regular MeshInstance3D
+			vertices = mesh.mesh.get_faces()
+			
 		for i in range(vertices.size()):
 			var current_point: Vector3 = mesh.global_transform * vertices[i]
 			var current_on_ray := Geometry3D.get_closest_point_to_segment_uncapped(
 				current_point, segment_start, segment_end)
+			
+		# Calculate the distance to each vertex and update closest if necessary
 			var current_distance := current_on_ray.distance_to(current_point)
 			if closest == VECTOR_INF or current_distance < closest_distance:
 				closest = current_point
 				closest_distance = current_distance
-
+	
 	return closest
