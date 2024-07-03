@@ -93,7 +93,6 @@ func find_meshes(node : Node3D) -> Array:
 	
 	if node is MeshInstance3D or node is CSGMesh3D:
 		meshes.append(node)
-		print(node)
 	
 	for child in node.get_children():
 		if child is Node3D:
