@@ -1,61 +1,114 @@
-[gd_scene load_steps=6 format=4 uid="uid://csnaekab8nwl3"]
+[gd_scene load_steps=5 format=3 uid="uid://csnaekab8nwl3"]
 
-[ext_resource type="PackedScene" uid="uid://ud4i731742vy" path="res://Planner/Art/Brick/Manifold/bevel-hq-brick-1x1-round.glb" id="1_b8oj8"]
-[ext_resource type="Texture2D" uid="uid://caei8ejt5gdxg" path="res://Planner/Art/Brick/Manifold/bevel-hq-brick-1x1-round_colormap.png" id="2_2d0cy"]
+[ext_resource type="PackedScene" uid="uid://bvwsag47rgs2" path="res://Planner/Art/Brick/Manifold/bevel-hq-plate-1x8.glb" id="2_v2ffm"]
+[ext_resource type="PackedScene" uid="uid://mlufcnfjsdhk" path="res://Planner/Art/Brick/Manifold/bevel-hq-plate-4x4.glb" id="3_cndf4"]
+[ext_resource type="PackedScene" uid="uid://hol31px761p3" path="res://Planner/Art/Brick/Manifold/bevel-hq-plate-4x8.glb" id="3_k85u3"]
+[ext_resource type="PackedScene" uid="uid://cdlfneehou7u" path="res://Planner/Art/Brick/Manifold/bevel-hq-plate-1x4.glb" id="4_4ey57"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_moxyk"]
-resource_name = "colormap.001"
-cull_mode = 2
-albedo_texture = ExtResource("2_2d0cy")
-texture_filter = 2
+[node name="Node3D" type="CSGCombiner3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.05, 0, 0)
+use_collision = true
 
-[sub_resource type="ArrayMesh" id="ArrayMesh_5lg1q"]
-_surfaces = [{
-"aabb": AABB(-0.03975, 0, -0.03975, 0.0795, 0.114, 0.0795),
-"format": 34359742465,
-"index_count": 360,
-"index_data": PackedByteArray("AAAbAB4AHgAZAAAAHgABABkAAQACABkAAQADAAIAAwAEAAIABQAOAAsACwATAAUACwAGABMABgAHABMABgAIAAcACAAJAAcACAAGAAoACgAGAAsACgAMAAgACQAIAAwACwANAAoADQALAA4ADwAMAAoACgAjAA8AIwAKAA0ADQAkACMAJwAkAA0AEAAMAA8ADAAQAAkACQAQABEADwASABAAEQAQABIAEQAHAAkAEgAfABEAEwAHABEAEQAfABQADQAVACcADgAVAA0AJgAnABUAEQAWABMAFAAWABEAFgAUACYABQATABYAFwAVAA4AFQAXACYAJgAXABYAFgAXAAUADgAFABcAAgAgACIAGAAgAAIAIgAZAAIAAgAEABgAGQAiABoAGgAAABkAGwAAABoAGgAcABsAIQAYAAQABAADACEAIQADAAEAAQAdACEAHgAbABwAHQABAB4AHAAlAB4AHgAlAB0AGAASAA8AHwASABgAIAAYAA8AHwAYACEAIgAgAA8AIgAPACMAGgAiACMAGgAjACQAFAAfACEAFAAhAB0AFAAdACUAJgAUACUAHAAaACQAJgAlABwAJAAnABwAHAAnACYAPgAoACkAKQA6AD4AKQAtADoALQA4ADoALQAqADgAKgArADgAKwAqACwALAAqAC0ALQAuACwALgAtACkAKQAvAC4ALwApACgALAAwACsAMQAsAC4AMAAsADEALgAyADEAMgAuAC8AMQAzADAALwA0ADIAMAAzADUANgA0AC8AKwAwADcANQA3ADAANwA4ACsANwA1ADkAOgA4ADcALwA7ADYAKAA7AC8APAA2ADsAOQA9ADcANwA9ADoAPQA5ADwAPgA6AD0APwA7ACgAOwA/ADwAPAA/AD0APQA/AD4AKAA+AD8AOQA2ADwANgAyADQAMgAzADEAMwA5ADUAOQAyADYAMgA5ADMA"),
-"lods": [0.0121858, PackedByteArray("GgAcAAEAHAAaAA0AHAAmAAEAJgAcABUADQAVABwAFQAXACYAJgAXABYAFgABACYAFQAFABcAFgAXAAUADQALABUABQAVAAsABQATABYACwATAAUAAQAWABEAEQAWABMACwANAAoAEQAhAAEACwAGABMACgAGAAsAEwAHABEABgAHABMAAQAhAAIAAQACABoAGAAhABEAIQAYAAIAEQAHABAAEQAQABgABgAIAAcACAAQAAcACAAGAAoAEAAIAAwACgAMAAgADwAYABAAEAAMAA8ADwAMAAoAAgAYAA8ACgAjAA8AIwACAA8AAgAjABoAIwAKAA0ADQAaACMAOgA7AC0AOwA6AD8ALQArADoANwA/ADoAOgArADcAKwAtACwAKwAsADcALwAtADsAOwA/ADwALwA7ADwANQA/ADcANQA3ACwAPwA1ADwALQAuACwALQAvAC4ALAAxADUAMQAsAC4ANQAyADwAMgA1ADEAPAAyAC8ALgAyADEAMgAuAC8A"), 0.0153807, PackedByteArray("GgAcAAEAHAAaAA0AGgAKAA0ADQAVABwACgAaAAIAAQACABoACwANAAoADQALABUAAgAMAAoADAALAAoAAQAYAAIAEAAMAAIAAgAYABAACwAMABMAEwAVAAsADAAQABMAEQAQABgAEQAYAAEAEQATABAAFgAVABMAEQAWABMAAQAWABEAHAAVABYAFgABABwAOgA7AC0ALQArADoAPAA7ADoALQA7ADwAPAA6ACsAMQArAC0AKwAxADwAPAAxAC0A"), 0.0213652, PackedByteArray("JgAYACMAEAAYACYAIwAYABAAJgAjABUAEAAMACMAJgATABAADAAQABMAJgAVABMAIwAMAAsACwAVACMACwAMABMAEwAVAAsAOgA8AC0APAA6AC0APAAxAC0ALQAxADwA"), 0.0352515, PackedByteArray("FQAQABMAGAATABAAGAAVABMAIwAQABUAIwAYABAAGAAjABUAPwA1AC0APwAtADUA")],
-"name": "colormap.001",
-"primitive": 3,
-"uv_scale": Vector4(0, 0, 0, 0),
-"vertex_count": 64,
-"vertex_data": PackedByteArray("yI6nPAAAAADIjqc8AAAAgAAAAABi9uy8yI6nvAAAAADIjqc8yI6nvAAAAADIjqe8YvbsvAAAAAAAAAAAPOjGPKabxD086Ma8AAAAgKabxD0Lpgw9POjGvKabxD086Ma8POjGvKabxD086MY8C6YMvaabxD0AAAAAAAAAgDVeuj3l0CI9POjGPKabxD086MY8sUHmvDVeuj2xQeY8sUHmPDVeuj2xQeY8C6YMPaabxD0AAAAAsUHmvG4SgzyxQeY85dAivTVeuj0AAAAAsUHmvDVeuj2xQea85dAivW4SgzwAAAAAAAAAgKabxD0Lpgy9AAAAgG4Sgzzl0CK95dAiPTVeuj0AAAAAAAAAgDVeuj3l0CK9sUHmPDVeuj2xQea8YvbsvG4SgzwAAAAAAAAAgAAAAABi9uw8yI6nPG4SgzzIjqc8YvbsPAAAAAAAAAAAYvbsPG4SgzwAAAAAAAAAgG4Sgzxi9uy8yI6nPAAAAADIjqe8sUHmvG4SgzyxQea8yI6nvG4SgzzIjqc8yI6nvG4SgzzIjqe8AAAAgG4Sgzxi9uw8AAAAgG4Sgzzl0CI9sUHmPG4SgzyxQeY8yI6nPG4SgzzIjqe8sUHmPG4SgzyxQea85dAiPW4SgzwAAAAAzmqePNV46T1uEgO6haJjPNV46T2kJ088EQ9LvNV46T2kJ088FCGSvNV46T1uEgO6/OCEvGQ73z1G7YY8pptEOtV46T1eLZQ8pptEOmQ73z0Tg8A8tiqRPGQ73z1G7YY8yXa+vGQ73z1uEgO6/OCEvKabxD1G7YY8pptEOqabxD0Tg8A8yXa+vKabxD1uEgO6tiqRPKabxD1G7YY8/OCEvKabxD1sHo+8g8DKPKabxD1uEgO6/OCEvGQ73z1sHo+8EQ9LvNV46T3yiV+8pptEOqabxD05tMi8pptEOtV46T2EXpy8g8DKPGQ73z1uEgO6tiqRPKabxD1sHo+8pptEOmQ73z05tMi8haJjPNV46T3yiV+8tiqRPGQ73z1sHo+8")
-}]
-blend_shape_mode = 0
+[node name="CSGCombiner3D2" type="CSGCombiner3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0)
 
-[sub_resource type="ArrayMesh" id="ArrayMesh_bqe31"]
-resource_name = "bevel-hq-brick-1x1-round_bevel-hq-brick-1x1-round_002"
-_surfaces = [{
-"aabb": AABB(-0.03975, 0, -0.03975, 0.0795, 0.114, 0.0795),
-"attribute_data": PackedByteArray("AAAYP5qZeT8AABg/mpl5PwAAGD+amXk/AAAYP5qZeT8AABg/mpl5PwAAGD9mZkY/AAAYP2ZmRj8AABg/ZmZGPwAAGD9mZkY/AAAYP2ZmRj8AABg/ERFJPwAAGD9mZkY/AAAYPxERST8AABg/ERFJPwAAGD9mZkY/AAAYPxERcT8AABg/ERFJPwAAGD8REUk/AAAYPxERcT8AABg/ZmZGPwAAGD8REXE/AAAYPxERST8AABg/ERFJPwAAGD8REUk/AAAYPxERcT8AABg/mpl5PwAAGD8REXE/AAAYP5qZeT8AABg/ERFxPwAAGD8REXE/AAAYP5qZeT8AABg/ERFxPwAAGD8REXE/AAAYPxERcT8AABg/ERFxPwAAGD8REXE/AAAYPxERcT8AABg/ERFxPwAAGD8REXE/AAAYPxERcT8AABg/ZmZGPwAAGD9mZkY/AAAYP2ZmRj8AABg/ZmZGPwAAGD9Kn1Q/AAAYP2ZmRj8AABg/Sp9UPwAAGD9Kn1Q/AAAYP0qfVD8AABg/mpl5PwAAGD+amXk/AAAYP5qZeT8AABg/mpl5PwAAGD+amXk/AAAYP5qZeT8AABg/Sp9UPwAAGD9mZkY/AAAYP5qZeT8AABg/ZmZGPwAAGD9Kn1Q/AAAYP5qZeT8AABg/Sp9UPwAAGD9mZkY/AAAYP0qfVD8="),
-"format": 34359742487,
-"index_count": 360,
-"index_data": PackedByteArray("AAAbAB4AHgAZAAAAHgABABkAAQACABkAAQADAAIAAwAEAAIABQAOAAsACwATAAUACwAGABMABgAHABMABgAIAAcACAAJAAcACAAGAAoACgAGAAsACgAMAAgACQAIAAwACwANAAoADQALAA4ADwAMAAoACgAjAA8AIwAKAA0ADQAkACMAJwAkAA0AEAAMAA8ADAAQAAkACQAQABEADwASABAAEQAQABIAEQAHAAkAEgAfABEAEwAHABEAEQAfABQADQAVACcADgAVAA0AJgAnABUAEQAWABMAFAAWABEAFgAUACYABQATABYAFwAVAA4AFQAXACYAJgAXABYAFgAXAAUADgAFABcAAgAgACIAGAAgAAIAIgAZAAIAAgAEABgAGQAiABoAGgAAABkAGwAAABoAGgAcABsAIQAYAAQABAADACEAIQADAAEAAQAdACEAHgAbABwAHQABAB4AHAAlAB4AHgAlAB0AGAASAA8AHwASABgAIAAYAA8AHwAYACEAIgAgAA8AIgAPACMAGgAiACMAGgAjACQAFAAfACEAFAAhAB0AFAAdACUAJgAUACUAHAAaACQAJgAlABwAJAAnABwAHAAnACYAPgAoACkAKQA6AD4AKQAtADoALQA4ADoALQAqADgAKgArADgAKwAqACwALAAqAC0ALQAuACwALgAtACkAKQAvAC4ALwApACgALAAwACsAMQAsAC4AMAAsADEALgAyADEAMgAuAC8AMQAzADAALwA0ADIAMAAzADUANgA0AC8AKwAwADcANQA3ADAANwA4ACsANwA1ADkAOgA4ADcALwA7ADYAKAA7AC8APAA2ADsAOQA9ADcANwA9ADoAPQA5ADwAPgA6AD0APwA7ACgAOwA/ADwAPAA/AD0APQA/AD4AKAA+AD8AOQA2ADwANgAyADQAMgAzADEAMwA5ADUAOQAyADYAMgA5ADMA"),
-"lods": [0.0121858, PackedByteArray("GgAcAAEAHAAaAA0AHAAmAAEAJgAcABUADQAVABwAFQAXACYAJgAXABYAFgABACYAFQAFABcAFgAXAAUADQALABUABQAVAAsABQATABYACwATAAUAAQAWABEAEQAWABMACwANAAoAEQAhAAEACwAGABMACgAGAAsAEwAHABEABgAHABMAAQAhAAIAAQACABoAGAAhABEAIQAYAAIAEQAHABAAEQAQABgABgAIAAcACAAQAAcACAAGAAoAEAAIAAwACgAMAAgADwAYABAAEAAMAA8ADwAMAAoAAgAYAA8ACgAjAA8AIwACAA8AAgAjABoAIwAKAA0ADQAaACMAOgA7AC0AOwA6AD8ALQArADoANwA/ADoAOgArADcAKwAtACwAKwAsADcALwAtADsAOwA/ADwALwA7ADwANQA/ADcANQA3ACwAPwA1ADwALQAuACwALQAvAC4ALAAxADUAMQAsAC4ANQAyADwAMgA1ADEAPAAyAC8ALgAyADEAMgAuAC8A"), 0.0153807, PackedByteArray("GgAcAAEAHAAaAA0AGgAKAA0ADQAVABwACgAaAAIAAQACABoACwANAAoADQALABUAAgAMAAoADAALAAoAAQAYAAIAEAAMAAIAAgAYABAACwAMABMAEwAVAAsADAAQABMAEQAQABgAEQAYAAEAEQATABAAFgAVABMAEQAWABMAAQAWABEAHAAVABYAFgABABwAOgA7AC0ALQArADoAPAA7ADoALQA7ADwAPAA6ACsAMQArAC0AKwAxADwAPAAxAC0A"), 0.0213652, PackedByteArray("JgAYACMAEAAYACYAIwAYABAAJgAjABUAEAAMACMAJgATABAADAAQABMAJgAVABMAIwAMAAsACwAVACMACwAMABMAEwAVAAsAOgA8AC0APAA6AC0APAAxAC0ALQAxADwA"), 0.0352515, PackedByteArray("FQAQABMAGAATABAAGAAVABMAIwAQABUAIwAYABAAGAAjABUAPwA1AC0APwAtADUA")],
-"material": SubResource("StandardMaterial3D_moxyk"),
-"name": "colormap.001",
-"primitive": 3,
-"uv_scale": Vector4(0, 0, 0, 0),
-"vertex_count": 64,
-"vertex_data": PackedByteArray("yI6nPAAAAADIjqc8AAAAgAAAAABi9uy8yI6nvAAAAADIjqc8yI6nvAAAAADIjqe8YvbsvAAAAAAAAAAAPOjGPKabxD086Ma8AAAAgKabxD0Lpgw9POjGvKabxD086Ma8POjGvKabxD086MY8C6YMvaabxD0AAAAAAAAAgDVeuj3l0CI9POjGPKabxD086MY8sUHmvDVeuj2xQeY8sUHmPDVeuj2xQeY8C6YMPaabxD0AAAAAsUHmvG4SgzyxQeY85dAivTVeuj0AAAAAsUHmvDVeuj2xQea85dAivW4SgzwAAAAAAAAAgKabxD0Lpgy9AAAAgG4Sgzzl0CK95dAiPTVeuj0AAAAAAAAAgDVeuj3l0CK9sUHmPDVeuj2xQea8YvbsvG4SgzwAAAAAAAAAgAAAAABi9uw8yI6nPG4SgzzIjqc8YvbsPAAAAAAAAAAAYvbsPG4SgzwAAAAAAAAAgG4Sgzxi9uy8yI6nPAAAAADIjqe8sUHmvG4SgzyxQea8yI6nvG4SgzzIjqc8yI6nvG4SgzzIjqe8AAAAgG4Sgzxi9uw8AAAAgG4Sgzzl0CI9sUHmPG4SgzyxQeY8yI6nPG4SgzzIjqe8sUHmPG4SgzyxQea85dAiPW4SgzwAAAAAzmqePNV46T1uEgO6haJjPNV46T2kJ088EQ9LvNV46T2kJ088FCGSvNV46T1uEgO6/OCEvGQ73z1G7YY8pptEOtV46T1eLZQ8pptEOmQ73z0Tg8A8tiqRPGQ73z1G7YY8yXa+vGQ73z1uEgO6/OCEvKabxD1G7YY8pptEOqabxD0Tg8A8yXa+vKabxD1uEgO6tiqRPKabxD1G7YY8/OCEvKabxD1sHo+8g8DKPKabxD1uEgO6/OCEvGQ73z1sHo+8EQ9LvNV46T3yiV+8pptEOqabxD05tMi8pptEOtV46T2EXpy8g8DKPGQ73z1uEgO6tiqRPKabxD1sHo+8pptEOmQ73z05tMi8haJjPNV46T3yiV+8tiqRPGQ73z1sHo+8qKhRUf///z+kxgAA////v1ZXUlH///8/ri6oKP///79aOaVG////vzC05uX///+//38W1v///z/OS+bl////v+dlzsv///8/FlYW1v///7//f1uk////Pxeazsv///8/Bk4KnP///z/4sQyc////P+ipFtb///+/VldRUf///z9dJF2k////vw0cBc7///+/WjmlRv///7/oqf//////v6TGAAD///+/odtdpP///7+i2///////v/PjBc7///+/mUlmNv///7//f6VG////P7SgakH///8/pMalRv///79ltmY2////v2W2AAD///+/UtGpKP///7+uLqgo////v0pfakH///8/lT61IP///7//f2Y2////P/9/pUb///8/qKhRUf///z9pwbUg////v1DRqCj///+/pMalRv///7/oqRbW////vxeazsv///8/52XOy////z8WVhbW////vwZODJz///8//38W1v///z//f1uk////P/qxCpz///8/XCRbpP///79WV1JR////P/9/pUb///8/WjmlRv///7+oqFFR////P64uqCj///+/pMalRv///78LHAXO////v85L5uX///+/pMYAAP///7/oqf//////v6LbW6T///+/UtGpKP///7+i2///////vzC05uX///+/8+MFzv///78=")
-}]
-blend_shape_mode = 0
-shadow_mesh = SubResource("ArrayMesh_5lg1q")
+[node name="CSGCombiner3D" type="CSGCombiner3D" parent="CSGCombiner3D2"]
 
-[node name="Node3D" type="Node3D"]
+[node name="bevel-hq-plate-4x8" parent="CSGCombiner3D2/CSGCombiner3D" instance=ExtResource("3_k85u3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.32082, 0, 0.150315)
 
-[node name="bevel-hq-brick-1x1-round" parent="." instance=ExtResource("1_b8oj8")]
+[node name="bevel-hq-plate-4x9" parent="CSGCombiner3D2/CSGCombiner3D" instance=ExtResource("3_k85u3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.32082, 0, 0.466315)
 
-[node name="bevel-hq-brick-1x1-round2" parent="bevel-hq-brick-1x1-round" instance=ExtResource("1_b8oj8")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0056, 0.096, -0.0005)
+[node name="bevel-hq-plate-4x9" parent="CSGCombiner3D2/CSGCombiner3D/bevel-hq-plate-4x9" instance=ExtResource("3_k85u3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.316)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0050933, 0.0987361, 0.202134)
-mesh = SubResource("ArrayMesh_bqe31")
+[node name="bevel-hq-plate-1x8" parent="CSGCombiner3D2/CSGCombiner3D/bevel-hq-plate-4x9" instance=ExtResource("2_v2ffm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5135)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="MeshInstance3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0028, 0.096, 0.003)
-mesh = SubResource("ArrayMesh_bqe31")
+[node name="bevel-hq-plate-4x8" parent="CSGCombiner3D2" instance=ExtResource("3_k85u3")]
+transform = Transform3D(6.12323e-17, 0, -1, 0, 1, 0, 1, 0, 6.12323e-17, -0.79682, 0, 0.310315)
 
-[editable path="bevel-hq-brick-1x1-round"]
+[node name="bevel-hq-plate-4x4" parent="CSGCombiner3D2" instance=ExtResource("3_cndf4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.79582, 0, 0.786315)
+
+[node name="bevel-hq-plate-1x4" parent="CSGCombiner3D2" instance=ExtResource("4_4ey57")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.79582, 0, 0.983815)
+
+[node name="CSGCombiner3D2" type="CSGCombiner3D" parent="CSGCombiner3D2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.952, 0, 0)
+
+[node name="CSGCombiner3D" type="CSGCombiner3D" parent="CSGCombiner3D2/CSGCombiner3D2"]
+
+[node name="bevel-hq-plate-4x8" parent="CSGCombiner3D2/CSGCombiner3D2/CSGCombiner3D" instance=ExtResource("3_k85u3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.32082, 0, 0.150315)
+
+[node name="bevel-hq-plate-4x9" parent="CSGCombiner3D2/CSGCombiner3D2/CSGCombiner3D" instance=ExtResource("3_k85u3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.32082, 0, 0.466315)
+
+[node name="bevel-hq-plate-4x9" parent="CSGCombiner3D2/CSGCombiner3D2/CSGCombiner3D/bevel-hq-plate-4x9" instance=ExtResource("3_k85u3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.316)
+
+[node name="bevel-hq-plate-1x8" parent="CSGCombiner3D2/CSGCombiner3D2/CSGCombiner3D/bevel-hq-plate-4x9" instance=ExtResource("2_v2ffm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5135)
+
+[node name="bevel-hq-plate-4x8" parent="CSGCombiner3D2/CSGCombiner3D2" instance=ExtResource("3_k85u3")]
+transform = Transform3D(6.12323e-17, 0, -1, 0, 1, 0, 1, 0, 6.12323e-17, -0.79682, 0, 0.310315)
+
+[node name="bevel-hq-plate-4x4" parent="CSGCombiner3D2/CSGCombiner3D2" instance=ExtResource("3_cndf4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.79582, 0, 0.786315)
+
+[node name="bevel-hq-plate-1x4" parent="CSGCombiner3D2/CSGCombiner3D2" instance=ExtResource("4_4ey57")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.79582, 0, 0.983815)
+
+[node name="CSGCombiner3D3" type="CSGCombiner3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1.031)
+
+[node name="CSGCombiner3D" type="CSGCombiner3D" parent="CSGCombiner3D3"]
+
+[node name="bevel-hq-plate-4x8" parent="CSGCombiner3D3/CSGCombiner3D" instance=ExtResource("3_k85u3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.32082, 0, 0.150315)
+
+[node name="bevel-hq-plate-4x9" parent="CSGCombiner3D3/CSGCombiner3D" instance=ExtResource("3_k85u3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.32082, 0, 0.466315)
+
+[node name="bevel-hq-plate-4x9" parent="CSGCombiner3D3/CSGCombiner3D/bevel-hq-plate-4x9" instance=ExtResource("3_k85u3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.316)
+
+[node name="bevel-hq-plate-1x8" parent="CSGCombiner3D3/CSGCombiner3D/bevel-hq-plate-4x9" instance=ExtResource("2_v2ffm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5135)
+
+[node name="bevel-hq-plate-4x8" parent="CSGCombiner3D3" instance=ExtResource("3_k85u3")]
+transform = Transform3D(6.12323e-17, 0, -1, 0, 1, 0, 1, 0, 6.12323e-17, -0.79682, 0, 0.310315)
+
+[node name="bevel-hq-plate-4x4" parent="CSGCombiner3D3" instance=ExtResource("3_cndf4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.79582, 0, 0.786315)
+
+[node name="bevel-hq-plate-1x4" parent="CSGCombiner3D3" instance=ExtResource("4_4ey57")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.79582, 0, 0.983815)
+
+[node name="CSGCombiner3D2" type="CSGCombiner3D" parent="CSGCombiner3D3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.952, 0, 0)
+
+[node name="CSGCombiner3D" type="CSGCombiner3D" parent="CSGCombiner3D3/CSGCombiner3D2"]
+
+[node name="bevel-hq-plate-4x8" parent="CSGCombiner3D3/CSGCombiner3D2/CSGCombiner3D" instance=ExtResource("3_k85u3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.32082, 0, 0.150315)
+
+[node name="bevel-hq-plate-4x9" parent="CSGCombiner3D3/CSGCombiner3D2/CSGCombiner3D" instance=ExtResource("3_k85u3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.32082, 0, 0.466315)
+
+[node name="bevel-hq-plate-4x9" parent="CSGCombiner3D3/CSGCombiner3D2/CSGCombiner3D/bevel-hq-plate-4x9" instance=ExtResource("3_k85u3")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.316)
+
+[node name="bevel-hq-plate-1x8" parent="CSGCombiner3D3/CSGCombiner3D2/CSGCombiner3D/bevel-hq-plate-4x9" instance=ExtResource("2_v2ffm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5135)
+
+[node name="bevel-hq-plate-4x8" parent="CSGCombiner3D3/CSGCombiner3D2" instance=ExtResource("3_k85u3")]
+transform = Transform3D(6.12323e-17, 0, -1, 0, 1, 0, 1, 0, 6.12323e-17, -0.79682, 0, 0.310315)
+
+[node name="bevel-hq-plate-4x4" parent="CSGCombiner3D3/CSGCombiner3D2" instance=ExtResource("3_cndf4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.79582, 0, 0.786315)
+
+[node name="bevel-hq-plate-1x4" parent="CSGCombiner3D3/CSGCombiner3D2" instance=ExtResource("4_4ey57")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.79582, 0, 0.983815)
