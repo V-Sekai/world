@@ -18,7 +18,7 @@ func update_memory() -> void:
 	update_afraid_state()
 
 func update_firepit_has_fuel() -> void:
-	memory[["firepit_has_fuel", "firepit"]] = false # Replace with actual logic
+	memory[["firepit_has_fuel", "firepit"]] = false
 
 func update_hunger_state() -> void:
 	var hunger_level: int

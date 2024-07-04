@@ -1,7 +1,5 @@
 extends Plan
 
-class_name BehaveSquadPlanner
-
 ## Plan specific actions based on the assigned task
 func plan_task(task: String, memory: Dictionary) -> Array:
 	match task:
@@ -16,7 +14,6 @@ func plan_task(task: String, memory: Dictionary) -> Array:
 		_:
 			return []
 
-## Task-specific plans
 func plan_keep_fire_burning(memory: Dictionary) -> Array:
 	if memory.get(["firepit_has_wood", "firepit"], false):
 		return ["go_to_firepit", "add_wood_to_firepit"]
