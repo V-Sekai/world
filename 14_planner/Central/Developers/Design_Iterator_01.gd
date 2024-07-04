@@ -1,7 +1,7 @@
 extends "res://addons/gut/test.gd"
 
 # One city district Immerssive Simulation Game. 
-# Join Aria and her hard-holograph companions on her journey towards becoming a Moped racer courier while unraveling a mystery within this cityscape!
+# Join Aria and her companion on her journey towards becoming a moped courier while unraveling a mystery within this cityscape!
 # How far the player will go?
 # It really depends on what and where. A lot of the issues with the player going somewhere is obstacles. Like locked doors or guards.
 # You need to define your obstacles and the solutions to them.
