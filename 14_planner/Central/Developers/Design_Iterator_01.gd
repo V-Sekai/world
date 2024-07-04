@@ -1,7 +1,7 @@
 extends "res://addons/gut/test.gd"
 
 # One city district Immerssive Simulation Game. 
-# Moped Racer: A coming-of-age story takes place in Neon Meadows, a futuristic city powered by holographic tech. Here, solar energy fuels the high-tech mascot companions used with transportation and delivery services. Elite couriers train hard to become skilled riders known as Moped Racers. Join Aria on her journey to join this prestigious group while uncovering an unexpected mystery in a world filled with neon lights and advanced technology!
+# Join Aria and her hard-holograph companions on her journey towards becoming a Moped racer courier while unraveling a mystery within this cityscape!
 # How far the player will go?
 # It really depends on what and where. A lot of the issues with the player going somewhere is obstacles. Like locked doors or guards.
 # You need to define your obstacles and the solutions to them.
