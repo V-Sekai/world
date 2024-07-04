@@ -1,0 +1,62 @@
+[gd_scene load_steps=8 format=3 uid="uid://civweqo7663sk"]
+
+[ext_resource type="Texture2D" uid="uid://b153nqpuv83gr" path="res://sprites/forestDecoration_0.png" id="1"]
+[ext_resource type="Script" path="res://scenes/firepit.gd" id="2"]
+
+[sub_resource type="AtlasTexture" id="1"]
+atlas = ExtResource("1")
+region = Rect2(96, 140, 16, 35)
+
+[sub_resource type="AtlasTexture" id="2"]
+atlas = ExtResource("1")
+region = Rect2(112, 140, 16, 35)
+
+[sub_resource type="AtlasTexture" id="3"]
+atlas = ExtResource("1")
+region = Rect2(128, 140, 16, 35)
+
+[sub_resource type="AtlasTexture" id="4"]
+atlas = ExtResource("1")
+region = Rect2(144, 140, 16, 35)
+
+[sub_resource type="SpriteFrames" id="5"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("1")
+}, {
+"duration": 1.0,
+"texture": SubResource("2")
+}, {
+"duration": 1.0,
+"texture": SubResource("3")
+}, {
+"duration": 1.0,
+"texture": SubResource("4")
+}],
+"loop": true,
+"name": &"default",
+"speed": 10.0
+}]
+
+[node name="firepit" type="Node2D" groups=["firepit"]]
+texture_filter = 1
+script = ExtResource("2")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("5")
+
+[node name="timer" type="Timer" parent="."]
+wait_time = 10.0
+one_shot = true
+autostart = true
+
+[node name="label" type="Label" parent="."]
+offset_left = -19.0
+offset_top = -35.0
+offset_right = 21.0
+offset_bottom = -9.0
+text = "10"
+horizontal_alignment = 1
+
+[connection signal="timeout" from="timer" to="." method="_on_timer_timeout"]

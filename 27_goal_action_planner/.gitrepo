@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/viniciusgerevini/godot-goap.git
+	branch = main
+	commit = 74d61fd200b501b49008d196ac2632fdee9452f2
+	parent = 98890116d607f56de6d6e473e306094901af7646
+	method = merge
+	cmdver = 0.4.6
