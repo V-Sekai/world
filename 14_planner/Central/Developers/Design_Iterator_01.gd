@@ -1,7 +1,8 @@
 extends "res://addons/gut/test.gd"
 
 # One city district Immerssive Simulation Game. 
-# <Brune> The right number of choices is the number that feels like you cover what the players will want to answer.
+# Moped Racer: A coming-of-age story takes place in Neon Meadows, a futuristic city powered by holographic tech. Here, holographic batteries fuels the high-tech mascot companions used for transportation and delivery services. Elite couriers train hard to become skilled riders known as Moped Racers. Join Aria on her journey to join this prestigious group while uncovering an unexpected mystery in a world filled with neon lights and advanced technology!
+# 3 choices per menu level.
 
 func test_ready() -> void:
 	var planner = Plan.new()
