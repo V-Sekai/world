@@ -91,6 +91,24 @@ jobs:
             deploy-arch: arm64
             arch: arm64
             deploy-target: editor
+
+          - name: linux_editor_web_deploy
+            runs-on: ubuntu-22.04
+            cache-name: linux-editor-deploy-web-editor
+            target: editor
+            tests: false
+            sconsflags: linker=gold precision=double
+            doc-test: false
+            bin: ./godot/bin/godot.web.editor.double.wasm32
+            editor-bin-name: godot.web.editor.double.wasm32 
+            proj-conv: false
+            artifact: true
+            platform: web
+            deploy: false
+            export-platform: Web
+            build-arch: wasm32
+            arch: wasm32
+
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
@@ -134,6 +152,19 @@ jobs:
         run: |
           sh ./.github/install_vulkan_sdk_macos.sh
 
+      - name: Set up Emscripten latest
+        if: ${{ matrix.platform == 'web' ||  matrix.deploy-platform == 'web'}}
+        uses: mymindstorm/setup-emsdk@6ab9eb1bda2574c4ddb79809fc9247783eaf9021 # v14
+        with:
+          version: ${{env.EM_VERSION}}
+          actions-cache-folder: ${{env.EM_CACHE_FOLDER}}
+
+      - name: Verify Emscripten setup
+        if: ${{ matrix.platform == 'web' ||  matrix.deploy-platform == 'web'}}
+        run: |
+          emcc -v
+        shell: bash
+  
       - name: Setup python, scons and golang
         uses: ./.github/actions/godot-world-deps
         with:
@@ -169,6 +200,17 @@ jobs:
           tests: false
           deploy: false
           arch: ${{ matrix.deploy-arch }}
+
+      - name: Compilation
+        if: ${{ matrix.arch == 'arm64' && matrix.deploy-platform == 'android' }}
+        uses: ./.github/actions/godot-world-build
+        with:
+          sconsflags: ${{ env.SCONSFLAGS }} ${{ matrix.sconsflags }}
+          platform: ${{ matrix.deploy-platform }}
+          target: ${{ matrix.deploy-target }}
+          tests: false
+          deploy: false
+          arch: arm32
 
       - name: Generate build constants
         uses: ./.github/actions/vsk-generate-constants

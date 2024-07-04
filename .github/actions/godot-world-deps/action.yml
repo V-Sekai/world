@@ -28,6 +28,12 @@ runs:
         # Optional - x64 or x86 architecture, defaults to x64
         architecture: ${{ inputs.python-arch }}
 
+    - name: Setup Java
+      uses: actions/setup-java@v2
+      with:
+        distribution: 'adopt'
+        java-version: '17'
+
     - name: Setup scons
       shell: bash
       run: |
