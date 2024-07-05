@@ -121,6 +121,26 @@ jobs:
             arch: arm64
             deploy: false
 
+          - name: editor_macos_arm64
+            os: macos-13
+            cache-name: macos-editor-deploy-macos-editor
+            target: editor
+            tests: false
+            sconsflags: linker=gold precision=double
+            doc-test: false
+            bin: ./godot/bin/godot.macos.editor.double.arm64
+            deploy-bin: ./godot/bin/godot_macos_editor_double.app
+            editor-bin-name: godot.macos.editor.double.arm64
+            proj-conv: false
+            artifact: true
+            platform: macos
+            deploy: true
+            deploy-platform: macos
+            export-platform: Mac
+            deploy-arch: arm64
+            arch: arm64
+            deploy-target: editor
+
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
@@ -291,12 +311,6 @@ jobs:
 
           cp -rf `pwd`/${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}.pck $TARGET/${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}.pck
           7z a -r $TARGET.zip $TARGET
-        shell: bash
-
-      - name: Tree 3 levels
-        if: ${{ matrix.deploy-platform != 'macos' || matrix.deploy-platform != 'ios' }}
-        run: |
-          tree . -L 3
         shell: bash
 
       - name: Upload Godot Artifact Export
