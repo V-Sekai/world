@@ -25,21 +25,21 @@ env:
 
 jobs:
   godot-build:
-    runs-on: ${{ matrix.runs-on }}
+    runs-on: ${{ matrix.os }}
     name: ${{ matrix.name }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - name: linux_editor_win_deploy
-            runs-on: ubuntu-22.04
-            cache-name: linux-editor-deploy-windows-editor
+          - name: editor_windows_x86_64
+            os: ubuntu-22.04
+            cache-name: windows-editor-x86_64
             target: editor
             tests: false
             sconsflags: linker=gold precision=double use_mingw=yes
             doc-test: false
-            bin: ./godot/bin/godot.linuxbsd.editor.double.x86_64
-            deploy-bin: ./godot/bin/godot.windows.editor.double.x86_64.exe
+            bin: ./19_godot/bin/godot.linuxbsd.editor.double.x86_64
+            deploy-bin: ./19_godot/bin/godot.windows.editor.double.x86_64.exe
             editor-bin-name: godot.windows.editor.double.x86_64.exe
             proj-conv: false
             artifact: true
@@ -52,15 +52,15 @@ jobs:
             arch: x86_64
             deploy-target: editor
 
-          - name: linux_editor_linux_deploy
-            runs-on: ubuntu-22.04
-            cache-name: linux-editor-deploy-linux-editor
+          - name: editor_linux_x86_64
+            os: ubuntu-22.04
+            cache-name: linux-editor-x86_64
             target: editor
             tests: false
             sconsflags: linker=gold precision=double use_llvm=yes
             doc-test: false
-            bin: ./godot/bin/godot.linuxbsd.editor.double.x86_64.llvm
-            deploy-bin: ./godot/bin/godot.linuxbsd.editor.double.x86_64.llvm
+            bin: ./19_godot/bin/godot.linuxbsd.editor.double.x86_64.llvm
+            deploy-bin: ./19_godot/bin/godot.linuxbsd.editor.double.x86_64.llvm
             editor-bin-name: godot.linuxbsd.editor.double.x86_64.llvm
             proj-conv: false
             artifact: true
@@ -72,34 +72,14 @@ jobs:
             arch: x86_64
             deploy-target: editor
 
-          - name: macos_editor_macos_deploy
-            runs-on: "macos-latest"
-            cache-name: macos-editor-deploy-macos-editor
-            target: editor
-            tests: false
-            sconsflags: linker=gold precision=double generate_bundle=yes
-            doc-test: false
-            bin: ./godot/bin/godot.macos.editor.double.arm64
-            deploy-bin: ./godot/bin/godot_macos_editor_double.app
-            editor-bin-name: godot.macos.editor.double.arm64
-            proj-conv: false
-            artifact: true
-            platform: macos
-            deploy: true
-            deploy-platform: macos
-            export-platform: Mac
-            deploy-arch: arm64
-            arch: arm64
-            deploy-target: editor
-
-          - name: linux_editor_web_deploy
-            runs-on: ubuntu-22.04
-            cache-name: linux-editor-deploy-web-editor
+          - name: editor_web_wasm32
+            os: ubuntu-22.04
+            cache-name: web-editor-wasm32
             target: editor
             tests: false
             sconsflags: linker=gold precision=double
             doc-test: false
-            bin: ./godot/bin/godot.web.editor.double.wasm32
+            bin: ./19_godot/bin/godot.web.editor.double.wasm32
             editor-bin-name: godot.web.editor.double.wasm32 
             proj-conv: false
             artifact: true
@@ -108,6 +88,22 @@ jobs:
             export-platform: Web
             build-arch: wasm32
             arch: wasm32
+            
+          - name: template_release_ios_arm64
+            os: macos-13
+            cache-name: ios-template-release-arm64
+            target: template_release
+            tests: false
+            sconsflags: linker=gold precision=double use_llvm=yes module_mvsqlite_enabled=no module_speech_enabled=no
+            doc-test: false
+            bin: ./19_godot/bin/libgodot.ios.template_release.double.arm64.so
+            editor-bin-name: libgodot.ios.template_release.double.arm64.so
+            proj-conv: false
+            artifact: true
+            platform: ios
+            export-platform: ios
+            arch: arm64
+            deploy: false
 
     steps:
       - name: Harden Runner
@@ -167,9 +163,6 @@ jobs:
   
       - name: Setup python, scons and golang
         uses: ./.github/actions/godot-world-deps
-        with:
-          godot-ref: ${{ env.GODOT_REF }}
-          godot-repository: ${{ env.GODOT_REPOSITORY }}
 
       - name: Set up .NET Sdk
         uses: actions/setup-dotnet@4d6c8fcf3c8f7a60068d26b594648e99df24cee3 # v4.0.0
@@ -182,6 +175,7 @@ jobs:
 
       - name: Compilation
         uses: ./.github/actions/godot-world-build
+        if: ${{ matrix.platform != 'android' }}
         with:
           sconsflags: ${{ env.SCONSFLAGS }} ${{ matrix.sconsflags }}
           platform: ${{ matrix.platform }}
@@ -201,16 +195,12 @@ jobs:
           deploy: false
           arch: ${{ matrix.deploy-arch }}
 
-      - name: Compilation
-        if: ${{ matrix.arch == 'arm64' && matrix.deploy-platform == 'android' }}
-        uses: ./.github/actions/godot-world-build
-        with:
-          sconsflags: ${{ env.SCONSFLAGS }} ${{ matrix.sconsflags }}
-          platform: ${{ matrix.deploy-platform }}
-          target: ${{ matrix.deploy-target }}
-          tests: false
-          deploy: false
-          arch: arm32
+      - name: generateGodotTemplates
+        if: ${{ matrix.arch == 'arm64' && matrix.platform == 'android' }}
+        run: |
+            cd 19_godot/platform/android/java
+            ./gradlew generateGodotTemplates
+        shell: bash
 
       - name: Generate build constants
         uses: ./.github/actions/vsk-generate-constants
@@ -305,7 +295,7 @@ jobs:
       - name: Prepare artifact
         if: ${{ matrix.artifact }}
         run: |
-          chmod +x godot/bin/godot.* || true
+          chmod +x 19_godot/bin/godot.* || true
         shell: bash
 
       - name: Upload artifact

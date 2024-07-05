@@ -10,7 +10,10 @@
       "label": "Godot Engine",
       "type": "shell",
       "options": {
-        "cwd": "${workspaceFolder}/19_Godot"
+        "cwd": "${workspaceFolder}/19_Godot",
+        "env": {
+          "ANDROID_HOME": "C:/Users/ernest.lee/AppData/Local/Android/Sdk"
+        }
       },
       "command": [
         "scons werror=no compiledb=yes dev_build=no use_mingw=yes use_llvm=yes generate_bundle=no precision=double compiledb=yes target=editor tests=yes debug_symbols=yes"
