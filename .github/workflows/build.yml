@@ -88,6 +88,22 @@ jobs:
             export-platform: Web
             build-arch: wasm32
             arch: wasm32
+            
+          - name: template_release_ios_arm64
+            os: macos-13
+            cache-name: ios-template-release-arm64
+            target: template_release
+            tests: false
+            sconsflags: linker=gold precision=double use_llvm=yes module_mvsqlite_enabled=no module_speech_enabled=no
+            doc-test: false
+            bin: ./19_godot/bin/libgodot.ios.template_release.double.arm64.so
+            editor-bin-name: libgodot.ios.template_release.double.arm64.so
+            proj-conv: false
+            artifact: true
+            platform: ios
+            export-platform: ios
+            arch: arm64
+            deploy: false
 
           - name: editor_android_arm64
             os: ubuntu-22.04
