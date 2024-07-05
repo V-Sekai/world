@@ -1,13 +1,20 @@
-extends Node
+extends Plan
 
-class_name BehaveIndividualPlanner
+class_name BehaveOperationalPlan
+
+signal task_completed(result)
+var memory = {}
+var selected_task
+
+func _on_task_selected(task):
+	selected_task = task
+	var result = behave(memory, task, Node.new())
+	emit_signal("task_completed", result)
 
 # TODO: Implement the character controller so humans and bot entities are equal.
 # TODO: Implement the command slot which is a todo_list: Array[Array].
 # TODO: Each _process try to complete the current todo_list.
-
-func execute_task(memory: Dictionary, task: String, satyr: Node) -> Dictionary:
-	# TODO: The execute task should be behave(memory: Dictionary)
+func behave(memory: Dictionary, task: String, satyr: Node) -> Dictionary:
 	match task:
 		"go_to_firepit":
 			return go_to_firepit(memory, satyr)
@@ -35,7 +42,6 @@ func execute_task(memory: Dictionary, task: String, satyr: Node) -> Dictionary:
 			print("Unknown task: ", task)
 			return memory
 
-# Actions
 func go_to_firepit(memory: Dictionary, satyr: Node) -> Dictionary:
 	# Implement the logic to go to the fire pit
 	return memory

@@ -1,4 +1,36 @@
 extends Plan
+class_name TacticalPlan
+
+signal task_selected(task)
+signal goal_completed(result)
+
+var selected_goal
+
+func _on_goal_selected(goal):
+	selected_goal = goal
+	# Your tactical planning logic here
+	var task = select_task(goal)
+	emit_signal("task_selected", task)
+
+func _on_task_completed(result):
+	# Handle the result of the completed task
+	emit_signal("goal_completed", result)
+
+## Function to select a task based on the selected goal
+func select_task(goal: String) -> String:
+	match goal:
+		"keep_fire_burning":
+			return "keep_fire_burning"
+		"keep_fed":
+			return "keep_fed"
+		"keep_fed_very_hungry":
+			return "keep_fed"
+		"calm_down":
+			return "calm_down"
+		"relax":
+			return "relax"
+		_:
+			return ""
 
 ## Plan specific actions based on the assigned task
 func plan_task(task: String, memory: Dictionary) -> Array:
