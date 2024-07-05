@@ -7,12 +7,6 @@ inputs:
   python-arch:
     description: The python architecture.
     default: "x64"
-  godot-ref:
-    description: The reference for the Godot engine repository.
-    default: master
-  godot-repository:
-    description: The Godot engine repository.
-    default: godotengine/godot
   go-version:
     description: The Go version to use.
     default: "1.21"
@@ -40,13 +34,6 @@ runs:
         python -c "import sys; print(sys.version)"
         python -m pip install scons==4.4.0
         scons --version
-
-    - name: Checkout godot engine repo
-      uses: actions/checkout@v3
-      with:
-        repository: ${{ inputs.godot-repository }}
-        path: godot
-        ref: ${{ inputs.godot-ref }}
 
     - name: Set up Go
       uses: actions/setup-go@v2
