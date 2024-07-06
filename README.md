@@ -13,7 +13,6 @@ The V-Sekai World project aims to create a virtual world using the Godot Engine 
 ```mermaid
 flowchart TD
   subgraph iFirePendingMilestones
-    IF[iFire] --> Downloader[Downloader🔥]
     Downloader --> F[ServerBackend🚫]
     PaperWork[PaperWork🔥]
   end
