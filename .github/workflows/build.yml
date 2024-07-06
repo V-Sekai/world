@@ -13,9 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  GAME_NAME: vsekai_game
   GODOT_REF: groups-4.3.2024-07-02T224837Z
-  VSK_GAME_BRANCH: 70892822d21e47b0cb7e36436b042a8ce19e481f
   GODOT_REPOSITORY: v-sekai/godot
   SCONSFLAGS: verbose=yes warnings=extra werror=no module_text_server_fb_enabled=yes use_thinlto=yes
   DOTNET_NOLOGO: true
@@ -26,12 +24,11 @@ env:
 jobs:
   godot-build:
     runs-on: ${{ matrix.os }}
-    name: ${{ matrix.name }}
+    name: ${{ matrix.cache-name }}
     strategy:
-      fail-fast: false
       matrix:
         include:
-          - name: editor_windows_x86_64
+          - name: vsekai_game_x86_64
             os: ubuntu-22.04
             cache-name: windows-editor-x86_64
             target: editor
@@ -45,12 +42,63 @@ jobs:
             artifact: true
             platform: linuxbsd
             deploy: true
-            deploy-pdb: true
+            deploy-pdb: false
             deploy-platform: windows
             export-platform: Windows
             deploy-arch: x86_64
             arch: x86_64
             deploy-target: editor
+            game_name: vsekai_game
+            game-repository: v-sekai/v-sekai-game
+            game-repository-ref: bc396caf2a62ca93e9adf9ae6116e3804e5046df
+
+          - name: model_explorer_windows_x86_64
+            os: ubuntu-22.04
+            cache-name: windows-editor-x86_64
+            target: editor
+            tests: false
+            sconsflags: linker=gold precision=double use_mingw=yes
+            doc-test: false
+            bin: ./19_godot/bin/godot.linuxbsd.editor.double.x86_64
+            deploy-bin: ./19_godot/bin/godot.windows.editor.double.x86_64.exe
+            editor-bin-name: godot.windows.editor.double.x86_64.exe
+            proj-conv: false
+            artifact: true
+            platform: linuxbsd
+            deploy: true
+            deploy-pdb: false
+            deploy-platform: windows
+            export-platform: Windows
+            deploy-arch: x86_64
+            arch: x86_64
+            deploy-target: editor
+            game_name: model_explorer_game
+            game-repository: V-Sekai/TOOL_model_explorer.git
+            game-repository-ref: ca140cd9e3f1d8f0b306a6ebf61f9f103694e463
+
+          - name: xr_grid_windows_x86_64
+            os: ubuntu-22.04
+            cache-name: windows-editor-x86_64
+            target: editor
+            tests: false
+            sconsflags: linker=gold precision=double use_mingw=yes
+            doc-test: false
+            bin: ./19_godot/bin/godot.linuxbsd.editor.double.x86_64
+            deploy-bin: ./19_godot/bin/godot.windows.editor.double.x86_64.exe
+            editor-bin-name: godot.windows.editor.double.x86_64.exe
+            proj-conv: false
+            artifact: true
+            platform: linuxbsd
+            deploy: true
+            deploy-pdb: false
+            deploy-platform: windows
+            export-platform: Windows
+            deploy-arch: x86_64
+            arch: x86_64
+            deploy-target: editor
+            game_name: grid_game
+            game-repository: V-Sekai/xr-grid
+            game-repository-ref: 08640744eaf972b00519cc726d40a771f5b276f0
 
           - name: editor_linux_x86_64
             os: ubuntu-22.04
@@ -71,6 +119,9 @@ jobs:
             deploy-arch: x86_64
             arch: x86_64
             deploy-target: editor
+            game_name: vsekai_game
+            game-repository: v-sekai/v-sekai-game
+            game-repository-ref: bc396caf2a62ca93e9adf9ae6116e3804e5046df
 
           - name: editor_web_wasm32
             os: ubuntu-22.04
@@ -88,22 +139,6 @@ jobs:
             export-platform: Web
             build-arch: wasm32
             arch: wasm32
-            
-          - name: template_release_ios_arm64
-            os: macos-13
-            cache-name: ios-template-release-arm64
-            target: template_release
-            tests: false
-            sconsflags: linker=gold precision=double use_llvm=yes module_mvsqlite_enabled=no module_speech_enabled=no
-            doc-test: false
-            bin: ./19_godot/bin/libgodot.ios.template_release.double.arm64.so
-            editor-bin-name: libgodot.ios.template_release.double.arm64.so
-            proj-conv: false
-            artifact: true
-            platform: ios
-            export-platform: ios
-            arch: arm64
-            deploy: false
 
           - name: editor_android_arm64
             os: ubuntu-22.04
@@ -129,13 +164,6 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          repository: V-Sekai/v-sekai-game
-          ref: ${{ env.VSK_GAME_BRANCH }}
-          path: game
 
       - name: Linux dependencies for gold linker
         if: ${{ matrix.platform == 'linux' }}
@@ -251,61 +279,17 @@ jobs:
             ./gradlew generateGodotTemplates
         shell: bash
 
-      - name: Generate build constants
-        uses: ./.github/actions/vsk-generate-constants
-
-      - name: Export Game
+      - name: Export and Prepare Game Artifacts
         if: ${{ matrix.deploy }}
-        run: |
-          mkdir -p .godot/editor .godot/imported export_${{ matrix.deploy-platform }}
-          chmod +x ${{ matrix.bin }}
-          ${{ matrix.bin }} --headless --xr-mode off --export-pack ${{ matrix.export-platform }}  `pwd`/${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}.pck --path game || true
-        timeout-minutes: 20
-        shell: bash
-
-      - name: Prepare artifacts
-        if: ${{ matrix.deploy }}
-        run: |
-          ls
-          # Check if the .pck file exists
-          if [ ! -f ./${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}.pck ]; then
-              echo "Error: ${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}.pck does not exist."
-              exit 1
-          fi
-
-          # Check if the path to the .pck file is correct
-          if [ ! -f `pwd`/${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}.pck ]; then
-              echo "Error: The path to ${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}.pck is incorrect."
-              exit 1
-          fi
-
-          rm -rf ${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}
-          export TARGET=${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}
-          mkdir -p $TARGET
-
-          if [ "${{ matrix.deploy-platform }}" == "windows" ]; then
-              cp -rf ${{ matrix.deploy-bin }} $TARGET/${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}.exe
-          else
-              cp -rf ${{ matrix.deploy-bin }} $TARGET/${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}
-          fi
-
-          cp -rf `pwd`/${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}.pck $TARGET/${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}.pck
-          7z a -r $TARGET.zip $TARGET
-        shell: bash
-
-      - name: Tree 3 levels
-        if: ${{ matrix.deploy-platform != 'macos' || matrix.deploy-platform != 'ios' }}
-        run: |
-          tree . -L 3
-        shell: bash
-
-      - name: Upload Godot Artifact Export
-        if: ${{ matrix.deploy }}
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+        uses: ./.github/actions/godot-world-godot-export
         with:
-          name: ${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}
-          path: |
-            ${{ env.GAME_NAME }}_${{ matrix.deploy-platform }}
+          deploy-platform: ${{ matrix.deploy-platform }}
+          export-platform: ${{ matrix.export-platform }}
+          bin: ${{ matrix.bin }}
+          deploy-bin: ${{ matrix.deploy-bin }}
+          game-name: ${{ matrix.GAME_NAME }}
+          game-repository: ${{ matrix.game-repository }}
+          game-repository-ref: ${{ matrix.game-repository-ref }}
 
       - name: Generate C# glue
         if: ${{ matrix.build-mono }}
