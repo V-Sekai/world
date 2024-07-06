@@ -63,7 +63,7 @@ jobs:
             deploy-bin: ./19_godot/bin/godot.windows.editor.double.x86_64.exe
             editor-bin-name: godot.windows.editor.double.x86_64.exe
             proj-conv: false
-            artifact: true
+            artifact: false
             platform: linuxbsd
             deploy: true
             deploy-pdb: false
@@ -87,7 +87,7 @@ jobs:
             deploy-bin: ./19_godot/bin/godot.windows.editor.double.x86_64.exe
             editor-bin-name: godot.windows.editor.double.x86_64.exe
             proj-conv: false
-            artifact: true
+            artifact: false
             platform: linuxbsd
             deploy: true
             deploy-pdb: false
