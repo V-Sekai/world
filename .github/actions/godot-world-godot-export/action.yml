@@ -79,17 +79,16 @@ runs:
         fi
 
         rm -rf ${{ inputs.game-name }}
-        export TARGET=${{ inputs.game-name }}_
-        mkdir -p $TARGET
+        mkdir -p ${{ inputs.game-name }}
 
         if [ "${{ inputs.deploy-platform }}" == "windows" ]; then
-            cp -rf ${{ inputs.deploy-bin }} $TARGET/${{ inputs.game-name }}.exe
+            cp -rf ${{ inputs.deploy-bin }} ${{ inputs.game-name }}/${{ inputs.game-name }}.exe
         else
-            cp -rf ${{ inputs.deploy-bin }} $TARGET/${{ inputs.game-name }}
+            cp -rf ${{ inputs.deploy-bin }} ${{ inputs.game-name }}/${{ inputs.game-name }}
         fi
 
-        cp -rf `pwd`/${{ inputs.game-name }}.pck $TARGET/${{ inputs.game-name }}.pck
-        7z a -r $TARGET.zip $TARGET
+        cp -rf `pwd`/${{ inputs.game-name }}.pck ${{ inputs.game-name }}/${{ inputs.game-name }}.pck
+        7z a -r ${{ inputs.game-name }}.zip $TARGET
       shell: bash
 
     - name: Upload Godot Artifact Export
@@ -98,4 +97,4 @@ runs:
       with:
         name: ${{ inputs.game-name }}
         path: |
-          ${{ inputs.game-name }}
+          ${{ inputs.game-name }}.zip
