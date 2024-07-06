@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/V-Sekai-fire/wax.git
+	branch = main
+	commit = 335a55bca1a9b69a56f0200d4c3fcfe066c55139
+	parent = d05d3bd1a3305c4dee699c4a6606c8057a2ef0a5
+	method = merge
+	cmdver = 0.4.6

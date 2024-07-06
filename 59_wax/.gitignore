@@ -1,0 +1,9 @@
+./a.out
+**/a.out
+out/
+tests/
+waxc
+.DS_Store
+**/.DS_Store
+.idea
+*build*
