@@ -13,29 +13,10 @@ The V-Sekai World project aims to create a virtual world using the Godot Engine 
 ```mermaid
 flowchart TD
   subgraph iFirePendingMilestones
-    Downloader --> F[ServerBackend🚫]
     PaperWork[PaperWork🔥]
   end
-  subgraph LyumaPendingMilestones
-    LY[Lyuma] --> G[IK🚫]
-  end
   subgraph PendingMilestones
-    F[ServerBackend🚫] --> H[Speech🚫]
-    H[Speech🚫] --> K[DESKTOP_ControllerPlayPS5🚫]
-    K[DESKTOP_ControllerPlayPS5🚫] --> L[VR_SteamVR🚫]
-    L[VR_SteamVR🚫] --> J[Upload]
-    J[Upload] --> N[PlaceholderAvatar]
-    N[PlaceholderAvatar] --> Q[VroidHub🚫]
-    Q[VroidHub🚫] --> O[PlaceholderWorld]
-    O[PlaceholderWorld] --> Y[CCBYHome🚫]
-    Y[CCBYHome🚫] --> G[IK🚫]
-    docker-gocd-agent-centos-8-groups-github-actions[docker-gocd-agent-centos-8-groups-github-actions]
-    docker-groups-github-actions[docker-groups-github-actions]
-    docker-uro-github-actions[docker-uro-github-actions]
-    godot-groups-github-actions[godot-groups-github-actions]
-    groups-editor-export-github-actions[groups-editor-export-github-actions]
-    groups-export-github-actions-itch[groups-export-github-actions-itch]
-    model-explorer-export-github-actions-itch[model-explorer-export-github-actions-itch]
+    F[ServerBackend🚫] --> T[TrollVsGoatTrafficSimulator]
   end
 ```
 
