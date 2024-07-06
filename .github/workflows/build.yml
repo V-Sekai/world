@@ -19,7 +19,9 @@ env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
   EM_VERSION: 3.1.18
-  EM_CACHE_FOLDER: "emsdk-cache"
+  EM_CACHE_FOLDER: ${{github.workspace}}/.scons-cache/
+  GOCACHE: ${{github.workspace}}/.scons-cache/
+  CARGO_HOME: ${{github.workspace}}/.scons-cache/
 
 jobs:
   godot-build:
