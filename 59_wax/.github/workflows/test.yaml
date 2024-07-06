@@ -203,3 +203,9 @@ jobs:
           cd build
           ./waxc ../examples/fib.wax --json fib.json
           cat fib.json
+
+      - name: Transpile to Gdscript
+        run: |
+          cd build
+          ./waxc ../examples/fib.wax --gd fib.gd
+          cat fib.gd

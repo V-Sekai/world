@@ -25,6 +25,8 @@ extern const char* TEXT_std_lua;
 
 extern const char* TEXT_std_py;
 
+extern const char* TEXT_std_gd;
+
 extern const char* TEXT_std_java;
 
 extern const char* TEXT_std_swift;

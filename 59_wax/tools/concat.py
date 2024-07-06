@@ -59,6 +59,9 @@ def min_ts(src):
 def min_py(src):
 	return src.replace("\n\n","\n");
 
+def min_gd(src):
+	return src.replace("\n\n","\n");
+
 def min_lua(src):
 	return src.replace("\n\n","\n");
 	
