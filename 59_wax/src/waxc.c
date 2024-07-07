@@ -13,7 +13,6 @@ int WVERBOSE = 1;
 #include "to_ts.h"
 #include "to_json.h"
 #include "to_py.h"
-#include "to_gd.h"
 #include "to_cs.h"
 #include "to_cpp.h"
 #include "to_swift.h"
@@ -30,7 +29,6 @@ int WVERBOSE = 1;
 #define TARG_SWIFT 128
 #define TARG_LUA   256
 #define TARG_WAT   512
-#define TARG_GD    1024
 
 void print_help(){
   printf(" _____                                           \n");
@@ -44,7 +42,6 @@ void print_help(){
   printf("--java  path/out.java  transpile to java         \n");
   printf("--ts    path/out.ts    transpile to typescript   \n");
   printf("--py    path/out.py    transpile to python       \n");
-  printf("--gd    path/out.gd    transpile to gdscript     \n");
   printf("--cs    path/out.cs    transpile to c#           \n");
   printf("--cpp   path/out.cpp   transpile to c++          \n");
   printf("--swift path/out.swift transpile to swift        \n");
@@ -77,8 +74,6 @@ void transpile(int targ, const char* input_file, const char* path, int print_tok
     defs_addbool(&defs,"TARGET_JSON",0);
   }else if (targ == TARG_PY){
     defs_addbool(&defs,"TARGET_PY",0);
-  }else if (targ == TARG_GD){
-    defs_addbool(&defs,"TARGET_GD",0);
   }else if (targ == TARG_CS){
     defs_addbool(&defs,"TARGET_CS",0);
   }else if (targ == TARG_CPP){
@@ -125,8 +120,6 @@ void transpile(int targ, const char* input_file, const char* path, int print_tok
     out = tree_to_json(modname,tree,&functable,&stttable,&included);
   }else if (targ == TARG_PY){
     out = tree_to_py(modname,tree,&functable,&stttable,&included);
-  }else if (targ == TARG_GD){
-    out = tree_to_gd(modname,tree,&functable,&stttable,&included);
   }else if (targ == TARG_CS){
     out = tree_to_cs(modname,tree,&functable,&stttable,&included);
   }else if (targ == TARG_CPP){
@@ -149,7 +142,6 @@ int main(int argc, char** argv){
   const char* path_ts = 0;
   const char* path_json = 0;
   const char* path_py = 0;
-  const char* path_gd = 0;
   const char* path_cs = 0;
   const char* path_cpp = 0;
   const char* path_swift = 0;
@@ -176,9 +168,6 @@ int main(int argc, char** argv){
       i+=2;
     }else if (!strcmp(argv[i],"--py")){
       path_py = argv[i+1];
-      i+=2;
-    }else if (!strcmp(argv[i],"--gd")){
-      path_gd = argv[i+1];
       i+=2;
     }else if (!strcmp(argv[i],"--cs")){
       path_cs = argv[i+1];
@@ -247,11 +236,6 @@ int main(int argc, char** argv){
   if (path_py){
     printinfo("[info] transpiling '%s' to Python...\n",input_file);
     transpile(TARG_PY, input_file, path_py, print_tok, print_ast);
-  }
-
-  if (path_gd){
-    printinfo("[info] transpiling '%s' to Gdscript...\n",input_file);
-    transpile(TARG_GD, input_file, path_gd, print_tok, print_ast);
   }
 
   if (path_cs){

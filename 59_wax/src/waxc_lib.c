@@ -44,8 +44,6 @@ char* transpile(char* targ, char* filname, char* src, int print_ast){
     defs_addbool(&defs,"TARGET_JSON",0);
   }else if (!strcmp(targ,"py")){
     defs_addbool(&defs,"TARGET_PY",0);
-  }else if (!strcmp(targ,"gd")){
-    defs_addbool(&defs,"TARGET_GD",0);
   }else if (!strcmp(targ,"cs")){
     defs_addbool(&defs,"TARGET_CS",0);
   }else if (!strcmp(targ,"cpp")){

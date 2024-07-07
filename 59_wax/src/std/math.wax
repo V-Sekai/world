@@ -1,4 +1,5 @@
 (@pragma once)
+
 (extern acos   (param x float) (result float))
 (extern asin   (param x float) (result float))
 (extern atan   (param x float) (result float))
