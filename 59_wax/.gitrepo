@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai-fire/wax.git
 	branch = actions
-	commit = 99242dd36b062aa5cc2ac3a0d27cd4e033b665cc
-	parent = 6abf64e01b85bd81e643d383fc072b315e39e809
+	commit = 4c14916f5ab3bc3e8e7f9d4e72509c089df25387
+	parent = 1377fca906d48e9552a0c5f9e29d87a32ce29fb5
 	method = merge
 	cmdver = 0.4.6
