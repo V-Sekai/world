@@ -270,6 +270,17 @@ str_t tmp_name(char* prefix){
   return out;
 }
 
+str_t truncate_string_from_dot(str_t s) {
+    size_t i;
+    for (i = 0; i < s.len; i++) {
+        if (s.data[i] == '.') {
+            s.len = i;
+            s.data[i] = '\0';
+            break;
+        }
+    }
+    return s;
+}
 
 str_t base_name(const char* path){
 	size_t l = strlen(path);
@@ -294,6 +305,8 @@ str_t base_name(const char* path){
 	}
 	str_t s = str_from((char*)&path[i],j-i);
 
+	s = truncate_string_from_dot(s);
+
 	return s;
 
 }
@@ -306,7 +319,7 @@ const char* censored[] = {
   "entry","enum","extends","elif","except","event","explicit",
   "final","finally","function","from","false","False","foreach","fixed",
   "goto","global",
-  "implements","import","instanceof","interface","Infinity","in","is",
+  "implements","import","instanceof","interface","Infinity", "in","is",
   "long","lambda","lock",
   "native","new","NaN","not","namespace",
   "Object","or","out","override","object","operator","of",
