@@ -116,7 +116,6 @@ func _notification(what):
 			not_logged.visible = true
 
 		await _load_categories()
-		_commit_category(0)
 
 		can_search = true
 		_search()

@@ -61,7 +61,7 @@ func _on_about_to_popup():
 
 		var gtlf = SafeData.dictionary(result, "gltf")
 		if gtlf == null or gtlf.size() == 0:
-			OS.alert("This model has not a glTF version.", "Sorry")
+			OS.alert("This model does not have a glTF version.", "Sorry")
 			hide()
 			return
 
