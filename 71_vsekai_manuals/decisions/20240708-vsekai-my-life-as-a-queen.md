@@ -22,6 +22,9 @@ In "V-Sekai: My Life as a Princess," players assume the role of a princess taske
 - **In-Game HUD**: Minimalistic interface showing resources, current tasks, and a map of the kingdom.
 - **Kingdom View**: A top-down view of the kingdom where players can place buildings, gardens, and other structures.
 - **Adventurer Management Screen**: Interface to manage and send adventurers on quests.
+- **Day Cycles**: The game operates on 5-minute day cycles, providing a sense of urgency and rhythm to daily tasks.
+- **Assistant**: An in-game assistant character helps guide players through their tasks, offering tips and reminders.
+- **Battle Log**: A detailed log that records all combat encounters, including outcomes, rewards, and adventurer performance.
 
 ### Initial Prototype
 
@@ -161,6 +164,6 @@ Status: Proposed
 2. [V-Sekai/v-sekai-game](https://github.com/v-sekai/v-sekai-game) - GitHub page for the V-Sekai open-source project, which brings social VR/VRSNS/metaverse components to the Godot Engine.
 3. [Final Fantasy Crystal Chronicles: My Life as a King - A Lost WiiWare Classic [REFFOID]](https://www.youtube.com/watch?v=oHDrSb6DUg4)
 4. [Godot XR Game Jam July 2024](https://itch.io/jam/godot-xr-game-jam-july-2024)
-5. [Gridmap usage in Cassete Beasts](https://www.cassettebeasts.com/2021/08/09/technical-look-the-park/)
+5. [Gridmap usage in Cassette Beasts](https://www.cassettebeasts.com/2021/08/09/technical-look-the-park/)
 
 AI assistant Aria assisted with this article.
