@@ -336,9 +336,3 @@ jobs:
         run: |
           chmod +x 19_godot/bin/godot.* || true
         shell: bash
-
-      - name: Upload artifact
-        uses: ./.github/actions/upload-world-artifact
-        if: ${{ matrix.artifact }}
-        with:
-          name: ${{ matrix.cache-name }}
