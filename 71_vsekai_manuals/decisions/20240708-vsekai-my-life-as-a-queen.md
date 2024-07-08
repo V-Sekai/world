@@ -1,4 +1,4 @@
-# Proposed: V-Sekai: My Life as a Queen
+# Proposed: V-Sekai: My Life as a Princess
 
 ## The Context
 
@@ -7,7 +7,7 @@
 > This game jam is organized by the Godot XR Community and offers a fun opportunity to build something using Godot's XR capabilities.
 >
 > Godot XR offers a lightweight entry into making XR games. With the expected release of Godot 4.3, there are loads of improvements, especially around AR-related features.
-> 
+>
 > The theme for this game jam is: **Relaxation!**
 
 ## The Problem Statement
@@ -16,7 +16,7 @@ Create an Android XR game using the theme of "Relaxation" and utilizing Godot En
 
 ## Describe how your proposal will work with code, pseudo-code, mock-ups, or diagrams
 
-In "V-Sekai: My Life as a Queen," players assume the role of a queen tasked with rebuilding and managing a kingdom. The game focuses on relaxation through planning, resource management, VR interactions, and adventurer tasking.
+In "V-Sekai: My Life as a Princess," players assume the role of a princess tasked with rebuilding and managing a kingdom. The game focuses on relaxation through planning, resource management, VR interactions, and adventurer tasking.
 
 - **Main Menu**: A serene landscape with options to start a new game, load a saved game, and access settings.
 - **In-Game HUD**: Minimalistic interface showing resources, current tasks, and a map of the kingdom.
@@ -25,11 +25,92 @@ In "V-Sekai: My Life as a Queen," players assume the role of a queen tasked with
 
 ### Initial Prototype
 
+```gdscript
+var memories: Dictionary = {
+    "is_at": {"player": "cabin"},
+    "is_outside_of": {"cave entrance": "cabin"},
+    "contains": {"first_room": "treasure"}
+}
+
+var todo_list: Array = [
+    "Explore the cabin",
+    "Find the cave entrance",
+    "Enter the cave",
+    "Reach the treasure room"
+]
+```
+
 You start in a little cabin in the woods. You have a cave you can venture into, and at the end is treasure. This initial prototype serves as a simple introduction to the game's mechanics and environment.
 
 ### Initial Prototype Reversal
 
-In the initial prototype, you explore the cave yourself. In "V-Sekai: My Life as a Queen," you will reverse this concept by taking on the role of the queen who supplies adventurers with instructions to explore the cave and retrieve treasures. This shift from direct exploration to strategic management aligns with the relaxation theme.
+```swift
+var princess_strategic_memories: Dictionary = {
+    "is_at": {"princess": "royal cabin"},
+    "has_goal": {"princess": "retrieve treasure from the cave"},
+    "preparation_status": {"princess": "not_started"}
+}
+
+var princess_strategic_plan: Array = [
+    "Set goal to retrieve treasure from the cave",
+    "Prepare for the journey"
+]
+
+var princess_tactical_memories: Dictionary = {
+    "is_at": {"princess": "royal cabin"},
+    "knows_location": {"princess": ["royal cabin", "cave entrance"]},
+    "route_planned": {"princess": false}
+}
+
+var princess_tactical_plan: Array = [
+    "Move to the royal cabin",
+    "Locate the cave entrance",
+    "Plan route through the cave to the treasure room"
+]
+
+var princess_operational_memories: Dictionary = {
+    "is_at": {"princess": "royal cabin"},
+    "visited": {"princess": []},
+    "contains": {"first_room": "treasure"}
+}
+
+var princess_operational_plan: Array = [
+    "Gather supplies for the journey",
+    "Travel to the cave entrance",
+    "Wait for the adventurer",
+    "Provide support from outside the cave",
+    "Receive the treasure from the adventurer"
+]
+
+var adventurer_tactical_memories: Dictionary = {
+    "is_at": {"adventurer": "adventurer's cabin"},
+    "knows_location": {"adventurer": ["adventurer's cabin", "cave entrance"]},
+    "route_planned": {"adventurer": false}
+}
+
+var adventurer_tactical_plan: Array = [
+    "Move to the adventurer's cabin",
+    "Locate the cave entrance",
+    "Plan route through the cave to the treasure room"
+]
+
+var adventurer_operational_memories: Dictionary = {
+    "is_at": {"adventurer": "adventurer's cabin"},
+    "visited": {"adventurer": []},
+    "contains": {"first_room": "treasure"}
+}
+
+var adventurer_operational_plan: Array = [
+    "Walk to the adventurer's cabin",
+    "Search for the cave entrance",
+    "Enter the cave",
+    "Navigate to the first room",
+    "Collect the treasure",
+    "Return to the cave entrance and hand over the treasure to the princess"
+]
+```
+
+In the initial prototype, you explore the cave yourself. In "V-Sekai: My Life as a Princess," you will reverse this concept by taking on the role of the princess who supplies adventurers with instructions to explore the cave and retrieve treasures. This shift from direct exploration to strategic management aligns with the relaxation theme.
 
 ## The Benefits
 
