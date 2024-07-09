@@ -1,1 +1,0 @@
-enum { MESH, FACE, EDGE, VERTEX }
