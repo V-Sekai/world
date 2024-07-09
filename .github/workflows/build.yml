@@ -52,54 +52,6 @@ jobs:
             game-repository: v-sekai/v-sekai-game
             game-repository-ref: bc396caf2a62ca93e9adf9ae6116e3804e5046df
 
-          - name: model_explorer_windows_x86_64
-            os: ubuntu-22.04
-            cache-name: windows-editor-x86_64
-            target: editor
-            tests: false
-            sconsflags: linker=gold precision=double use_mingw=yes
-            doc-test: false
-            bin: ./19_godot/bin/godot.linuxbsd.editor.double.x86_64
-            deploy-bin: ./19_godot/bin/godot.windows.editor.double.x86_64.exe
-            editor-bin-name: godot.windows.editor.double.x86_64.exe
-            proj-conv: false
-            artifact: false
-            platform: linuxbsd
-            deploy: true
-            deploy-pdb: false
-            deploy-platform: windows
-            export-platform: Windows
-            deploy-arch: x86_64
-            arch: x86_64
-            deploy-target: editor
-            game_name: model_explorer_game
-            game-repository: V-Sekai/TOOL_model_explorer.git
-            game-repository-ref: ca140cd9e3f1d8f0b306a6ebf61f9f103694e463
-
-          - name: xr_grid_windows_x86_64
-            os: ubuntu-22.04
-            cache-name: windows-editor-x86_64
-            target: editor
-            tests: false
-            sconsflags: linker=gold precision=double use_mingw=yes
-            doc-test: false
-            bin: ./19_godot/bin/godot.linuxbsd.editor.double.x86_64
-            deploy-bin: ./19_godot/bin/godot.windows.editor.double.x86_64.exe
-            editor-bin-name: godot.windows.editor.double.x86_64.exe
-            proj-conv: false
-            artifact: false
-            platform: linuxbsd
-            deploy: true
-            deploy-pdb: false
-            deploy-platform: windows
-            export-platform: Windows
-            deploy-arch: x86_64
-            arch: x86_64
-            deploy-target: editor
-            game_name: grid_game
-            game-repository: V-Sekai/xr-grid
-            game-repository-ref: 08640744eaf972b00519cc726d40a771f5b276f0
-
           - name: vsekai_game_linux_x86_64
             os: ubuntu-22.04
             cache-name: linux-editor-x86_64
