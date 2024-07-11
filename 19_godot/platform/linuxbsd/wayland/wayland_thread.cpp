@@ -968,7 +968,6 @@ void WaylandThread::_frame_wl_callback_on_done(void *data, struct wl_callback *w
 
 	ws->frame_callback = wl_surface_frame(ws->wl_surface),
 	wl_callback_add_listener(ws->frame_callback, &frame_wl_callback_listener, ws);
-	wl_surface_commit(ws->wl_surface);
 
 	if (ws->wl_surface && ws->buffer_scale_changed) {
 		// NOTE: We're only now setting the buffer scale as the idea is to get this
@@ -980,11 +979,6 @@ void WaylandThread::_frame_wl_callback_on_done(void *data, struct wl_callback *w
 		// rendering if needed.
 		wl_surface_set_buffer_scale(ws->wl_surface, window_state_get_preferred_buffer_scale(ws));
 	}
-
-	// NOTE: Remember to set here also other buffer-dependent states (e.g. opaque
-	// region) if used, to be as close as possible to an atomic surface update.
-	// Ideally we'd only have one surface commit, but it's not really doable given
-	// the current state of things.
 }
 
 void WaylandThread::_wl_surface_on_leave(void *data, struct wl_surface *wl_surface, struct wl_output *wl_output) {
@@ -2055,8 +2049,13 @@ void WaylandThread::_wp_relative_pointer_on_relative_motion(void *data, struct z
 
 	PointerData &pd = ss->pointer_data_buffer;
 
+	WindowState *ws = wl_surface_get_window_state(ss->pointed_surface);
+	ERR_FAIL_NULL(ws);
+
 	pd.relative_motion.x = wl_fixed_to_double(dx);
 	pd.relative_motion.y = wl_fixed_to_double(dy);
+
+	pd.relative_motion *= window_state_get_scale_factor(ws);
 
 	pd.relative_motion_time = uptime_lo;
 }
@@ -3241,10 +3240,6 @@ void WaylandThread::window_create(DisplayServer::WindowID p_window_id, int p_wid
 	ws.frame_callback = wl_surface_frame(ws.wl_surface);
 	wl_callback_add_listener(ws.frame_callback, &frame_wl_callback_listener, &ws);
 
-	// NOTE: This commit is only called once to start the whole frame callback
-	// "loop".
-	wl_surface_commit(ws.wl_surface);
-
 	if (registry.xdg_exporter) {
 		ws.xdg_exported = zxdg_exporter_v1_export(registry.xdg_exporter, ws.wl_surface);
 		zxdg_exported_v1_add_listener(ws.xdg_exported, &xdg_exported_listener, &ws);
@@ -4118,6 +4113,10 @@ void WaylandThread::primary_set_text(const String &p_text) {
 	// Wait for the message to get to the server before continuing, otherwise the
 	// clipboard update might come with a delay.
 	wl_display_roundtrip(wl_display);
+}
+
+void WaylandThread::commit_surfaces() {
+	wl_surface_commit(main_window.wl_surface);
 }
 
 void WaylandThread::set_frame() {

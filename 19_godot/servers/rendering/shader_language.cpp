@@ -1552,7 +1552,7 @@ bool ShaderLanguage::_validate_operator(OperatorNode *p_op, DataType *r_ret_type
 			}
 
 			DataType na = p_op->arguments[0]->get_datatype();
-			valid = na > TYPE_BOOL && na < TYPE_MAT2;
+			valid = na > TYPE_BVEC4 && na < TYPE_MAT2;
 			ret_type = na;
 		} break;
 		case OP_ADD:
@@ -1572,7 +1572,7 @@ bool ShaderLanguage::_validate_operator(OperatorNode *p_op, DataType *r_ret_type
 			}
 
 			if (na == nb) {
-				valid = (na > TYPE_BOOL && na <= TYPE_MAT4);
+				valid = (na > TYPE_BVEC4 && na <= TYPE_MAT4);
 				ret_type = na;
 			} else if (na == TYPE_INT && nb == TYPE_IVEC2) {
 				valid = true;
@@ -1781,7 +1781,7 @@ bool ShaderLanguage::_validate_operator(OperatorNode *p_op, DataType *r_ret_type
 			DataType nb = p_op->arguments[1]->get_datatype();
 
 			if (na == nb) {
-				valid = (na > TYPE_BOOL && na <= TYPE_MAT4);
+				valid = (na > TYPE_BVEC4 && na <= TYPE_MAT4);
 				ret_type = na;
 			} else if (na == TYPE_IVEC2 && nb == TYPE_INT) {
 				valid = true;
@@ -3987,12 +3987,9 @@ Variant ShaderLanguage::constant_value_to_variant(const Vector<ShaderLanguage::C
 						}
 						value = Variant(array);
 					} else {
-						PackedFloat32Array array;
+						PackedVector4Array array;
 						for (int i = 0; i < array_size; i += 4) {
-							array.push_back(p_value[i].real);
-							array.push_back(p_value[i + 1].real);
-							array.push_back(p_value[i + 2].real);
-							array.push_back(p_value[i + 3].real);
+							array.push_back(Vector4(p_value[i].real, p_value[i + 1].real, p_value[i + 2].real, p_value[i + 3].real));
 						}
 						value = Variant(array);
 					}
@@ -4224,7 +4221,7 @@ PropertyInfo ShaderLanguage::uniform_to_property_info(const ShaderNode::Uniform 
 				if (p_uniform.hint == ShaderLanguage::ShaderNode::Uniform::HINT_SOURCE_COLOR) {
 					pi.type = Variant::PACKED_COLOR_ARRAY;
 				} else {
-					pi.type = Variant::PACKED_FLOAT32_ARRAY;
+					pi.type = Variant::PACKED_VECTOR4_ARRAY;
 				}
 			} else {
 				if (p_uniform.hint == ShaderLanguage::ShaderNode::Uniform::HINT_SOURCE_COLOR) {
@@ -10867,4 +10864,5 @@ ShaderLanguage::ShaderLanguage() {
 
 ShaderLanguage::~ShaderLanguage() {
 	clear();
+	global_func_set.clear();
 }
