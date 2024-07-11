@@ -779,10 +779,10 @@ Error ResourceLoaderBinary::load() {
 			if (res.is_null()) {
 				//did not replace
 
-			    Object *obj = nullptr;
-			    if (!using_whitelist || type_whitelist.has(t)) {
-				    obj = ClassDB::instantiate(t);
-                }
+				Object *obj = nullptr;
+				if (!using_whitelist || type_whitelist.has(t)) {
+					obj = ClassDB::instantiate(t);
+				}
 				if (!obj) {
 					if (ResourceLoader::is_creating_missing_resources_if_class_unavailable_enabled()) {
 						//create a missing resource

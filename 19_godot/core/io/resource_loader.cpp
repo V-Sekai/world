@@ -331,18 +331,18 @@ void ResourceLoader::_thread_load_function(void *p_userdata) {
 		DEV_ASSERT(load_task.dependent_path.is_empty());
 	}
 	// --
-    
-	Ref<Resource> res = _load(load_task.remapped_path, 
-							load_task.remapped_path != load_task.local_path ? load_task.local_path : String(), 
-							load_task.type_hint, 
-							load_task.cache_mode, 
-							load_task.using_whitelist, 
-							load_task.external_path_whitelist, 
-							load_task.type_whitelist, 
-							&load_task.error, 
-							load_task.use_sub_threads, 
-							&load_task.progress);
-    if (mq_override_present) {
+
+	Ref<Resource> res = _load(load_task.remapped_path,
+			load_task.remapped_path != load_task.local_path ? load_task.local_path : String(),
+			load_task.type_hint,
+			load_task.cache_mode,
+			load_task.using_whitelist,
+			load_task.external_path_whitelist,
+			load_task.type_whitelist,
+			&load_task.error,
+			load_task.use_sub_threads,
+			&load_task.progress);
+	if (mq_override_present) {
 		MessageQueue::get_singleton()->flush();
 	}
 
@@ -717,7 +717,7 @@ Ref<Resource> ResourceLoader::_load_complete_inner(LoadToken &p_load_token, Erro
 			DEV_ASSERT((load_task.task_id == 0) != (load_task.thread_id == 0));
 
 			if ((load_task.task_id != 0 && load_task.task_id == caller_task_id) ||
-				(load_task.thread_id != 0 && load_task.thread_id == Thread::get_caller_id())) {
+					(load_task.thread_id != 0 && load_task.thread_id == Thread::get_caller_id())) {
 				// Load is in progress, but it's precisely this thread the one in charge.
 				// That means this is a cyclic load.
 				if (r_error) {
