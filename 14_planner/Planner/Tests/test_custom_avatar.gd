@@ -72,9 +72,9 @@ func test_construction_plan():
 	var callable_array: Array[Callable]
 	for element: String in possible_types.node_labels:
 		planner.current_domain.add_task_methods(element, [planner.current_domain.apply_graph_grammar_node])
-	var todo_list: Array = [["solve_graph_grammar"]]
+	var todo_list: Array = [["behave"]]
 	planner.verbose = 0
-	assert_eq_deep(todo_list,  [["solve_graph_grammar"]])
+	assert_eq_deep(todo_list,  [["behave"]])
 	assert_eq_deep(state, {})
 	var result = planner.find_plan(state, todo_list)
 	assert_eq_deep(state, { "messages": ["Excavate and pour footers", "Pour concrete foundation", "Erect wooden frame including rough roof", "Lay brickwork", "Install basement drains and plumbing", "Install rough wiring", "Finish roofing and flashing", "Pour basement floor", "Install rough plumbing", "Fasten plaster board and plaster (including drying)", "Fasten gutters and downspouts", "Install heating and ventilating", "Lay finish flooring", "Finish grading", "Install kitchen fixtures", "Install finish plumbing", "Finish carpentry", "Pour walks and complete landscaping", "Paint", "Sand and varnish flooring", "Finish", "Finish electrical work"] }
@@ -124,9 +124,9 @@ func test_custom_avatar_find_plan():
 	var callable_array: Array[Callable]
 	for element: String in possible_types.node_labels:
 		planner.current_domain.add_task_methods(element, [planner.current_domain.apply_graph_grammar_node])
-	var todo_list: Array = [["solve_graph_grammar"]]
+	var todo_list: Array = [["behave"]]
 	planner.verbose = 0
-	assert_eq_deep(todo_list,  [["solve_graph_grammar"]])
+	assert_eq_deep(todo_list,  [["behave"]])
 	assert_eq_deep(state, {})
 	var result = planner.find_plan(state, todo_list)
 	assert_eq_deep(state, { "messages": ["Drag and drop the outfit prefab onto the avatar.", "setup_animators", "Set up your animators as normal.", "after_setup", "merge_bones", "The component will automatically merge the bone hierarchy with the original avatar\'s bones.", "setup_bone_proxies", "Set up bone proxies for all collider objects.", "setup_cloth_colliders", "Ensure cloth colliders are working correctly.", "setup_blendshape_sync", "Set up blendshape sync components for Skirt and Tops."]})
