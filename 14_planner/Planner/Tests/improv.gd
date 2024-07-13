@@ -20,7 +20,6 @@ func apply_graph_grammar_node(state, predicate, subject, object) -> Variant:
 	return [["print_side_effect", object], ["set_tile_state", subject, object]]
 
 static func print_side_effect(state, message) -> Dictionary:
-	# Ensure the state is updated or processed correctly
 	if not state.has("messages"):
 		state["messages"] = []
 	state["messages"].append(message)
@@ -31,15 +30,17 @@ func solve_graph_grammar(state):
 	var current_nodes = [possible_types.initial_nonterminal_symbol]
 	var completed_actions = {}
 	var node_to_rule = {}
+	
 	for rule in possible_types.production_rules:
-		if not node_to_rule.has(rule.left_hand_side):
-			node_to_rule[rule.left_hand_side] = []
-		node_to_rule[rule.left_hand_side].append(rule)
+		var lhs = rule.left_hand_side
+		if not node_to_rule.has(lhs):
+			node_to_rule[lhs] = []
+		node_to_rule[lhs].append(rule)
 	
 	while current_nodes.size() > 0:
 		var next_nodes = []
 		for current_node in current_nodes:
-			if current_node in node_to_rule:
+			if node_to_rule.has(current_node):
 				for rule in node_to_rule[current_node]:
 					for action in rule.right_hand_side:
 						var action_key = str(action["node"])
