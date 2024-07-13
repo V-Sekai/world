@@ -22,11 +22,13 @@ class_name GraphGrammar
 }
 @export var id: String = "ex:myGraphGrammar"
 @export var type: String = "gg:GraphGrammar"
+
 class ProductionRule:
 	@export var id: String
 	@export var type: String
 	@export var left_hand_side: String
 	@export var right_hand_side: Array
+	
 	func _init(_id: String, _type: String, _left_hand_side: String, _right_hand_side: Array):
 		id = _id
 		type = _type
@@ -39,6 +41,7 @@ class ProductionRule:
 @export var final_edge_labels: PackedStringArray
 @export var production_rules: Array
 @export var initial_nonterminal_symbol: String
+
 func all_in_array(subset: PackedStringArray, set: PackedStringArray) -> bool:
 	var set_dict = {}
 	for element in set:
@@ -48,6 +51,32 @@ func all_in_array(subset: PackedStringArray, set: PackedStringArray) -> bool:
 		if !set_dict.has(element):
 			return false
 	return true
+
+static func has_cycle(graph: Dictionary) -> bool:
+	var visited = {}
+	var stack = {}
+
+	for node in graph.keys():
+		if _visit(node, graph, visited, stack):
+			return true
+	
+	return false
+
+static func _visit(node: String, graph: Dictionary, visited: Dictionary, stack: Dictionary) -> bool:
+	if stack.has(node):
+		return true
+	if visited.has(node):
+		return false
+	
+	visited[node] = true
+	stack[node] = true
+	
+	for neighbor in graph[node]:
+		if _visit(neighbor, graph, visited, stack):
+			return true
+	
+	stack.erase(node)
+	return false
 
 func _init(_id: String, _type: String, _node_labels: PackedStringArray, _terminal_node_labels: PackedStringArray, _edge_labels: PackedStringArray, _final_edge_labels: PackedStringArray, _production_rules: Array[ProductionRule], _initial_nonterminal_symbol: String):
 	# Initialize with valid but non-empty default values
@@ -72,10 +101,14 @@ func _init(_id: String, _type: String, _node_labels: PackedStringArray, _termina
 	if !node_labels.has(_initial_nonterminal_symbol):
 		push_error("The initial nonterminal symbol must be in the node labels. Problematic symbol: " + str(_initial_nonterminal_symbol))
 		return
+	
+	var graph = {}
 	for rule in _production_rules:
 		if !_node_labels.has(rule.left_hand_side):
 			push_error("The left-hand side of each production rule must be a possible node label. Problematic label: " + str(rule.left_hand_side))
 			return
+		if !graph.has(rule.left_hand_side):
+			graph[rule.left_hand_side] = []
 		for rhs in rule.right_hand_side:
 			if rhs["edge"] == "next":
 				if !_node_labels.has(rhs["node"]):
@@ -84,6 +117,11 @@ func _init(_id: String, _type: String, _node_labels: PackedStringArray, _termina
 				if !_edge_labels.has(rhs["edge"]):
 					push_error("Each edge in the right-hand side of each production rule must be a possible edge label. Problematic edge: " + str(rhs["edge"]))
 					return
+				graph[rule.left_hand_side].append(rhs["node"])
+
+	if has_cycle(graph):
+		push_error("The graph grammar must be acyclic.")
+		return
 
 	# If no errors, set the actual values
 	id = _id
@@ -94,7 +132,6 @@ func _init(_id: String, _type: String, _node_labels: PackedStringArray, _termina
 	final_edge_labels = _final_edge_labels
 	production_rules = _production_rules
 	initial_nonterminal_symbol = _initial_nonterminal_symbol
-
 
 static func plan_to_graph_grammar(todo_list: Array, state: Dictionary) -> RefCounted:
 	var node_labels = PackedStringArray()
