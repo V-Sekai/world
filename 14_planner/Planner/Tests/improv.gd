@@ -23,31 +23,31 @@ static func print_side_effect(state, message) -> Dictionary:
 	state["messages"].append(message)
 	return state
 
-func behave(_state):
-	var plan = []
-	var current_nodes = [possible_types.initial_nonterminal_symbol]
-	var completed_actions = {}
-	var node_to_rule = {}
+func behave(_state, current_nodes = null, completed_actions = {}, plan = []):
+	if current_nodes == null:
+		current_nodes = [possible_types.initial_nonterminal_symbol]
 
+	var node_to_rule = {}
 	for rule in possible_types.production_rules:
 		var lhs = rule.left_hand_side
 		if not node_to_rule.has(lhs):
 			node_to_rule[lhs] = []
 		node_to_rule[lhs].append(rule)
 
-	while current_nodes.size() > 0:
-		var next_nodes = []
-		for current_node in current_nodes:
-			if node_to_rule.has(current_node):
-				var rules = node_to_rule[current_node]
-				for rule in rules:
-					for action in rule.right_hand_side:
-						var action_key = str(action["node"])
-						if not completed_actions.has(action_key):
-							plan.append(["print_side_effect", action["node"]])
-							plan.append(["append_tile_state", action["node"]])
-							completed_actions[action_key] = true
-							next_nodes.append(action["node"])
-		current_nodes = next_nodes
+	if current_nodes.is_empty():
+		return plan
 
-	return plan
+	var next_nodes = []
+	for current_node in current_nodes:
+		if node_to_rule.has(current_node):
+			var rules = node_to_rule[current_node]
+			for rule in rules:
+				for action in rule.right_hand_side:
+					var action_key = str(action["node"])
+					if not completed_actions.has(action_key):
+						plan.append(["print_side_effect", action["node"]])
+						plan.append(["append_tile_state", action["node"]])
+						completed_actions[action_key] = true
+						next_nodes.append(action["node"])
+
+	return [["behave", next_nodes, completed_actions, plan]]
