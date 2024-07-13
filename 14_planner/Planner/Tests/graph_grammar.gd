@@ -120,11 +120,6 @@ func _init(_id: String, _type: String, _node_labels: PackedStringArray, _termina
 					return
 				graph[rule.left_hand_side].append(rhs["node"])
 
-	if has_cycle(graph):
-		push_error("The graph grammar must be acyclic.")
-		return
-
-	# If no errors, set the actual values
 	id = _id
 	type = _type
 	node_labels = _node_labels
