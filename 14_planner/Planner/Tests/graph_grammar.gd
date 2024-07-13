@@ -71,9 +71,10 @@ static func _visit(node: String, graph: Dictionary, visited: Dictionary, stack: 
 	visited[node] = true
 	stack[node] = true
 	
-	for neighbor in graph[node]:
-		if _visit(neighbor, graph, visited, stack):
-			return true
+	if graph.has(node):
+		for neighbor in graph[node]:
+			if _visit(neighbor, graph, visited, stack):
+				return true
 	
 	stack.erase(node)
 	return false
