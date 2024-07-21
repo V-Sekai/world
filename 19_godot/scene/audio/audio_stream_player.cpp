@@ -33,7 +33,6 @@
 
 #include "scene/audio/audio_stream_player_internal.h"
 #include "servers/audio/audio_stream.h"
-#include "servers/resonanceaudio/resonance_audio_wrapper.h"
 
 void AudioStreamPlayer::_notification(int p_what) {
 	internal->notification(p_what);
@@ -65,7 +64,7 @@ void AudioStreamPlayer::set_volume_db(float p_volume) {
 
 	Vector<AudioFrame> volume_vector = _get_volume_vector();
 	for (Ref<AudioStreamPlayback> &playback : internal->stream_playbacks) {
-		AudioServer::get_singleton()->set_playback_all_bus_volumes_linear(playback, volume_vector, AudioSourceId(-1));
+		AudioServer::get_singleton()->set_playback_all_bus_volumes_linear(playback, volume_vector);
 	}
 }
 
@@ -127,7 +126,7 @@ float AudioStreamPlayer::get_playback_position() {
 void AudioStreamPlayer::set_bus(const StringName &p_bus) {
 	internal->bus = p_bus;
 	for (const Ref<AudioStreamPlayback> &playback : internal->stream_playbacks) {
-		AudioServer::get_singleton()->set_playback_bus_exclusive(playback, p_bus, _get_volume_vector(), AudioSourceId(-1));
+		AudioServer::get_singleton()->set_playback_bus_exclusive(playback, p_bus, _get_volume_vector());
 	}
 }
 

@@ -39,7 +39,6 @@
 #include "scene/resources/world_2d.h"
 #include "servers/audio/audio_stream.h"
 #include "servers/audio_server.h"
-#include "servers/resonanceaudio/resonance_audio_wrapper.h"
 
 void AudioStreamPlayer2D::_notification(int p_what) {
 	internal->notification(p_what);
@@ -180,7 +179,7 @@ void AudioStreamPlayer2D::_update_panning() {
 	}
 
 	for (const Ref<AudioStreamPlayback> &playback : internal->stream_playbacks) {
-		AudioServer::get_singleton()->set_playback_bus_exclusive(playback, actual_bus, volume_vector, AudioSourceId(-1));
+		AudioServer::get_singleton()->set_playback_bus_exclusive(playback, actual_bus, volume_vector);
 	}
 
 	for (const Ref<AudioStreamPlayback> &playback : internal->stream_playbacks) {

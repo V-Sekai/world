@@ -44,7 +44,6 @@
 #include "core/io/file_access_zip.h"
 #include "core/io/image_loader.h"
 #include "core/io/ip.h"
-#include "core/io/resource.h"
 #include "core/io/resource_loader.h"
 #include "core/object/message_queue.h"
 #include "core/os/os.h"
@@ -74,7 +73,6 @@
 #include "servers/navigation_server_3d_dummy.h"
 #include "servers/register_server_types.h"
 #include "servers/rendering/rendering_server_default.h"
-#include "servers/resonanceaudio/resonance_audio_wrapper.h"
 #include "servers/text/text_server_dummy.h"
 #include "servers/text_server.h"
 
@@ -157,7 +155,6 @@ static SteamTracker *steam_tracker = nullptr;
 // Initialized in setup2()
 static AudioServer *audio_server = nullptr;
 static CameraServer *camera_server = nullptr;
-static ResonanceAudioServer *resonance_audio_server = nullptr;
 static DisplayServer *display_server = nullptr;
 static RenderingServer *rendering_server = nullptr;
 static TextServerManager *tsman = nullptr;
@@ -911,15 +908,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	set_current_thread_safe_for_nodes(true);
 
 	OS::get_singleton()->initialize();
-
-	// Add our logger so we can log *everything*
-	// This must be extremely early so it can record every log so we can catch Godot startup errors
-	// At the moment the log subsystem owns this object, which prevents us from easily removing it
-	// I'm just living with that, but if a conditional per log message ends up being too much overhead,
-	// it could be turned into its own global that manages its own registration and deregistration
-	// This is also likely necessary if it starts using other log attachments
-	// such as add_error_handler, add_print_handler, register_message_capture, and EditorToaster.
-	OS::get_singleton()->add_logger(memnew(UserLogManagerLogger()));
 
 	// Benchmark tracking must be done after `OS::get_singleton()->initialize()` as on some
 	// platforms, it's used to set up the time utilities.
@@ -2876,8 +2864,6 @@ Error Main::setup2(bool p_show_boot_logo) {
 		audio_server = memnew(AudioServer);
 		audio_server->init();
 
-		resonance_audio_server = memnew(ResonanceAudioServer);
-
 		OS::get_singleton()->benchmark_end_measure("Servers", "Audio");
 	}
 
@@ -4135,11 +4121,6 @@ bool Main::iteration() {
 		}
 	}
 
-	// trigger the logger flush now
-	// this could be moved before the frame update, but the first time it updates changes behavior a bit
-	// and it's convenient to say "behavior is X before the first frame"
-	UserLogManagerLogger::get_singleton()->flush();
-
 	process_ticks = OS::get_singleton()->get_ticks_usec() - process_begin;
 	process_max = MAX(process_ticks, process_max);
 	uint64_t frame_time = OS::get_singleton()->get_ticks_usec() - ticks;
@@ -4339,10 +4320,6 @@ void Main::cleanup(bool p_force) {
 	if (audio_server) {
 		audio_server->finish();
 		memdelete(audio_server);
-	}
-
-	if (resonance_audio_server) {
-		memdelete(resonance_audio_server);
 	}
 
 	if (camera_server) {

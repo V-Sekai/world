@@ -85,7 +85,6 @@ class SceneTreeDock : public VBoxContainer {
 		TOOL_SCENE_EDITABLE_CHILDREN,
 		TOOL_SCENE_USE_PLACEHOLDER,
 		TOOL_SCENE_MAKE_LOCAL,
-		TOOL_SCENE_MAKE_LOCAL_RECURSIVELY,
 		TOOL_SCENE_OPEN,
 		TOOL_SCENE_CLEAR_INHERITANCE,
 		TOOL_SCENE_CLEAR_INHERITANCE_CONFIRM,
@@ -205,9 +204,6 @@ class SceneTreeDock : public VBoxContainer {
 	};
 
 	void _node_replace_owner(Node *p_base, Node *p_node, Node *p_root, ReplaceOwnerMode p_mode = MODE_BIDI);
-	void _node_make_local_recursively(Vector<Node *> p_bases, Node *p_node, Node *p_root);
-	void _node_make_local_recursively_inner(Vector<Node *> p_bases, Node *p_node, Node *p_root);
-
 	void _node_strip_signal_inheritance(Node *p_node);
 	void _load_request(const String &p_path);
 	void _script_open_request(const Ref<Script> &p_script);
