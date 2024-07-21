@@ -1320,25 +1320,31 @@ void RenIK::_notification(int p_what) {
 			right_shoulder_pole_offset = Vector3(Math::deg_to_rad(0.0), Math::deg_to_rad(0.0),
 					Math::deg_to_rad(-78.0));
 			spine_chain.instantiate();
-			spine_chain->init(Vector3(0, 15, -15), 0.5, 0.5, 1, 0);
+			spine_chain->init(Vector3(0.0, 15, -15), 0.5, 0.5, 1, 0);
 			limb_arm_left.instantiate();
-			limb_arm_left->init(0, 0, Math::deg_to_rad(80.0), 0.5, 0,
-					Math::deg_to_rad(-180.0), Math::deg_to_rad(45.0), 0.33,
-					Vector3(Math::deg_to_rad(15.0), 0, Math::deg_to_rad(60.0)),
-					Vector3(2.0, -1.5, -1.0));
 			limb_arm_right.instantiate();
-			limb_arm_right->init(0, 0, Math::deg_to_rad(80.0), 0.5, 0,
-					Math::deg_to_rad(-180.0), Math::deg_to_rad(45.0), 0.33,
-					Vector3(Math::deg_to_rad(15.0), 0, Math::deg_to_rad(-60.0)),
-					Vector3(2.0, 1.5, 1.0));
+			set_arm_upper_twist_offset(190.0);
+			set_arm_lower_twist_offset(-60);
+			set_arm_roll_offset(270.0);
+			set_arm_upper_limb_twist(50);
+			set_arm_lower_limb_twist(90);
+			set_arm_twist_inflection_point_offset(-180.0);
+			set_arm_twist_overflow(45.0);
+			set_arm_target_rotation_influence(0.33);
+			set_arm_pole_offset(Vector3(15.0, 0, 60.0));
+			set_arm_target_position_influence(Vector3(2.0, -1.5, -1.0));
 			limb_leg_left.instantiate();
-			limb_leg_left->init(0, Math::deg_to_rad(-180.0), 0, 0.25, 0.25, 0, Math::deg_to_rad(45.0), 0.5,
-					Vector3(0, 0, Math_PI), Vector3());
 			limb_leg_right.instantiate();
-			limb_leg_right->init(0, Math::deg_to_rad(-180.0), 0, 0.25, 0.25, 0, Math::deg_to_rad(45.0), 0.5,
-					Vector3(0, 0, -Math_PI), Vector3());
+			set_leg_upper_twist_offset(0);
+			set_leg_lower_twist_offset(-180.0);
+			set_leg_roll_offset(0);
+			set_leg_upper_limb_twist(50);
+			set_leg_lower_limb_twist(90);
+			set_leg_twist_inflection_point_offset(0);
+			set_leg_twist_overflow(45.0);
+			set_leg_target_rotation_influence(0.5);
 			set_leg_pole_offset(Vector3(0, 0, 180));
-			set_arm_pole_offset(Vector3(15, 0, 60));
+			set_leg_target_position_influence(Vector3());
 		} break;
 		case NOTIFICATION_READY: {
 			_initialize();
@@ -1531,28 +1537,26 @@ RenIK::SpineTransforms RenIK::perform_torso_ik() {
 							spine_chain->get_joints()[0].relative_prev));
 		}
 
+		Transform3D hipLocalPose = skeleton->get_bone_pose(hip);
+		Transform3D correctedHipTransform = hipGlobalTransform;
+		correctedHipTransform.set_origin(-hipLocalPose.origin);
+
 		HashMap<BoneId, Quaternion> ik_map = solve_ik_qcp(
 				spine_chain,
-				hipGlobalTransform * skeleton->get_bone_rest(hip).basis.inverse(),
+				correctedHipTransform * skeleton->get_bone_rest(hip).basis.inverse(),
 				headGlobalTransform);
-		//skeleton->set_bone_global_pose_override(
-		//    hip, hipGlobalTransform, 1.0f, true);
 		skeleton->set_bone_pose_rotation(hip, hipGlobalTransform.get_basis().get_rotation_quaternion());
 		skeleton->set_bone_pose_position(hip, hipGlobalTransform.get_origin());
 
 		apply_ik_map(ik_map, hipGlobalTransform,
 				bone_id_order(spine_chain));
 
-		// Keep Hip and Head as global poses tand then apply them as global pose
-		// override
 		Quaternion neckQuaternion = Quaternion();
 		int parent_bone = skeleton->get_bone_parent(head);
 		while (parent_bone != -1) {
 			neckQuaternion = skeleton->get_bone_pose_rotation(parent_bone) * neckQuaternion;
 			parent_bone = skeleton->get_bone_parent(parent_bone);
 		}
-		//skeleton->set_bone_global_pose_override(
-		//    head, headGlobalTransform, 1.0f, true);
 		skeleton->set_bone_pose_rotation(head, neckQuaternion.inverse() * headGlobalTransform.get_basis().get_rotation_quaternion());
 
 		// Calculate and return the parent bone position for the arms
