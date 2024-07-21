@@ -3,7 +3,6 @@ extends Domain
 class_name LongCatDomain
 
 func _init():
-	add_task_methods("care_for_pet", [task_care_for_pet])
 	add_task_methods("walk_pet", [walk_pet])
 	add_task_methods("release_pet", [release_pet])
 	add_unigoal_methods("hunger", [method_feed_pet])
@@ -60,18 +59,3 @@ func method_release_pet(p_state, p_pet, p_location):
 	if p_pet in p_state["pets"] and p_location in p_state["locations"] and p_state["location"][p_pet] != "neighborhood":
 		return [["release_pet", p_pet]]
 	return false
-
-func task_care_for_pet(p_state, p_pet):
-	var goals: Dictionary = p_state.duplicate(true)
-	if p_state["hunger"][p_pet] > 5:
-		goals["nutrition"][p_pet] = 5
-	if p_state["thirst"][p_pet] > 5:
-		goals["hydration"][p_pet] = 5
-	if p_state["exercise"][p_pet] < 5:
-		goals["exercise"][p_pet] = 5
-	if p_state["location"][p_pet] != "neighborhood":
-		goals["location"][p_pet] = "neighborhood"
-	var multigoal = Multigoal.new()
-	multigoal.resource_name = "multigoal_care_for_pet"
-	multigoal.state = goals
-	return [multigoal]

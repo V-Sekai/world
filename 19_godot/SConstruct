@@ -216,7 +216,6 @@ opts.Add(BoolVariable("threads", "Enable threading support", True))
 # Components
 opts.Add(BoolVariable("deprecated", "Enable compatibility code for deprecated and removed features", True))
 opts.Add(EnumVariable("precision", "Set the floating-point precision level", "single", ("single", "double")))
-opts.Add(BoolVariable("libdatachannel", "Enable the built-in libdatachannel webrtc implementation", True))
 opts.Add(BoolVariable("minizip", "Enable ZIP archive support using minizip", True))
 opts.Add(BoolVariable("brotli", "Enable Brotli for decompresson and WOFF2 fonts support", True))
 opts.Add(BoolVariable("xaudio2", "Enable the XAudio2 audio driver", False))
@@ -260,8 +259,6 @@ opts.Add("scu_limit", "Max includes per SCU file when using scu_build (determine
 opts.Add(BoolVariable("engine_update_check", "Enable engine update checks in the Project Manager", True))
 opts.Add(BoolVariable("steamapi", "Enable minimal SteamAPI integration for usage time tracking (editor only)", False))
 
-opts.Add(BoolVariable("use_resonance_audio", "Use the audio spatializer.", True))
-
 # Thirdparty libraries
 opts.Add(BoolVariable("builtin_brotli", "Use the built-in Brotli library", True))
 opts.Add(BoolVariable("builtin_certs", "Use the built-in SSL certificates bundles", True))
@@ -274,7 +271,6 @@ opts.Add(BoolVariable("builtin_glslang", "Use the built-in glslang library", Tru
 opts.Add(BoolVariable("builtin_graphite", "Use the built-in Graphite library", True))
 opts.Add(BoolVariable("builtin_harfbuzz", "Use the built-in HarfBuzz library", True))
 opts.Add(BoolVariable("builtin_icu4c", "Use the built-in ICU library", True))
-opts.Add(BoolVariable("builtin_libdatachannel", "Use the built-in libdatachannel library", True))
 opts.Add(BoolVariable("builtin_libogg", "Use the built-in libogg library", True))
 opts.Add(BoolVariable("builtin_libpng", "Use the built-in libpng library", True))
 opts.Add(BoolVariable("builtin_libtheora", "Use the built-in libtheora library", True))
@@ -492,12 +488,6 @@ if env.debug_features:
     # to give *users* extra debugging information for their game development.
     env.Append(CPPDEFINES=["DEBUG_ENABLED"])
 
-# ensure that anything depending on eigen will only be linked with permissively licensed code.
-env.Append(CPPDEFINES=["EIGEN_MPL2_ONLY"])
-
-if env["use_precise_math_checks"]:
-    env.Append(CPPDEFINES=["PRECISE_MATH_CHECKS"])
-
 if env.dev_build:
     # DEV_ENABLED enables *engine developer* code which should only be compiled for those
     # working on the engine itself.
@@ -710,12 +700,11 @@ if env.msvc:
     else:
         env.Append(LINKFLAGS=["/DEBUG:NONE"])
 
-    if env["optimize"] == "speed":
+    if env["optimize"].startswith("speed"):
         env.Append(CCFLAGS=["/O2"])
         env.Append(LINKFLAGS=["/OPT:REF"])
-    elif env["optimize"] == "speed_trace":
-        env.Append(CCFLAGS=["/O2"])
-        env.Append(LINKFLAGS=["/OPT:REF", "/OPT:NOICF"])
+        if env["optimize"] == "speed_trace":
+            env.Append(LINKFLAGS=["/OPT:NOICF"])
     elif env["optimize"] == "size":
         env.Append(CCFLAGS=["/O1"])
         env.Append(LINKFLAGS=["/OPT:REF"])
@@ -726,7 +715,13 @@ else:
         # Adding dwarf-4 explicitly makes stacktraces work with clang builds,
         # otherwise addr2line doesn't understand them
         env.Append(CCFLAGS=["-gdwarf-4"])
-        if env.dev_build:
+        if methods.using_emcc(env):
+            # Emscripten only produces dwarf symbols when using "-g3".
+            env.Append(CCFLAGS=["-g3"])
+            # Emscripten linker needs debug symbols options too.
+            env.Append(LINKFLAGS=["-gdwarf-4"])
+            env.Append(LINKFLAGS=["-g3"])
+        elif env.dev_build:
             env.Append(CCFLAGS=["-g3"])
         else:
             env.Append(CCFLAGS=["-g2"])
@@ -741,17 +736,25 @@ else:
         else:
             env.Append(LINKFLAGS=["-s"])
 
+    # Linker needs optimization flags too, at least for Emscripten.
+    # For other toolchains, this _may_ be useful for LTO too to disambiguate.
+
     if env["optimize"] == "speed":
         env.Append(CCFLAGS=["-O3"])
+        env.Append(LINKFLAGS=["-O3"])
     # `-O2` is friendlier to debuggers than `-O3`, leading to better crash backtraces.
     elif env["optimize"] == "speed_trace":
         env.Append(CCFLAGS=["-O2"])
+        env.Append(LINKFLAGS=["-O2"])
     elif env["optimize"] == "size":
         env.Append(CCFLAGS=["-Os"])
+        env.Append(LINKFLAGS=["-Os"])
     elif env["optimize"] == "debug":
         env.Append(CCFLAGS=["-Og"])
+        env.Append(LINKFLAGS=["-Og"])
     elif env["optimize"] == "none":
         env.Append(CCFLAGS=["-O0"])
+        env.Append(LINKFLAGS=["-O0"])
 
 # Needs to happen after configure to handle "auto".
 if env["lto"] != "none":

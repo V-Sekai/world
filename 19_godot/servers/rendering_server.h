@@ -44,14 +44,6 @@
 // Helper macros for code outside of the rendering server, but that is
 // called by the rendering server.
 #ifdef DEBUG_ENABLED
-#define ERR_ON_RENDER_THREAD                                              \
-	RenderingServer *rendering_server = RenderingServer::get_singleton(); \
-	ERR_FAIL_NULL(rendering_server);                                      \
-	ERR_FAIL_COND(rendering_server->is_on_render_thread());
-#define ERR_ON_RENDER_THREAD_V(m_ret)                                     \
-	RenderingServer *rendering_server = RenderingServer::get_singleton(); \
-	ERR_FAIL_NULL_V(rendering_server, m_ret);                             \
-	ERR_FAIL_COND_V(rendering_server->is_on_render_thread(), m_ret);
 #define ERR_NOT_ON_RENDER_THREAD                                          \
 	RenderingServer *rendering_server = RenderingServer::get_singleton(); \
 	ERR_FAIL_NULL(rendering_server);                                      \
@@ -61,8 +53,6 @@
 	ERR_FAIL_NULL_V(rendering_server, m_ret);                             \
 	ERR_FAIL_COND_V(!rendering_server->is_on_render_thread(), m_ret);
 #else
-#define ERR_ON_RENDER_THREAD
-#define ERR_ON_RENDER_THREAD_V(m_ret)
 #define ERR_NOT_ON_RENDER_THREAD
 #define ERR_NOT_ON_RENDER_THREAD_V(m_ret)
 #endif
@@ -842,7 +832,6 @@ public:
 	virtual void camera_set_perspective(RID p_camera, float p_fovy_degrees, float p_z_near, float p_z_far) = 0;
 	virtual void camera_set_orthogonal(RID p_camera, float p_size, float p_z_near, float p_z_far) = 0;
 	virtual void camera_set_frustum(RID p_camera, float p_size, Vector2 p_offset, float p_z_near, float p_z_far) = 0;
-	virtual void camera_set_override_projection(RID p_camera, const Projection &p_matrix) = 0;
 	virtual void camera_set_transform(RID p_camera, const Transform3D &p_transform) = 0;
 	virtual void camera_set_cull_mask(RID p_camera, uint32_t p_layers) = 0;
 	virtual void camera_set_environment(RID p_camera, RID p_env) = 0;

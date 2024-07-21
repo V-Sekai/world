@@ -17,7 +17,6 @@
 #include <atomic>
 
 #include "public.h"
-#include "utils.h"
 #include "vec.h"
 
 namespace {
@@ -70,7 +69,8 @@ class HashTableD {
   int Size() const { return keys_.size(); }
 
   bool Full() const {
-    return used_.load(std::memory_order_relaxed) * 2 > Size();
+    return used_.load(std::memory_order_relaxed) * 2 >
+           static_cast<size_t>(Size());
   }
 
   void Insert(Uint64 key, const V& val) {
@@ -131,18 +131,17 @@ class HashTable {
         step_(step) {}
 
   HashTable(const HashTable& other)
-      : keys_(other.keys_),
-        values_(other.values_),
-        used_(other.used_.load()),
-        step_(other.step_) {}
+      : keys_(other.keys_), values_(other.values_), step_(other.step_) {
+    used_.store(other.used_.load());
+  }
 
   HashTable& operator=(const HashTable& other) {
-      if (this == &other) return *this;
-      keys_ = other.keys_;
-      values_ = other.values_;
-      used_.store(other.used_.load());
-      step_ = other.step_;
-      return *this;
+    if (this == &other) return *this;
+    keys_ = other.keys_;
+    values_ = other.values_;
+    used_.store(other.used_.load());
+    step_ = other.step_;
+    return *this;
   }
 
   HashTableD<V, H> D() { return {keys_, values_, used_, step_}; }

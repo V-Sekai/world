@@ -1420,7 +1420,7 @@ void RasterizerSceneGLES3::_fill_render_list(RenderListType p_render_list, const
 #else
 				bool force_alpha = false;
 #endif
-				if (!force_alpha && (surf->flags & GeometryInstanceSurface::FLAG_PASS_OPAQUE)) {
+				if (!force_alpha && (surf->flags & (GeometryInstanceSurface::FLAG_PASS_DEPTH | GeometryInstanceSurface::FLAG_PASS_OPAQUE))) {
 					rl->add_element(surf);
 				}
 				if (force_alpha || (surf->flags & GeometryInstanceSurface::FLAG_PASS_ALPHA)) {
@@ -1460,7 +1460,7 @@ void RasterizerSceneGLES3::_fill_render_list(RenderListType p_render_list, const
 void RasterizerSceneGLES3::_setup_environment(const RenderDataGLES3 *p_render_data, bool p_no_fog, const Size2i &p_screen_size, bool p_flip_y, const Color &p_default_bg_color, bool p_pancake_shadows, float p_shadow_bias) {
 	Projection correction;
 	correction.set_depth_correction(p_flip_y, true, false);
-	Projection projection = correction * p_render_data->view_projection[0];
+	Projection projection = correction * p_render_data->cam_projection;
 	//store camera into ubo
 	GLES3::MaterialStorage::store_camera(projection, scene_state.ubo.projection_matrix);
 	GLES3::MaterialStorage::store_camera(projection.inverse(), scene_state.ubo.inv_projection_matrix);

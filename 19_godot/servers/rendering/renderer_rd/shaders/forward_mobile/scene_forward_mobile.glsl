@@ -76,6 +76,10 @@ void axis_angle_to_tbn(vec3 axis, float angle, out vec3 tangent, out vec3 binorm
 	normal = omc_axis.zzz * axis + vec3(-s_axis.y, s_axis.x, c);
 }
 
+/* Spec Constants */
+
+layout(constant_id = 17) const bool sc_is_multimesh = false;
+
 /* Varyings */
 
 layout(location = 0) highp out vec3 vertex_interp;
@@ -178,8 +182,6 @@ void main() {
 	color_interp = color_attrib;
 #endif
 
-	bool is_multimesh = bool(instances.data[draw_call.instance_index].flags & INSTANCE_FLAGS_MULTIMESH);
-
 	mat4 model_matrix = instances.data[draw_call.instance_index].transform;
 	mat4 inv_view_matrix = scene_data.inv_view_matrix;
 #ifdef USE_DOUBLE_PRECISION
@@ -203,7 +205,7 @@ void main() {
 	mat4 matrix;
 	mat4 read_model_matrix = model_matrix;
 
-	if (is_multimesh) {
+	if (sc_is_multimesh) {
 		//multimesh, instances are for it
 
 #ifdef USE_PARTICLE_TRAILS
@@ -387,52 +389,6 @@ void main() {
 	mat4 read_view_matrix = scene_data.view_matrix;
 	vec2 read_viewport_size = scene_data.viewport_size;
 
-#if defined(TRIPLANAR_POSITION_USED) || defined(TRIPLANAR_MATRIX_USED)
-	mat4 triplanar_matrix;
-
-#ifdef TRIPLANAR_POSITION_USED
-	vec3 triplanar_position = vertex;
-#endif
-
-	{
-#ifdef TRIPLANAR_MATRIX
-		triplanar_matrix = material.TRIPLANAR_MATRIX;
-#else
-		triplanar_matrix = model_matrix;
-#endif
-
-#ifdef TRIPLANAR_POSITION_USED
-
-#ifdef USE_DOUBLE_PRECISION
-		vec3 triplanar_matrix_precision;
-
-#ifdef TRIPLANAR_MATRIX
-		triplanar_matrix_precision = vec3(triplanar_matrix[0][3], triplanar_matrix[1][3], triplanar_matrix[2][3]);
-		triplanar_matrix[0][3] = 0.0;
-		triplanar_matrix[1][3] = 0.0;
-		triplanar_matrix[2][3] = 0.0;
-#else
-		triplanar_matrix_precision = model_precision;
-#endif
-
-		// We separate the basis from the origin because the basis is fine with single point precision.
-		// We add the result to the triplanar_position and ignore the final lost precision.
-		vec3 model_origin = triplanar_matrix[3].xyz;
-		if (is_multimesh) {
-			triplanar_position = (matrix * vec4(triplanar_position, 1.0)).xyz;
-		}
-		triplanar_position = mat3(triplanar_matrix) * triplanar_position;
-		vec3 temp_precision; // Will be ignored.
-		triplanar_position += double_add_vec3(model_origin, triplanar_matrix_precision, -vec3(ceil(model_origin.x), ceil(model_origin.y), ceil(model_origin.z)), vec3(0.0), temp_precision);
-#else
-		triplanar_position = (triplanar_matrix * vec4(triplanar_position, 1.0)).xyz;
-#endif
-
-#endif
-	}
-
-#endif
-
 	{
 #CODE : VERTEX
 	}
@@ -445,7 +401,7 @@ void main() {
 	// Then we combine the translations from the model matrix and the view matrix using emulated doubles.
 	// We add the result to the vertex and ignore the final lost precision.
 	vec3 model_origin = model_matrix[3].xyz;
-	if (is_multimesh) {
+	if (sc_is_multimesh) {
 		vertex = mat3(matrix) * vertex;
 		model_origin = double_add_vec3(model_origin, model_precision, matrix[3].xyz, vec3(0.0), model_precision);
 	}

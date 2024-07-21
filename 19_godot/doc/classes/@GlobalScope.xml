@@ -1588,9 +1588,6 @@
 			The [JavaScriptBridge] singleton.
 			[b]Note:[/b] Only implemented on the Web platform.
 		</member>
-		<member name="LogManager" type="LogManager" setter="" getter="">
-			The [LogManager] singleton.
-		</member>
 		<member name="Marshalls" type="Marshalls" setter="" getter="">
 			The [Marshalls] singleton.
 		</member>
@@ -2942,10 +2939,10 @@
 			The property is not stored, and does not display in the editor. This is the default for non-exported properties.
 		</constant>
 		<constant name="PROPERTY_USAGE_STORAGE" value="2" enum="PropertyUsageFlags" is_bitfield="true">
-			The property is serialized and saved in the scene file (default).
+			The property is serialized and saved in the scene file (default for exported properties).
 		</constant>
 		<constant name="PROPERTY_USAGE_EDITOR" value="4" enum="PropertyUsageFlags" is_bitfield="true">
-			The property is shown in the [EditorInspector] (default).
+			The property is shown in the [EditorInspector] (default for exported properties).
 		</constant>
 		<constant name="PROPERTY_USAGE_INTERNAL" value="8" enum="PropertyUsageFlags" is_bitfield="true">
 			The property is excluded from the class reference.

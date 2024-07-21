@@ -18,7 +18,19 @@ func test_ready() -> void:
 		"happiness": {"longcat": 50},
 	}
 
-	var task: Array = [["care_for_pet", "longcat"]]
-	var result = planner.find_plan(state, task)
+	var pet = "longcat";
+	var goals: Dictionary = state.duplicate(true)
+	if goals["hunger"][pet] > 5:
+		goals["nutrition"][pet] = 5
+	if goals["thirst"][pet] > 5:
+		goals["hydration"][pet] = 5
+	if goals["exercise"][pet] < 5:
+		goals["exercise"][pet] = 5
+	if goals["location"][pet] != "neighborhood":
+		goals["location"][pet] = "neighborhood"
+	var multigoal = Multigoal.new()
+	multigoal.resource_name = "multigoal_care_for_pet"
+	multigoal.state = goals
+	var result = planner.find_plan(state, [multigoal])
 	gut.p(result)
 	assert_eq_deep(result, [["release_pet", "longcat"], ["walk_pet", "longcat"], ["walk_pet", "longcat"], ["walk_pet", "longcat"], ["walk_pet", "longcat"], ["walk_pet", "longcat"]])

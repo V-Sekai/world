@@ -402,9 +402,6 @@
 		<member name="audio/driver/output_latency.web" type="int" setter="" getter="" default="50">
 			Safer override for [member audio/driver/output_latency] in the Web platform, to avoid audio issues especially on mobile devices.
 		</member>
-		<member name="audio/enable_resonance_audio" type="bool" setter="" getter="" default="true">
-			Use spatialized audio for a more immersive playback.
-		</member>
 		<member name="audio/general/2d_panning_strength" type="float" setter="" getter="" default="0.5">
 			The base strength of the panning effect for all [AudioStreamPlayer2D] nodes. The panning strength can be further scaled on each Node using [member AudioStreamPlayer2D.panning_strength]. A value of [code]0.0[/code] disables stereo panning entirely, leaving only volume attenuation in place. A value of [code]1.0[/code] completely mutes one of the channels if the sound is located exactly to the left (or right) of the listener.
 			The default value of [code]0.5[/code] is tuned for headphones. When using speakers, you may find lower values to sound better as speakers have a lower stereo separation compared to headphones.
@@ -1397,12 +1394,6 @@
 			If [code]false[/code], such events will be flushed only once per process frame, between iterations of the engine.
 			Enabling this can greatly improve the responsiveness to input, specially in devices that need to run multiple physics frames per visible (process) frame, because they can't run at the target frame rate.
 			[b]Note:[/b] Currently implemented only on Android.
-		</member>
-		<member name="input_devices/buffering/android/use_accumulated_input" type="bool" setter="" getter="" default="true">
-			If [code]true[/code], multiple input events will be accumulated into a single input event when possible.
-		</member>
-		<member name="input_devices/buffering/android/use_input_buffering" type="bool" setter="" getter="" default="true">
-			If [code]true[/code], input events will be buffered prior to being dispatched.
 		</member>
 		<member name="input_devices/compatibility/legacy_just_pressed_behavior" type="bool" setter="" getter="" default="false">
 			If [code]true[/code], [method Input.is_action_just_pressed] and [method Input.is_action_just_released] will only return [code]true[/code] if the action is still in the respective state, i.e. an action that is pressed [i]and[/i] released on the same frame will be missed.

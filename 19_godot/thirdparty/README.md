@@ -168,19 +168,6 @@ Files extracted from upstream source:
 - `doctest/doctest.h` as `doctest.h`
 - `LICENSE.txt`
 
-## eigen
-
-- Upstream: https://gitlab.com/libeigen/eigen/
-- Version: 3.3.7
-- License: Multiple* (BSD-3-Clause, GPLv3, LGPL 2.1, Minpack, MPL 2.0)
-
-Files extracted from upstream source:
-
-- All files in `Eigen/` except `CMakeLists.txt`
-- All `COPYING.*` files.
-
-\* Note that while eigen contains code under many licenses, godot WILL SET BUT DOESN'T CURRENTLY SET, FIXEME the `-DEIGEN_MPL2_ONLY` flag described in `COPYING.README`, which ensures that no code licensed under a more restrictive license than MPL 2.0 is included in godot binaries.
-
 
 ## embree
 
@@ -353,6 +340,11 @@ a new version of the web instance.
 Some changes have been made in order to allow loading OpenGL and OpenGLES APIs at the same time.
 See the patches in the `patches` directory.
 
+## glm
+
+- Upstream: https://github.com/g-truc/glm.git
+- Version: 1.0.1 (0af55ccecd98d4e5a8d1fad7de25ba429d60e863, 2024)
+- License: MIT
 
 ## glslang
 
@@ -453,81 +445,6 @@ Files extracted from upstream source:
 - `LICENSE`
 
 
-## libdatachannel
-
-- Upstream: https://github.com/paullouisageneau/libdatachannel
-- Version: 0.19.1 (c59cea8973fe5a182feb3159638af338752efa9b, 2023)
-- License: MPL 2.0
-
-File extracted from upstream release tarball:
-
-- All `*.h` and `*.hpp` from `include/rtc/` to `thirdparty/libdatachannel/include/rtc/`.
-- All `*.cpp` from `src/impl/` to `thirdparty/libdatachannel/src/impl/` except for
-    - cpp files starting with `poll`,
-    - cpp files starting with `ws`,
-    - cpp files starting with `websocket`,
-    - cpp files starting with `tcp`,
-    - cpp files starting with `http`,
-    - `dtlssrtpransport.cpp`,
-    - `tlstransport.cpp`,
-    - `verifiedtlstransport.cpp`,
-    - `sha.cpp`
-    tcp|grep -v srtptransport|grep -v http|grep -v poll|grep -v sha.cpp
-- All `*.cpp` from `src/` to `thirdparty/libdatachannel/src/` except for
-    - cpp files containing `packet`,
-    - cpp files containing `nalunit`,
-    - cpp files containing `rtcp`,
-    - cpp files containing `handler`,
-    - cpp files containing `websocket`,
-    - `capi.cpp`
-- The entire folder `deps/plog/include/plog/` to `thirdparty/libdatachannel/deps/plog/include/plog/`. No other files in deps/plog are needed.
-- The entire folder `deps/usrsctp/usrsctplib/` to `thirdparty/libdatachannel/deps/usrsctp/usrsctplib/`
-- All `*.c` and `*.h` files in `deps/libjuice/src/` to `thirdparty/libdatachannel/deps/libjuice/src/`
-- `juice.h` from `deps/libjuice/include/juice/` to `thirdparty/libdatachannel/deps/libjuice/include/juice/`
-- The `LICENSE` file.
-- The `deps/plog/LICENSE` file.
-- The `deps/usrsctp/LICENSE.md` file.
-- The `deps/libjuice/LICENSE` file.
-- Added 2 files `include/rtc/exception_wrapper_godot.hpp` and `src/exception_wrapper_godot.cpp`
-  providing try/catch exception wrappers around rtc functions.
-- Apply `thirdparty/libdatachannel/patches/virtual_destructor.patch` to add missing virtual destructors.
-- Apply `thirdparty/libdatachannel/patches/fix_mingw.patch` to add a couple mingw compiler fixes.
-- Apply `thirdparty/libdatachannel/patches/mbedtls_optional_apis.patch` to avoid usage of mbedtls APIs that are compiled out.
-- Apply `thirdparty/libdatachannel/patches/disable_logging.patch` to compile out logging in release templates.
-
-
-## libdatachannel Submodules:
-
-### libjuice
-
-- Upstream: https://github.com/paullouisageneau/libjuice
-- Version: 1.3.1 (7d7a66d439b2e3e55e3f2494ff1176d527335674, 2023)
-- License: MPL 2.0
-
-Module location:
-
-- thirdparty/libdatachannel/deps/libjuice
-
-### plog
-
-- Upstream: https://github.com/SergiusTheBest/plog
-- Version: 1.1.10 (e21baecd4753f14da64ede979c5a19302618b752, 2023)
-- License: MIT
-
-Module location:
-
-- thirdparty/libdatachannel/deps/plog
-
-### usrsctp
-
-- Upstream: https://github.com/sctplab/usrsctp
-- Version: git (5ca29ac7d8055802c7657191325c06386640ac24, 2023)
-- License: BSD-3-Clause
-
-Module location:
-
-- thirdparty/libdatachannel/deps/usrsctp
-
 ## libktx
 
 - Upstream: https://github.com/KhronosGroup/KTX-Software
@@ -616,6 +533,17 @@ Files extracted from upstream source:
 Patch `godot-node-debug-fix.patch` workarounds shadowing of Godot's Node class
 in the MSVC debugger.
 
+
+## manifold
+
+- Upstream: https://github.com/elalish/manifold
+- Version: master (ccb682fc440bc621607ae4d84706429f42300705, 2024)
+- License: Apache 2.0
+
+File extracted from upstream source:
+
+- `src/`
+- `AUTHORS`, `LICENSE`
 
 ## mbedtls
 
@@ -878,16 +806,15 @@ Files extracted from upstream source:
 - `AUTHORS` and `LICENCE`
 
 
-## pffft
+## quickhull
 
-- Upstream: https://bitbucket.org/jpommier/pffft
-- Version: hg (29e4f76, 2016)
-- License: FFTPACK5 (BSD-like) 
+- Upstream: https://github.com/akuukka/quickhull.git
+- Version: master (1ffbc6f884ea1da89e104a5996cf8a726db673d5, 2023)
+- License: Public Domain
 
-Files extracted from upstream source:
+Files extraced from upstream sources:
 
-- all files
-
+- All `.cpp` and `.hpp` files
 
 ## recastnavigation
 
@@ -947,20 +874,6 @@ They can be reapplied using the patches included in the `patches`
 folder.
 
 
-## resonanceaudio
-
-- Upstream: https://github.com/resonance-audio/resonance-audio
-- Version: git (1213ab78f00645fd2807285ccd4bed1375a50bfb, 2020)
-- License: Apache 2.0
-
-Files extracted from upstream source:
-
-- `resonance_audio/` and `platforms/common` folders without `*.test.cpp` and `*test.h`
-- `third_party/SADIE_hrtf_database` folder without `generate_hrtf_assets.py`, `WAV/*` and `hrtf_assets.iad`
-- LICENSE
-- AUTHORS
-
-
 ## squish
 
 - Upstream: https://sourceforge.net/projects/libsquish
@@ -995,7 +908,7 @@ instead of `miniz.h` as an external dependency.
 ## thorvg
 
 - Upstream: https://github.com/thorvg/thorvg
-- Version: 0.14.1 (70b2f2dad158316dd08166d613b425248b36fd27, 2024)
+- Version: 0.14.2 (f6c4d8a94e0b2194fe911d6e19a550683055dd50, 2024)
 - License: MIT
 
 Files extracted from upstream source:

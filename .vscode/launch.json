@@ -34,5 +34,14 @@
       "program": "${workspaceFolder}/19_godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
     },
+    {
+      "name": "Run the editor with V-Sekai planner windows",
+      "type": "lldb",
+      "request": "launch",
+      "args": ["--path", "${workspaceFolder}/14_planner", "-e"],
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/19_godot/bin/godot.windows.editor.double.x86_64.llvm.console.exe",
+      "preLaunchTask": "Godot Engine"
+    },
   ]
 }

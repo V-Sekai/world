@@ -149,7 +149,8 @@ void SceneTreeDock::input(const Ref<InputEvent> &p_event) {
 void SceneTreeDock::shortcut_input(const Ref<InputEvent> &p_event) {
 	ERR_FAIL_COND(p_event.is_null());
 
-	if (get_viewport()->gui_get_focus_owner() && get_viewport()->gui_get_focus_owner()->is_text_field()) {
+	Control *focus_owner = get_viewport()->gui_get_focus_owner();
+	if (focus_owner && focus_owner->is_text_field()) {
 		return;
 	}
 
@@ -158,7 +159,11 @@ void SceneTreeDock::shortcut_input(const Ref<InputEvent> &p_event) {
 	}
 
 	if (ED_IS_SHORTCUT("scene_tree/rename", p_event)) {
-		_tool_selected(TOOL_RENAME);
+		// Prevent renaming if a button is focused
+		// to avoid conflict with Enter shortcut on macOS
+		if (!focus_owner || !Object::cast_to<BaseButton>(focus_owner)) {
+			_tool_selected(TOOL_RENAME);
+		}
 #ifdef MODULE_REGEX_ENABLED
 	} else if (ED_IS_SHORTCUT("scene_tree/batch_rename", p_event)) {
 		_tool_selected(TOOL_BATCH_RENAME);
@@ -985,6 +990,7 @@ void SceneTreeDock::_tool_selected(int p_tool, bool p_confirm_override) {
 			undo_redo->add_do_method(root, "set_scene_file_path", String());
 			undo_redo->add_do_method(node, "set_owner", (Object *)nullptr);
 			undo_redo->add_do_method(root, "set_owner", node);
+			undo_redo->add_do_method(node, "set_unique_name_in_owner", false);
 			_node_replace_owner(root, root, node, MODE_DO);
 
 			undo_redo->add_undo_method(root, "set_scene_file_path", root->get_scene_file_path());
@@ -995,6 +1001,7 @@ void SceneTreeDock::_tool_selected(int p_tool, bool p_confirm_override) {
 			undo_redo->add_undo_method(node->get_parent(), "move_child", node, node->get_index(false));
 			undo_redo->add_undo_method(root, "set_owner", (Object *)nullptr);
 			undo_redo->add_undo_method(node, "set_owner", root);
+			undo_redo->add_undo_method(node, "set_unique_name_in_owner", node->is_unique_name_in_owner());
 			_node_replace_owner(root, root, root, MODE_UNDO);
 
 			undo_redo->add_do_method(scene_tree, "update_tree");
@@ -1266,7 +1273,6 @@ void SceneTreeDock::_tool_selected(int p_tool, bool p_confirm_override) {
 						break;
 					}
 
-					ERR_FAIL_COND(node->get_owner() != root);
 					ERR_FAIL_COND(node->get_scene_file_path().is_empty());
 					undo_redo->create_action(TTR("Make Local"));
 					undo_redo->add_do_method(node, "set_scene_file_path", "");
@@ -1277,35 +1283,6 @@ void SceneTreeDock::_tool_selected(int p_tool, bool p_confirm_override) {
 					undo_redo->add_do_method(scene_tree, "update_tree");
 					undo_redo->add_undo_method(scene_tree, "update_tree");
 					undo_redo->commit_action();
-				}
-			}
-		} break;
-		case TOOL_SCENE_MAKE_LOCAL_RECURSIVELY: {
-			if (!profile_allow_editing) {
-				break;
-			}
-
-			List<Node *> selection = editor_selection->get_selected_node_list();
-			List<Node *>::Element *e = selection.front();
-			if (e) {
-				Node *node = e->get();
-				if (node) {
-					Node *root = EditorNode::get_singleton()->get_edited_scene();
-					if (!root) {
-						break;
-					}
-
-					ERR_FAIL_COND(node->get_owner() != root);
-					ERR_FAIL_COND(node->get_scene_file_path().is_empty());
-					EditorUndoRedoManager::get_singleton()->create_action(TTR("Make Local Recursively"));
-
-					Vector<Node *> base_nodes;
-					base_nodes.push_back(node);
-					_node_make_local_recursively(base_nodes, node, root);
-
-					EditorUndoRedoManager::get_singleton()->add_do_method(scene_tree, "update_tree");
-					EditorUndoRedoManager::get_singleton()->add_undo_method(scene_tree, "update_tree");
-					EditorUndoRedoManager::get_singleton()->commit_action();
 				}
 			}
 		} break;
@@ -1738,31 +1715,6 @@ void SceneTreeDock::_node_replace_owner(Node *p_base, Node *p_node, Node *p_root
 	for (int i = 0; i < p_node->get_child_count(); i++) {
 		_node_replace_owner(p_base, p_node->get_child(i), p_root, p_mode);
 	}
-}
-
-void SceneTreeDock::_node_make_local_recursively_inner(Vector<Node *> p_bases, Node *p_node, Node *p_root) {
-	if (p_bases.has(p_node->get_owner()) && p_node != p_root) {
-		EditorUndoRedoManager::get_singleton()->add_do_method(p_node, "set_owner", p_root);
-		EditorUndoRedoManager::get_singleton()->add_undo_method(p_node, "set_owner", p_node->get_owner());
-
-		if (!p_node->get_scene_file_path().is_empty()) {
-			p_bases.push_back(p_node);
-			EditorUndoRedoManager::get_singleton()->add_do_method(p_node, "set_scene_file_path", "");
-			EditorUndoRedoManager::get_singleton()->add_undo_method(p_node, "set_scene_file_path", p_node->get_scene_file_path());
-		}
-	}
-
-	for (int i = 0; i < p_node->get_child_count(); i++) {
-		_node_make_local_recursively_inner(p_bases, p_node->get_child(i), p_root);
-	}
-}
-
-void SceneTreeDock::_node_make_local_recursively(Vector<Node *> p_bases, Node *p_node, Node *p_root) {
-	// Check for the first node
-	EditorUndoRedoManager::get_singleton()->add_do_method(p_node, "set_scene_file_path", "");
-	EditorUndoRedoManager::get_singleton()->add_undo_method(p_node, "set_scene_file_path", p_node->get_scene_file_path());
-
-	_node_make_local_recursively_inner(p_bases, p_node, p_root);
 }
 
 void SceneTreeDock::_node_strip_signal_inheritance(Node *p_node) {
@@ -3731,11 +3683,9 @@ void SceneTreeDock::_tree_rmb(const Vector2 &p_menu_pos) {
 				if (profile_allow_editing) {
 					menu->add_check_item(TTR("Editable Children"), TOOL_SCENE_EDITABLE_CHILDREN);
 					menu->set_item_shortcut(-1, ED_GET_SHORTCUT("scene_tree/toggle_editable_children"));
-					menu->add_check_item(TTR("Load As Placeholder"), TOOL_SCENE_USE_PLACEHOLDER);
-					if (selection.front() && selection.front()->get()->get_owner() == EditorNode::get_singleton()->get_edited_scene()) {
-						menu->add_item(TTR("Make Local"), TOOL_SCENE_MAKE_LOCAL);
-						menu->add_item(TTR("Make Local Recursively"), TOOL_SCENE_MAKE_LOCAL_RECURSIVELY);
-					}
+
+					menu->add_check_item(TTR("Load as Placeholder"), TOOL_SCENE_USE_PLACEHOLDER);
+					menu->add_item(TTR("Make Local"), TOOL_SCENE_MAKE_LOCAL);
 				}
 				menu->add_icon_item(get_editor_theme_icon(SNAME("Load")), TTR("Open in Editor"), TOOL_SCENE_OPEN);
 				if (profile_allow_editing) {

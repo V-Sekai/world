@@ -179,7 +179,6 @@ public:
 		TK_HINT_SCREEN_TEXTURE,
 		TK_HINT_NORMAL_ROUGHNESS_TEXTURE,
 		TK_HINT_DEPTH_TEXTURE,
-		TK_HINT_TRIPLANAR_MAT,
 		TK_FILTER_NEAREST,
 		TK_FILTER_LINEAR,
 		TK_FILTER_NEAREST_MIPMAP,
@@ -675,7 +674,6 @@ public:
 				HINT_SCREEN_TEXTURE,
 				HINT_NORMAL_ROUGHNESS_TEXTURE,
 				HINT_DEPTH_TEXTURE,
-				HINT_TRIPLANAR_MAT,
 				HINT_MAX
 			};
 
@@ -719,8 +717,6 @@ public:
 		Vector<Function> vfunctions;
 		Vector<Constant> vconstants;
 		Vector<Struct> vstructs;
-
-		bool uses_triplanar_matrix = false;
 
 		ShaderNode() :
 				Node(NODE_TYPE_SHADER) {}
@@ -803,6 +799,8 @@ public:
 	static void get_keyword_list(List<String> *r_keywords);
 	static bool is_control_flow_keyword(String p_keyword);
 	static void get_builtin_funcs(List<String> *r_keywords);
+
+	static int instance_counter;
 
 	struct BuiltInInfo {
 		DataType type = TYPE_VOID;
