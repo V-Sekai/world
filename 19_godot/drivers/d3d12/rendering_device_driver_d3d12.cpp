@@ -36,6 +36,7 @@
 #include "thirdparty/zlib/zlib.h"
 
 #include "d3d12_godot_nir_bridge.h"
+#include "dxil_hash.h"
 #include "rendering_context_driver_d3d12.h"
 
 // No point in fighting warnings in Mesa.
@@ -59,7 +60,6 @@
 #pragma clang diagnostic ignored "-Wmissing-field-initializers"
 #endif
 
-#include "dxil_validator.h"
 #include "nir_spirv.h"
 #include "nir_to_dxil.h"
 #include "spirv_to_dxil.h"
@@ -2867,23 +2867,6 @@ static uint32_t SHADER_STAGES_BIT_OFFSET_INDICES[RenderingDevice::SHADER_STAGE_M
 	/* SHADER_STAGE_COMPUTE */ 2,
 };
 
-dxil_validator *RenderingDeviceDriverD3D12::_get_dxil_validator_for_current_thread() {
-	MutexLock lock(dxil_mutex);
-
-	int thread_idx = WorkerThreadPool::get_singleton()->get_thread_index();
-	if (dxil_validators.has(thread_idx)) {
-		return dxil_validators[thread_idx];
-	}
-
-#ifdef DEV_ENABLED
-	print_verbose("Creating DXIL validator for worker thread index " + itos(thread_idx));
-#endif
-
-	dxil_validator *dxil_validator = dxil_create_validator(nullptr);
-	dxil_validators.insert(thread_idx, dxil_validator);
-	return dxil_validator;
-}
-
 uint32_t RenderingDeviceDriverD3D12::_shader_patch_dxil_specialization_constant(
 		PipelineSpecializationConstantType p_type,
 		const void *p_value,
@@ -3006,40 +2989,20 @@ bool RenderingDeviceDriverD3D12::_shader_apply_specialization_constants(
 		ShaderStage stage = E.key;
 		if ((stages_re_sign_mask & (1 << stage))) {
 			Vector<uint8_t> &bytecode = E.value;
-			bool sign_ok = _shader_sign_dxil_bytecode(stage, bytecode);
-			ERR_FAIL_COND_V(!sign_ok, false);
+			_shader_sign_dxil_bytecode(stage, bytecode);
 		}
 	}
 
 	return true;
 }
 
-bool RenderingDeviceDriverD3D12::_shader_sign_dxil_bytecode(ShaderStage p_stage, Vector<uint8_t> &r_dxil_blob) {
-	dxil_validator *validator = _get_dxil_validator_for_current_thread();
-	if (!validator) {
-		if (is_in_developer_mode()) {
-			return true;
-		} else {
-			OS::get_singleton()->alert("Shader validation failed: DXIL.dll was not found, and developer mode is disabled.\n\nClick OK to exit.");
-			CRASH_NOW();
-		}
-	}
-
-	char *err = nullptr;
-	bool res = dxil_validate_module(validator, r_dxil_blob.ptrw(), r_dxil_blob.size(), &err);
-	if (!res) {
-		if (err) {
-			ERR_FAIL_COND_V_MSG(!res, false, "Shader signing invocation at stage " + String(SHADER_STAGE_NAMES[p_stage]) + " failed:\n" + String(err));
-		} else {
-			ERR_FAIL_COND_V_MSG(!res, false, "Shader signing invocation at stage " + String(SHADER_STAGE_NAMES[p_stage]) + " failed.");
-		}
-	}
-
-	return true;
+void RenderingDeviceDriverD3D12::_shader_sign_dxil_bytecode(ShaderStage p_stage, Vector<uint8_t> &r_dxil_blob) {
+	uint8_t *w = r_dxil_blob.ptrw();
+	compute_dxil_hash(w + 20, r_dxil_blob.size() - 20, w + 4);
 }
 
 String RenderingDeviceDriverD3D12::shader_get_binary_cache_key() {
-	return "D3D12-SV" + uitos(ShaderBinary::VERSION) + "-" + itos(shader_capabilities.shader_model) + (is_in_developer_mode() ? "dev" : "");
+	return "D3D12-SV" + uitos(ShaderBinary::VERSION) + "-" + itos(shader_capabilities.shader_model);
 }
 
 Vector<uint8_t> RenderingDeviceDriverD3D12::shader_compile_binary_from_spirv(VectorView<ShaderStageSPIRVData> p_spirv, const String &p_shader_name) {
@@ -3307,10 +3270,7 @@ Vector<uint8_t> RenderingDeviceDriverD3D12::shader_compile_binary_from_spirv(Vec
 			nir_to_dxil_options nir_to_dxil_options = {};
 			nir_to_dxil_options.environment = DXIL_ENVIRONMENT_VULKAN;
 			nir_to_dxil_options.shader_model_max = shader_model_d3d_to_dxil(shader_capabilities.shader_model);
-			dxil_validator *validator = _get_dxil_validator_for_current_thread();
-			if (validator) {
-				nir_to_dxil_options.validator_version_max = dxil_get_validator_version(validator);
-			}
+			nir_to_dxil_options.validator_version_max = NO_DXIL_VALIDATION;
 			nir_to_dxil_options.godot_nir_callbacks = &godot_nir_callbacks;
 
 			dxil_logger logger = {};
@@ -3361,8 +3321,7 @@ Vector<uint8_t> RenderingDeviceDriverD3D12::shader_compile_binary_from_spirv(Vec
 	for (KeyValue<ShaderStage, Vector<uint8_t>> &E : dxil_blobs) {
 		ShaderStage stage = E.key;
 		Vector<uint8_t> &dxil_blob = E.value;
-		bool sign_ok = _shader_sign_dxil_bytecode(stage, dxil_blob);
-		ERR_FAIL_COND_V(!sign_ok, Vector<uint8_t>());
+		_shader_sign_dxil_bytecode(stage, dxil_blob);
 	}
 
 	// Build the root signature.
@@ -5376,10 +5335,12 @@ void RenderingDeviceDriverD3D12::command_bind_render_pipeline(CommandBufferID p_
 	cmd_buf_info->cmd_list->OMSetBlendFactor(pso_extra_info.dyn_params.blend_constant.components);
 	cmd_buf_info->cmd_list->OMSetStencilRef(pso_extra_info.dyn_params.stencil_reference);
 
-	ComPtr<ID3D12GraphicsCommandList1> command_list_1;
-	cmd_buf_info->cmd_list->QueryInterface(command_list_1.GetAddressOf());
-	if (command_list_1) {
-		command_list_1->OMSetDepthBounds(pso_extra_info.dyn_params.depth_bounds_min, pso_extra_info.dyn_params.depth_bounds_max);
+	if (misc_features_support.depth_bounds_supported) {
+		ComPtr<ID3D12GraphicsCommandList1> command_list_1;
+		cmd_buf_info->cmd_list->QueryInterface(command_list_1.GetAddressOf());
+		if (command_list_1) {
+			command_list_1->OMSetDepthBounds(pso_extra_info.dyn_params.depth_bounds_min, pso_extra_info.dyn_params.depth_bounds_max);
+		}
 	}
 
 	cmd_buf_info->render_pass_state.vf_info = pso_extra_info.vf_info;
@@ -5769,8 +5730,15 @@ RDD::PipelineID RenderingDeviceDriverD3D12::render_pipeline_create(
 		(&pipeline_desc.DepthStencilState)->BackFace.StencilDepthFailOp = RD_TO_D3D12_STENCIL_OP[p_depth_stencil_state.back_op.depth_fail];
 		(&pipeline_desc.DepthStencilState)->BackFace.StencilFunc = RD_TO_D3D12_COMPARE_OP[p_depth_stencil_state.back_op.compare];
 
-		pso_extra_info.dyn_params.depth_bounds_min = p_depth_stencil_state.enable_depth_range ? p_depth_stencil_state.depth_range_min : 0.0f;
-		pso_extra_info.dyn_params.depth_bounds_max = p_depth_stencil_state.enable_depth_range ? p_depth_stencil_state.depth_range_max : 1.0f;
+		if (misc_features_support.depth_bounds_supported) {
+			pso_extra_info.dyn_params.depth_bounds_min = p_depth_stencil_state.enable_depth_range ? p_depth_stencil_state.depth_range_min : 0.0f;
+			pso_extra_info.dyn_params.depth_bounds_max = p_depth_stencil_state.enable_depth_range ? p_depth_stencil_state.depth_range_max : 1.0f;
+		} else {
+			if (p_depth_stencil_state.enable_depth_range) {
+				WARN_PRINT_ONCE("Depth bounds test is not supported by the GPU driver.");
+			}
+		}
+
 		pso_extra_info.dyn_params.stencil_reference = p_depth_stencil_state.front_op.reference;
 	}
 
@@ -6287,15 +6255,6 @@ RenderingDeviceDriverD3D12::RenderingDeviceDriverD3D12(RenderingContextDriverD3D
 }
 
 RenderingDeviceDriverD3D12::~RenderingDeviceDriverD3D12() {
-	{
-		MutexLock lock(dxil_mutex);
-		for (const KeyValue<int, dxil_validator *> &E : dxil_validators) {
-			if (E.value) {
-				dxil_destroy_validator(E.value);
-			}
-		}
-	}
-
 	glsl_type_singleton_decref();
 }
 
@@ -6491,6 +6450,12 @@ Error RenderingDeviceDriverD3D12::_check_capabilities() {
 		subgroup_capabilities.wave_ops_supported = options1.WaveOps;
 	}
 
+	D3D12_FEATURE_DATA_D3D12_OPTIONS2 options2 = {};
+	res = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS2, &options2, sizeof(options2));
+	if (SUCCEEDED(res)) {
+		misc_features_support.depth_bounds_supported = options2.DepthBoundsTestSupported;
+	}
+
 	D3D12_FEATURE_DATA_D3D12_OPTIONS3 options3 = {};
 	res = device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &options3, sizeof(options3));
 	if (SUCCEEDED(res)) {
@@ -6575,6 +6540,12 @@ Error RenderingDeviceDriverD3D12::_check_capabilities() {
 	}
 
 	print_verbose(String("- D3D12 16-bit ops supported: ") + (shader_capabilities.native_16bit_ops ? "yes" : "no"));
+
+	if (misc_features_support.depth_bounds_supported) {
+		print_verbose("- Depth bounds test supported");
+	} else {
+		print_verbose("- Depth bounds test not supported");
+	}
 
 	return OK;
 }
