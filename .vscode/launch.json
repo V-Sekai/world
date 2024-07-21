@@ -11,7 +11,7 @@
       "name": "Run the editor with V-Sekai game macos",
       "type": "lldb",
       "request": "launch",
-      "args": ["--path", "/Users/ernest.lee/Documents/godot-merge-game-project", "-e"],
+      "args": ["--path", "${workspaceFolder}/11_vsekai_game", "-e"],
       "cwd": "${workspaceFolder}",
       "program": "${workspaceFolder}/19_godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
