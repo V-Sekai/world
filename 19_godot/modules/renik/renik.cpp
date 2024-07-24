@@ -3370,7 +3370,7 @@ HashMap<BoneId, Quaternion> RenIK::solve_ik_qcp(Ref<RenIKChain> chain,
 
 	Vector<RenIKChain::Joint> joints = chain->get_joints();
 	const Transform3D true_root = root.translated_local(joints[0].relative_prev);
-	const Vector3 priority = Vector3(0.2, 0, 0.2);
+    const Vector3 priority = Vector3(1.0 / 7.0, 1.0 / 7.0, 1.0 / 7.0);
 
 	Vector<Transform3D> global_transforms;
 	global_transforms.resize(joints.size());
