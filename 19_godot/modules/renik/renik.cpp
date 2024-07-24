@@ -3370,17 +3370,8 @@ HashMap<BoneId, Quaternion> RenIK::solve_ik_qcp(Ref<RenIKChain> chain,
 
 	Vector<RenIKChain::Joint> joints = chain->get_joints();
 	const Transform3D true_root = root.translated_local(joints[0].relative_prev);
-	Vector<Vector3> rest_positions;
-	Vector<Vector3> target_positions;
-	Vector<double> weights;
-	constexpr int TRANSFORM_TO_HEADINGS_COUNT = 7;
-	rest_positions.resize(TRANSFORM_TO_HEADINGS_COUNT * joints.size());
-	target_positions.resize(TRANSFORM_TO_HEADINGS_COUNT * joints.size());
-	weights.resize(TRANSFORM_TO_HEADINGS_COUNT * joints.size());
-	weights.fill(1.0);
 	const Vector3 priority = Vector3(0.2, 0, 0.2);
 
-	// Compute global transforms
 	Vector<Transform3D> global_transforms;
 	global_transforms.resize(joints.size());
 	Transform3D current_global_transform = true_root;
@@ -3400,61 +3391,62 @@ HashMap<BoneId, Quaternion> RenIK::solve_ik_qcp(Ref<RenIKChain> chain,
 	static constexpr double evec_prec = static_cast<double>(1E-6);
 	QCP qcp = QCP(evec_prec);
 
-	// Compute rest and target positions
+	Vector<Vector3> rest_positions;
+	Vector<Vector3> target_positions;
+	Vector<double> weights;
+	rest_positions.resize(7);
+	target_positions.resize(7);
+	weights.resize(7);
+	weights.fill(1.0);
+
 	for (int joint_i = 0; joint_i < global_transforms.size(); joint_i++) {
 		Transform3D bone_direction_global_transform = global_transforms[joint_i];
 		real_t pin_weight = weights[joint_i];
-		int32_t rest_index = joint_i * 7;
 
 		Basis tip_basis = bone_direction_global_transform.basis.orthogonalized();
-
 		Quaternion quaternion = tip_basis.get_rotation_quaternion();
 		tip_basis.set_quaternion_scale(quaternion, tip_basis.get_scale());
 
-		rest_positions.write[rest_index] = p_target.origin - bone_direction_global_transform.origin;
-		rest_index++;
+		rest_positions.write[0] = target.origin - bone_direction_global_transform.origin;
 
 		double scale_by = pin_weight;
-		Vector3 target_global_space = p_target.origin;
+		Vector3 target_global_space = target.origin;
 		if (!quaternion.is_equal_approx(Quaternion())) {
-			target_global_space = bone_direction_global_transform.xform(p_target.origin);
+			target_global_space = bone_direction_global_transform.xform(target.origin);
 		}
 		double distance = target_global_space.distance_to(bone_direction_global_transform.origin);
 		scale_by = MAX(1.0, distance);
 
+		int rest_index = 1;
 		for (int axis_i = Vector3::AXIS_X; axis_i <= Vector3::AXIS_Z; ++axis_i) {
 			if (priority[axis_i] > 0.0) {
-				Vector3 column = p_target.basis.get_column(axis_i);
-				rest_positions.write[rest_index] = bone_direction_global_transform.affine_inverse().xform((column + p_target.origin) - bone_direction_global_transform.origin);
+				Vector3 column = target.basis.get_column(axis_i);
+				rest_positions.write[rest_index] = bone_direction_global_transform.affine_inverse().xform((column + target.origin) - bone_direction_global_transform.origin);
 				rest_positions.write[rest_index] *= scale_by;
 				rest_index++;
-				rest_positions.write[rest_index] = bone_direction_global_transform.affine_inverse().xform((p_target.origin - column) - bone_direction_global_transform.origin);
+				rest_positions.write[rest_index] = bone_direction_global_transform.affine_inverse().xform((target.origin - column) - bone_direction_global_transform.origin);
 				rest_positions.write[rest_index] *= scale_by;
 				rest_index++;
 			}
 		}
 
-		int32_t target_index = joint_i * 7;
-		target_positions.write[target_index] = p_target.origin - bone_direction_global_transform.origin;
-		target_index++;
+		target_positions.write[0] = target.origin - bone_direction_global_transform.origin;
 
 		scale_by = pin_weight;
-
+		int target_index = 1;
 		for (int axis_j = Vector3::AXIS_X; axis_j <= Vector3::AXIS_Z; ++axis_j) {
 			if (priority[axis_j] > 0.0) {
-				real_t w = weights[rest_index];
+				real_t w = weights[target_index];
 				Vector3 column = tip_basis.get_column(axis_j) * priority[axis_j];
-				target_positions.write[target_index] = bone_direction_global_transform.xform((column + p_target.origin) - bone_direction_global_transform.origin);
+				target_positions.write[target_index] = bone_direction_global_transform.xform((column + target.origin) - bone_direction_global_transform.origin);
 				target_positions.write[target_index] *= Vector3(w, w, w);
 				target_index++;
-				target_positions.write[target_index] = bone_direction_global_transform.xform((p_target.origin - column) - bone_direction_global_transform.origin);
+				target_positions.write[target_index] = bone_direction_global_transform.xform((target.origin - column) - bone_direction_global_transform.origin);
 				target_positions.write[target_index] *= Vector3(w, w, w);
 				target_index++;
 			}
 		}
-	}
 
-	for (int joint_i = 0; joint_i < joints.size(); joint_i++) {
 		Quaternion solved_global_pose = qcp.weighted_superpose(rest_positions, target_positions, weights, false);
 
 		int parent_index = joint_i > 0 ? joint_i - 1 : 0;
