@@ -258,20 +258,9 @@ struct CheckCoplanarity {
 
 int GetLabels(std::vector<int>& components,
               const Vec<std::pair<int, int>>& edges, int numNodes) {
-  if (numNodes <= 0) {
-    return 0;
-  }
-
   UnionFind<> uf(numNodes);
-
-  for (const auto& edge : edges) {
+  for (auto edge : edges) {
     if (edge.first == -1 || edge.second == -1) continue;
-
-    if (edge.first < 0 || edge.first >= numNodes ||
-        edge.second < 0 || edge.second >= numNodes) {
-      continue;
-    }
-
     uf.unionXY(edge.first, edge.second);
   }
 
@@ -283,25 +272,11 @@ void DedupePropVerts(manifold::Vec<glm::ivec3>& triProp,
   ZoneScoped;
   std::vector<int> vertLabels;
   const int numLabels = GetLabels(vertLabels, vert2vert, vert2vert.size());
-  std::vector<int> label2vert(numLabels);
-  for (size_t v = 0; v < vert2vert.size(); ++v) {
-    if (vertLabels[v] >= 0 && vertLabels[v] < numLabels) {
-      label2vert[vertLabels[v]] = v;
-    } else {
-      return;
-    }
-  }
 
-  for (auto& prop : triProp) {
-    for (int i : {0, 1, 2}) {
-      if (prop[i] >= 0 && prop[i] < vertLabels.size() &&
-          vertLabels[prop[i]] >= 0 && vertLabels[prop[i]] < numLabels) {
-        prop[i] = label2vert[vertLabels[prop[i]]];
-      } else {
-        return;
-      }
-    }
-  }
+  std::vector<int> label2vert(numLabels);
+  for (size_t v = 0; v < vert2vert.size(); ++v) label2vert[vertLabels[v]] = v;
+  for (auto& prop : triProp)
+    for (int i : {0, 1, 2}) prop[i] = label2vert[vertLabels[prop[i]]];
 }
 }  // namespace
 
