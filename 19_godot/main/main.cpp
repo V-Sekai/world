@@ -1956,6 +1956,9 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 		GLOBAL_DEF_RST_NOVAL(PropertyInfo(Variant::STRING, "rendering/rendering_device/driver.android", PROPERTY_HINT_ENUM, driver_hints), default_driver);
 		GLOBAL_DEF_RST_NOVAL(PropertyInfo(Variant::STRING, "rendering/rendering_device/driver.ios", PROPERTY_HINT_ENUM, driver_hints), default_driver);
 		GLOBAL_DEF_RST_NOVAL(PropertyInfo(Variant::STRING, "rendering/rendering_device/driver.macos", PROPERTY_HINT_ENUM, driver_hints), default_driver);
+
+		GLOBAL_DEF_RST("rendering/rendering_device/fallback_to_vulkan", true);
+		GLOBAL_DEF_RST("rendering/rendering_device/fallback_to_d3d12", true);
 	}
 
 	{
@@ -2326,12 +2329,12 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	// Make sure that headless is the last one, which it is assumed to be by design.
 	DEV_ASSERT(NULL_DISPLAY_DRIVER == DisplayServer::get_create_function_name(DisplayServer::get_create_function_count() - 1));
 
-	GLOBAL_DEF_RST_NOVAL("display/display_server/driver", "default");
-	GLOBAL_DEF_RST_NOVAL(PropertyInfo(Variant::STRING, "display/display_server/driver.windows", PROPERTY_HINT_ENUM_SUGGESTION, "default,windows,headless"), "default");
-	GLOBAL_DEF_RST_NOVAL(PropertyInfo(Variant::STRING, "display/display_server/driver.linuxbsd", PROPERTY_HINT_ENUM_SUGGESTION, "default,x11,wayland,headless"), "default");
-	GLOBAL_DEF_RST_NOVAL(PropertyInfo(Variant::STRING, "display/display_server/driver.android", PROPERTY_HINT_ENUM_SUGGESTION, "default,android,headless"), "default");
-	GLOBAL_DEF_RST_NOVAL(PropertyInfo(Variant::STRING, "display/display_server/driver.ios", PROPERTY_HINT_ENUM_SUGGESTION, "default,iOS,headless"), "default");
-	GLOBAL_DEF_RST_NOVAL(PropertyInfo(Variant::STRING, "display/display_server/driver.macos", PROPERTY_HINT_ENUM_SUGGESTION, "default,macos,headless"), "default");
+	GLOBAL_DEF_NOVAL("display/display_server/driver", "default");
+	GLOBAL_DEF_NOVAL(PropertyInfo(Variant::STRING, "display/display_server/driver.windows", PROPERTY_HINT_ENUM_SUGGESTION, "default,windows,headless"), "default");
+	GLOBAL_DEF_NOVAL(PropertyInfo(Variant::STRING, "display/display_server/driver.linuxbsd", PROPERTY_HINT_ENUM_SUGGESTION, "default,x11,wayland,headless"), "default");
+	GLOBAL_DEF_NOVAL(PropertyInfo(Variant::STRING, "display/display_server/driver.android", PROPERTY_HINT_ENUM_SUGGESTION, "default,android,headless"), "default");
+	GLOBAL_DEF_NOVAL(PropertyInfo(Variant::STRING, "display/display_server/driver.ios", PROPERTY_HINT_ENUM_SUGGESTION, "default,iOS,headless"), "default");
+	GLOBAL_DEF_NOVAL(PropertyInfo(Variant::STRING, "display/display_server/driver.macos", PROPERTY_HINT_ENUM_SUGGESTION, "default,macos,headless"), "default");
 
 	GLOBAL_DEF_RST_NOVAL("audio/driver/driver", AudioDriverManager::get_driver(0)->get_name());
 	if (audio_driver.is_empty()) { // Specified in project.godot.
@@ -2459,11 +2462,12 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	}
 #endif
 
+	OS::get_singleton()->benchmark_end_measure("Startup", "Main::Setup");
+
 	if (p_second_phase) {
 		return setup2();
 	}
 
-	OS::get_singleton()->benchmark_end_measure("Startup", "Main::Setup");
 	return OK;
 
 error:
@@ -2591,6 +2595,7 @@ Error Main::setup2(bool p_show_boot_logo) {
 					String screen_property;
 
 					bool prefer_wayland_found = false;
+					bool prefer_wayland = false;
 
 					if (editor) {
 						screen_property = "interface/editor/editor_screen";
@@ -2623,14 +2628,17 @@ Error Main::setup2(bool p_show_boot_logo) {
 							}
 
 							if (!prefer_wayland_found && assign == "run/platforms/linuxbsd/prefer_wayland") {
-								if (value) {
-									display_driver = "wayland";
-								} else {
-									display_driver = "default";
-								}
-
+								prefer_wayland = value;
 								prefer_wayland_found = true;
 							}
+						}
+					}
+
+					if (display_driver.is_empty()) {
+						if (prefer_wayland) {
+							display_driver = "wayland";
+						} else {
+							display_driver = "default";
 						}
 					}
 				}
