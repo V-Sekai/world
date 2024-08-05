@@ -357,7 +357,26 @@ static void pack_manifold(
 	ERR_FAIL_COND_MSG(mesh.vertProperties.size() % mesh.numProp != 0, "Invalid vertex properties size");
 
 	mesh.precision = p_snap;
-	mesh.Merge();
+
+	/**
+	 * MeshGL::merge(): updates the mergeFromVert and mergeToVert vectors in order to create a
+	 * manifold solid. If the MeshGL is already manifold, no change will occur, and
+	 * the function will return false.
+	 */
+	if (mesh.Merge()) {
+		std::vector<int32_t> index_map(mesh.vertProperties.size() / MANIFOLD_MAX, -1);
+		const size_t vertices_count = mesh.mergeFromVert.size();
+		for (size_t i = 0; i < vertices_count; ++i) {
+			index_map[mesh.mergeFromVert[i]] = mesh.mergeToVert[i];
+		}
+		const size_t indices_count = mesh.triVerts.size();
+		for (size_t i = 0; i < indices_count; ++i) {
+			if (index_map[i] > -1) {
+				mesh.triVerts[i] = index_map[i];
+			}
+		}
+	}
+
 	r_manifold = manifold::Manifold(mesh);
 	manifold::Manifold::Error err = r_manifold.Status();
 	if (err != manifold::Manifold::Error::NoError) {
