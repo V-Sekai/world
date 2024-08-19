@@ -998,6 +998,13 @@ const String EditorSettings::_get_project_metadata_path() const {
 	return EditorPaths::get_singleton()->get_project_settings_dir().path_join("project_metadata.cfg");
 }
 
+#ifndef DISABLE_DEPRECATED
+void EditorSettings::_remove_deprecated_settings() {
+	erase("run/output/always_open_output_on_play");
+	erase("run/output/always_close_output_on_stop");
+}
+#endif
+
 // PUBLIC METHODS
 
 EditorSettings *EditorSettings::get_singleton() {
@@ -1063,13 +1070,13 @@ void EditorSettings::create() {
 		}
 
 		singleton = ResourceLoader::load(config_file_path, "EditorSettings");
-		singleton->set_path(get_newest_settings_path()); // Settings can be loaded from older version file, so make sure it's newest.
-
 		if (singleton.is_null()) {
 			ERR_PRINT("Could not load editor settings from path: " + config_file_path);
+			config_file_path = get_newest_settings_path();
 			goto fail;
 		}
 
+		singleton->set_path(get_newest_settings_path()); // Settings can be loaded from older version file, so make sure it's newest.
 		singleton->save_changed_setting = true;
 
 		print_verbose("EditorSettings: Load OK!");
@@ -1078,6 +1085,9 @@ void EditorSettings::create() {
 		singleton->setup_network();
 		singleton->load_favorites_and_recent_dirs();
 		singleton->list_text_editor_themes();
+#ifndef DISABLE_DEPRECATED
+		singleton->_remove_deprecated_settings();
+#endif
 
 		return;
 	}

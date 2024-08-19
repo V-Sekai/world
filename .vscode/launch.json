@@ -8,12 +8,12 @@
   },
   "configurations": [
     {
-      "name": "Run the editor with V-Sekai game macos",
+      "name": "Run the editor with V-Sekai game",
       "type": "lldb",
       "request": "launch",
-      "args": ["--path", "${workspaceFolder}/11_vsekai_game", "-e"],
+      "args": ["--path", "/Users/ernest.lee/Downloads/godot-merge-game-project", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/19_godot/bin/godot.macos.editor.double.arm64",
+      "program": "${workspaceFolder}/19_godot/bin/godot.windows.editor.double.x86_64",
       "preLaunchTask": "Godot Engine"
     },
   ]
