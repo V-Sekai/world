@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  GODOT_REF: groups-4.3.2024-07-02T224837Z
+  GODOT_REF: groups-4.3.2024-08-19T154558Z
   GODOT_REPOSITORY: v-sekai/godot
   SCONSFLAGS: verbose=yes warnings=extra werror=no module_text_server_fb_enabled=yes use_thinlto=yes
   DOTNET_NOLOGO: true
