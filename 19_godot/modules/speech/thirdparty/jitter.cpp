@@ -610,15 +610,15 @@ void VoipJitterBuffer::jitter_buffer_tick(Ref<JitterBuffer> jitter) {
 	/* Automatically-adjust the buffering delay if requested */
 	if (jitter->auto_adjust) {
 		_jitter_buffer_update_delay(jitter, nullptr);
-	}
+    }
 
-	if (jitter->buffered >= 0) {
-		jitter->next_stop = jitter->pointer_timestamp - jitter->buffered;
-	} else {
-		jitter->next_stop = jitter->pointer_timestamp;
-		ERR_PRINT(vformat("jitter buffer sees negative buffering, your code might be broken. Value is %d", jitter->buffered));
-	}
-	jitter->buffered = 0;
+    if (jitter->buffered >= 0) {
+        jitter->next_stop = jitter->pointer_timestamp - jitter->buffered;
+    } else {
+        jitter->next_stop = jitter->pointer_timestamp;
+        print_verbose(vformat("jitter buffer sees negative buffering, your code might be broken. Value is %d", jitter->buffered));
+    }
+    jitter->buffered = 0;
 }
 
 void VoipJitterBuffer::jitter_buffer_remaining_span(Ref<JitterBuffer> jitter, uint32_t rem) {
@@ -631,7 +631,7 @@ void VoipJitterBuffer::jitter_buffer_remaining_span(Ref<JitterBuffer> jitter, ui
 	}
 
 	if (jitter->buffered < 0) {
-		ERR_PRINT(vformat("jitter buffer sees negative buffering, your code might be broken. Value is %d", jitter->buffered));
+		print_verbose(vformat("jitter buffer sees negative buffering, your code might be broken. Value is %d", jitter->buffered));
 	}
 	jitter->next_stop = jitter->pointer_timestamp - rem;
 }
