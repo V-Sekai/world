@@ -13,7 +13,7 @@
       "request": "launch",
       "args": ["--path", "${workspaceFolder}/19_godot/modules/speech/demo", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/19_godot/bin/godot*",
+      "program": "${workspaceFolder}/19_godot/bin/godot.windows.editor.double.x86_64.console.exe",
       "preLaunchTask": "Godot Engine"
     },
   ]
