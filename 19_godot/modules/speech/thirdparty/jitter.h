@@ -250,8 +250,8 @@ public:
 
 	TimingBuffer *_tb[MAX_BUFFERS] = {};
 	TimingBuffer *timeBuffers[MAX_BUFFERS] = {};
-	int window_size = 0;
-	int subwindow_size = 0;
+	int window_size = 50;
+	int subwindow_size = 10;
 	int max_late_rate = 0;
 	int latency_tradeoff = 0;
 	int auto_tradeoff = 0;

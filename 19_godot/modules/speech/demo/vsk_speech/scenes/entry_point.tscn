@@ -12,3 +12,5 @@ stream = SubResource("AudioStreamMicrophone_tmvyd")
 bus = &"Mic"
 
 [node name="GodotSpeech" type="Speech" parent="."]
+
+[node name="SpeechProcessor" type="SpeechProcessor" parent="GodotSpeech"]
