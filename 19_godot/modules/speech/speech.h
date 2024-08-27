@@ -123,7 +123,7 @@ private:
 	int JITTER_BUFFER_SLOWDOWN = 6;
 
 	bool DEBUG = false;
-	bool use_sample_stretching = true;
+	bool use_sample_stretching = false;
 	PackedVector2Array uncompressed_audio;
 
 	int packets_received_this_frame = 0;
