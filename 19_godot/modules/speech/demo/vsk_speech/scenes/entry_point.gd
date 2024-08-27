@@ -7,6 +7,7 @@ const AEC_BUS_NAME = "Master"
 var lobby_scene : Node = null
 var debug_output : Label = null
 @onready var godot_speech : Node = get_node("GodotSpeech")
+var is_connected : bool = false
 var audio_players : Dictionary
 var audio_mutex : Mutex = Mutex.new()
 const MAX_VOICE_BUFFERS = 16
@@ -78,6 +79,7 @@ func host(p_player_name : String, p_port : int, p_server_only : bool) -> void:
 
 
 func confirm_connection() -> void:
+	is_connected = true
 	voice_id = 0
 
 
@@ -202,7 +204,8 @@ func _process(p_delta) -> void:
 		index += 1
 	var speech_stat_dict : Dictionary = godot_speech.get_stats()
 	var stat_dict : Dictionary = godot_speech.get_playback_stats(speech_stat_dict)
-	debug_output.set_text(JSON.stringify(stat_dict, "\t"))
+	var json : JSON = JSON.new()
+	debug_output.set_text(json.stringify(stat_dict, "\t"))
 
 
 func _ready() -> void:

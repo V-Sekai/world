@@ -17,18 +17,14 @@ config/icon="res://icon.png"
 
 [audio]
 
-driver/driver=""
 driver/enable_input=true
+driver/mix_rate=48000
 enable_audio_input=true
 mix_rate=48000
 
 [autoload]
 
 network_layer="*res://vsk_speech/scenes/network_layer.gd"
-
-[debug]
-
-gdscript/warnings/unused_signal=0
 
 [editor_plugins]
 
