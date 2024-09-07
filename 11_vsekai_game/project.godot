@@ -13,7 +13,7 @@ config_version=5
 config/name="V-Sekai Game"
 run/main_scene="res://vsk_default/scenes/main_scene.tscn"
 config/quit_on_go_back=false
-config/features=PackedStringArray("4.3", "Double Precision")
+config/features=PackedStringArray("4.4", "Double Precision")
 run/flush_stdout_on_print.debug=false
 boot_splash/bg_color=Color(0.227451, 0.054902, 0.054902, 1)
 boot_splash/show_image=false
@@ -97,6 +97,7 @@ ScreenshotManager="*res://addons/sar1_screenshot_manager/screenshot_manager.gd"
 ConnectionUtil="*res://addons/gd_util/connection_util.gd"
 VSKVersion="*res://addons/vsk_version/vsk_version.gd"
 Telemetry="*res://addons/telemetry/telemetry.gd"
+XRToolsUserSettings="*res://addons/godot-xr-tools/user_settings/user_settings.gd"
 
 [compression]
 

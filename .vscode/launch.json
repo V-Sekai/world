@@ -9,11 +9,11 @@
   "configurations": [
     {
       "name": "Run the editor with V-Sekai game",
-      "type": "cppvsdbg",
+      "type": "lldb",
       "request": "launch",
-      "args": ["--path", "${workspaceFolder}/19_godot/modules/speech/demo"],
+      "args": ["--path", "${workspaceFolder}/11_vsekai_game", "-e"],
       "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/19_godot/bin/godot.windows.editor.double.x86_64.console.exe",
+      "program": "${workspaceFolder}/14_godot/bin/godot.macos.editor.double.arm64",
       "preLaunchTask": "Godot Engine"
     },
   ]
