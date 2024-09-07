@@ -117,7 +117,9 @@ class SceneImportSettingsData : public Object {
 		ERR_FAIL_NULL(settings);
 		if (r_option.name == "rest_pose/load_pose") {
 			if (!settings->has("rest_pose/load_pose") || int((*settings)["rest_pose/load_pose"]) != 2) {
-				(*settings)["rest_pose/external_animation_library"] = Variant();
+				if (settings->has("rest_pose/external_animation_library")) {
+					(*settings)["rest_pose/external_animation_library"] = Variant();
+				}
 			}
 		}
 		if (r_option.name == "rest_pose/selected_animation") {
@@ -134,7 +136,10 @@ class SceneImportSettingsData : public Object {
 					}
 				} break;
 				case 2: {
-					Object *res = (*settings)["rest_pose/external_animation_library"];
+					Object *res = nullptr;
+					if (settings->has("rest_pose/external_animation_library")) {
+						res = (*settings)["rest_pose/external_animation_library"];
+					}
 					Ref<Animation> anim(res);
 					Ref<AnimationLibrary> library(res);
 					if (anim.is_valid()) {
@@ -467,6 +472,7 @@ void SceneImportSettingsDialog::_fill_scene(Node *p_node, TreeItem *p_parent_ite
 		}
 
 		AABB aabb = accum_xform.xform(mesh_node->get_mesh()->get_aabb());
+
 		if (first_aabb) {
 			contents_aabb = aabb;
 			first_aabb = false;
@@ -672,26 +678,26 @@ void SceneImportSettingsDialog::update_view() {
 	update_view_timer->start();
 }
 
-void SceneImportSettingsDialog::open_settings(const String &p_path, bool p_for_animation) {
+void SceneImportSettingsDialog::open_settings(const String &p_path, const String &p_scene_import_type) {
 	if (scene) {
 		_cleanup();
 		memdelete(scene);
 		scene = nullptr;
 	}
 
-	editing_animation = p_for_animation;
+	editing_animation = p_scene_import_type == "AnimationLibrary";
 	scene_import_settings_data->settings = nullptr;
 	scene_import_settings_data->path = p_path;
 
 	// Visibility.
-	data_mode->set_tab_hidden(1, p_for_animation);
-	data_mode->set_tab_hidden(2, p_for_animation);
-	if (p_for_animation) {
+	data_mode->set_tab_hidden(1, editing_animation);
+	data_mode->set_tab_hidden(2, editing_animation);
+	if (editing_animation) {
 		data_mode->set_current_tab(0);
 	}
 
-	action_menu->get_popup()->set_item_disabled(action_menu->get_popup()->get_item_id(ACTION_EXTRACT_MATERIALS), p_for_animation);
-	action_menu->get_popup()->set_item_disabled(action_menu->get_popup()->get_item_id(ACTION_CHOOSE_MESH_SAVE_PATHS), p_for_animation);
+	action_menu->get_popup()->set_item_disabled(action_menu->get_popup()->get_item_id(ACTION_EXTRACT_MATERIALS), editing_animation);
+	action_menu->get_popup()->set_item_disabled(action_menu->get_popup()->get_item_id(ACTION_CHOOSE_MESH_SAVE_PATHS), editing_animation);
 
 	base_path = p_path;
 
@@ -765,7 +771,7 @@ void SceneImportSettingsDialog::open_settings(const String &p_path, bool p_for_a
 	// Start with the root item (Scene) selected.
 	scene_tree->get_root()->select(0);
 
-	if (p_for_animation) {
+	if (editing_animation) {
 		set_title(vformat(TTR("Advanced Import Settings for AnimationLibrary '%s'"), base_path.get_file()));
 	} else {
 		set_title(vformat(TTR("Advanced Import Settings for Scene '%s'"), base_path.get_file()));

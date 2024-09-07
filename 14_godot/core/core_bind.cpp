@@ -29,6 +29,7 @@
 /**************************************************************************/
 
 #include "core_bind.h"
+#include "core_bind.compat.inc"
 
 #include "core/config/project_settings.h"
 #include "core/crypto/crypto_core.h"
@@ -53,10 +54,6 @@ Error ResourceLoader::load_threaded_request(const String &p_path, const String &
 	return ::ResourceLoader::load_threaded_request(p_path, p_type_hint, p_use_sub_threads, ResourceFormatLoader::CacheMode(p_cache_mode));
 }
 
-Error ResourceLoader::load_threaded_request_whitelisted(const String &p_path, Dictionary p_external_path_whitelist, Dictionary p_type_whitelist, const String &p_type_hint, bool p_use_sub_threads, CacheMode p_cache_mode) {
-	return ::ResourceLoader::load_threaded_request_whitelisted(p_path, p_external_path_whitelist, p_type_whitelist, p_type_hint, p_use_sub_threads, ResourceFormatLoader::CacheMode(p_cache_mode));
-}
-
 ResourceLoader::ThreadLoadStatus ResourceLoader::load_threaded_get_status(const String &p_path, Array r_progress) {
 	float progress = 0;
 	::ResourceLoader::ThreadLoadStatus tls = ::ResourceLoader::load_threaded_get_status(p_path, &progress);
@@ -74,14 +71,6 @@ Ref<Resource> ResourceLoader::load_threaded_get(const String &p_path) {
 Ref<Resource> ResourceLoader::load(const String &p_path, const String &p_type_hint, CacheMode p_cache_mode) {
 	Error err = OK;
 	Ref<Resource> ret = ::ResourceLoader::load(p_path, p_type_hint, ResourceFormatLoader::CacheMode(p_cache_mode), &err);
-
-	ERR_FAIL_COND_V_MSG(err != OK, ret, "Error loading resource: '" + p_path + "'.");
-	return ret;
-}
-
-Ref<Resource> ResourceLoader::load_whitelisted(const String &p_path, Dictionary p_external_path_whitelist, Dictionary p_type_whitelist, const String &p_type_hint, CacheMode p_cache_mode) {
-	Error err = OK;
-	Ref<Resource> ret = ::ResourceLoader::load_whitelisted(p_path, p_external_path_whitelist, p_type_whitelist, p_type_hint, ResourceFormatLoader::CacheMode(p_cache_mode), &err);
 
 	ERR_FAIL_COND_V_MSG(err != OK, ret, "Error loading resource: '" + p_path + "'.");
 	return ret;
@@ -127,6 +116,11 @@ bool ResourceLoader::has_cached(const String &p_path) {
 	return ResourceCache::has(local_path);
 }
 
+Ref<Resource> ResourceLoader::get_cached_ref(const String &p_path) {
+	String local_path = ProjectSettings::get_singleton()->localize_path(p_path);
+	return ResourceCache::get_ref(local_path);
+}
+
 bool ResourceLoader::exists(const String &p_path, const String &p_type_hint) {
 	return ::ResourceLoader::exists(p_path, p_type_hint);
 }
@@ -137,18 +131,17 @@ ResourceUID::ID ResourceLoader::get_resource_uid(const String &p_path) {
 
 void ResourceLoader::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("load_threaded_request", "path", "type_hint", "use_sub_threads", "cache_mode"), &ResourceLoader::load_threaded_request, DEFVAL(""), DEFVAL(false), DEFVAL(CACHE_MODE_REUSE));
-	ClassDB::bind_method(D_METHOD("load_threaded_request_whitelisted", "path", "external_path_whitelist", "type_whitelist", "type_hint", "use_sub_threads", "cache_mode"), &ResourceLoader::load_threaded_request_whitelisted, DEFVAL(""), DEFVAL(false), DEFVAL(CACHE_MODE_REUSE));
 	ClassDB::bind_method(D_METHOD("load_threaded_get_status", "path", "progress"), &ResourceLoader::load_threaded_get_status, DEFVAL(Array()));
 	ClassDB::bind_method(D_METHOD("load_threaded_get", "path"), &ResourceLoader::load_threaded_get);
 
 	ClassDB::bind_method(D_METHOD("load", "path", "type_hint", "cache_mode"), &ResourceLoader::load, DEFVAL(""), DEFVAL(CACHE_MODE_REUSE));
-	ClassDB::bind_method(D_METHOD("load_whitelisted", "path", "external_path_whitelist", "type_whitelist", "type_hint", "cache_mode"), &ResourceLoader::load_whitelisted, DEFVAL(""), DEFVAL(CACHE_MODE_REUSE));
 	ClassDB::bind_method(D_METHOD("get_recognized_extensions_for_type", "type"), &ResourceLoader::get_recognized_extensions_for_type);
 	ClassDB::bind_method(D_METHOD("add_resource_format_loader", "format_loader", "at_front"), &ResourceLoader::add_resource_format_loader, DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("remove_resource_format_loader", "format_loader"), &ResourceLoader::remove_resource_format_loader);
 	ClassDB::bind_method(D_METHOD("set_abort_on_missing_resources", "abort"), &ResourceLoader::set_abort_on_missing_resources);
 	ClassDB::bind_method(D_METHOD("get_dependencies", "path"), &ResourceLoader::get_dependencies);
 	ClassDB::bind_method(D_METHOD("has_cached", "path"), &ResourceLoader::has_cached);
+	ClassDB::bind_method(D_METHOD("get_cached_ref", "path"), &ResourceLoader::get_cached_ref);
 	ClassDB::bind_method(D_METHOD("exists", "path", "type_hint"), &ResourceLoader::exists, DEFVAL(""));
 	ClassDB::bind_method(D_METHOD("get_resource_uid", "path"), &ResourceLoader::get_resource_uid);
 
@@ -321,12 +314,12 @@ int OS::execute(const String &p_path, const Vector<String> &p_arguments, Array r
 	return exitcode;
 }
 
-Dictionary OS::execute_with_pipe(const String &p_path, const Vector<String> &p_arguments) {
+Dictionary OS::execute_with_pipe(const String &p_path, const Vector<String> &p_arguments, bool p_blocking) {
 	List<String> args;
 	for (const String &arg : p_arguments) {
 		args.push_back(arg);
 	}
-	return ::OS::get_singleton()->execute_with_pipe(p_path, args);
+	return ::OS::get_singleton()->execute_with_pipe(p_path, args, p_blocking);
 }
 
 int OS::create_instance(const Vector<String> &p_arguments) {
@@ -626,7 +619,7 @@ void OS::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_executable_path"), &OS::get_executable_path);
 	ClassDB::bind_method(D_METHOD("read_string_from_stdin"), &OS::read_string_from_stdin);
 	ClassDB::bind_method(D_METHOD("execute", "path", "arguments", "output", "read_stderr", "open_console"), &OS::execute, DEFVAL(Array()), DEFVAL(false), DEFVAL(false));
-	ClassDB::bind_method(D_METHOD("execute_with_pipe", "path", "arguments"), &OS::execute_with_pipe);
+	ClassDB::bind_method(D_METHOD("execute_with_pipe", "path", "arguments", "blocking"), &OS::execute_with_pipe, DEFVAL(true));
 	ClassDB::bind_method(D_METHOD("create_process", "path", "arguments", "open_console"), &OS::create_process, DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("create_instance", "arguments"), &OS::create_instance);
 	ClassDB::bind_method(D_METHOD("kill", "pid"), &OS::kill);
@@ -706,6 +699,7 @@ void OS::_bind_methods() {
 	BIND_ENUM_CONSTANT(RENDERING_DRIVER_VULKAN);
 	BIND_ENUM_CONSTANT(RENDERING_DRIVER_OPENGL3);
 	BIND_ENUM_CONSTANT(RENDERING_DRIVER_D3D12);
+	BIND_ENUM_CONSTANT(RENDERING_DRIVER_METAL);
 
 	BIND_ENUM_CONSTANT(SYSTEM_DIR_DESKTOP);
 	BIND_ENUM_CONSTANT(SYSTEM_DIR_DCIM);
@@ -1223,14 +1217,15 @@ bool Semaphore::try_wait() {
 	return semaphore.try_wait();
 }
 
-void Semaphore::post() {
-	semaphore.post();
+void Semaphore::post(int p_count) {
+	ERR_FAIL_COND(p_count <= 0);
+	semaphore.post(p_count);
 }
 
 void Semaphore::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("wait"), &Semaphore::wait);
 	ClassDB::bind_method(D_METHOD("try_wait"), &Semaphore::try_wait);
-	ClassDB::bind_method(D_METHOD("post"), &Semaphore::post);
+	ClassDB::bind_method(D_METHOD("post", "count"), &Semaphore::post, DEFVAL(1));
 }
 
 ////// Mutex //////
@@ -1454,6 +1449,14 @@ TypedArray<Dictionary> ClassDB::class_get_property_list(const StringName &p_clas
 	return ret;
 }
 
+StringName ClassDB::class_get_property_getter(const StringName &p_class, const StringName &p_property) {
+	return ::ClassDB::get_property_getter(p_class, p_property);
+}
+
+StringName ClassDB::class_get_property_setter(const StringName &p_class, const StringName &p_property) {
+	return ::ClassDB::get_property_setter(p_class, p_property);
+}
+
 Variant ClassDB::class_get_property(Object *p_object, const StringName &p_property) const {
 	Variant ret;
 	::ClassDB::get_property(p_object, p_property, ret);
@@ -1504,6 +1507,23 @@ TypedArray<Dictionary> ClassDB::class_get_method_list(const StringName &p_class,
 	}
 
 	return ret;
+}
+
+Variant ClassDB::class_call_static_method(const Variant **p_arguments, int p_argcount, Callable::CallError &r_call_error) {
+	if (p_argcount < 2) {
+		r_call_error.error = Callable::CallError::CALL_ERROR_TOO_FEW_ARGUMENTS;
+		return Variant::NIL;
+	}
+	if (!p_arguments[0]->is_string() || !p_arguments[1]->is_string()) {
+		r_call_error.error = Callable::CallError::CALL_ERROR_INVALID_ARGUMENT;
+		return Variant::NIL;
+	}
+	StringName class_ = *p_arguments[0];
+	StringName method = *p_arguments[1];
+	const MethodBind *bind = ::ClassDB::get_method(class_, method);
+	ERR_FAIL_NULL_V_MSG(bind, Variant::NIL, "Cannot find static method.");
+	ERR_FAIL_COND_V_MSG(!bind->is_static(), Variant::NIL, "Method is not static.");
+	return bind->call(nullptr, p_arguments + 2, p_argcount - 2, r_call_error);
 }
 
 PackedStringArray ClassDB::class_get_integer_constant_list(const StringName &p_class, bool p_no_inheritance) const {
@@ -1615,6 +1635,8 @@ void ClassDB::_bind_methods() {
 	::ClassDB::bind_method(D_METHOD("class_get_signal_list", "class", "no_inheritance"), &ClassDB::class_get_signal_list, DEFVAL(false));
 
 	::ClassDB::bind_method(D_METHOD("class_get_property_list", "class", "no_inheritance"), &ClassDB::class_get_property_list, DEFVAL(false));
+	::ClassDB::bind_method(D_METHOD("class_get_property_getter", "class", "property"), &ClassDB::class_get_property_getter);
+	::ClassDB::bind_method(D_METHOD("class_get_property_setter", "class", "property"), &ClassDB::class_get_property_setter);
 	::ClassDB::bind_method(D_METHOD("class_get_property", "object", "property"), &ClassDB::class_get_property);
 	::ClassDB::bind_method(D_METHOD("class_set_property", "object", "property", "value"), &ClassDB::class_set_property);
 
@@ -1625,6 +1647,8 @@ void ClassDB::_bind_methods() {
 	::ClassDB::bind_method(D_METHOD("class_get_method_argument_count", "class", "method", "no_inheritance"), &ClassDB::class_get_method_argument_count, DEFVAL(false));
 
 	::ClassDB::bind_method(D_METHOD("class_get_method_list", "class", "no_inheritance"), &ClassDB::class_get_method_list, DEFVAL(false));
+
+	::ClassDB::bind_vararg_method(METHOD_FLAGS_DEFAULT, "class_call_static_method", &ClassDB::class_call_static_method, MethodInfo("class_call_static_method", PropertyInfo(Variant::STRING_NAME, "class"), PropertyInfo(Variant::STRING_NAME, "method")));
 
 	::ClassDB::bind_method(D_METHOD("class_get_integer_constant_list", "class", "no_inheritance"), &ClassDB::class_get_integer_constant_list, DEFVAL(false));
 
@@ -1752,7 +1776,7 @@ Object *Engine::get_singleton_object(const StringName &p_name) const {
 
 void Engine::register_singleton(const StringName &p_name, Object *p_object) {
 	ERR_FAIL_COND_MSG(has_singleton(p_name), "Singleton already registered: " + String(p_name));
-	ERR_FAIL_COND_MSG(!String(p_name).is_valid_identifier(), "Singleton name is not a valid identifier: " + p_name);
+	ERR_FAIL_COND_MSG(!String(p_name).is_valid_ascii_identifier(), "Singleton name is not a valid identifier: " + p_name);
 	::Engine::Singleton s;
 	s.class_name = p_name;
 	s.name = p_name;

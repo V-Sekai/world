@@ -49,6 +49,7 @@
 #include "editor/gui/editor_scene_tabs.h"
 #include "editor/import/3d/scene_import_settings.h"
 #include "editor/import_dock.h"
+#include "editor/plugins/editor_context_menu_plugin.h"
 #include "editor/plugins/editor_resource_tooltip_plugins.h"
 #include "editor/scene_create_dialog.h"
 #include "editor/scene_tree_dock.h"
@@ -270,7 +271,7 @@ bool FileSystemDock::_create_tree(TreeItem *p_parent, EditorFileSystemDirectory 
 		List<FileInfo> file_list;
 		for (int i = 0; i < p_dir->get_file_count(); i++) {
 			String file_type = p_dir->get_file_type(i);
-			if (file_type != "TextFile" && _is_file_type_disabled_by_feature_profile(file_type)) {
+			if (file_type != "TextFile" && file_type != "OtherFile" && _is_file_type_disabled_by_feature_profile(file_type)) {
 				// If type is disabled, file won't be displayed.
 				continue;
 			}
@@ -685,7 +686,15 @@ void FileSystemDock::_tree_multi_selected(Object *p_item, int p_column, bool p_s
 }
 
 Vector<String> FileSystemDock::get_selected_paths() const {
-	return _tree_get_selected(false);
+	if (display_mode == DISPLAY_MODE_TREE_ONLY) {
+		return _tree_get_selected(false);
+	} else {
+		Vector<String> selected = _file_list_get_selected();
+		if (selected.is_empty()) {
+			selected.push_back(get_current_directory());
+		}
+		return selected;
+	}
 }
 
 String FileSystemDock::get_current_path() const {
@@ -953,7 +962,8 @@ void FileSystemDock::_update_file_list(bool p_keep_selection) {
 		files->set_max_columns(1);
 		files->set_max_text_lines(1);
 		files->set_fixed_column_width(0);
-		files->set_fixed_icon_size(Size2());
+		const int icon_size = get_theme_constant(SNAME("class_icon_size"), EditorStringName(Editor));
+		files->set_fixed_icon_size(Size2(icon_size, icon_size));
 	}
 
 	Ref<Texture2D> folder_icon = (use_thumbnails) ? folder_thumbnail : get_theme_icon(SNAME("folder"), SNAME("FileDialog"));
@@ -1207,7 +1217,7 @@ void FileSystemDock::_select_file(const String &p_path, bool p_select_in_favorit
 			}
 
 			if (is_imported) {
-				SceneImportSettingsDialog::get_singleton()->open_settings(p_path, resource_type == "AnimationLibrary");
+				SceneImportSettingsDialog::get_singleton()->open_settings(p_path, resource_type);
 			} else if (resource_type == "PackedScene") {
 				EditorNode::get_singleton()->open_request(fpath);
 			} else {
@@ -2049,6 +2059,15 @@ Vector<String> FileSystemDock::_tree_get_selected(bool remove_self_inclusion, bo
 	return selected_strings;
 }
 
+Vector<String> FileSystemDock::_file_list_get_selected() const {
+	Vector<String> selected;
+
+	for (int idx : files->get_selected_items()) {
+		selected.push_back(files->get_item_metadata(idx));
+	}
+	return selected;
+}
+
 Vector<String> FileSystemDock::_remove_self_included_paths(Vector<String> selected_strings) {
 	// Remove paths or files that are included into another.
 	if (selected_strings.size() > 1) {
@@ -2538,6 +2557,9 @@ void FileSystemDock::_file_option(int p_option, const Vector<String> &p_selected
 			String dir = ProjectSettings::get_singleton()->globalize_path(fpath);
 			ScriptEditor::get_singleton()->open_text_file_create_dialog(dir);
 		} break;
+		default:
+			EditorNode::get_editor_data().filesystem_options_pressed(EditorData::CONTEXT_SLOT_FILESYSTEM, p_option, p_selected);
+			break;
 	}
 }
 
@@ -3160,6 +3182,8 @@ void FileSystemDock::_file_and_folders_fill_popup(PopupMenu *p_popup, const Vect
 		new_menu->add_icon_item(get_editor_theme_icon(SNAME("Script")), TTR("Script..."), FILE_NEW_SCRIPT);
 		new_menu->add_icon_item(get_editor_theme_icon(SNAME("Object")), TTR("Resource..."), FILE_NEW_RESOURCE);
 		new_menu->add_icon_item(get_editor_theme_icon(SNAME("TextFile")), TTR("TextFile..."), FILE_NEW_TEXTFILE);
+
+		EditorNode::get_editor_data().add_options_from_plugins(new_menu, EditorData::CONTEXT_SUBMENU_SLOT_FILESYSTEM_CREATE, p_paths);
 		p_popup->add_separator();
 	}
 
@@ -3299,6 +3323,8 @@ void FileSystemDock::_file_and_folders_fill_popup(PopupMenu *p_popup, const Vect
 
 		current_path = fpath;
 	}
+
+	EditorNode::get_editor_data().add_options_from_plugins(p_popup, EditorData::CONTEXT_SLOT_FILESYSTEM, p_paths);
 }
 
 void FileSystemDock::_tree_rmb_select(const Vector2 &p_pos, MouseButton p_button) {
@@ -3391,6 +3417,11 @@ void FileSystemDock::_file_list_empty_clicked(const Vector2 &p_pos, MouseButton 
 	}
 
 	current_path = current_path_line_edit->get_text();
+
+	// Favorites isn't a directory so don't show menu.
+	if (current_path == "Favorites") {
+		return;
+	}
 
 	file_list_popup->clear();
 	file_list_popup->reset_size();
@@ -3528,6 +3559,10 @@ void FileSystemDock::_tree_gui_input(Ref<InputEvent> p_event) {
 		} else if (ED_IS_SHORTCUT("editor/open_search", p_event)) {
 			focus_on_filter();
 		} else {
+			int match_option = EditorNode::get_editor_data().match_context_menu_shortcut(EditorData::CONTEXT_SLOT_FILESYSTEM, p_event);
+			if (match_option) {
+				_tree_rmb_option(match_option);
+			}
 			return;
 		}
 

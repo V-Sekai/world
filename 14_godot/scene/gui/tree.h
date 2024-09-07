@@ -136,6 +136,7 @@ private:
 	TreeItem *prev = nullptr; // previous in list
 	TreeItem *next = nullptr; // next in list
 	TreeItem *first_child = nullptr;
+	TreeItem *last_child = nullptr;
 
 	Vector<TreeItem *> children_cache;
 	bool is_root = false; // for tree root
@@ -176,6 +177,9 @@ private:
 			}
 			if (parent->first_child == this) {
 				parent->first_child = next;
+			}
+			if (parent->last_child == this) {
+				parent->last_child = prev;
 			}
 		}
 	}

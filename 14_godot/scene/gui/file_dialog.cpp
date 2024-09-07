@@ -124,6 +124,8 @@ void FileDialog::_native_dialog_cb(bool p_ok, const Vector<String> &p_files, int
 			file_name = ProjectSettings::get_singleton()->localize_path(file_name);
 		}
 	}
+	selected_options = p_selected_options;
+
 	String f = files[0];
 	if (mode == FILE_MODE_OPEN_FILES) {
 		emit_signal(SNAME("files_selected"), files);
@@ -155,7 +157,6 @@ void FileDialog::_native_dialog_cb(bool p_ok, const Vector<String> &p_files, int
 	}
 	file->set_text(f);
 	dir->set_text(f.get_base_dir());
-	selected_options = p_selected_options;
 	filter->select(p_filter);
 }
 
@@ -1143,7 +1144,7 @@ void FileDialog::_update_option_controls() {
 			CheckBox *cb = memnew(CheckBox);
 			cb->set_pressed(opt.default_idx);
 			grid_options->add_child(cb);
-			cb->connect("toggled", callable_mp(this, &FileDialog::_option_changed_checkbox_toggled).bind(opt.name));
+			cb->connect(SceneStringName(toggled), callable_mp(this, &FileDialog::_option_changed_checkbox_toggled).bind(opt.name));
 			selected_options[opt.name] = (bool)opt.default_idx;
 		} else {
 			OptionButton *ob = memnew(OptionButton);
@@ -1441,7 +1442,7 @@ FileDialog::FileDialog() {
 	show_hidden->set_toggle_mode(true);
 	show_hidden->set_pressed(is_showing_hidden_files());
 	show_hidden->set_tooltip_text(ETR("Toggle the visibility of hidden files."));
-	show_hidden->connect("toggled", callable_mp(this, &FileDialog::set_show_hidden_files));
+	show_hidden->connect(SceneStringName(toggled), callable_mp(this, &FileDialog::set_show_hidden_files));
 	hbc->add_child(show_hidden);
 
 	shortcuts_container = memnew(HBoxContainer);

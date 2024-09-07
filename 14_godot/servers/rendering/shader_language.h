@@ -59,6 +59,7 @@ public:
 		TK_FLOAT_CONSTANT,
 		TK_INT_CONSTANT,
 		TK_UINT_CONSTANT,
+		TK_STRING_CONSTANT,
 		TK_TYPE_VOID,
 		TK_TYPE_BOOL,
 		TK_TYPE_BVEC2,
@@ -175,11 +176,11 @@ public:
 		TK_HINT_ANISOTROPY_TEXTURE,
 		TK_HINT_SOURCE_COLOR,
 		TK_HINT_RANGE,
+		TK_HINT_ENUM,
 		TK_HINT_INSTANCE_INDEX,
 		TK_HINT_SCREEN_TEXTURE,
 		TK_HINT_NORMAL_ROUGHNESS_TEXTURE,
 		TK_HINT_DEPTH_TEXTURE,
-		TK_HINT_TRIPLANAR_MAT,
 		TK_FILTER_NEAREST,
 		TK_FILTER_LINEAR,
 		TK_FILTER_NEAREST_MIPMAP,
@@ -624,6 +625,7 @@ public:
 			enum Hint {
 				HINT_NONE,
 				HINT_RANGE,
+				HINT_ENUM,
 				HINT_SOURCE_COLOR,
 				HINT_NORMAL,
 				HINT_ROUGHNESS_NORMAL,
@@ -639,7 +641,6 @@ public:
 				HINT_SCREEN_TEXTURE,
 				HINT_NORMAL_ROUGHNESS_TEXTURE,
 				HINT_DEPTH_TEXTURE,
-				HINT_TRIPLANAR_MAT,
 				HINT_MAX
 			};
 
@@ -650,6 +651,7 @@ public:
 			};
 
 			int order = 0;
+			int prop_order = 0;
 			int texture_order = 0;
 			int texture_binding = 0;
 			DataType type = TYPE_VOID;
@@ -662,9 +664,15 @@ public:
 			TextureFilter filter = FILTER_DEFAULT;
 			TextureRepeat repeat = REPEAT_DEFAULT;
 			float hint_range[3];
+			PackedStringArray hint_enum_names;
 			int instance_index = 0;
 			String group;
 			String subgroup;
+
+			_FORCE_INLINE_ bool is_texture() const {
+				// Order is assigned to -1 for texture uniforms.
+				return order < 0;
+			}
 
 			Uniform() {
 				hint_range[0] = 0.0f;
@@ -683,8 +691,6 @@ public:
 		Vector<Function> vfunctions;
 		Vector<Constant> vconstants;
 		Vector<Struct> vstructs;
-
-		bool uses_triplanar_matrix = false;
 
 		ShaderNode() :
 				Node(NODE_TYPE_SHADER) {}
@@ -739,6 +745,12 @@ public:
 			Operator op;
 			Node *node = nullptr;
 		};
+	};
+
+	struct ExpressionInfo {
+		Vector<Expression> *expression = nullptr;
+		TokenType tt_break = TK_EMPTY;
+		bool is_last_expr = false;
 	};
 
 	struct VarInfo {
@@ -1041,6 +1053,7 @@ private:
 	Token _make_token(TokenType p_type, const StringName &p_text = StringName());
 	Token _get_token();
 	bool _lookup_next(Token &r_tk);
+	Token _peek();
 
 	ShaderNode *shader = nullptr;
 
@@ -1136,13 +1149,13 @@ private:
 	bool _check_restricted_func(const StringName &p_name, const StringName &p_current_function) const;
 	bool _validate_restricted_func(const StringName &p_call_name, const CallInfo *p_func_info, bool p_is_builtin_hint = false);
 
-	Node *_parse_expression(BlockNode *p_block, const FunctionInfo &p_function_info);
+	Node *_parse_expression(BlockNode *p_block, const FunctionInfo &p_function_info, const ExpressionInfo *p_previous_expression_info = nullptr);
 	Error _parse_array_size(BlockNode *p_block, const FunctionInfo &p_function_info, bool p_forbid_unknown_size, Node **r_size_expression, int *r_array_size, bool *r_unknown_size);
 	Node *_parse_array_constructor(BlockNode *p_block, const FunctionInfo &p_function_info);
 	Node *_parse_array_constructor(BlockNode *p_block, const FunctionInfo &p_function_info, DataType p_type, const StringName &p_struct_name, int p_array_size);
 	ShaderLanguage::Node *_reduce_expression(BlockNode *p_block, ShaderLanguage::Node *p_node);
 
-	Node *_parse_and_reduce_expression(BlockNode *p_block, const FunctionInfo &p_function_info);
+	Node *_parse_and_reduce_expression(BlockNode *p_block, const FunctionInfo &p_function_info, const ExpressionInfo *p_previous_expression_info = nullptr);
 	Error _parse_block(BlockNode *p_block, const FunctionInfo &p_function_info, bool p_just_one = false, bool p_can_break = false, bool p_can_continue = false);
 	String _get_shader_type_list(const HashSet<String> &p_shader_types) const;
 	String _get_qualifier_str(ArgumentQualifier p_qualifier) const;

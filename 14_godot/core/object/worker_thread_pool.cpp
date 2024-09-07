@@ -32,6 +32,7 @@
 
 #include "core/object/script_language.h"
 #include "core/os/os.h"
+#include "core/os/safe_binary_mutex.h"
 #include "core/os/thread_safe.h"
 
 WorkerThreadPool::Task *const WorkerThreadPool::ThreadData::YIELDING = (Task *)1;
@@ -46,7 +47,7 @@ void WorkerThreadPool::Task::free_template_userdata() {
 WorkerThreadPool *WorkerThreadPool::singleton = nullptr;
 
 #ifdef THREADS_ENABLED
-thread_local uintptr_t WorkerThreadPool::unlockable_mutexes[MAX_UNLOCKABLE_MUTEXES] = {};
+thread_local WorkerThreadPool::UnlockableLocks WorkerThreadPool::unlockable_locks[MAX_UNLOCKABLE_LOCKS];
 #endif
 
 void WorkerThreadPool::_process_task(Task *p_task) {
@@ -126,9 +127,8 @@ void WorkerThreadPool::_process_task(Task *p_task) {
 
 		if (finished_users == max_users) {
 			// Get rid of the group, because nobody else is using it.
-			task_mutex.lock();
+			MutexLock task_lock(task_mutex);
 			group_allocator.free(p_task->group);
-			task_mutex.unlock();
 		}
 
 		// For groups, tasks get rid of themselves.
@@ -348,17 +348,13 @@ WorkerThreadPool::TaskID WorkerThreadPool::add_task(const Callable &p_action, bo
 }
 
 bool WorkerThreadPool::is_task_completed(TaskID p_task_id) const {
-	task_mutex.lock();
+	MutexLock task_lock(task_mutex);
 	const Task *const *taskp = tasks.getptr(p_task_id);
 	if (!taskp) {
-		task_mutex.unlock();
 		ERR_FAIL_V_MSG(false, "Invalid Task ID"); // Invalid task
 	}
 
-	bool completed = (*taskp)->completed;
-	task_mutex.unlock();
-
-	return completed;
+	return (*taskp)->completed;
 }
 
 Error WorkerThreadPool::wait_for_task_completion(TaskID p_task_id) {
@@ -428,13 +424,9 @@ Error WorkerThreadPool::wait_for_task_completion(TaskID p_task_id) {
 
 void WorkerThreadPool::_lock_unlockable_mutexes() {
 #ifdef THREADS_ENABLED
-	for (uint32_t i = 0; i < MAX_UNLOCKABLE_MUTEXES; i++) {
-		if (unlockable_mutexes[i]) {
-			if ((((uintptr_t)unlockable_mutexes[i]) & 1) == 0) {
-				((Mutex *)unlockable_mutexes[i])->lock();
-			} else {
-				((BinaryMutex *)(unlockable_mutexes[i] & ~1))->lock();
-			}
+	for (uint32_t i = 0; i < MAX_UNLOCKABLE_LOCKS; i++) {
+		if (unlockable_locks[i].ulock) {
+			unlockable_locks[i].ulock->lock();
 		}
 	}
 #endif
@@ -442,13 +434,9 @@ void WorkerThreadPool::_lock_unlockable_mutexes() {
 
 void WorkerThreadPool::_unlock_unlockable_mutexes() {
 #ifdef THREADS_ENABLED
-	for (uint32_t i = 0; i < MAX_UNLOCKABLE_MUTEXES; i++) {
-		if (unlockable_mutexes[i]) {
-			if ((((uintptr_t)unlockable_mutexes[i]) & 1) == 0) {
-				((Mutex *)unlockable_mutexes[i])->unlock();
-			} else {
-				((BinaryMutex *)(unlockable_mutexes[i] & ~1))->unlock();
-			}
+	for (uint32_t i = 0; i < MAX_UNLOCKABLE_LOCKS; i++) {
+		if (unlockable_locks[i].ulock) {
+			unlockable_locks[i].ulock->unlock();
 		}
 	}
 #endif
@@ -468,7 +456,10 @@ void WorkerThreadPool::_wait_collaboratively(ThreadData *p_caller_pool_thread, T
 			p_caller_pool_thread->signaled = false;
 
 			if (IS_WAIT_OVER) {
-				p_caller_pool_thread->yield_is_over = false;
+				if (unlikely(p_task == ThreadData::YIELDING)) {
+					p_caller_pool_thread->yield_is_over = false;
+				}
+
 				if (!exit_threads && was_signaled) {
 					// This thread was awaken for some additional reason, but it's about to exit.
 					// Let's find out what may be pending and forward the requests.
@@ -526,10 +517,9 @@ void WorkerThreadPool::yield() {
 }
 
 void WorkerThreadPool::notify_yield_over(TaskID p_task_id) {
-	task_mutex.lock();
+	MutexLock task_lock(task_mutex);
 	Task **taskp = tasks.getptr(p_task_id);
 	if (!taskp) {
-		task_mutex.unlock();
 		ERR_FAIL_MSG("Invalid Task ID.");
 	}
 	Task *task = *taskp;
@@ -538,7 +528,6 @@ void WorkerThreadPool::notify_yield_over(TaskID p_task_id) {
 			// This avoids a race condition where a task is created and yield-over called before it's processed.
 			task->pending_notify_yield_over = true;
 		}
-		task_mutex.unlock();
 		return;
 	}
 
@@ -546,8 +535,6 @@ void WorkerThreadPool::notify_yield_over(TaskID p_task_id) {
 	td.yield_is_over = true;
 	td.signaled = true;
 	td.cond_var.notify_one();
-
-	task_mutex.unlock();
 }
 
 WorkerThreadPool::GroupID WorkerThreadPool::_add_group_task(const Callable &p_callable, void (*p_func)(void *, uint32_t), void *p_userdata, BaseTemplateUserdata *p_template_userdata, int p_elements, int p_tasks, bool p_high_priority, const String &p_description) {
@@ -605,26 +592,20 @@ WorkerThreadPool::GroupID WorkerThreadPool::add_group_task(const Callable &p_act
 }
 
 uint32_t WorkerThreadPool::get_group_processed_element_count(GroupID p_group) const {
-	task_mutex.lock();
+	MutexLock task_lock(task_mutex);
 	const Group *const *groupp = groups.getptr(p_group);
 	if (!groupp) {
-		task_mutex.unlock();
 		ERR_FAIL_V_MSG(0, "Invalid Group ID");
 	}
-	uint32_t elements = (*groupp)->completed_index.get();
-	task_mutex.unlock();
-	return elements;
+	return (*groupp)->completed_index.get();
 }
 bool WorkerThreadPool::is_group_task_completed(GroupID p_group) const {
-	task_mutex.lock();
+	MutexLock task_lock(task_mutex);
 	const Group *const *groupp = groups.getptr(p_group);
 	if (!groupp) {
-		task_mutex.unlock();
 		ERR_FAIL_V_MSG(false, "Invalid Group ID");
 	}
-	bool completed = (*groupp)->completed.is_set();
-	task_mutex.unlock();
-	return completed;
+	return (*groupp)->completed.is_set();
 }
 
 void WorkerThreadPool::wait_for_group_task_completion(GroupID p_group) {
@@ -648,15 +629,13 @@ void WorkerThreadPool::wait_for_group_task_completion(GroupID p_group) {
 
 		if (finished_users == max_users) {
 			// All tasks using this group are gone (finished before the group), so clear the group too.
-			task_mutex.lock();
+			MutexLock task_lock(task_mutex);
 			group_allocator.free(group);
-			task_mutex.unlock();
 		}
 	}
 
-	task_mutex.lock(); // This mutex is needed when Physics 2D and/or 3D is selected to run on a separate thread.
+	MutexLock task_lock(task_mutex); // This mutex is needed when Physics 2D and/or 3D is selected to run on a separate thread.
 	groups.erase(p_group);
-	task_mutex.unlock();
 #endif
 }
 
@@ -665,38 +644,38 @@ int WorkerThreadPool::get_thread_index() {
 	return singleton->thread_ids.has(tid) ? singleton->thread_ids[tid] : -1;
 }
 
+WorkerThreadPool::TaskID WorkerThreadPool::get_caller_task_id() {
+	int th_index = get_thread_index();
+	if (th_index != -1 && singleton->threads[th_index].current_task) {
+		return singleton->threads[th_index].current_task->self;
+	} else {
+		return INVALID_TASK_ID;
+	}
+}
+
 #ifdef THREADS_ENABLED
-uint32_t WorkerThreadPool::thread_enter_unlock_allowance_zone(Mutex *p_mutex) {
-	return _thread_enter_unlock_allowance_zone(p_mutex, false);
-}
-
-uint32_t WorkerThreadPool::thread_enter_unlock_allowance_zone(BinaryMutex *p_mutex) {
-	return _thread_enter_unlock_allowance_zone(p_mutex, true);
-}
-
-uint32_t WorkerThreadPool::_thread_enter_unlock_allowance_zone(void *p_mutex, bool p_is_binary) {
-	for (uint32_t i = 0; i < MAX_UNLOCKABLE_MUTEXES; i++) {
-		if (unlikely((unlockable_mutexes[i] & ~1) == (uintptr_t)p_mutex)) {
+uint32_t WorkerThreadPool::_thread_enter_unlock_allowance_zone(THREADING_NAMESPACE::unique_lock<THREADING_NAMESPACE::mutex> &p_ulock) {
+	for (uint32_t i = 0; i < MAX_UNLOCKABLE_LOCKS; i++) {
+		DEV_ASSERT((bool)unlockable_locks[i].ulock == (bool)unlockable_locks[i].rc);
+		if (unlockable_locks[i].ulock == &p_ulock) {
 			// Already registered in the current thread.
-			return UINT32_MAX;
-		}
-		if (!unlockable_mutexes[i]) {
-			unlockable_mutexes[i] = (uintptr_t)p_mutex;
-			if (p_is_binary) {
-				unlockable_mutexes[i] |= 1;
-			}
+			unlockable_locks[i].rc++;
+			return i;
+		} else if (!unlockable_locks[i].ulock) {
+			unlockable_locks[i].ulock = &p_ulock;
+			unlockable_locks[i].rc = 1;
 			return i;
 		}
 	}
-	ERR_FAIL_V_MSG(UINT32_MAX, "No more unlockable mutex slots available. Engine bug.");
+	ERR_FAIL_V_MSG(UINT32_MAX, "No more unlockable lock slots available. Engine bug.");
 }
 
 void WorkerThreadPool::thread_exit_unlock_allowance_zone(uint32_t p_zone_id) {
-	if (p_zone_id == UINT32_MAX) {
-		return;
+	DEV_ASSERT(unlockable_locks[p_zone_id].ulock && unlockable_locks[p_zone_id].rc);
+	unlockable_locks[p_zone_id].rc--;
+	if (unlockable_locks[p_zone_id].rc == 0) {
+		unlockable_locks[p_zone_id].ulock = nullptr;
 	}
-	DEV_ASSERT(unlockable_mutexes[p_zone_id]);
-	unlockable_mutexes[p_zone_id] = 0;
 }
 #endif
 
@@ -707,6 +686,8 @@ void WorkerThreadPool::init(int p_thread_count, float p_low_priority_task_ratio)
 	}
 
 	max_low_priority_threads = CLAMP(p_thread_count * p_low_priority_task_ratio, 1, p_thread_count - 1);
+
+	print_verbose(vformat("WorkerThreadPool: %d threads, %d max low-priority.", p_thread_count, max_low_priority_threads));
 
 	threads.resize(p_thread_count);
 

@@ -179,7 +179,8 @@ class SceneTreeDock : public VBoxContainer {
 	bool first_enter = true;
 
 	void _create();
-	void _do_create(Node *p_parent);
+	Node *_do_create(Node *p_parent);
+	void _post_do_create(Node *p_child);
 	Node *scene_root = nullptr;
 	Node *edited_scene = nullptr;
 	Node *pending_click_select = nullptr;
@@ -282,7 +283,7 @@ class SceneTreeDock : public VBoxContainer {
 	void _remote_tree_selected();
 	void _local_tree_selected();
 
-	void _update_create_root_dialog();
+	void _update_create_root_dialog(bool p_initializing = false);
 	void _favorite_root_selected(const String &p_class);
 
 	void _feature_profile_changed();

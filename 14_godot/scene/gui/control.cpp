@@ -37,7 +37,7 @@
 #include "core/os/keyboard.h"
 #include "core/os/os.h"
 #include "core/string/print_string.h"
-#include "core/string/translation.h"
+#include "core/string/translation_server.h"
 #include "scene/gui/label.h"
 #include "scene/gui/panel.h"
 #include "scene/main/canvas_layer.h"
@@ -682,12 +682,10 @@ Size2 Control::get_parent_area_size() const {
 // Positioning and sizing.
 
 Transform2D Control::_get_internal_transform() const {
-	Transform2D rot_scale;
-	rot_scale.set_rotation_and_scale(data.rotation, data.scale);
-	Transform2D offset;
-	offset.set_origin(-data.pivot_offset);
-
-	return offset.affine_inverse() * (rot_scale * offset);
+	// T(pivot_offset) * R(rotation) * S(scale) * T(-pivot_offset)
+	Transform2D xform(data.rotation, data.scale, 0.0f, data.pivot_offset);
+	xform.translate_local(-data.pivot_offset);
+	return xform;
 }
 
 void Control::_update_canvas_item_transform() {
@@ -1748,10 +1746,10 @@ void Control::_size_changed() {
 			// so an up to date global transform could be obtained when handling these.
 			_notify_transform();
 
+			item_rect_changed(size_changed);
 			if (size_changed) {
 				notification(NOTIFICATION_RESIZED);
 			}
-			item_rect_changed(size_changed);
 		}
 
 		if (pos_changed && !size_changed) {
@@ -2577,8 +2575,8 @@ Ref<Texture2D> Control::get_theme_icon(const StringName &p_name, const StringNam
 		return data.theme_icon_cache[p_theme_type][p_name];
 	}
 
-	List<StringName> theme_types;
-	data.theme_owner->get_theme_type_dependencies(this, p_theme_type, &theme_types);
+	Vector<StringName> theme_types;
+	data.theme_owner->get_theme_type_dependencies(this, p_theme_type, theme_types);
 	Ref<Texture2D> icon = data.theme_owner->get_theme_item_in_types(Theme::DATA_TYPE_ICON, p_name, theme_types);
 	data.theme_icon_cache[p_theme_type][p_name] = icon;
 	return icon;
@@ -2601,8 +2599,8 @@ Ref<StyleBox> Control::get_theme_stylebox(const StringName &p_name, const String
 		return data.theme_style_cache[p_theme_type][p_name];
 	}
 
-	List<StringName> theme_types;
-	data.theme_owner->get_theme_type_dependencies(this, p_theme_type, &theme_types);
+	Vector<StringName> theme_types;
+	data.theme_owner->get_theme_type_dependencies(this, p_theme_type, theme_types);
 	Ref<StyleBox> style = data.theme_owner->get_theme_item_in_types(Theme::DATA_TYPE_STYLEBOX, p_name, theme_types);
 	data.theme_style_cache[p_theme_type][p_name] = style;
 	return style;
@@ -2625,8 +2623,8 @@ Ref<Font> Control::get_theme_font(const StringName &p_name, const StringName &p_
 		return data.theme_font_cache[p_theme_type][p_name];
 	}
 
-	List<StringName> theme_types;
-	data.theme_owner->get_theme_type_dependencies(this, p_theme_type, &theme_types);
+	Vector<StringName> theme_types;
+	data.theme_owner->get_theme_type_dependencies(this, p_theme_type, theme_types);
 	Ref<Font> font = data.theme_owner->get_theme_item_in_types(Theme::DATA_TYPE_FONT, p_name, theme_types);
 	data.theme_font_cache[p_theme_type][p_name] = font;
 	return font;
@@ -2649,8 +2647,8 @@ int Control::get_theme_font_size(const StringName &p_name, const StringName &p_t
 		return data.theme_font_size_cache[p_theme_type][p_name];
 	}
 
-	List<StringName> theme_types;
-	data.theme_owner->get_theme_type_dependencies(this, p_theme_type, &theme_types);
+	Vector<StringName> theme_types;
+	data.theme_owner->get_theme_type_dependencies(this, p_theme_type, theme_types);
 	int font_size = data.theme_owner->get_theme_item_in_types(Theme::DATA_TYPE_FONT_SIZE, p_name, theme_types);
 	data.theme_font_size_cache[p_theme_type][p_name] = font_size;
 	return font_size;
@@ -2673,8 +2671,8 @@ Color Control::get_theme_color(const StringName &p_name, const StringName &p_the
 		return data.theme_color_cache[p_theme_type][p_name];
 	}
 
-	List<StringName> theme_types;
-	data.theme_owner->get_theme_type_dependencies(this, p_theme_type, &theme_types);
+	Vector<StringName> theme_types;
+	data.theme_owner->get_theme_type_dependencies(this, p_theme_type, theme_types);
 	Color color = data.theme_owner->get_theme_item_in_types(Theme::DATA_TYPE_COLOR, p_name, theme_types);
 	data.theme_color_cache[p_theme_type][p_name] = color;
 	return color;
@@ -2697,8 +2695,8 @@ int Control::get_theme_constant(const StringName &p_name, const StringName &p_th
 		return data.theme_constant_cache[p_theme_type][p_name];
 	}
 
-	List<StringName> theme_types;
-	data.theme_owner->get_theme_type_dependencies(this, p_theme_type, &theme_types);
+	Vector<StringName> theme_types;
+	data.theme_owner->get_theme_type_dependencies(this, p_theme_type, theme_types);
 	int constant = data.theme_owner->get_theme_item_in_types(Theme::DATA_TYPE_CONSTANT, p_name, theme_types);
 	data.theme_constant_cache[p_theme_type][p_name] = constant;
 	return constant;
@@ -2743,8 +2741,8 @@ bool Control::has_theme_icon(const StringName &p_name, const StringName &p_theme
 		}
 	}
 
-	List<StringName> theme_types;
-	data.theme_owner->get_theme_type_dependencies(this, p_theme_type, &theme_types);
+	Vector<StringName> theme_types;
+	data.theme_owner->get_theme_type_dependencies(this, p_theme_type, theme_types);
 	return data.theme_owner->has_theme_item_in_types(Theme::DATA_TYPE_ICON, p_name, theme_types);
 }
 
@@ -2760,8 +2758,8 @@ bool Control::has_theme_stylebox(const StringName &p_name, const StringName &p_t
 		}
 	}
 
-	List<StringName> theme_types;
-	data.theme_owner->get_theme_type_dependencies(this, p_theme_type, &theme_types);
+	Vector<StringName> theme_types;
+	data.theme_owner->get_theme_type_dependencies(this, p_theme_type, theme_types);
 	return data.theme_owner->has_theme_item_in_types(Theme::DATA_TYPE_STYLEBOX, p_name, theme_types);
 }
 
@@ -2777,8 +2775,8 @@ bool Control::has_theme_font(const StringName &p_name, const StringName &p_theme
 		}
 	}
 
-	List<StringName> theme_types;
-	data.theme_owner->get_theme_type_dependencies(this, p_theme_type, &theme_types);
+	Vector<StringName> theme_types;
+	data.theme_owner->get_theme_type_dependencies(this, p_theme_type, theme_types);
 	return data.theme_owner->has_theme_item_in_types(Theme::DATA_TYPE_FONT, p_name, theme_types);
 }
 
@@ -2794,8 +2792,8 @@ bool Control::has_theme_font_size(const StringName &p_name, const StringName &p_
 		}
 	}
 
-	List<StringName> theme_types;
-	data.theme_owner->get_theme_type_dependencies(this, p_theme_type, &theme_types);
+	Vector<StringName> theme_types;
+	data.theme_owner->get_theme_type_dependencies(this, p_theme_type, theme_types);
 	return data.theme_owner->has_theme_item_in_types(Theme::DATA_TYPE_FONT_SIZE, p_name, theme_types);
 }
 
@@ -2811,8 +2809,8 @@ bool Control::has_theme_color(const StringName &p_name, const StringName &p_them
 		}
 	}
 
-	List<StringName> theme_types;
-	data.theme_owner->get_theme_type_dependencies(this, p_theme_type, &theme_types);
+	Vector<StringName> theme_types;
+	data.theme_owner->get_theme_type_dependencies(this, p_theme_type, theme_types);
 	return data.theme_owner->has_theme_item_in_types(Theme::DATA_TYPE_COLOR, p_name, theme_types);
 }
 
@@ -2828,8 +2826,8 @@ bool Control::has_theme_constant(const StringName &p_name, const StringName &p_t
 		}
 	}
 
-	List<StringName> theme_types;
-	data.theme_owner->get_theme_type_dependencies(this, p_theme_type, &theme_types);
+	Vector<StringName> theme_types;
+	data.theme_owner->get_theme_type_dependencies(this, p_theme_type, theme_types);
 	return data.theme_owner->has_theme_item_in_types(Theme::DATA_TYPE_CONSTANT, p_name, theme_types);
 }
 
@@ -3608,7 +3606,7 @@ void Control::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "focus_mode", PROPERTY_HINT_ENUM, "None,Click,All"), "set_focus_mode", "get_focus_mode");
 
 	ADD_GROUP("Mouse", "mouse_");
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "mouse_filter", PROPERTY_HINT_ENUM, "Stop,Pass,Ignore"), "set_mouse_filter", "get_mouse_filter");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "mouse_filter", PROPERTY_HINT_ENUM, "Stop,Pass (Propagate Up),Ignore"), "set_mouse_filter", "get_mouse_filter");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "mouse_force_pass_scroll_events"), "set_force_pass_scroll_events", "is_force_pass_scroll_events");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "mouse_default_cursor_shape", PROPERTY_HINT_ENUM, "Arrow,I-Beam,Pointing Hand,Cross,Wait,Busy,Drag,Can Drop,Forbidden,Vertical Resize,Horizontal Resize,Secondary Diagonal Resize,Main Diagonal Resize,Move,Vertical Split,Horizontal Split,Help"), "set_default_cursor_shape", "get_default_cursor_shape");
 

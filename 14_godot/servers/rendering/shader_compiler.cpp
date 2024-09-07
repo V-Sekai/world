@@ -547,11 +547,6 @@ String ShaderCompiler::_dump_node_code(const SL::Node *p_node, int p_level, Gene
 
 				String ucode;
 
-				// 'hint_triplanar_matrix' requires a custom #define with the uniform name
-				if (uniform.type == ShaderLanguage::TYPE_MAT4 && uniform.hint == ShaderLanguage::ShaderNode::Uniform::HINT_TRIPLANAR_MAT) {
-					r_gen_code.defines.push_back("#define TRIPLANAR_MATRIX " + _mkid(uniform_name) + "\n");
-				}
-
 				if (uniform.scope == SL::ShaderNode::Uniform::SCOPE_INSTANCE) {
 					//insert, but don't generate any code.
 					p_actions.uniforms->insert(uniform_name, uniform);
@@ -927,7 +922,7 @@ String ShaderCompiler::_dump_node_code(const SL::Node *p_node, int p_level, Gene
 				if (shader->uniforms.has(vnode->name)) {
 					//its a uniform!
 					const ShaderLanguage::ShaderNode::Uniform &u = shader->uniforms[vnode->name];
-					if (u.texture_order >= 0) {
+					if (u.is_texture()) {
 						StringName name;
 						if (u.hint == ShaderLanguage::ShaderNode::Uniform::HINT_SCREEN_TEXTURE) {
 							name = "color_buffer";
@@ -1044,7 +1039,7 @@ String ShaderCompiler::_dump_node_code(const SL::Node *p_node, int p_level, Gene
 				if (shader->uniforms.has(anode->name)) {
 					//its a uniform!
 					const ShaderLanguage::ShaderNode::Uniform &u = shader->uniforms[anode->name];
-					if (u.texture_order >= 0) {
+					if (u.is_texture()) {
 						code = _mkid(anode->name); //texture, use as is
 					} else {
 						//a scalar or vector

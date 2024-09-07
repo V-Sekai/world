@@ -70,6 +70,17 @@ Files extracted from upstream source:
 Applied upstream PR https://github.com/BinomialLLC/basis_universal/pull/344 to
 fix build with our own copy of zstd (patch in `patches`).
 
+## betsy
+
+- Upstream: https://github.com/darksylinc/betsy
+- Version: git (cc723dcae9a6783ae572f64d12a90d60ef8d631a, 2022)
+- License: MIT
+
+Files extracted from upstream source:
+
+- `bc6h.glsl`, `CrossPlatformSettings_piece_all.glsl` and `UavCrossPlatform_piece_all.glsl`.
+- `LICENSE.md`
+
 
 ## brotli
 
@@ -167,19 +178,6 @@ Files extracted from upstream source:
 
 - `doctest/doctest.h` as `doctest.h`
 - `LICENSE.txt`
-
-## eigen
-
-- Upstream: https://gitlab.com/libeigen/eigen/
-- Version: 3.3.7
-- License: Multiple* (BSD-3-Clause, GPLv3, LGPL 2.1, Minpack, MPL 2.0)
-
-Files extracted from upstream source:
-
-- All files in `Eigen/` except `CMakeLists.txt`
-- All `COPYING.*` files.
-
-\* Note that while eigen contains code under many licenses, godot WILL SET BUT DOESN'T CURRENTLY SET, FIXEME the `-DEIGEN_MPL2_ONLY` flag described in `COPYING.README`, which ensures that no code licensed under a more restrictive license than MPL 2.0 is included in godot binaries.
 
 
 ## embree
@@ -453,81 +451,6 @@ Files extracted from upstream source:
 - `LICENSE`
 
 
-## libdatachannel
-
-- Upstream: https://github.com/paullouisageneau/libdatachannel
-- Version: 0.19.1 (c59cea8973fe5a182feb3159638af338752efa9b, 2023)
-- License: MPL 2.0
-
-File extracted from upstream release tarball:
-
-- All `*.h` and `*.hpp` from `include/rtc/` to `thirdparty/libdatachannel/include/rtc/`.
-- All `*.cpp` from `src/impl/` to `thirdparty/libdatachannel/src/impl/` except for
-    - cpp files starting with `poll`,
-    - cpp files starting with `ws`,
-    - cpp files starting with `websocket`,
-    - cpp files starting with `tcp`,
-    - cpp files starting with `http`,
-    - `dtlssrtpransport.cpp`,
-    - `tlstransport.cpp`,
-    - `verifiedtlstransport.cpp`,
-    - `sha.cpp`
-    tcp|grep -v srtptransport|grep -v http|grep -v poll|grep -v sha.cpp
-- All `*.cpp` from `src/` to `thirdparty/libdatachannel/src/` except for
-    - cpp files containing `packet`,
-    - cpp files containing `nalunit`,
-    - cpp files containing `rtcp`,
-    - cpp files containing `handler`,
-    - cpp files containing `websocket`,
-    - `capi.cpp`
-- The entire folder `deps/plog/include/plog/` to `thirdparty/libdatachannel/deps/plog/include/plog/`. No other files in deps/plog are needed.
-- The entire folder `deps/usrsctp/usrsctplib/` to `thirdparty/libdatachannel/deps/usrsctp/usrsctplib/`
-- All `*.c` and `*.h` files in `deps/libjuice/src/` to `thirdparty/libdatachannel/deps/libjuice/src/`
-- `juice.h` from `deps/libjuice/include/juice/` to `thirdparty/libdatachannel/deps/libjuice/include/juice/`
-- The `LICENSE` file.
-- The `deps/plog/LICENSE` file.
-- The `deps/usrsctp/LICENSE.md` file.
-- The `deps/libjuice/LICENSE` file.
-- Added 2 files `include/rtc/exception_wrapper_godot.hpp` and `src/exception_wrapper_godot.cpp`
-  providing try/catch exception wrappers around rtc functions.
-- Apply `thirdparty/libdatachannel/patches/virtual_destructor.patch` to add missing virtual destructors.
-- Apply `thirdparty/libdatachannel/patches/fix_mingw.patch` to add a couple mingw compiler fixes.
-- Apply `thirdparty/libdatachannel/patches/mbedtls_optional_apis.patch` to avoid usage of mbedtls APIs that are compiled out.
-- Apply `thirdparty/libdatachannel/patches/disable_logging.patch` to compile out logging in release templates.
-
-
-## libdatachannel Submodules:
-
-### libjuice
-
-- Upstream: https://github.com/paullouisageneau/libjuice
-- Version: 1.3.1 (7d7a66d439b2e3e55e3f2494ff1176d527335674, 2023)
-- License: MPL 2.0
-
-Module location:
-
-- thirdparty/libdatachannel/deps/libjuice
-
-### plog
-
-- Upstream: https://github.com/SergiusTheBest/plog
-- Version: 1.1.10 (e21baecd4753f14da64ede979c5a19302618b752, 2023)
-- License: MIT
-
-Module location:
-
-- thirdparty/libdatachannel/deps/plog
-
-### usrsctp
-
-- Upstream: https://github.com/sctplab/usrsctp
-- Version: git (5ca29ac7d8055802c7657191325c06386640ac24, 2023)
-- License: BSD-3-Clause
-
-Module location:
-
-- thirdparty/libdatachannel/deps/usrsctp
-
 ## libktx
 
 - Upstream: https://github.com/KhronosGroup/KTX-Software
@@ -620,7 +543,7 @@ in the MSVC debugger.
 ## mbedtls
 
 - Upstream: https://github.com/Mbed-TLS/mbedtls
-- Version: 3.6.0 (2ca6c285a0dd3f33982dd57299012dacab1ff206, 2024)
+- Version: 3.6.1 (71c569d44bf3a8bd53d874c81ee8ac644dd6e9e3, 2024)
 - License: Apache 2.0
 
 File extracted from upstream release tarball:
@@ -630,8 +553,6 @@ File extracted from upstream release tarball:
 - All `.c` and `.h` from `library/` to `thirdparty/mbedtls/library/` except
   for the `psa_*.c` source files
 - The `LICENSE` file (edited to keep only the Apache 2.0 variant)
-- Applied the patch `no-flexible-arrays.diff` to fix Windows build (see
-  upstream GH-9020)
 - Applied the patch `msvc-redeclaration-bug.diff` to fix a compilation error
   with some MSVC versions
 - Added 2 files `godot_core_mbedtls_platform.c` and `godot_core_mbedtls_config.h`
@@ -769,8 +690,8 @@ Collection of single-file libraries used in Godot components.
   * License: MIT
 - `qoa.h`
   * Upstream: https://github.com/phoboslab/qoa
-  * Version: git (5c2a86d615661f34636cf179abf4fa278d3257e0, 2024)
-  * Modifications: Inlined functions, patched uninitialized variables and untyped mallocs.
+  * Version: git (e0c69447d4d3945c3c92ac1751e4cdc9803a8303, 2024)
+  * Modifications: Added a few modifiers to comply with C++ nature.
   * License: MIT
 - `r128.{c,h}`
   * Upstream: https://github.com/fahickman/r128
@@ -836,7 +757,7 @@ with the provided patch.
 ## openxr
 
 - Upstream: https://github.com/KhronosGroup/OpenXR-SDK
-- Version: 1.0.34 (288d3a7ebc1ad959f62d51da75baa3d27438c499, 2024)
+- Version: 1.1.38 (f90488c4fb1537f4256d09d4a4d3ad5543ebaf24, 2024)
 - License: Apache 2.0
 
 Files extracted from upstream source:
@@ -878,17 +799,6 @@ Files extracted from upstream source:
 - `AUTHORS` and `LICENCE`
 
 
-## pffft
-
-- Upstream: https://bitbucket.org/jpommier/pffft
-- Version: hg (29e4f76, 2016)
-- License: FFTPACK5 (BSD-like) 
-
-Files extracted from upstream source:
-
-- all files
-
-
 ## recastnavigation
 
 - Upstream: https://github.com/recastnavigation/recastnavigation
@@ -926,6 +836,22 @@ and solve conflicts and also enrich the feature set originally
 proposed by these libraries and better integrate them with Godot.
 
 
+## spirv-cross
+
+- Upstream: https://github.com/KhronosGroup/SPIRV-Cross
+- Version: vulkan-sdk-1.3.290.0 (5d127b917f080c6f052553c47170ec0ba702e54f, 2024)
+- License: Apache 2.0
+
+Files extracted from upstream source:
+
+- All `.cpp`, `.hpp` and `.h` files, minus `main.cpp`, `spirv_cross_c.*`, `spirv_hlsl.*`, `spirv_cpp.*`
+- `include/` folder
+- `LICENSE` and `LICENSES/` folder, minus `CC-BY-4.0.txt`
+
+Versions of this SDK do not have to match the `vulkan` section, as this SDK is required
+to generate Metal source from Vulkan SPIR-V.
+
+
 ## spirv-reflect
 
 - Upstream: https://github.com/KhronosGroup/SPIRV-Reflect
@@ -944,21 +870,7 @@ Files extracted from upstream source:
 Some downstream changes have been made and are identified by
 `// -- GODOT begin --` and `// -- GODOT end --` comments.
 They can be reapplied using the patches included in the `patches`
-folder.
-
-
-## resonanceaudio
-
-- Upstream: https://github.com/resonance-audio/resonance-audio
-- Version: git (1213ab78f00645fd2807285ccd4bed1375a50bfb, 2020)
-- License: Apache 2.0
-
-Files extracted from upstream source:
-
-- `resonance_audio/` and `platforms/common` folders without `*.test.cpp` and `*test.h`
-- `third_party/SADIE_hrtf_database` folder without `generate_hrtf_assets.py`, `WAV/*` and `hrtf_assets.iad`
-- LICENSE
-- AUTHORS
+folder, in order.
 
 
 ## squish
@@ -995,7 +907,7 @@ instead of `miniz.h` as an external dependency.
 ## thorvg
 
 - Upstream: https://github.com/thorvg/thorvg
-- Version: 0.14.2 (f6c4d8a94e0b2194fe911d6e19a550683055dd50, 2024)
+- Version: 0.14.9 (81a0fbfd590873b21e53c3af77969c71d3d9b586, 2024)
 - License: MIT
 
 Files extracted from upstream source:
@@ -1007,7 +919,7 @@ number and run the script.
 ## ufbx
 
 - Upstream: https://github.com/ufbx/ufbx
-- Version: 0.14.0 (80ff790ab36507b99ec7e4ef55b9cfb076ce821b, 2024)
+- Version: 0.14.3 (19bdb7e7ef02eb914d5e7211a3685f50ee6d27e3, 2024)
 - License: MIT
 
 Files extracted from upstream source:

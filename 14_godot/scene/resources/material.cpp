@@ -37,7 +37,7 @@
 #include "scene/main/scene_tree.h"
 
 void Material::set_next_pass(const Ref<Material> &p_pass) {
-	for (Ref<Material> pass_child = p_pass; pass_child != nullptr; pass_child = pass_child->get_next_pass()) {
+	for (Ref<Material> pass_child = p_pass; pass_child.is_valid(); pass_child = pass_child->get_next_pass()) {
 		ERR_FAIL_COND_MSG(pass_child == this, "Can't set as next_pass one of its parents to prevent crashes due to recursive loop.");
 	}
 
@@ -379,6 +379,8 @@ bool ShaderMaterial::_property_can_revert(const StringName &p_name) const {
 			Variant default_value = RenderingServer::get_singleton()->shader_get_parameter_default(shader->get_rid(), *pr);
 			Variant current_value = get_shader_parameter(*pr);
 			return default_value.get_type() != Variant::NIL && default_value != current_value;
+		} else if (p_name == "render_priority" || p_name == "next_pass") {
+			return true;
 		}
 	}
 	return false;
@@ -389,6 +391,12 @@ bool ShaderMaterial::_property_get_revert(const StringName &p_name, Variant &r_p
 		const StringName *pr = remap_cache.getptr(p_name);
 		if (pr) {
 			r_property = RenderingServer::get_singleton()->shader_get_parameter_default(shader->get_rid(), *pr);
+			return true;
+		} else if (p_name == "render_priority") {
+			r_property = 0;
+			return true;
+		} else if (p_name == "next_pass") {
+			r_property = Variant();
 			return true;
 		}
 	}
@@ -1254,8 +1262,8 @@ void vertex() {)";
 		if (flags[FLAG_UV1_USE_WORLD_TRIPLANAR]) {
 			code += R"(
 	// UV1 Triplanar: Enabled (with World Triplanar)
-	uv1_power_normal = pow(abs(mat3(TRIPLANAR_MATRIX) * normal), vec3(uv1_blend_sharpness));
-	uv1_triplanar_pos = TRIPLANAR_POSITION * uv1_scale + uv1_offset;
+	uv1_power_normal = pow(abs(normal), vec3(uv1_blend_sharpness));
+	uv1_triplanar_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz * uv1_scale + uv1_offset;
 )";
 		} else {
 			code += R"(
@@ -1273,8 +1281,8 @@ void vertex() {)";
 		if (flags[FLAG_UV2_USE_WORLD_TRIPLANAR]) {
 			code += R"(
 	// UV2 Triplanar: Enabled (with World Triplanar)
-	uv2_power_normal = pow(abs(mat3(TRIPLANAR_MATRIX) * NORMAL), vec3(uv2_blend_sharpness));
-	uv2_triplanar_pos = TRIPLANAR_POSITION * uv2_scale + uv2_offset;
+	uv2_power_normal = pow(abs(mat3(MODEL_MATRIX) * NORMAL), vec3(uv2_blend_sharpness));
+	uv2_triplanar_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz * uv2_scale + uv2_offset;
 )";
 		} else {
 			code += R"(

@@ -432,10 +432,8 @@ Error ResourceLoaderBinary::parse_variant(Variant &r_v) {
 						path = remaps[path];
 					}
 
-					Ref<Resource> res;
-					if (!using_whitelist || external_path_whitelist.has(path)) {
-						res = ResourceLoader::load(path, exttype, cache_mode_for_external);
-					}
+					Ref<Resource> res = ResourceLoader::load(path, exttype, cache_mode_for_external);
+
 					if (res.is_null()) {
 						WARN_PRINT(String("Couldn't load resource: " + path).utf8().get_data());
 					}
@@ -700,14 +698,7 @@ Error ResourceLoaderBinary::load() {
 		}
 
 		external_resources.write[i].path = path; //remap happens here, not on load because on load it can actually be used for filesystem dock resource remap
-
-		if (using_whitelist && !external_path_whitelist.has(path)) {
-			error = ERR_FILE_MISSING_DEPENDENCIES;
-			ERR_FAIL_V_MSG(error, "External dependency not in whitelist: " + path + ".");
-		}
-
-		external_resources.write[i].load_token = ResourceLoader::_load_start(path, external_resources[i].type, use_sub_threads ? ResourceLoader::LOAD_THREAD_DISTRIBUTE : ResourceLoader::LOAD_THREAD_FROM_CURRENT, ResourceFormatLoader::CACHE_MODE_REUSE, using_whitelist, external_path_whitelist, type_whitelist);
-
+		external_resources.write[i].load_token = ResourceLoader::_load_start(path, external_resources[i].type, use_sub_threads ? ResourceLoader::LOAD_THREAD_DISTRIBUTE : ResourceLoader::LOAD_THREAD_FROM_CURRENT, cache_mode_for_external);
 		if (!external_resources[i].load_token.is_valid()) {
 			if (!ResourceLoader::get_abort_on_missing_resources()) {
 				ResourceLoader::notify_dependency_error(local_path, path, external_resources[i].type);
@@ -779,10 +770,7 @@ Error ResourceLoaderBinary::load() {
 			if (res.is_null()) {
 				//did not replace
 
-				Object *obj = nullptr;
-				if (!using_whitelist || type_whitelist.has(t)) {
-					obj = ClassDB::instantiate(t);
-				}
+				Object *obj = ClassDB::instantiate(t);
 				if (!obj) {
 					if (ResourceLoader::is_creating_missing_resources_if_class_unavailable_enabled()) {
 						//create a missing resource
@@ -865,6 +853,19 @@ Error ResourceLoaderBinary::load() {
 					Array get_array = get_value;
 					if (!set_array.is_same_typed(get_array)) {
 						value = Array(set_array, get_array.get_typed_builtin(), get_array.get_typed_class_name(), get_array.get_typed_script());
+					}
+				}
+			}
+
+			if (value.get_type() == Variant::DICTIONARY) {
+				Dictionary set_dict = value;
+				bool is_get_valid = false;
+				Variant get_value = res->get(name, &is_get_valid);
+				if (is_get_valid && get_value.get_type() == Variant::DICTIONARY) {
+					Dictionary get_dict = get_value;
+					if (!set_dict.is_same_typed(get_dict)) {
+						value = Dictionary(set_dict, get_dict.get_typed_key_builtin(), get_dict.get_typed_key_class_name(), get_dict.get_typed_key_script(),
+								get_dict.get_typed_value_builtin(), get_dict.get_typed_value_class_name(), get_dict.get_typed_value_script());
 					}
 				}
 			}
@@ -1247,41 +1248,6 @@ Ref<Resource> ResourceFormatLoaderBinary::load(const String &p_path, const Strin
 	String path = !p_original_path.is_empty() ? p_original_path : p_path;
 	loader.local_path = ProjectSettings::get_singleton()->localize_path(path);
 	loader.res_path = loader.local_path;
-	loader.using_whitelist = false;
-	loader.open(f);
-
-	err = loader.load();
-
-	if (r_error) {
-		*r_error = err;
-	}
-
-	if (err) {
-		return Ref<Resource>();
-	}
-	return loader.resource;
-}
-
-Ref<Resource> ResourceFormatLoaderBinary::load_whitelisted(const String &p_path, Dictionary p_external_path_whitelist, Dictionary p_type_whitelist, const String &p_original_path, Error *r_error, bool p_use_sub_threads, float *r_progress, CacheMode p_cache_mode) {
-	if (r_error) {
-		*r_error = ERR_FILE_CANT_OPEN;
-	}
-
-	Error err;
-	Ref<FileAccess> f = FileAccess::open(p_path, FileAccess::READ, &err);
-
-	ERR_FAIL_COND_V_MSG(err != OK, Ref<Resource>(), "Cannot open file '" + p_path + "'.");
-
-	ResourceLoaderBinary loader;
-	loader.cache_mode = p_cache_mode;
-	loader.use_sub_threads = p_use_sub_threads;
-	loader.progress = r_progress;
-	String path = !p_original_path.is_empty() ? p_original_path : p_path;
-	loader.local_path = ProjectSettings::get_singleton()->localize_path(path);
-	loader.res_path = loader.local_path;
-	loader.using_whitelist = true;
-	loader.external_path_whitelist = p_external_path_whitelist;
-	loader.type_whitelist = p_type_whitelist;
 	loader.open(f);
 
 	err = loader.load();
@@ -2111,6 +2077,8 @@ void ResourceFormatSaverBinaryInstance::_find_resources(const Variant &p_variant
 
 		case Variant::DICTIONARY: {
 			Dictionary d = p_variant;
+			_find_resources(d.get_typed_key_script());
+			_find_resources(d.get_typed_value_script());
 			List<Variant> keys;
 			d.get_key_list(&keys);
 			for (const Variant &E : keys) {

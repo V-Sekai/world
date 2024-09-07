@@ -49,8 +49,8 @@
 #define PEM_END_CRT "-----END CERTIFICATE-----\n"
 #define PEM_MIN_SIZE 54
 
-CryptoKey *CryptoKeyMbedTLS::create() {
-	return memnew(CryptoKeyMbedTLS);
+CryptoKey *CryptoKeyMbedTLS::create(bool p_notify_postinitialize) {
+	return static_cast<CryptoKey *>(ClassDB::creator<CryptoKeyMbedTLS>(p_notify_postinitialize));
 }
 
 Error CryptoKeyMbedTLS::load(const String &p_path, bool p_public_only) {
@@ -153,8 +153,8 @@ int CryptoKeyMbedTLS::_parse_key(const uint8_t *p_buf, int p_size) {
 #endif
 }
 
-X509Certificate *X509CertificateMbedTLS::create() {
-	return memnew(X509CertificateMbedTLS);
+X509Certificate *X509CertificateMbedTLS::create(bool p_notify_postinitialize) {
+	return static_cast<X509Certificate *>(ClassDB::creator<X509CertificateMbedTLS>(p_notify_postinitialize));
 }
 
 Error X509CertificateMbedTLS::load(const String &p_path) {
@@ -250,8 +250,8 @@ bool HMACContextMbedTLS::is_md_type_allowed(mbedtls_md_type_t p_md_type) {
 	}
 }
 
-HMACContext *HMACContextMbedTLS::create() {
-	return memnew(HMACContextMbedTLS);
+HMACContext *HMACContextMbedTLS::create(bool p_notify_postinitialize) {
+	return static_cast<HMACContext *>(ClassDB::creator<HMACContextMbedTLS>(p_notify_postinitialize));
 }
 
 Error HMACContextMbedTLS::start(HashingContext::HashType p_hash_type, const PackedByteArray &p_key) {
@@ -309,8 +309,8 @@ HMACContextMbedTLS::~HMACContextMbedTLS() {
 	}
 }
 
-Crypto *CryptoMbedTLS::create() {
-	return memnew(CryptoMbedTLS);
+Crypto *CryptoMbedTLS::create(bool p_notify_postinitialize) {
+	return static_cast<Crypto *>(ClassDB::creator<CryptoMbedTLS>(p_notify_postinitialize));
 }
 
 void CryptoMbedTLS::initialize_crypto() {
@@ -415,7 +415,14 @@ Ref<X509Certificate> CryptoMbedTLS::generate_self_signed_certificate(Ref<CryptoK
 	uint8_t rand_serial[20];
 	mbedtls_ctr_drbg_random(&ctr_drbg, rand_serial, sizeof(rand_serial));
 
+#if MBEDTLS_VERSION_MAJOR >= 3
 	mbedtls_x509write_crt_set_serial_raw(&crt, rand_serial, sizeof(rand_serial));
+#else
+	mbedtls_mpi serial;
+	mbedtls_mpi_init(&serial);
+	ERR_FAIL_COND_V(mbedtls_mpi_read_binary(&serial, rand_serial, sizeof(rand_serial)), nullptr);
+	mbedtls_x509write_crt_set_serial(&crt, &serial);
+#endif
 
 	mbedtls_x509write_crt_set_validity(&crt, p_not_before.utf8().get_data(), p_not_after.utf8().get_data());
 	mbedtls_x509write_crt_set_basic_constraints(&crt, 1, -1);
