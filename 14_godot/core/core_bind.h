@@ -73,10 +73,12 @@ public:
 	static ResourceLoader *get_singleton() { return singleton; }
 
 	Error load_threaded_request(const String &p_path, const String &p_type_hint = "", bool p_use_sub_threads = false, CacheMode p_cache_mode = CACHE_MODE_REUSE);
-	ThreadLoadStatus load_threaded_get_status(const String &p_path, Array r_progress = Array());
+	Error load_threaded_request_whitelisted(const String &p_path, Dictionary p_external_path_whitelist, Dictionary p_type_whitelist, const String &p_type_hint = "", bool p_use_sub_threads = false, CacheMode p_cache_mode = CACHE_MODE_REUSE);
+	ThreadLoadStatus load_threaded_get_status(const String &p_path, Array r_progress = ClassDB::default_array_arg);
 	Ref<Resource> load_threaded_get(const String &p_path);
 
 	Ref<Resource> load(const String &p_path, const String &p_type_hint = "", CacheMode p_cache_mode = CACHE_MODE_REUSE);
+	Ref<Resource> load_whitelisted(const String &p_path, Dictionary p_external_path_whitelist, Dictionary p_type_whitelist, const String &p_type_hint = "", CacheMode p_cache_mode = CACHE_MODE_REUSE);
 	Vector<String> get_recognized_extensions_for_type(const String &p_type);
 	void add_resource_format_loader(Ref<ResourceFormatLoader> p_format_loader, bool p_at_front);
 	void remove_resource_format_loader(Ref<ResourceFormatLoader> p_format_loader);
@@ -166,7 +168,7 @@ public:
 	Vector<String> get_system_font_path_for_text(const String &p_font_name, const String &p_text, const String &p_locale = String(), const String &p_script = String(), int p_weight = 400, int p_stretch = 100, bool p_italic = false) const;
 	String get_executable_path() const;
 	String read_string_from_stdin();
-	int execute(const String &p_path, const Vector<String> &p_arguments, Array r_output = Array(), bool p_read_stderr = false, bool p_open_console = false);
+	int execute(const String &p_path, const Vector<String> &p_arguments, Array r_output = ClassDB::default_array_arg, bool p_read_stderr = false, bool p_open_console = false);
 	Dictionary execute_with_pipe(const String &p_path, const Vector<String> &p_arguments, bool p_blocking = true);
 	int create_process(const String &p_path, const Vector<String> &p_arguments, bool p_open_console = false);
 	int create_instance(const Vector<String> &p_arguments);
@@ -616,26 +618,6 @@ public:
 
 	EngineDebugger() { singleton = this; }
 	~EngineDebugger();
-};
-
-class LogManager : public Object {
-	GDCLASS(LogManager, Object);
-
-protected:
-	static void _bind_methods();
-	static LogManager *singleton;
-
-public:
-	LogManager();
-	~LogManager();
-
-	static LogManager *get_singleton() { return singleton; }
-
-	void register_log_capture_non_thread_safe(const Callable &p_callable);
-	void unregister_log_capture_non_thread_safe(const Callable &p_callable);
-
-	void register_log_capture_buffered(const Callable &p_callable);
-	void unregister_log_capture_buffered(const Callable &p_callable);
 };
 
 } // namespace core_bind

@@ -140,6 +140,7 @@ static Engine *engine = nullptr;
 static ProjectSettings *globals = nullptr;
 static Input *input = nullptr;
 static InputMap *input_map = nullptr;
+static WorkerThreadPool *worker_thread_pool = nullptr;
 static TranslationServer *translation_server = nullptr;
 static Performance *performance = nullptr;
 static PackedData *packed_data = nullptr;
@@ -690,6 +691,8 @@ Error Main::test_setup() {
 
 	register_core_settings(); // Here globals are present.
 
+	worker_thread_pool = memnew(WorkerThreadPool);
+
 	translation_server = memnew(TranslationServer);
 	tsman = memnew(TextServerManager);
 
@@ -800,6 +803,8 @@ void Main::test_cleanup() {
 	ResourceSaver::remove_custom_savers();
 	PropertyListHelper::clear_base_helpers();
 
+	WorkerThreadPool::get_singleton()->finish();
+
 #ifdef TOOLS_ENABLED
 	GDExtensionManager::get_singleton()->deinitialize_extensions(GDExtension::INITIALIZATION_LEVEL_EDITOR);
 	uninitialize_modules(MODULE_INITIALIZATION_LEVEL_EDITOR);
@@ -840,6 +845,9 @@ void Main::test_cleanup() {
 #endif // _3D_DISABLED
 	if (physics_server_2d_manager) {
 		memdelete(physics_server_2d_manager);
+	}
+	if (worker_thread_pool) {
+		memdelete(worker_thread_pool);
 	}
 	if (globals) {
 		memdelete(globals);
@@ -913,15 +921,6 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 
 	OS::get_singleton()->initialize();
 
-	// Add our logger so we can log *everything*
-	// This must be extremely early so it can record every log so we can catch Godot startup errors
-	// At the moment the log subsystem owns this object, which prevents us from easily removing it
-	// I'm just living with that, but if a conditional per log message ends up being too much overhead,
-	// it could be turned into its own global that manages its own registration and deregistration
-	// This is also likely necessary if it starts using other log attachments
-	// such as add_error_handler, add_print_handler, register_message_capture, and EditorToaster.
-	OS::get_singleton()->add_logger(memnew(UserLogManagerLogger()));
-
 	// Benchmark tracking must be done after `OS::get_singleton()->initialize()` as on some
 	// platforms, it's used to set up the time utilities.
 	OS::get_singleton()->benchmark_begin_measure("Startup", "Main::Setup");
@@ -940,6 +939,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 
 	register_core_settings(); //here globals are present
 
+	worker_thread_pool = memnew(WorkerThreadPool);
 	translation_server = memnew(TranslationServer);
 	performance = memnew(Performance);
 	GDREGISTER_CLASS(Performance);
@@ -2628,6 +2628,10 @@ error:
 	}
 	if (translation_server) {
 		memdelete(translation_server);
+	}
+	if (worker_thread_pool) {
+		worker_thread_pool->finish();
+		memdelete(worker_thread_pool);
 	}
 	if (globals) {
 		memdelete(globals);
@@ -4364,11 +4368,6 @@ bool Main::iteration() {
 		}
 	}
 
-	// trigger the logger flush now
-	// this could be moved before the frame update, but the first time it updates changes behavior a bit
-	// and it's convenient to say "behavior is X before the first frame"
-	UserLogManagerLogger::get_singleton()->flush();
-
 	process_ticks = OS::get_singleton()->get_ticks_usec() - process_begin;
 	process_max = MAX(process_ticks, process_max);
 	uint64_t frame_time = OS::get_singleton()->get_ticks_usec() - ticks;
@@ -4515,6 +4514,8 @@ void Main::cleanup(bool p_force) {
 	ResourceLoader::clear_translation_remaps();
 	ResourceLoader::clear_path_remaps();
 
+	WorkerThreadPool::get_singleton()->finish();
+
 	ScriptServer::finish_languages();
 
 	// Sync pending commands that may have been queued from a different thread during ScriptServer finalization
@@ -4604,6 +4605,9 @@ void Main::cleanup(bool p_force) {
 #endif // _3D_DISABLED
 	if (physics_server_2d_manager) {
 		memdelete(physics_server_2d_manager);
+	}
+	if (worker_thread_pool) {
+		memdelete(worker_thread_pool);
 	}
 	if (globals) {
 		memdelete(globals);

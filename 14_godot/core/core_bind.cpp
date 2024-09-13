@@ -54,11 +54,18 @@ Error ResourceLoader::load_threaded_request(const String &p_path, const String &
 	return ::ResourceLoader::load_threaded_request(p_path, p_type_hint, p_use_sub_threads, ResourceFormatLoader::CacheMode(p_cache_mode));
 }
 
+Error ResourceLoader::load_threaded_request_whitelisted(const String &p_path, Dictionary p_external_path_whitelist, Dictionary p_type_whitelist, const String &p_type_hint, bool p_use_sub_threads, CacheMode p_cache_mode) {
+	return ::ResourceLoader::load_threaded_request_whitelisted(p_path, p_external_path_whitelist, p_type_whitelist, p_type_hint, p_use_sub_threads, ResourceFormatLoader::CacheMode(p_cache_mode));
+}
+
 ResourceLoader::ThreadLoadStatus ResourceLoader::load_threaded_get_status(const String &p_path, Array r_progress) {
 	float progress = 0;
 	::ResourceLoader::ThreadLoadStatus tls = ::ResourceLoader::load_threaded_get_status(p_path, &progress);
-	r_progress.resize(1);
-	r_progress[0] = progress;
+	// Default array should never be modified, it causes the hash of the method to change.
+	if (!ClassDB::is_default_array_arg(r_progress)) {
+		r_progress.resize(1);
+		r_progress[0] = progress;
+	}
 	return (ThreadLoadStatus)tls;
 }
 
@@ -71,6 +78,14 @@ Ref<Resource> ResourceLoader::load_threaded_get(const String &p_path) {
 Ref<Resource> ResourceLoader::load(const String &p_path, const String &p_type_hint, CacheMode p_cache_mode) {
 	Error err = OK;
 	Ref<Resource> ret = ::ResourceLoader::load(p_path, p_type_hint, ResourceFormatLoader::CacheMode(p_cache_mode), &err);
+
+	ERR_FAIL_COND_V_MSG(err != OK, ret, "Error loading resource: '" + p_path + "'.");
+	return ret;
+}
+
+Ref<Resource> ResourceLoader::load_whitelisted(const String &p_path, Dictionary p_external_path_whitelist, Dictionary p_type_whitelist, const String &p_type_hint, CacheMode p_cache_mode) {
+	Error err = OK;
+	Ref<Resource> ret = ::ResourceLoader::load_whitelisted(p_path, p_external_path_whitelist, p_type_whitelist, p_type_hint, ResourceFormatLoader::CacheMode(p_cache_mode), &err);
 
 	ERR_FAIL_COND_V_MSG(err != OK, ret, "Error loading resource: '" + p_path + "'.");
 	return ret;
@@ -131,10 +146,12 @@ ResourceUID::ID ResourceLoader::get_resource_uid(const String &p_path) {
 
 void ResourceLoader::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("load_threaded_request", "path", "type_hint", "use_sub_threads", "cache_mode"), &ResourceLoader::load_threaded_request, DEFVAL(""), DEFVAL(false), DEFVAL(CACHE_MODE_REUSE));
-	ClassDB::bind_method(D_METHOD("load_threaded_get_status", "path", "progress"), &ResourceLoader::load_threaded_get_status, DEFVAL(Array()));
+	ClassDB::bind_method(D_METHOD("load_threaded_request_whitelisted", "path", "external_path_whitelist", "type_whitelist", "type_hint", "use_sub_threads", "cache_mode"), &ResourceLoader::load_threaded_request_whitelisted, DEFVAL(""), DEFVAL(false), DEFVAL(CACHE_MODE_REUSE));
+	ClassDB::bind_method(D_METHOD("load_threaded_get_status", "path", "progress"), &ResourceLoader::load_threaded_get_status, DEFVAL_ARRAY);
 	ClassDB::bind_method(D_METHOD("load_threaded_get", "path"), &ResourceLoader::load_threaded_get);
 
 	ClassDB::bind_method(D_METHOD("load", "path", "type_hint", "cache_mode"), &ResourceLoader::load, DEFVAL(""), DEFVAL(CACHE_MODE_REUSE));
+	ClassDB::bind_method(D_METHOD("load_whitelisted", "path", "external_path_whitelist", "type_whitelist", "type_hint", "cache_mode"), &ResourceLoader::load_whitelisted, DEFVAL(""), DEFVAL(CACHE_MODE_REUSE));
 	ClassDB::bind_method(D_METHOD("get_recognized_extensions_for_type", "type"), &ResourceLoader::get_recognized_extensions_for_type);
 	ClassDB::bind_method(D_METHOD("add_resource_format_loader", "format_loader", "at_front"), &ResourceLoader::add_resource_format_loader, DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("remove_resource_format_loader", "format_loader"), &ResourceLoader::remove_resource_format_loader);
@@ -307,7 +324,10 @@ int OS::execute(const String &p_path, const Vector<String> &p_arguments, Array r
 	String pipe;
 	int exitcode = 0;
 	Error err = ::OS::get_singleton()->execute(p_path, args, &pipe, &exitcode, p_read_stderr, nullptr, p_open_console);
-	r_output.push_back(pipe);
+	// Default array should never be modified, it causes the hash of the method to change.
+	if (!ClassDB::is_default_array_arg(r_output)) {
+		r_output.push_back(pipe);
+	}
 	if (err != OK) {
 		return -1;
 	}
@@ -618,7 +638,7 @@ void OS::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_system_font_path_for_text", "font_name", "text", "locale", "script", "weight", "stretch", "italic"), &OS::get_system_font_path_for_text, DEFVAL(String()), DEFVAL(String()), DEFVAL(400), DEFVAL(100), DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("get_executable_path"), &OS::get_executable_path);
 	ClassDB::bind_method(D_METHOD("read_string_from_stdin"), &OS::read_string_from_stdin);
-	ClassDB::bind_method(D_METHOD("execute", "path", "arguments", "output", "read_stderr", "open_console"), &OS::execute, DEFVAL(Array()), DEFVAL(false), DEFVAL(false));
+	ClassDB::bind_method(D_METHOD("execute", "path", "arguments", "output", "read_stderr", "open_console"), &OS::execute, DEFVAL_ARRAY, DEFVAL(false), DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("execute_with_pipe", "path", "arguments", "blocking"), &OS::execute_with_pipe, DEFVAL(true));
 	ClassDB::bind_method(D_METHOD("create_process", "path", "arguments", "open_console"), &OS::create_process, DEFVAL(false));
 	ClassDB::bind_method(D_METHOD("create_instance", "arguments"), &OS::create_instance);
@@ -2090,55 +2110,6 @@ void EngineDebugger::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("insert_breakpoint", "line", "source"), &EngineDebugger::insert_breakpoint);
 	ClassDB::bind_method(D_METHOD("remove_breakpoint", "line", "source"), &EngineDebugger::remove_breakpoint);
 	ClassDB::bind_method(D_METHOD("clear_breakpoints"), &EngineDebugger::clear_breakpoints);
-}
-
-////// LogManager //////
-// This is the client-facing part of the user log hooking system.
-// It's basically just a shunt that passes callbacks to the persistent UserLogManagerLogger singleton.
-
-LogManager *LogManager::singleton = nullptr;
-
-LogManager::LogManager() {
-	ERR_FAIL_COND_MSG(singleton != nullptr, "Somehow created two LogManagers.");
-
-	singleton = this;
-}
-
-LogManager::~LogManager() {
-	ERR_FAIL_COND_MSG(singleton != this, "LogManager::singleton not correct on exit.");
-
-	singleton = nullptr;
-}
-
-void LogManager::register_log_capture_non_thread_safe(const Callable &p_callable) {
-	UserLogManagerLogger *log_manager = UserLogManagerLogger::get_singleton();
-	ERR_FAIL_NULL_MSG(log_manager, "log_manager not yet initialized. This shouldn't be possible.");
-	log_manager->register_log_capture_non_thread_safe(p_callable);
-}
-
-void LogManager::unregister_log_capture_non_thread_safe(const Callable &p_callable) {
-	UserLogManagerLogger *log_manager = UserLogManagerLogger::get_singleton();
-	ERR_FAIL_NULL_MSG(log_manager, "log_manager not yet initialized. This shouldn't be possible.");
-	log_manager->unregister_log_capture_non_thread_safe(p_callable);
-}
-
-void LogManager::register_log_capture_buffered(const Callable &p_callable) {
-	UserLogManagerLogger *log_manager = UserLogManagerLogger::get_singleton();
-	ERR_FAIL_NULL_MSG(log_manager, "log_manager not yet initialized. This shouldn't be possible.");
-	log_manager->register_log_capture_buffered(p_callable);
-}
-
-void LogManager::unregister_log_capture_buffered(const Callable &p_callable) {
-	UserLogManagerLogger *log_manager = UserLogManagerLogger::get_singleton();
-	ERR_FAIL_NULL_MSG(log_manager, "log_manager not yet initialized. This shouldn't be possible.");
-	log_manager->unregister_log_capture_buffered(p_callable);
-}
-
-void LogManager::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("register_log_capture_non_thread_safe", "callable"), &LogManager::register_log_capture_non_thread_safe);
-	ClassDB::bind_method(D_METHOD("unregister_log_capture_non_thread_safe", "callable"), &LogManager::unregister_log_capture_non_thread_safe);
-	ClassDB::bind_method(D_METHOD("register_log_capture_buffered", "callable"), &LogManager::register_log_capture_buffered);
-	ClassDB::bind_method(D_METHOD("unregister_log_capture_buffered", "callable"), &LogManager::unregister_log_capture_buffered);
 }
 
 } // namespace core_bind
