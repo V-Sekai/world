@@ -31,8 +31,12 @@
 #ifndef RESOURCE_IMPORTER_LOTTIE_H
 #define RESOURCE_IMPORTER_LOTTIE_H
 
+#include "core/io/json.h"
 #include "core/io/resource_importer.h"
 #include "editor/import/resource_importer_texture.h"
+
+Ref<JSON> read_lottie_json(String p_path);
+Ref<Image> lottie_to_sprite_sheet(Ref<JSON> p_json, float p_begin, float p_end, float p_fps, int p_columns, float p_scale, int p_size_limit, Size2i *r_sprite_size = nullptr, int *r_columns = nullptr, int *r_frame_count = nullptr);
 
 class ResourceImporterLottie : public ResourceImporter {
 	GDCLASS(ResourceImporterLottie, ResourceImporter);
