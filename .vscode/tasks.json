@@ -10,7 +10,7 @@
       "label": "Godot Engine",
       "type": "shell",
       "options": {
-        "cwd": "${workspaceFolder}/19_Godot",
+        "cwd": "${workspaceFolder}/14_Godot",
         "env": {
           "ANDROID_HOME": "C:/Users/ernest.lee/AppData/Local/Android/Sdk"
         }
