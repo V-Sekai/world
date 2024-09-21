@@ -7,16 +7,10 @@
   },
   "tasks": [
     {
-      "label": "Godot Engine",
+      "label": "Just",
       "type": "shell",
-      "options": {
-        "cwd": "${workspaceFolder}/14_Godot",
-        "env": {
-          "ANDROID_HOME": "C:/Users/ernest.lee/AppData/Local/Android/Sdk"
-        }
-      },
       "command": [
-        "scons werror=no compiledb=yes dev_build=no generate_bundle=no precision=double target=editor tests=yes debug_symbols=yes"
+        "just build-godot"
       ],
     },
   ]
