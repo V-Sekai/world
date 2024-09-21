@@ -16,16 +16,17 @@ set-android-home-windows:
 build-godot:
     @just {{ EDITOR_TYPE_COMMAND }}
     cd godot && scons werror=no compiledb=yes dev_build=no generate_bundle=no precision=double target=editor tests=yes debug_symbols=yes
+    cd -
 
 run-editor:
     @just build-godot
     @just {{ EDITOR_TYPE_COMMAND }}
 
 run-editor-macos:
-    samply record ./godot/bin/godot.macos.editor.double.arm64 --path "planner" -e
+    samply record ./godot/bin/godot.macos.editor.double.arm64 --path ./planner -e --display-driver macos --rendering-driver vulkan
 
 run-editor-linux:
-    samply record ./godot/bin/godot.linux.editor.double.x86_64 --path "planner" -e
+    ./godot/bin/godot.linux.editor.double.x86_64 --path ./planner -e
 
 run-editor-windows:
-    ./godot/bin/godot.windows.editor.double.exe --path "planner" -e
+    ./godot/bin/godot.windows.editor.double.exe --path ./planner -e
