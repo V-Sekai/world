@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://g31x3ouynixd"]
+
+[ext_resource type="PackedScene" uid="uid://b1q8351tm8opt" path="res://net_demo/import/xbot/xbot.gltf" id="1_os2ig"]
+
+[node name="Model" type="Node3D"]
+
+[node name="xbot" parent="." instance=ExtResource("1_os2ig")]
+
+[editable path="xbot"]
