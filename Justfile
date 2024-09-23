@@ -4,6 +4,8 @@ export OPERATING_SYSTEM := os()
 export ANDROID_HOME_COMMAND := "set-android-home-$OPERATING_SYSTEM"
 export EDITOR_TYPE_COMMAND := "run-editor-$OPERATING_SYSTEM"
 
+default: run-editor
+
 set-android-home:
     @just {{ ANDROID_HOME_COMMAND }}
 
