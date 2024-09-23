@@ -29,4 +29,4 @@ run-editor-linux:
     ./godot/bin/godot.linux.editor.double.x86_64 --path ./planner -e
 
 run-editor-windows:
-    ./godot/bin/godot.windows.editor.double.exe --path ./planner -e
+    ./godot/bin/godot.windows.editor.double.x86_64 --path ./planner -e
