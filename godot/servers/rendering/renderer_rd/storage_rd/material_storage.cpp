@@ -342,7 +342,7 @@ static void _fill_std140_variant_ubo_value(ShaderLanguage::DataType type, int p_
 	}
 }
 
-_FORCE_INLINE_ static void _fill_std140_ubo_value(ShaderLanguage::DataType type, const Vector<ShaderLanguage::ConstantNode::Value> &value, uint8_t *data) {
+_FORCE_INLINE_ static void _fill_std140_ubo_value(ShaderLanguage::DataType type, const Vector<ShaderLanguage::Scalar> &value, uint8_t *data) {
 	switch (type) {
 		case ShaderLanguage::TYPE_BOOL: {
 			uint32_t *gui = (uint32_t *)data;
@@ -566,7 +566,7 @@ void MaterialStorage::ShaderData::set_default_texture_parameter(const StringName
 Variant MaterialStorage::ShaderData::get_default_parameter(const StringName &p_parameter) const {
 	if (uniforms.has(p_parameter)) {
 		ShaderLanguage::ShaderNode::Uniform uniform = uniforms[p_parameter];
-		Vector<ShaderLanguage::ConstantNode::Value> default_value = uniform.default_value;
+		Vector<ShaderLanguage::Scalar> default_value = uniform.default_value;
 		return ShaderLanguage::constant_value_to_variant(default_value, uniform.type, uniform.array_size, uniform.hint);
 	}
 	return Variant();
@@ -580,11 +580,7 @@ void MaterialStorage::ShaderData::get_shader_uniform_list(List<PropertyInfo> *p_
 		if (E.value.scope != ShaderLanguage::ShaderNode::Uniform::SCOPE_LOCAL) {
 			continue;
 		}
-		if (E.value.texture_order >= 0) {
-			filtered_uniforms.push_back(Pair<StringName, int>(E.key, E.value.texture_order + 100000));
-		} else {
-			filtered_uniforms.push_back(Pair<StringName, int>(E.key, E.value.order));
-		}
+		filtered_uniforms.push_back(Pair<StringName, int>(E.key, E.value.prop_order));
 	}
 	int uniform_count = filtered_uniforms.size();
 	sorter.sort(filtered_uniforms.ptr(), uniform_count);
@@ -634,7 +630,7 @@ bool MaterialStorage::ShaderData::is_parameter_texture(const StringName &p_param
 		return false;
 	}
 
-	return uniforms[p_param].texture_order >= 0;
+	return uniforms[p_param].is_texture();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -645,7 +641,7 @@ void MaterialStorage::MaterialData::update_uniform_buffer(const HashMap<StringNa
 	bool uses_global_buffer = false;
 
 	for (const KeyValue<StringName, ShaderLanguage::ShaderNode::Uniform> &E : p_uniforms) {
-		if (E.value.order < 0) {
+		if (E.value.is_texture()) {
 			continue; // texture, does not go here
 		}
 
@@ -699,20 +695,6 @@ void MaterialStorage::MaterialData::update_uniform_buffer(const HashMap<StringNa
 			//user provided
 			_fill_std140_variant_ubo_value(E.value.type, E.value.array_size, V->value, data, p_use_linear_color);
 
-#ifdef REAL_T_IS_DOUBLE
-			// Split the origin into two components, the float approximation and the missing precision.
-			// In the shader we will combine these back together to restore the lost precision.
-			// This is needed because HINT_TRIPLANAR_MAT might refer to a world space matrix,
-			// which could benefit from the emulated doubles, if far enough away from the origin.
-			if (E.value.hint == ShaderLanguage::ShaderNode::Uniform::HINT_TRIPLANAR_MAT) {
-				Transform3D v = V->value;
-				float *gui = reinterpret_cast<float *>(data);
-
-				RendererRD::MaterialStorage::split_double(v.origin.x, &gui[12], &gui[3]);
-				RendererRD::MaterialStorage::split_double(v.origin.y, &gui[13], &gui[7]);
-				RendererRD::MaterialStorage::split_double(v.origin.z, &gui[14], &gui[11]);
-			}
-#endif
 		} else if (E.value.default_value.size()) {
 			//default value
 			_fill_std140_ubo_value(E.value.type, E.value.default_value, data);
@@ -1657,6 +1639,7 @@ void MaterialStorage::global_shader_parameters_load_settings(bool p_load_texture
 				"sampler2DArray",
 				"sampler3D",
 				"samplerCube",
+				"samplerExternalOES",
 			};
 
 			RS::GlobalShaderParameterType gvtype = RS::GLOBAL_VAR_TYPE_MAX;

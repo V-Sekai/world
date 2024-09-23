@@ -348,7 +348,7 @@ static void _fill_std140_variant_ubo_value(ShaderLanguage::DataType type, int p_
 	}
 }
 
-_FORCE_INLINE_ static void _fill_std140_ubo_value(ShaderLanguage::DataType type, const Vector<ShaderLanguage::ConstantNode::Value> &value, uint8_t *data) {
+_FORCE_INLINE_ static void _fill_std140_ubo_value(ShaderLanguage::DataType type, const Vector<ShaderLanguage::Scalar> &value, uint8_t *data) {
 	switch (type) {
 		case ShaderLanguage::TYPE_BOOL: {
 			uint32_t *gui = (uint32_t *)data;
@@ -572,7 +572,7 @@ void ShaderData::set_default_texture_parameter(const StringName &p_name, RID p_t
 Variant ShaderData::get_default_parameter(const StringName &p_parameter) const {
 	if (uniforms.has(p_parameter)) {
 		ShaderLanguage::ShaderNode::Uniform uniform = uniforms[p_parameter];
-		Vector<ShaderLanguage::ConstantNode::Value> default_value = uniform.default_value;
+		Vector<ShaderLanguage::Scalar> default_value = uniform.default_value;
 		return ShaderLanguage::constant_value_to_variant(default_value, uniform.type, uniform.array_size, uniform.hint);
 	}
 	return Variant();
@@ -586,11 +586,7 @@ void ShaderData::get_shader_uniform_list(List<PropertyInfo> *p_param_list) const
 		if (E.value.scope != ShaderLanguage::ShaderNode::Uniform::SCOPE_LOCAL) {
 			continue;
 		}
-		if (E.value.texture_order >= 0) {
-			filtered_uniforms.push_back(Pair<StringName, int>(E.key, E.value.texture_order + 100000));
-		} else {
-			filtered_uniforms.push_back(Pair<StringName, int>(E.key, E.value.order));
-		}
+		filtered_uniforms.push_back(Pair<StringName, int>(E.key, E.value.prop_order));
 	}
 	int uniform_count = filtered_uniforms.size();
 	sorter.sort(filtered_uniforms.ptr(), uniform_count);
@@ -640,7 +636,7 @@ bool ShaderData::is_parameter_texture(const StringName &p_param) const {
 		return false;
 	}
 
-	return uniforms[p_param].texture_order >= 0;
+	return uniforms[p_param].is_texture();
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -679,6 +675,7 @@ static const GLenum target_from_type[ShaderLanguage::TYPE_MAX] = {
 	GL_TEXTURE_3D, // TYPE_USAMPLER3D,
 	GL_TEXTURE_CUBE_MAP, // TYPE_SAMPLERCUBE,
 	GL_TEXTURE_CUBE_MAP, // TYPE_SAMPLERCUBEARRAY,
+	_GL_TEXTURE_EXTERNAL_OES, // TYPE_SAMPLEREXT
 	GL_TEXTURE_2D, // TYPE_STRUCT
 };
 
@@ -719,7 +716,7 @@ void MaterialData::update_uniform_buffer(const HashMap<StringName, ShaderLanguag
 	bool uses_global_buffer = false;
 
 	for (const KeyValue<StringName, ShaderLanguage::ShaderNode::Uniform> &E : p_uniforms) {
-		if (E.value.order < 0) {
+		if (E.value.is_texture()) {
 			continue; // texture, does not go here
 		}
 
@@ -949,6 +946,9 @@ void MaterialData::update_textures(const HashMap<StringName, Variant> &p_paramet
 				} break;
 				case ShaderLanguage::TYPE_SAMPLERCUBEARRAY: {
 					ERR_PRINT_ONCE("Type: SamplerCubeArray not supported in GL Compatibility rendering backend, please use another type.");
+				} break;
+				case ShaderLanguage::TYPE_SAMPLEREXT: {
+					gl_texture = texture_storage->texture_gl_get_default(DEFAULT_GL_TEXTURE_EXT);
 				} break;
 
 				case ShaderLanguage::TYPE_ISAMPLER3D:
@@ -1212,7 +1212,6 @@ MaterialStorage::MaterialStorage() {
 		actions.renames["MODELVIEW_MATRIX"] = "modelview";
 		actions.renames["MODELVIEW_NORMAL_MATRIX"] = "modelview_normal";
 		actions.renames["MAIN_CAM_INV_VIEW_MATRIX"] = "scene_data.main_cam_inv_view_matrix";
-		actions.renames["TRIPLANAR_MATRIX"] = "triplanar_matrix";
 
 		actions.renames["VERTEX"] = "vertex";
 		actions.renames["NORMAL"] = "normal";
@@ -1278,10 +1277,10 @@ MaterialStorage::MaterialStorage() {
 		actions.renames["CUSTOM2"] = "custom2_attrib";
 		actions.renames["CUSTOM3"] = "custom3_attrib";
 		actions.renames["OUTPUT_IS_SRGB"] = "SHADER_IS_SRGB";
+		actions.renames["CLIP_SPACE_FAR"] = "SHADER_SPACE_FAR";
 		actions.renames["LIGHT_VERTEX"] = "light_vertex";
 
 		actions.renames["NODE_POSITION_WORLD"] = "model_matrix[3].xyz";
-		actions.renames["TRIPLANAR_POSITION"] = "triplanar_position";
 		actions.renames["CAMERA_POSITION_WORLD"] = "scene_data.inv_view_matrix[3].xyz";
 		actions.renames["CAMERA_DIRECTION_WORLD"] = "scene_data.inv_view_matrix[2].xyz";
 		actions.renames["CAMERA_VISIBLE_LAYERS"] = "scene_data.camera_visible_layers";
@@ -1327,8 +1326,6 @@ MaterialStorage::MaterialStorage() {
 		actions.usage_defines["INSTANCE_CUSTOM"] = "#define ENABLE_INSTANCE_CUSTOM\n";
 		actions.usage_defines["POSITION"] = "#define OVERRIDE_POSITION\n";
 		actions.usage_defines["LIGHT_VERTEX"] = "#define LIGHT_VERTEX_USED\n";
-		actions.usage_defines["TRIPLANAR_POSITION"] = "#define TRIPLANAR_POSITION_USED\n";
-		actions.usage_defines["TRIPLANAR_MATRIX"] = "#define TRIPLANAR_MATRIX_USED\n";
 
 		actions.usage_defines["ALPHA_SCISSOR_THRESHOLD"] = "#define ALPHA_SCISSOR_USED\n";
 		actions.usage_defines["ALPHA_HASH_SCALE"] = "#define ALPHA_HASH_USED\n";
@@ -1956,6 +1953,7 @@ void MaterialStorage::global_shader_parameters_load_settings(bool p_load_texture
 				"sampler2DArray",
 				"sampler3D",
 				"samplerCube",
+				"samplerExternalOES"
 			};
 
 			RS::GlobalShaderParameterType gvtype = RS::GLOBAL_VAR_TYPE_MAX;
@@ -2668,7 +2666,11 @@ static void bind_uniforms_generic(const Vector<RID> &p_textures, const Vector<Sh
 		const ShaderCompiler::GeneratedCode::Texture &texture_uniform = texture_uniforms[texture_uniform_index];
 		if (texture) {
 			glActiveTexture(GL_TEXTURE0 + texture_offset + ti);
-			glBindTexture(target_from_type[texture_uniform.type], texture->tex_id);
+			GLenum target = target_from_type[texture_uniform.type];
+			if (target == _GL_TEXTURE_EXTERNAL_OES && !GLES3::Config::get_singleton()->external_texture_supported) {
+				target = GL_TEXTURE_2D;
+			}
+			glBindTexture(target, texture->tex_id);
 			if (texture->render_target) {
 				texture->render_target->used_in_frame = true;
 			}

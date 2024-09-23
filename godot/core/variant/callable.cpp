@@ -112,7 +112,7 @@ Error Callable::rpcp(int p_id, const Variant **p_arguments, int p_argcount, Call
 			argptrs[i + 2] = p_arguments[i];
 		}
 
-		CallError tmp;
+		CallError tmp; // TODO: Check `tmp`?
 		Error err = (Error)obj->callp(SNAME("rpc_id"), argptrs, argcount, tmp).operator int64_t();
 
 		r_call_error.error = Callable::CallError::CALL_OK;
@@ -543,6 +543,13 @@ bool Signal::is_connected(const Callable &p_callable) const {
 	ERR_FAIL_NULL_V(obj, false);
 
 	return obj->is_connected(name, p_callable);
+}
+
+bool Signal::has_connections() const {
+	Object *obj = get_object();
+	ERR_FAIL_NULL_V(obj, false);
+
+	return obj->has_connections(name);
 }
 
 Array Signal::get_connections() const {

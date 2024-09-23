@@ -113,6 +113,8 @@ static int _get_datatype_alignment(SL::DataType p_type) {
 			return 16;
 		case SL::TYPE_SAMPLERCUBEARRAY:
 			return 16;
+		case SL::TYPE_SAMPLEREXT:
+			return 16;
 		case SL::TYPE_STRUCT:
 			return 0;
 		case SL::TYPE_MAX: {
@@ -185,7 +187,7 @@ static String f2sp0(float p_float) {
 	return num;
 }
 
-static String get_constant_text(SL::DataType p_type, const Vector<SL::ConstantNode::Value> &p_values) {
+static String get_constant_text(SL::DataType p_type, const Vector<SL::Scalar> &p_values) {
 	switch (p_type) {
 		case SL::TYPE_BOOL:
 			return p_values[0].boolean ? "true" : "false";
@@ -546,11 +548,6 @@ String ShaderCompiler::_dump_node_code(const SL::Node *p_node, int p_level, Gene
 				const SL::ShaderNode::Uniform &uniform = pnode->uniforms[uniform_name];
 
 				String ucode;
-
-				// 'hint_triplanar_matrix' requires a custom #define with the uniform name
-				if (uniform.type == ShaderLanguage::TYPE_MAT4 && uniform.hint == ShaderLanguage::ShaderNode::Uniform::HINT_TRIPLANAR_MAT) {
-					r_gen_code.defines.push_back("#define TRIPLANAR_MATRIX " + _mkid(uniform_name) + "\n");
-				}
 
 				if (uniform.scope == SL::ShaderNode::Uniform::SCOPE_INSTANCE) {
 					//insert, but don't generate any code.
@@ -927,7 +924,7 @@ String ShaderCompiler::_dump_node_code(const SL::Node *p_node, int p_level, Gene
 				if (shader->uniforms.has(vnode->name)) {
 					//its a uniform!
 					const ShaderLanguage::ShaderNode::Uniform &u = shader->uniforms[vnode->name];
-					if (u.texture_order >= 0) {
+					if (u.is_texture()) {
 						StringName name;
 						if (u.hint == ShaderLanguage::ShaderNode::Uniform::HINT_SCREEN_TEXTURE) {
 							name = "color_buffer";
@@ -1044,7 +1041,7 @@ String ShaderCompiler::_dump_node_code(const SL::Node *p_node, int p_level, Gene
 				if (shader->uniforms.has(anode->name)) {
 					//its a uniform!
 					const ShaderLanguage::ShaderNode::Uniform &u = shader->uniforms[anode->name];
-					if (u.texture_order >= 0) {
+					if (u.is_texture()) {
 						code = _mkid(anode->name); //texture, use as is
 					} else {
 						//a scalar or vector
@@ -1139,9 +1136,16 @@ String ShaderCompiler::_dump_node_code(const SL::Node *p_node, int p_level, Gene
 				case SL::OP_NEGATE:
 				case SL::OP_NOT:
 				case SL::OP_DECREMENT:
-				case SL::OP_INCREMENT:
-					code = _opstr(onode->op) + _dump_node_code(onode->arguments[0], p_level, r_gen_code, p_actions, p_default_actions, p_assigning);
-					break;
+				case SL::OP_INCREMENT: {
+					const String node_code = _dump_node_code(onode->arguments[0], p_level, r_gen_code, p_actions, p_default_actions, p_assigning);
+
+					if (onode->op == SL::OP_NEGATE && node_code.begins_with("-")) { // To prevent writing unary minus twice.
+						code = node_code;
+					} else {
+						code = _opstr(onode->op) + node_code;
+					}
+
+				} break;
 				case SL::OP_POST_DECREMENT:
 				case SL::OP_POST_INCREMENT:
 					code = _dump_node_code(onode->arguments[0], p_level, r_gen_code, p_actions, p_default_actions, p_assigning) + _opstr(onode->op);

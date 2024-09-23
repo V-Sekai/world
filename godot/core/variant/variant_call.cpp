@@ -1724,6 +1724,8 @@ static void _register_variant_builtin_methods_string() {
 	bind_string_method(validate_node_name, sarray(), varray());
 	bind_string_method(validate_filename, sarray(), varray());
 
+	bind_string_method(is_valid_ascii_identifier, sarray(), varray());
+	bind_string_method(is_valid_unicode_identifier, sarray(), varray());
 	bind_string_method(is_valid_identifier, sarray(), varray());
 	bind_string_method(is_valid_int, sarray(), varray());
 	bind_string_method(is_valid_float, sarray(), varray());
@@ -1849,6 +1851,7 @@ static void _register_variant_builtin_methods_math() {
 	bind_method(Rect2, intersection, sarray("b"), varray());
 	bind_method(Rect2, merge, sarray("b"), varray());
 	bind_method(Rect2, expand, sarray("to"), varray());
+	bind_method(Rect2, get_support, sarray("direction"), varray());
 	bind_method(Rect2, grow, sarray("amount"), varray());
 	bind_methodv(Rect2, grow_side, &Rect2::grow_side_bind, sarray("side", "amount"), varray());
 	bind_method(Rect2, grow_individual, sarray("left", "top", "right", "bottom"), varray());
@@ -2118,6 +2121,7 @@ static void _register_variant_builtin_methods_misc() {
 	bind_method(Signal, disconnect, sarray("callable"), varray());
 	bind_method(Signal, is_connected, sarray("callable"), varray());
 	bind_method(Signal, get_connections, sarray(), varray());
+	bind_method(Signal, has_connections, sarray(), varray());
 
 	bind_custom(Signal, emit, _VariantCall::func_Signal_emit, false, Variant);
 
@@ -2185,7 +2189,7 @@ static void _register_variant_builtin_methods_misc() {
 	bind_method(AABB, merge, sarray("with"), varray());
 	bind_method(AABB, expand, sarray("to_point"), varray());
 	bind_method(AABB, grow, sarray("by"), varray());
-	bind_method(AABB, get_support, sarray("dir"), varray());
+	bind_method(AABB, get_support, sarray("direction"), varray());
 	bind_method(AABB, get_longest_axis, sarray(), varray());
 	bind_method(AABB, get_longest_axis_index, sarray(), varray());
 	bind_method(AABB, get_longest_axis_size, sarray(), varray());
@@ -2251,6 +2255,7 @@ static void _register_variant_builtin_methods_misc() {
 	bind_method(Dictionary, size, sarray(), varray());
 	bind_method(Dictionary, is_empty, sarray(), varray());
 	bind_method(Dictionary, clear, sarray(), varray());
+	bind_method(Dictionary, assign, sarray("dictionary"), varray());
 	bind_method(Dictionary, merge, sarray("dictionary", "overwrite"), varray(false));
 	bind_method(Dictionary, merged, sarray("dictionary", "overwrite"), varray(false));
 	bind_method(Dictionary, has, sarray("key"), varray());
@@ -2263,6 +2268,18 @@ static void _register_variant_builtin_methods_misc() {
 	bind_method(Dictionary, duplicate, sarray("deep"), varray(false));
 	bind_method(Dictionary, get, sarray("key", "default"), varray(Variant()));
 	bind_method(Dictionary, get_or_add, sarray("key", "default"), varray(Variant()));
+	bind_method(Dictionary, is_typed, sarray(), varray());
+	bind_method(Dictionary, is_typed_key, sarray(), varray());
+	bind_method(Dictionary, is_typed_value, sarray(), varray());
+	bind_method(Dictionary, is_same_typed, sarray("dictionary"), varray());
+	bind_method(Dictionary, is_same_typed_key, sarray("dictionary"), varray());
+	bind_method(Dictionary, is_same_typed_value, sarray("dictionary"), varray());
+	bind_method(Dictionary, get_typed_key_builtin, sarray(), varray());
+	bind_method(Dictionary, get_typed_value_builtin, sarray(), varray());
+	bind_method(Dictionary, get_typed_key_class_name, sarray(), varray());
+	bind_method(Dictionary, get_typed_value_class_name, sarray(), varray());
+	bind_method(Dictionary, get_typed_key_script, sarray(), varray());
+	bind_method(Dictionary, get_typed_value_script, sarray(), varray());
 	bind_method(Dictionary, make_read_only, sarray(), varray());
 	bind_method(Dictionary, is_read_only, sarray(), varray());
 	bind_method(Dictionary, recursive_equal, sarray("dictionary", "recursion_count"), varray());
@@ -2289,7 +2306,9 @@ static void _register_variant_builtin_methods_array() {
 	bind_method(Array, back, sarray(), varray());
 	bind_method(Array, pick_random, sarray(), varray());
 	bind_method(Array, find, sarray("what", "from"), varray(0));
+	bind_method(Array, find_custom, sarray("method", "from"), varray(0));
 	bind_method(Array, rfind, sarray("what", "from"), varray(-1));
+	bind_method(Array, rfind_custom, sarray("method", "from"), varray(-1));
 	bind_method(Array, count, sarray("value"), varray());
 	bind_method(Array, has, sarray("value"), varray());
 	bind_method(Array, pop_back, sarray(), varray());
