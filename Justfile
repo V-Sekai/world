@@ -3,6 +3,7 @@ export MVSQLITE_DATA_PLANE := "http://192.168.0.39:7000"
 export OPERATING_SYSTEM := os()
 export ANDROID_HOME_COMMAND := "set-android-home-$OPERATING_SYSTEM"
 export EDITOR_TYPE_COMMAND := "run-editor-$OPERATING_SYSTEM"
+export PROJECT_PATH := "farm_chickens"
 
 default: run-editor
 
@@ -23,10 +24,10 @@ run-editor:
     @just {{ EDITOR_TYPE_COMMAND }}
 
 run-editor-macos:
-    ./godot/bin/godot.macos.editor.double.arm64 --path planner -e --display-driver macos --rendering-driver vulkan
+    ./godot/bin/godot.macos.editor.double.arm64 --path ${PROJECT_PATH} -e --display-driver macos --rendering-driver vulkan
 
 run-editor-linux:
-    ./godot/bin/godot.linux.editor.double.x86_64 --path ./planner -e
+    ./godot/bin/godot.linux.editor.double.x86_64 --path ${PROJECT_PATH} -e
 
 run-editor-windows:
-    ./godot/bin/godot.windows.editor.double.x86_64 --path ./planner -e
+    ./godot/bin/godot.windows.editor.double.x86_64 --path ${PROJECT_PATH} -e
