@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/V-Sekai-fire/godot-farm-chickens.git
 	branch = main
-	commit = 1f1c65740be688e2f68eeae58c69f17dd1deb7f3
-	parent = f750763374a54d9444311c2f4c10e8c8666a9239
+	commit = 796c4ae1bc747510212619fa8a8f56b6c74efb3b
+	parent = fec07ff0ca7fb9b3e306949329670bfee70debdc
 	method = merge
-	cmdver = 0.4.6
+	cmdver = 0.4.9
