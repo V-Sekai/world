@@ -160,7 +160,6 @@ func _ready() -> void:
 	if multiplayer_color_id >= 0:
 		var color_material: Material = MultiplayerColorTable.get_material_for_index(multiplayer_color_id)
 		assert(color_material)
-		
 		$CharacterModelHolder.assign_multiplayer_material(color_material)
 		if !multiplayer.has_multiplayer_peer() or is_multiplayer_authority():
 			$IngameGUI.assign_peer_color(color_material.albedo_color)
