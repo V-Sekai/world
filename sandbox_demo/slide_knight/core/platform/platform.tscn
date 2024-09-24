@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://eqb1p24hpo2f"]
+
+[ext_resource type="Texture2D" uid="uid://yautvntwvt24" path="res://slide_knight/art/platforms.png" id="1_1t7b0"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_nsg8i"]
+size = Vector2(30, 8)
+
+[node name="Node" type="AnimatableBody2D"]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture_filter = 1
+texture = ExtResource("1_1t7b0")
+region_enabled = true
+region_rect = Rect2(16, 0, 32, 9)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_nsg8i")
+one_way_collision = true
