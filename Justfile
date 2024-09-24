@@ -204,7 +204,9 @@ build-godot:
 build-godot-local:
     #!/usr/bin/env bash
     cd godot 
-    scons platform=macos \
+    scons platform=$OPERATING_SYSTEM \
+    use_mingw=yes \
+    use_llvm=yes \
     werror=no \
     vulkan=no \
     compiledb=yes \
@@ -213,7 +215,6 @@ build-godot-local:
     precision=single \
     target=editor \
     tests=yes \
-    arch=arm64 \
     debug_symbols=yes
 
 run-godot-local:
