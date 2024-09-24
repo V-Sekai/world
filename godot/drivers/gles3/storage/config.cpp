@@ -121,7 +121,7 @@ Config::Config() {
 #ifdef WEB_ENABLED
 	msaa_supported = (msaa_max_samples > 0);
 #else
-	msaa_supported = true;
+	msaa_supported = extensions.has("GL_EXT_framebuffer_multisample");
 #endif
 #ifndef IOS_ENABLED
 #ifdef WEB_ENABLED
@@ -138,7 +138,6 @@ Config::Config() {
 	// These are GLES only
 	rt_msaa_supported = extensions.has("GL_EXT_multisampled_render_to_texture");
 	rt_msaa_multiview_supported = extensions.has("GL_OVR_multiview_multisampled_render_to_texture");
-	external_texture_supported = extensions.has("GL_OES_EGL_image_external_essl3");
 
 	if (multiview_supported) {
 		eglFramebufferTextureMultiviewOVR = (PFNGLFRAMEBUFFERTEXTUREMULTIVIEWOVRPROC)eglGetProcAddress("glFramebufferTextureMultiviewOVR");
@@ -165,13 +164,6 @@ Config::Config() {
 		eglFramebufferTextureMultisampleMultiviewOVR = (PFNGLFRAMEBUFFERTEXTUREMULTISAMPLEMULTIVIEWOVRPROC)eglGetProcAddress("glFramebufferTextureMultisampleMultiviewOVR");
 		if (eglFramebufferTextureMultisampleMultiviewOVR == nullptr) {
 			rt_msaa_multiview_supported = false;
-		}
-	}
-
-	if (external_texture_supported) {
-		eglEGLImageTargetTexture2DOES = (PFNEGLIMAGETARGETTEXTURE2DOESPROC)eglGetProcAddress("glEGLImageTargetTexture2DOES");
-		if (eglEGLImageTargetTexture2DOES == nullptr) {
-			external_texture_supported = false;
 		}
 	}
 #endif
@@ -226,8 +218,6 @@ Config::Config() {
 			//https://github.com/godotengine/godot/issues/92662#issuecomment-2161199477
 			//disable_particles_workaround = false;
 		}
-	} else if (rendering_device_name == "PowerVR Rogue GE8320") {
-		disable_transform_feedback_shader_cache = true;
 	}
 }
 

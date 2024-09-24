@@ -154,6 +154,12 @@ msgstr "3D Kerimise Tugevus"
 msgid "iOS"
 msgstr "iOS"
 
+msgid "Editor"
+msgstr "Redaktor"
+
+msgid "Script"
+msgstr "Skript"
+
 msgid "Subwindows"
 msgstr "Alamaknad"
 
@@ -681,9 +687,6 @@ msgstr "Lülitusrežiim"
 
 msgid "Interface"
 msgstr "Liides"
-
-msgid "Editor"
-msgstr "Redaktor"
 
 msgid "Editor Language"
 msgstr "Redaktori Keel"
@@ -1959,9 +1962,6 @@ msgstr "SSH Privaatse Võtme Asukoht"
 
 msgid "Main Run Args"
 msgstr "Peamised Jooksuargumendid"
-
-msgid "Script"
-msgstr "Skript"
 
 msgid "Templates Search Path"
 msgstr "Mallide Otsingutee"

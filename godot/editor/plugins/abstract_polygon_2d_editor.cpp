@@ -620,6 +620,9 @@ void AbstractPolygon2DEditor::edit(Node *p_polygon) {
 	canvas_item_editor->update_viewport();
 }
 
+void AbstractPolygon2DEditor::_bind_methods() {
+}
+
 void AbstractPolygon2DEditor::remove_point(const Vertex &p_vertex) {
 	EditorUndoRedoManager *undo_redo = EditorUndoRedoManager::get_singleton();
 	Vector<Vector2> vertices = _get_polygon(p_vertex.polygon);
@@ -748,9 +751,7 @@ AbstractPolygon2DEditor::AbstractPolygon2DEditor(bool p_wip_destructive) {
 }
 
 void AbstractPolygon2DEditorPlugin::edit(Object *p_object) {
-	Node *polygon_node = Object::cast_to<Node>(p_object);
-	polygon_editor->edit(polygon_node);
-	make_visible(polygon_node != nullptr);
+	polygon_editor->edit(Object::cast_to<Node>(p_object));
 }
 
 bool AbstractPolygon2DEditorPlugin::handles(Object *p_object) const {

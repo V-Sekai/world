@@ -51,13 +51,11 @@ def create_template_zip(env, js, wasm, worker, side):
         js,
         wasm,
         "#platform/web/js/libs/audio.worklet.js",
-        "#platform/web/js/libs/audio.position.worklet.js",
     ]
     out_files = [
         zip_dir.File(binary_name + ".js"),
         zip_dir.File(binary_name + ".wasm"),
         zip_dir.File(binary_name + ".audio.worklet.js"),
-        zip_dir.File(binary_name + ".audio.position.worklet.js"),
     ]
     if env["threads"]:
         in_files.append(worker)
@@ -76,7 +74,6 @@ def create_template_zip(env, js, wasm, worker, side):
             "offline.html",
             "godot.editor.js",
             "godot.editor.audio.worklet.js",
-            "godot.editor.audio.position.worklet.js",
             "logo.svg",
             "favicon.png",
         ]
