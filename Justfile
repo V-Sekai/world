@@ -218,7 +218,7 @@ build-godot-local:
 
 run-godot-local:
     @just build-godot-local
-    ./godot/bin/
+    ./godot/bin/godot.macos.editor.double.arm64 --path sandbox_demo -e
 
 build_vsekai:
     just clone_repo_vsekai generate_build_constants prepare_exports copy_binaries list_files
