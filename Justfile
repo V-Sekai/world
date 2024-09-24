@@ -198,21 +198,14 @@ build-godot-web-editor:
     module_raycast_enabled=no \
     module_speech_enabled=no
 
-# brew unlink moreutils
-# brew install parallel
-# brew link --overwrite moreutils
-# brew unlink parallel
-# brew link --overwrite parallel
-# brew install clang
-
 build-godot:
-  #!/usr/bin/env -S parallel --shebang --ungroup --jobs {{ num_cpus() }}
-  #echo task windows-template-debug start; just build-godot-windows-template-debug; echo task windows-template-debug done
-  #echo task windows-template-release start; just build-godot-windows-template-release; echo task windows-template-release done
-  echo task windows-editor start; just build-godot-windows-editor; echo task windows-editor done
-  echo task macos-editor start; just build-godot-macos-editor; echo task macos-editor done
-  echo task linux-editor start; just build-godot-linux-editor; echo task linux-editor done
-  echo task web-editor start; just build-godot-web-editor; echo task web-editor done
+    #!/usr/bin/env -S parallel --shebang --ungroup --jobs {{ num_cpus() }}
+    #echo task windows-template-debug start; just build-godot-windows-template-debug; echo task windows-template-debug done
+    #echo task windows-template-release start; just build-godot-windows-template-release; echo task windows-template-release done
+    echo task windows-editor start; just build-godot-windows-editor; echo task windows-editor done
+    echo task macos-editor start; just build-godot-macos-editor; echo task macos-editor done
+    echo task linux-editor start; just build-godot-linux-editor; echo task linux-editor done
+    echo task web-editor start; just build-godot-web-editor; echo task web-editor done
 
 build_vsekai:
     just clone_repo_vsekai generate_build_constants prepare_exports copy_binaries list_files
