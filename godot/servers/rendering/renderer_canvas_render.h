@@ -364,7 +364,6 @@ public:
 		bool repeat_source;
 		Point2 repeat_size;
 		int repeat_times = 1;
-		Item *repeat_source_item = nullptr;
 
 		Rect2 global_rect_cache;
 

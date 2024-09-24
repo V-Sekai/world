@@ -958,30 +958,28 @@ struct CompletionItem {
 
 	/**
 	 * A string that should be used when comparing this item
-	 * with other items. When omitted the label is used
-	 * as the filter text for this item.
+	 * with other items. When `falsy` the label is used.
 	 */
 	String sortText;
 
 	/**
 	 * A string that should be used when filtering a set of
-	 * completion items. When omitted the label is used as the
-	 * filter text for this item.
+	 * completion items. When `falsy` the label is used.
 	 */
 	String filterText;
 
 	/**
 	 * A string that should be inserted into a document when selecting
-	 * this completion. When omitted the label is used as the insert text
-	 * for this item.
+	 * this completion. When `falsy` the label is used.
 	 *
 	 * The `insertText` is subject to interpretation by the client side.
 	 * Some tools might not take the string literally. For example
-	 * VS Code when code complete is requested in this example
-	 * `con<cursor position>` and a completion item with an `insertText` of
-	 * `console` is provided it will only insert `sole`. Therefore it is
-	 * recommended to use `textEdit` instead since it avoids additional client
-	 * side interpretation.
+	 * VS Code when code complete is requested in this example `con<cursor position>`
+	 * and a completion item with an `insertText` of `console` is provided it
+	 * will only insert `sole`. Therefore it is recommended to use `textEdit` instead
+	 * since it avoids additional client side interpretation.
+	 *
+	 * @deprecated Use textEdit instead.
 	 */
 	String insertText;
 
@@ -1036,20 +1034,14 @@ struct CompletionItem {
 		dict["label"] = label;
 		dict["kind"] = kind;
 		dict["data"] = data;
-		if (!insertText.is_empty()) {
-			dict["insertText"] = insertText;
-		}
+		dict["insertText"] = insertText;
 		if (resolved) {
 			dict["detail"] = detail;
 			dict["documentation"] = documentation.to_json();
 			dict["deprecated"] = deprecated;
 			dict["preselect"] = preselect;
-			if (!sortText.is_empty()) {
-				dict["sortText"] = sortText;
-			}
-			if (!filterText.is_empty()) {
-				dict["filterText"] = filterText;
-			}
+			dict["sortText"] = sortText;
+			dict["filterText"] = filterText;
 			if (commitCharacters.size()) {
 				dict["commitCharacters"] = commitCharacters;
 			}
@@ -1072,7 +1064,7 @@ struct CompletionItem {
 		}
 		if (p_dict.has("documentation")) {
 			Variant doc = p_dict["documentation"];
-			if (doc.is_string()) {
+			if (doc.get_type() == Variant::STRING) {
 				documentation.value = doc;
 			} else if (doc.get_type() == Variant::DICTIONARY) {
 				Dictionary v = doc;

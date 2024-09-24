@@ -178,6 +178,15 @@ msgstr "Catagóir an tSeisiúin"
 msgid "Mix With Others"
 msgstr "Measc le Daoine Eile"
 
+msgid "Editor"
+msgstr "Eagarthóir"
+
+msgid "Script"
+msgstr "Script"
+
+msgid "Search in File Extensions"
+msgstr "Cuardaigh i Eisínteachtaí Comhad"
+
 msgid "Subwindows"
 msgstr "Fofhuinneoga"
 
@@ -828,9 +837,6 @@ msgstr "Scoránaigh an Mód"
 
 msgid "Interface"
 msgstr "Comhéadan"
-
-msgid "Editor"
-msgstr "Eagarthóir"
 
 msgid "Editor Language"
 msgstr "Teanga an Eagarthóra"
@@ -2720,9 +2726,6 @@ msgstr "Cosán Eochair Phríobháideach SSH"
 msgid "Main Run Args"
 msgstr "Príomh-Args Rith"
 
-msgid "Script"
-msgstr "Script"
-
 msgid "Templates Search Path"
 msgstr "Conair Chuardaigh Teimpléid"
 
@@ -2977,9 +2980,6 @@ msgstr "Ais Scrollaigh Ionchur Rothlach"
 
 msgid "Text Driver"
 msgstr "Tiománaí Téacs"
-
-msgid "Search in File Extensions"
-msgstr "Cuardaigh i Eisínteachtaí Comhad"
 
 msgid "Mouse Cursor"
 msgstr "Cúrsóir Luiche"

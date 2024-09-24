@@ -39,17 +39,19 @@
 #endif //TOOLS_ENABLED
 
 bool Bone2D::_set(const StringName &p_path, const Variant &p_value) {
-	if (p_path == SNAME("auto_calculate_length_and_angle")) {
+	String path = p_path;
+
+	if (path.begins_with("auto_calculate_length_and_angle")) {
 		set_autocalculate_length_and_angle(p_value);
-	} else if (p_path == SNAME("length")) {
+	} else if (path.begins_with("length")) {
 		set_length(p_value);
-	} else if (p_path == SNAME("bone_angle")) {
+	} else if (path.begins_with("bone_angle")) {
 		set_bone_angle(Math::deg_to_rad(real_t(p_value)));
-	} else if (p_path == SNAME("default_length")) {
+	} else if (path.begins_with("default_length")) {
 		set_length(p_value);
 	}
 #ifdef TOOLS_ENABLED
-	else if (p_path == SNAME("editor_settings/show_bone_gizmo")) {
+	else if (path.begins_with("editor_settings/show_bone_gizmo")) {
 		_editor_set_show_bone_gizmo(p_value);
 	}
 #endif // TOOLS_ENABLED
@@ -61,17 +63,19 @@ bool Bone2D::_set(const StringName &p_path, const Variant &p_value) {
 }
 
 bool Bone2D::_get(const StringName &p_path, Variant &r_ret) const {
-	if (p_path == SNAME("auto_calculate_length_and_angle")) {
+	String path = p_path;
+
+	if (path.begins_with("auto_calculate_length_and_angle")) {
 		r_ret = get_autocalculate_length_and_angle();
-	} else if (p_path == SNAME("length")) {
+	} else if (path.begins_with("length")) {
 		r_ret = get_length();
-	} else if (p_path == SNAME("bone_angle")) {
+	} else if (path.begins_with("bone_angle")) {
 		r_ret = Math::rad_to_deg(get_bone_angle());
-	} else if (p_path == SNAME("default_length")) {
+	} else if (path.begins_with("default_length")) {
 		r_ret = get_length();
 	}
 #ifdef TOOLS_ENABLED
-	else if (p_path == SNAME("editor_settings/show_bone_gizmo")) {
+	else if (path.begins_with("editor_settings/show_bone_gizmo")) {
 		r_ret = _editor_get_show_bone_gizmo();
 	}
 #endif // TOOLS_ENABLED
@@ -326,7 +330,9 @@ bool Bone2D::_editor_get_bone_shape(Vector<Vector2> *p_shape, Vector<Vector2> *p
 		rel = (p_other_bone->get_global_position() - get_global_position());
 		rel = rel.rotated(-get_global_rotation()); // Undo Bone2D node's rotation so its drawn correctly regardless of the node's rotation
 	} else {
-		rel = Vector2(Math::cos(bone_angle), Math::sin(bone_angle)) * length * get_global_scale();
+		real_t angle_to_use = get_rotation() + bone_angle;
+		rel = Vector2(cos(angle_to_use), sin(angle_to_use)) * (length * MIN(get_global_scale().x, get_global_scale().y));
+		rel = rel.rotated(-get_rotation()); // Undo Bone2D node's rotation so its drawn correctly regardless of the node's rotation
 	}
 
 	Vector2 relt = rel.rotated(Math_PI * 0.5).normalized() * bone_width;
@@ -412,7 +418,7 @@ int Bone2D::get_index_in_skeleton() const {
 }
 
 PackedStringArray Bone2D::get_configuration_warnings() const {
-	PackedStringArray warnings = Node2D::get_configuration_warnings();
+	PackedStringArray warnings = Node::get_configuration_warnings();
 	if (!skeleton) {
 		if (parent_bone) {
 			warnings.push_back(RTR("This Bone2D chain should end at a Skeleton2D node."));
@@ -512,19 +518,23 @@ Bone2D::~Bone2D() {
 //////////////////////////////////////
 
 bool Skeleton2D::_set(const StringName &p_path, const Variant &p_value) {
-	if (p_path == SNAME("modification_stack")) {
+	String path = p_path;
+
+	if (path.begins_with("modification_stack")) {
 		set_modification_stack(p_value);
 		return true;
 	}
-	return false;
+	return true;
 }
 
 bool Skeleton2D::_get(const StringName &p_path, Variant &r_ret) const {
-	if (p_path == SNAME("modification_stack")) {
+	String path = p_path;
+
+	if (path.begins_with("modification_stack")) {
 		r_ret = get_modification_stack();
 		return true;
 	}
-	return false;
+	return true;
 }
 
 void Skeleton2D::_get_property_list(List<PropertyInfo> *p_list) const {

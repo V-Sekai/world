@@ -5,5 +5,5 @@ var color_material: Material = null
 
 func assign_multiplayer_material(p_material: Material) -> void:
 	color_material = p_material
-	
-	character_mesh_instance.material_override = color_material
+	if character_mesh_instance:
+		character_mesh_instance.material_override = color_material

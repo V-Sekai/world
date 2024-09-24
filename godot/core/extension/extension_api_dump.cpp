@@ -60,9 +60,6 @@ static String get_property_info_type_name(const PropertyInfo &p_info) {
 	if (p_info.type == Variant::ARRAY && (p_info.hint == PROPERTY_HINT_ARRAY_TYPE)) {
 		return String("typedarray::") + p_info.hint_string;
 	}
-	if (p_info.type == Variant::DICTIONARY && (p_info.hint == PROPERTY_HINT_DICTIONARY_TYPE)) {
-		return String("typeddictionary::") + p_info.hint_string;
-	}
 	if (p_info.type == Variant::INT && (p_info.usage & (PROPERTY_USAGE_CLASS_IS_ENUM))) {
 		return String("enum::") + String(p_info.class_name);
 	}
@@ -88,7 +85,7 @@ static String get_property_info_type_name(const PropertyInfo &p_info) {
 }
 
 static String get_type_meta_name(const GodotTypeInfo::Metadata metadata) {
-	static const char *argmeta[13] = { "none", "int8", "int16", "int32", "int64", "uint8", "uint16", "uint32", "uint64", "float", "double", "char16", "char32" };
+	static const char *argmeta[11] = { "none", "int8", "int16", "int32", "int64", "uint8", "uint16", "uint32", "uint64", "float", "double" };
 	return argmeta[metadata];
 }
 

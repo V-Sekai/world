@@ -79,7 +79,6 @@
 #include "core/os/time.h"
 #include "core/string/optimized_translation.h"
 #include "core/string/translation.h"
-#include "core/string/translation_server.h"
 
 static Ref<ResourceFormatSaverBinary> resource_saver_binary;
 static Ref<ResourceFormatLoaderBinary> resource_loader_binary;
@@ -100,6 +99,7 @@ static core_bind::Engine *_engine = nullptr;
 static core_bind::special::ClassDB *_classdb = nullptr;
 static core_bind::Marshalls *_marshalls = nullptr;
 static core_bind::EngineDebugger *_engine_debugger = nullptr;
+static core_bind::LogManager *_log_manager = nullptr;
 
 static IP *ip = nullptr;
 static Time *_time = nullptr;
@@ -233,7 +233,6 @@ void register_core_types() {
 
 	GDREGISTER_CLASS(MainLoop);
 	GDREGISTER_CLASS(Translation);
-	GDREGISTER_CLASS(TranslationDomain);
 	GDREGISTER_CLASS(OptimizedTranslation);
 	GDREGISTER_CLASS(UndoRedo);
 	GDREGISTER_CLASS(TriangleMesh);
@@ -293,6 +292,7 @@ void register_core_types() {
 	_classdb = memnew(core_bind::special::ClassDB);
 	_marshalls = memnew(core_bind::Marshalls);
 	_engine_debugger = memnew(core_bind::EngineDebugger);
+	_log_manager = memnew(core_bind::LogManager);
 
 	GDREGISTER_NATIVE_STRUCT(ObjectID, "uint64_t id = 0");
 	GDREGISTER_NATIVE_STRUCT(AudioFrame, "float left;float right");
@@ -331,6 +331,7 @@ void register_core_singletons() {
 	GDREGISTER_CLASS(InputMap);
 	GDREGISTER_CLASS(Expression);
 	GDREGISTER_CLASS(core_bind::EngineDebugger);
+	GDREGISTER_CLASS(core_bind::LogManager);
 	GDREGISTER_CLASS(Time);
 
 	Engine::get_singleton()->add_singleton(Engine::Singleton("ProjectSettings", ProjectSettings::get_singleton()));
@@ -347,6 +348,7 @@ void register_core_singletons() {
 	Engine::get_singleton()->add_singleton(Engine::Singleton("Input", Input::get_singleton()));
 	Engine::get_singleton()->add_singleton(Engine::Singleton("InputMap", InputMap::get_singleton()));
 	Engine::get_singleton()->add_singleton(Engine::Singleton("EngineDebugger", core_bind::EngineDebugger::get_singleton()));
+	Engine::get_singleton()->add_singleton(Engine::Singleton("LogManager", core_bind::LogManager::get_singleton()));
 	Engine::get_singleton()->add_singleton(Engine::Singleton("Time", Time::get_singleton()));
 	Engine::get_singleton()->add_singleton(Engine::Singleton("GDExtensionManager", GDExtensionManager::get_singleton()));
 	Engine::get_singleton()->add_singleton(Engine::Singleton("ResourceUID", ResourceUID::get_singleton()));
@@ -385,6 +387,7 @@ void unregister_core_types() {
 
 	memdelete(worker_thread_pool);
 
+	memdelete(_log_manager);
 	memdelete(_engine_debugger);
 	memdelete(_marshalls);
 	memdelete(_classdb);

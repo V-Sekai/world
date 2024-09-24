@@ -54,29 +54,35 @@ static constexpr bool operator &(CanvasEngine a, CanvasEngine b)
     return int(a) & int(b);
 }
 
-static bool _buildVersionInfo(uint32_t* major, uint32_t* minor, uint32_t* micro)
+static bool _buildVersionInfo()
 {
-    auto VER = THORVG_VERSION_STRING;
-    auto p = VER;
+    auto SRC = THORVG_VERSION_STRING;   //ex) 0.3.99
+    auto p = SRC;
     const char* x;
 
-    if (!(x = strchr(p, '.'))) return false;
-    uint32_t majorVal = atoi(p);
+    char major[3];
+    x = strchr(p, '.');
+    if (!x) return false;
+    memcpy(major, p, x - p);
+    major[x - p] = '\0';
     p = x + 1;
 
-    if (!(x = strchr(p, '.'))) return false;
-    uint32_t minorVal = atoi(p);
+    char minor[3];
+    x = strchr(p, '.');
+    if (!x) return false;
+    memcpy(minor, p, x - p);
+    minor[x - p] = '\0';
     p = x + 1;
 
-    uint32_t microVal = atoi(p);
+    char micro[3];
+    x = SRC + strlen(THORVG_VERSION_STRING);
+    memcpy(micro, p, x - p);
+    micro[x - p] = '\0';
 
     char sum[7];
-    snprintf(sum, sizeof(sum), "%d%02d%02d", majorVal, minorVal, microVal);
-    _version = atoi(sum);
+    snprintf(sum, sizeof(sum), "%s%s%s", major, minor, micro);
 
-    if (major) *major = majorVal;
-    if (minor) *minor = minorVal;
-    if (micro) *micro = microVal;
+    _version = atoi(sum);
 
     return true;
 }
@@ -116,7 +122,7 @@ Result Initializer::init(CanvasEngine engine, uint32_t threads) noexcept
 
     if (_initCnt++ > 0) return Result::Success;
 
-    if (!_buildVersionInfo(nullptr, nullptr, nullptr)) return Result::Unknown;
+    if (!_buildVersionInfo()) return Result::Unknown;
 
     if (!LoaderMgr::init()) return Result::Unknown;
 
@@ -166,14 +172,8 @@ Result Initializer::term(CanvasEngine engine) noexcept
 }
 
 
-const char* Initializer::version(uint32_t* major, uint32_t* minor, uint32_t* micro) noexcept
-{
-    if ((!major && ! minor && !micro) || _buildVersionInfo(major, minor, micro)) return THORVG_VERSION_STRING;
-    return nullptr;
-}
-
-
 uint16_t THORVG_VERSION_NUMBER()
 {
     return _version;
 }
+

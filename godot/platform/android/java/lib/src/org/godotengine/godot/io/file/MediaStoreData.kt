@@ -52,7 +52,7 @@ import java.nio.channels.FileChannel
  */
 @RequiresApi(Build.VERSION_CODES.Q)
 internal class MediaStoreData(context: Context, filePath: String, accessFlag: FileAccessFlags) :
-	DataAccess.FileChannelDataAccess(filePath) {
+	DataAccess(filePath) {
 
 	private data class DataItem(
 		val id: Long,
@@ -203,7 +203,7 @@ internal class MediaStoreData(context: Context, filePath: String, accessFlag: Fi
 			}
 
 			val dataItem = result[0]
-			return dataItem.dateModified.toLong() / 1000L
+			return dataItem.dateModified.toLong()
 		}
 
 		fun rename(context: Context, from: String, to: String): Boolean {

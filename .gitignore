@@ -4,12 +4,9 @@ game/vsk_default/art/SK_black_cat/
 SERVICE_mvsqlite/mvsqlite-sqlite3/sqlite3
 SERVICE_uro_sqlite_fdb/test_output.txt
 DOC_manuals/notebooks/.ipynb_checkpoints
-
 VSK_godot/modules/mvsqlite/thirdparty/mvsqlite/mvsqlite-sqlite3/sqlite3
 34 Blender/addons/AddRoutes/.idea
-
 34_blender/addons/voxel_skinning/data/
-
 24_mesh_transformer/addons/text_to_mesh/temporary/
-
 profile.json
+osxcross

@@ -208,7 +208,7 @@ func _peer_authenticating(p_id: int) -> void:
 func _peer_authentication_failed(p_id: int) -> void:
 	print("Peer %s failed to authenticate..." % p_id)
 	
-func _physics_process(p_delta: float):
+func _physics_process(_delta: float):
 	multiplayer.poll()
 	
 func _ready() -> void:

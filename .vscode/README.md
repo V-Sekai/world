@@ -5,7 +5,9 @@ Tested on msys2 Windows 11, Popos.
 ## Readme for fire
 
 ```bash
-scoop install msys2
+scoop install sudo clink
+clink autorun install
+sudo scoop install msys2 gpg4win lazygit gopass
 msys2
 pacman -S git python3 ssh-pageant
 echo "pacman -S git python3 ssh-pageant" >> ~/.bashrc
