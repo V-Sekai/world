@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/libriscv/godot-sandbox-demo.git
 	branch = master
-	commit = 2b2dc716a8a192a6948ed502c82a865760ed06fa
-	parent = 74ce96359bbe486cbd125d201a8d49c1ba7ce242
+	commit = 7220d35bc87340264213d40d515853324315f9a8
+	parent = d1060f89efb9c3df77c4b8c58a89396b6716a9a9
 	method = merge
 	cmdver = 0.4.6
