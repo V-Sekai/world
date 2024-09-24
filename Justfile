@@ -63,9 +63,7 @@ build_just_docker:
 
 deploy_just_docker:
     @just build_just_docker
-    # POSIX
-    # docker run -it --rm -v "$(pwd)":/app just-fedora-app
-    powershell -Command "docker run -it --rm -v \"${PWD}:/app\" just-fedora-app"
+    docker run -it --rm -v "$(pwd)":/app just-fedora-app
 
 deploy_osxcross:
     #!/usr/bin/env bash
@@ -88,16 +86,14 @@ run-editor:
     @just build-godot
     @just {{ EDITOR_TYPE_COMMAND }}
 
-# Download and set up LLVM-MinGW
-setup-llvm-mingw:
-    #!/usr/bin/env bash
-    curl -o llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64.tar.xz -L https://github.com/mstorsjo/llvm-mingw/releases/download/20240917/llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64.tar.xz
-    tar -xf llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64.tar.xz
-    export PATH=$(pwd)/llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64/bin:$PATH
+build-godot-windows:
+    @just build-godot-windows-editor
+    @just build-godot-template-debug
+    @just build-godot-template-release
 
 build-godot-windows-editor:
     #!/usr/bin/env bash
-    export PATH=$(pwd)/llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64/bin:$PATH
+    export PATH=/llvm-mingw-20240917-ucrt-ubuntu-20.04-aarch64/bin:$PATH
     cd godot 
     scons platform=windows \
         werror=no \
@@ -113,7 +109,7 @@ build-godot-windows-editor:
 
 build-godot-windows-template-release:
     #!/usr/bin/env bash
-    export PATH=$(pwd)/llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64/bin:$PATH
+    export PATH=/llvm-mingw-20240917-ucrt-ubuntu-20.04-aarch64/bin:$PATH
     cd godot 
     scons platform=windows \
         werror=no \
@@ -129,7 +125,7 @@ build-godot-windows-template-release:
 
 build-godot-windows-template-debug:
     #!/usr/bin/env bash
-    export PATH=$(pwd)/llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64/bin:$PATH
+    export PATH=$(pwd)/llvm-mingw-20240917-ucrt-ubuntu-20.04-aarch64/bin:$PATH
     cd godot 
     scons platform=windows \
         werror=no \
@@ -146,7 +142,6 @@ build-godot-windows-template-debug:
 build-godot-macos-editor:
     #!/usr/bin/env bash
     export OSXCROSS_ROOT="/osxcross"
-    export PATH=/osxcross/target/bin:$PATH
     cd godot 
     scons platform=macos \
     osxcross_sdk=darwin24 \
@@ -176,36 +171,54 @@ build-godot-linux-editor:
     tests=yes \
     debug_symbols=yes
 
-build-godot-web-editor:
+build-godot-web-template-release:
     #!/usr/bin/env bash
     cd godot 
     # Needs 59+ gigabytes of ram for the editor web build.
     scons platform=web \
     werror=no \
     compiledb=yes \
-    threads=no \
+    threads=yes \
     linker=mold \
+    dev_build=no \
+    generate_bundle=no \
+    precision=double \
+    target=template_release \
+    tests=yes \
+    debug_symbols=yes \
+    lto=none \
+    dlink_enabled=yes \
+    builtin_glslang=yes \
+    builtin_openxr=yes \
+    module_raycast_enabled=no \
+    module_speech_enabled=no \
+    javascript_eval=no
+
+build-godot:
+    #!/usr/bin/env -S parallel --shebang --ungroup --jobs {{ num_cpus() }}
+    echo task windows start; just build-godot-windows; echo task windows done
+    echo task macos-editor start; just build-godot-macos-editor; echo task macos-editor done
+    echo task linux-editor start; just build-godot-linux-editor; echo task linux-editor done
+    echo task web-template-release start; just build-godot-web-template-release; echo task web-template-release done
+
+build-godot-local:
+    #!/usr/bin/env bash
+    cd godot 
+    scons platform=macos \
+    werror=no \
+    vulkan=no \
+    compiledb=yes \
     dev_build=no \
     generate_bundle=no \
     precision=double \
     target=editor \
     tests=yes \
-    debug_symbols=yes \
-    lto=thin \
-    dlink_enabled=yes \
-    builtin_glslang=yes \
-    builtin_openxr=yes \
-    module_raycast_enabled=no \
-    module_speech_enabled=no
+    arch=arm64 \
+    debug_symbols=yes
 
-build-godot:
-    #!/usr/bin/env -S parallel --shebang --ungroup --jobs {{ num_cpus() }}
-    #echo task windows-template-debug start; just build-godot-windows-template-debug; echo task windows-template-debug done
-    #echo task windows-template-release start; just build-godot-windows-template-release; echo task windows-template-release done
-    echo task windows-editor start; just build-godot-windows-editor; echo task windows-editor done
-    echo task macos-editor start; just build-godot-macos-editor; echo task macos-editor done
-    echo task linux-editor start; just build-godot-linux-editor; echo task linux-editor done
-    echo task web-editor start; just build-godot-web-editor; echo task web-editor done
+run-godot-local:
+    @just build-godot-local
+    ./godot/bin/
 
 build_vsekai:
     just clone_repo_vsekai generate_build_constants prepare_exports copy_binaries list_files
@@ -215,3 +228,6 @@ deploy_vsekai:
 
 full_build_deploy:
     just build_vsekai deploy_vsekai build_docker push_docker
+
+default:
+    @just --choose

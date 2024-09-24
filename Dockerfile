@@ -1,6 +1,5 @@
 # Dockerfile
 FROM fedora:39
-
 RUN dnf install -y \
     xz \
     gcc \
@@ -13,7 +12,6 @@ RUN dnf install -y \
     just \
     parallel \
     scons \
-    ccache \
     mold \
     pkgconfig \
     libX11-devel \
@@ -35,20 +33,15 @@ RUN dnf install -y \
     openssl \ 
     openssl-devel \
     git
-
 RUN git clone https://github.com/emscripten-core/emsdk.git /emsdk
-
 RUN /emsdk/emsdk install 3.1.67
-
 RUN /emsdk/emsdk activate 3.1.67
-
 RUN echo 'source "/emsdk/emsdk_env.sh"' >> $HOME/.bashrc
-
 RUN git clone https://github.com/tpoechtrager/osxcross.git /osxcross
-COPY osxcross/tarballs/MacOSX15.0.sdk.tar.xz /osxcross/tarballs/
-
+RUN curl -o /osxcross/tarballs/MacOSX15.0.sdk.tar.xz -L https://github.com/V-Sekai/world/releases/download/v0.0.1/MacOSX15.0.sdk.tar.xz
 RUN cd  /osxcross && UNATTENDED=1 ./build.sh && ./build_compiler_rt.sh
-
+RUN curl -o llvm-mingw.tar.xz -L https://github.com/mstorsjo/llvm-mingw/releases/download/20240917/llvm-mingw-20240917-ucrt-ubuntu-20.04-aarch64.tar.xz
+RUN tar -xf llvm-mingw.tar.xz -C /
+RUN rm -rf llvm-mingw.tar.xz 
 WORKDIR /app
-
 CMD ["bash"]
