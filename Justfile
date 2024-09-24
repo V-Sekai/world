@@ -210,7 +210,7 @@ build-godot-local:
     compiledb=yes \
     dev_build=no \
     generate_bundle=no \
-    precision=double \
+    precision=single \
     target=editor \
     tests=yes \
     arch=arm64 \
@@ -218,7 +218,7 @@ build-godot-local:
 
 run-godot-local:
     @just build-godot-local
-    ./godot/bin/godot.macos.editor.double.arm64 --path sandbox_demo -e
+    ./godot/bin/godot.macos.editor.arm64 --path sandbox_demo -e
 
 build_vsekai:
     just clone_repo_vsekai generate_build_constants prepare_exports copy_binaries list_files
