@@ -102,7 +102,7 @@ build-all:
             web)
                 EXTRA_FLAGS="threads=yes linker=mold lto=none dlink_enabled=yes builtin_glslang=yes builtin_openxr=yes module_raycast_enabled=no module_speech_enabled=no javascript_eval=no"
                 ;;
-        esac
+        esac        
         scons platform=$platform \
             werror=no \
             compiledb=yes \
@@ -112,23 +112,23 @@ build-all:
             test=yes \
             debug_symbol=yes \
             $EXTRA_FLAGS
-    ' ::: android web windows linux macos \
-    ::: editor template_release template_debug
-    case "$platform" in
-        android)
-            if [ "$target" = "editor" ]; then
-                cd platform/android/java
-                ./gradlew generateGodotEditor
-                ./gradlew generateGodotHorizonOSEditor
-                cd ../../..
-                ls -l bin/android_editor_builds/
-            elif [ "$target" = "template_release" ] || [ "$target" = "template_debug" ]; then
-                cd platform/android/java
-                ./gradlew generateGodotTemplates
-                cd ../../..
-                ls -l bin/
-            fi
-            ;;
+        case "$platform" in
+            android)
+                if [ "$target" = "editor" ]; then
+                    cd platform/android/java
+                    ./gradlew generateGodotEditor
+                    ./gradlew generateGodotHorizonOSEditor
+                    cd ../../..
+                    ls -l bin/android_editor_builds/
+                elif [ "$target" = "template_release" ] || [ "$target" = "template_debug" ]; then
+                    cd platform/android/java
+                    ./gradlew generateGodotTemplates
+                    cd ../../..
+                    ls -l bin/
+                fi
+                ;;
+    ' ::: android \
+    ::: editor
     esac
 
 build-godot-local:
