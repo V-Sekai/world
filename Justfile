@@ -175,6 +175,21 @@ build-godot-linux-editor:
     tests=yes \
     debug_symbols=yes
 
+build-godot-android-editor:
+    #!/usr/bin/env bash
+    cd godot
+    scons platform=android \
+    use_llvm=yes \
+    werror=no \
+    compiledb=yes \
+    linker=mold \
+    dev_build=no \
+    generate_bundle=no \
+    precision=double \
+    target=editor \
+    tests=yes \
+    debug_symbols=yes
+
 build-godot-web-template-release:
     #!/usr/bin/env bash
     cd godot 
