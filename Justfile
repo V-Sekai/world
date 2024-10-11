@@ -107,6 +107,7 @@ build-all:
         scons platform=$platform \
             linkflags="-Wl,-pdb=" \
             ccflags="-g -gcodeview" \
+            use_thinlto=yes \
             werror=no \
             compiledb=yes \
             generate_bundle=yes \
@@ -131,7 +132,7 @@ build-all:
                 fi
                 ;;
         esac
-    ' ::: android web windows linux macos \
+    ' ::: windows android web linux macos \
     ::: editor template_release template_debug
 
 build-godot-local:
