@@ -112,7 +112,7 @@ build-all:
             test=yes \
             debug_symbol=yes \
             $EXTRA_FLAGS
-    ' ::: windows macos linux web android \
+    ' ::: android web windows linux macos \
     ::: editor template_release template_debug
     case "$platform" in
         android)
