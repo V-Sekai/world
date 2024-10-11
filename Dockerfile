@@ -40,7 +40,6 @@ RUN curl -O https://download.blender.org/release/Blender4.1/blender-4.1.1-linux-
     tar -xf blender-4.1.1-linux-x64.tar.xz -C /opt/ && \
     rm blender-4.1.1-linux-x64.tar.xz && \
     ln -s /opt/blender-4.1.1-linux-x64/blender /usr/local/bin/blender
-RUN cd /usr/local/bin && curl -L -o butler.zip https://broth.itch.zone/butler/linux-amd64/15.21.0/archive/default && unzip butler.zip && rm butler.zip && butler -V && butler -V && cd && butler -V
 RUN mkdir -p /opt/cargo /opt/rust && curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly --no-modify-path && . "$HOME/.cargo/env" && rustup default nightly && rustup target add aarch64-linux-android x86_64-linux-android x86_64-unknown-linux-gnu aarch64-apple-ios x86_64-apple-ios x86_64-apple-darwin aarch64-apple-darwin x86_64-pc-windows-gnu x86_64-pc-windows-msvc wasm32-wasi
 RUN git clone https://github.com/emscripten-core/emsdk.git /emsdk
 RUN /emsdk/emsdk install 3.1.67
