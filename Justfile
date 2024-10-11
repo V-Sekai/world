@@ -16,8 +16,9 @@ export GIT_URL_DOCKER := "https://github.com/V-Sekai/docker-groups.git"
 export GIT_URL_VSEKAI := "https://github.com/V-Sekai/v-sekai-game.git"
 
 deploy_just_docker:
+    set windows-shell := ["powershell.exe", "-NoLogo", "-Command"]
     @just build_just_docker
-    docker run -it --rm -v "C:/Users/ernest.lee/Downloads/world":/app just-fedora-app
+    docker run -it --rm -v "%(pwd)":/app just-fedora-app
 
 run-godot-local:
     @just build-godot-local
