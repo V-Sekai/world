@@ -86,7 +86,7 @@ run-editor:
 build-all:
     #!/usr/bin/env bash
     export PATH=/llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64/bin:$PATH
-    parallel --ungroup --jobs 4 '
+    parallel --ungroup --jobs 1 '
         platform={1}
         target={2}
         cd godot
