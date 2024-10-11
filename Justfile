@@ -101,7 +101,8 @@ build-all:
                 ;;
         esac        
         scons platform=$platform \
-            scu_build=yes \
+            ninja=yes \
+            ninja_auto_run=yes \
             linkflags="-Wl,-pdb=" \
             ccflags="-g -gcodeview" \
             use_thinlto=yes \
