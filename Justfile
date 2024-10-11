@@ -97,7 +97,7 @@ build-godot-windows:
 
 build-godot-windows-editor:
     #!/usr/bin/env bash
-    export PATH=/llvm-mingw-20240917-ucrt-ubuntu-20.04-aarch64/bin:$PATH
+    export PATH=/llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64/bin:$PATH
     cd godot 
     scons platform=windows \
         werror=no \
@@ -113,7 +113,7 @@ build-godot-windows-editor:
 
 build-godot-windows-template-release:
     #!/usr/bin/env bash
-    export PATH=/llvm-mingw-20240917-ucrt-ubuntu-20.04-aarch64/bin:$PATH
+    export PATH=/llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64/bin:$PATH
     cd godot 
     scons platform=windows \
         werror=no \
@@ -129,7 +129,7 @@ build-godot-windows-template-release:
 
 build-godot-windows-template-debug:
     #!/usr/bin/env bash
-    export PATH=$(pwd)/llvm-mingw-20240917-ucrt-ubuntu-20.04-aarch64/bin:$PATH
+    export PATH=/llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64/bin:$PATH
     cd godot 
     scons platform=windows \
         werror=no \
