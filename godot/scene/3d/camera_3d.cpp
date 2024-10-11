@@ -31,7 +31,9 @@
 #include "camera_3d.h"
 
 #include "core/math/projection.h"
+#include "core/math/transform_interpolator.h"
 #include "scene/main/viewport.h"
+#include "servers/rendering/rendering_server_constants.h"
 
 void Camera3D::_update_audio_listener_state() {
 }
@@ -88,13 +90,80 @@ void Camera3D::_update_camera() {
 		return;
 	}
 
-	RenderingServer::get_singleton()->camera_set_transform(camera, get_camera_transform());
+	if (!is_physics_interpolated_and_enabled()) {
+		RenderingServer::get_singleton()->camera_set_transform(camera, get_camera_transform());
+	} else {
+		// Ideally we shouldn't be moving a physics interpolated camera within a frame,
+		// because it will break smooth interpolation, but it may occur on e.g. level load.
+		if (!Engine::get_singleton()->is_in_physics_frame() && camera.is_valid()) {
+			_physics_interpolation_ensure_transform_calculated(true);
+			RenderingServer::get_singleton()->camera_set_transform(camera, _interpolation_data.camera_xform_interpolated);
+		}
+	}
 
 	if (is_part_of_edited_scene() || !is_current()) {
 		return;
 	}
 
 	get_viewport()->_camera_3d_transform_changed_notify();
+}
+
+void Camera3D::_physics_interpolated_changed() {
+	_update_process_mode();
+}
+
+void Camera3D::_physics_interpolation_ensure_data_flipped() {
+	// The curr -> previous update can either occur
+	// on the INTERNAL_PHYSICS_PROCESS OR
+	// on NOTIFICATION_TRANSFORM_CHANGED,
+	// if NOTIFICATION_TRANSFORM_CHANGED takes place
+	// earlier than INTERNAL_PHYSICS_PROCESS on a tick.
+	// This is to ensure that the data keeps flowing, but the new data
+	// doesn't overwrite before prev has been set.
+
+	// Keep the data flowing.
+	uint64_t tick = Engine::get_singleton()->get_physics_frames();
+	if (_interpolation_data.last_update_physics_tick != tick) {
+		_interpolation_data.xform_prev = _interpolation_data.xform_curr;
+		_interpolation_data.last_update_physics_tick = tick;
+		physics_interpolation_flip_data();
+	}
+}
+
+void Camera3D::_physics_interpolation_ensure_transform_calculated(bool p_force) const {
+	DEV_CHECK_ONCE(!Engine::get_singleton()->is_in_physics_frame());
+
+	InterpolationData &id = _interpolation_data;
+	uint64_t frame = Engine::get_singleton()->get_frames_drawn();
+
+	if (id.last_update_frame != frame || p_force) {
+		id.last_update_frame = frame;
+
+		TransformInterpolator::interpolate_transform_3d(id.xform_prev, id.xform_curr, id.xform_interpolated, Engine::get_singleton()->get_physics_interpolation_fraction());
+
+		Transform3D &tr = id.camera_xform_interpolated;
+		tr = _get_adjusted_camera_transform(id.xform_interpolated);
+	}
+}
+
+void Camera3D::set_desired_process_modes(bool p_process_internal, bool p_physics_process_internal) {
+	_desired_process_internal = p_process_internal;
+	_desired_physics_process_internal = p_physics_process_internal;
+	_update_process_mode();
+}
+
+void Camera3D::_update_process_mode() {
+	bool process = _desired_process_internal;
+	bool physics_process = _desired_physics_process_internal;
+
+	if (is_physics_interpolated_and_enabled()) {
+		if (is_current()) {
+			process = true;
+			physics_process = true;
+		}
+	}
+	set_process_internal(process);
+	set_physics_process_internal(physics_process);
 }
 
 void Camera3D::_notification(int p_what) {
@@ -118,10 +187,57 @@ void Camera3D::_notification(int p_what) {
 #endif
 		} break;
 
+		case NOTIFICATION_INTERNAL_PROCESS: {
+			if (is_physics_interpolated_and_enabled() && camera.is_valid()) {
+				_physics_interpolation_ensure_transform_calculated();
+
+#ifdef RENDERING_SERVER_DEBUG_PHYSICS_INTERPOLATION
+				print_line("\t\tinterpolated Camera3D: " + rtos(_interpolation_data.xform_interpolated.origin.x) + "\t( prev " + rtos(_interpolation_data.xform_prev.origin.x) + ", curr " + rtos(_interpolation_data.xform_curr.origin.x) + " ) on tick " + itos(Engine::get_singleton()->get_physics_frames()));
+#endif
+
+				RenderingServer::get_singleton()->camera_set_transform(camera, _interpolation_data.camera_xform_interpolated);
+			}
+		} break;
+
+		case NOTIFICATION_INTERNAL_PHYSICS_PROCESS: {
+			if (is_physics_interpolated_and_enabled()) {
+				_physics_interpolation_ensure_data_flipped();
+				_interpolation_data.xform_curr = get_global_transform();
+			}
+		} break;
+
 		case NOTIFICATION_TRANSFORM_CHANGED: {
+			if (is_physics_interpolated_and_enabled()) {
+				_physics_interpolation_ensure_data_flipped();
+				_interpolation_data.xform_curr = get_global_transform();
+#if defined(DEBUG_ENABLED) && defined(TOOLS_ENABLED)
+				if (!Engine::get_singleton()->is_in_physics_frame()) {
+					PHYSICS_INTERPOLATION_NODE_WARNING(get_instance_id(), "Interpolated Camera3D triggered from outside physics process");
+				}
+#endif
+			}
 			_request_camera_update();
 			if (doppler_tracking != DOPPLER_TRACKING_DISABLED) {
 				velocity_tracker->update_position(get_global_transform().origin);
+			}
+			// Allow auto-reset when first adding to the tree, as a convenience.
+			if (_is_physics_interpolation_reset_requested() && is_inside_tree()) {
+				_notification(NOTIFICATION_RESET_PHYSICS_INTERPOLATION);
+				_set_physics_interpolation_reset_requested(false);
+			}
+		} break;
+
+		case NOTIFICATION_RESET_PHYSICS_INTERPOLATION: {
+			if (is_inside_tree()) {
+				_interpolation_data.xform_curr = get_global_transform();
+				_interpolation_data.xform_prev = _interpolation_data.xform_curr;
+			}
+		} break;
+
+		case NOTIFICATION_PAUSED: {
+			if (is_physics_interpolated_and_enabled() && is_inside_tree() && is_visible_in_tree()) {
+				_physics_interpolation_ensure_transform_calculated(true);
+				RenderingServer::get_singleton()->camera_set_transform(camera, _interpolation_data.camera_xform_interpolated);
 			}
 		} break;
 
@@ -151,21 +267,32 @@ void Camera3D::_notification(int p_what) {
 			if (viewport) {
 				viewport->find_world_3d()->_register_camera(this);
 			}
+			_update_process_mode();
 		} break;
 
 		case NOTIFICATION_LOST_CURRENT: {
 			if (viewport) {
 				viewport->find_world_3d()->_remove_camera(this);
 			}
+			_update_process_mode();
 		} break;
 	}
 }
 
-Transform3D Camera3D::get_camera_transform() const {
-	Transform3D tr = get_global_transform().orthonormalized();
+Transform3D Camera3D::_get_adjusted_camera_transform(const Transform3D &p_xform) const {
+	Transform3D tr = p_xform.orthonormalized();
 	tr.origin += tr.basis.get_column(1) * v_offset;
 	tr.origin += tr.basis.get_column(0) * h_offset;
 	return tr;
+}
+
+Transform3D Camera3D::get_camera_transform() const {
+	if (is_physics_interpolated_and_enabled() && !Engine::get_singleton()->is_in_physics_frame()) {
+		_physics_interpolation_ensure_transform_calculated();
+		return _interpolation_data.camera_xform_interpolated;
+	}
+
+	return _get_adjusted_camera_transform(get_global_transform());
 }
 
 Projection Camera3D::_get_camera_projection(real_t p_near) const {
@@ -238,15 +365,6 @@ void Camera3D::set_frustum(real_t p_size, Vector2 p_offset, real_t p_z_near, rea
 
 	RenderingServer::get_singleton()->camera_set_frustum(camera, size, frustum_offset, _near, _far);
 	update_gizmos();
-}
-
-Projection Camera3D::get_override_projection() const {
-	return override_projection;
-}
-
-void Camera3D::set_override_projection(const Projection &p_matrix) {
-	override_projection = p_matrix;
-	RenderingServer::get_singleton()->camera_set_override_projection(camera, override_projection);
 }
 
 void Camera3D::set_projection(ProjectionType p_mode) {
@@ -388,6 +506,11 @@ Point2 Camera3D::unproject_position(const Vector3 &p_pos) const {
 	Plane p(get_camera_transform().xform_inv(p_pos), 1.0);
 
 	p = cm.xform4(p);
+
+	// Prevent divide by zero.
+	// TODO: Investigate, this was causing NaNs.
+	ERR_FAIL_COND_V(p.d == 0, Point2());
+
 	p.normal /= p.d;
 
 	Point2 res;
@@ -545,8 +668,6 @@ void Camera3D::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_near", "near"), &Camera3D::set_near);
 	ClassDB::bind_method(D_METHOD("get_projection"), &Camera3D::get_projection);
 	ClassDB::bind_method(D_METHOD("set_projection", "mode"), &Camera3D::set_projection);
-	ClassDB::bind_method(D_METHOD("get_override_projection"), &Camera3D::get_override_projection);
-	ClassDB::bind_method(D_METHOD("set_override_projection", "projection_matrix"), &Camera3D::set_override_projection);
 	ClassDB::bind_method(D_METHOD("set_h_offset", "offset"), &Camera3D::set_h_offset);
 	ClassDB::bind_method(D_METHOD("get_h_offset"), &Camera3D::get_h_offset);
 	ClassDB::bind_method(D_METHOD("set_v_offset", "offset"), &Camera3D::set_v_offset);
@@ -582,7 +703,6 @@ void Camera3D::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "v_offset", PROPERTY_HINT_NONE, "suffix:m"), "set_v_offset", "get_v_offset");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "doppler_tracking", PROPERTY_HINT_ENUM, "Disabled,Idle,Physics"), "set_doppler_tracking", "get_doppler_tracking");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "projection", PROPERTY_HINT_ENUM, "Perspective,Orthogonal,Frustum"), "set_projection", "get_projection");
-	ADD_PROPERTY(PropertyInfo(Variant::PROJECTION, "override_projection"), "set_override_projection", "get_override_projection");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "current"), "set_current", "is_current");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "fov", PROPERTY_HINT_RANGE, "1,179,0.1,degrees"), "set_fov", "get_fov");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "size", PROPERTY_HINT_RANGE, "0.001,100,0.001,or_greater,suffix:m"), "set_size", "get_size");
@@ -760,7 +880,6 @@ RID Camera3D::get_pyramid_shape_rid() {
 
 Camera3D::Camera3D() {
 	camera = RenderingServer::get_singleton()->camera_create();
-	override_projection.set_zero();
 	set_perspective(75.0, 0.05, 4000.0);
 	RenderingServer::get_singleton()->camera_set_cull_mask(camera, layers);
 	//active=false;
