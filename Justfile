@@ -15,6 +15,10 @@ export GODOT_STATUS := "groups-4.3"
 export GIT_URL_DOCKER := "https://github.com/V-Sekai/docker-groups.git"
 export GIT_URL_VSEKAI := "https://github.com/V-Sekai/v-sekai-game.git"
 
+run-godot-local:
+    @just build-godot-local
+    ./godot/bin/godot.macos.editor.arm64 --path sandbox_demo -e
+
 set-android-home:
     @just {{ ANDROID_HOME_COMMAND }}
 
@@ -217,10 +221,6 @@ build-godot-local:
     tests=yes \
     debug_symbols=yes
 
-run-godot-local:
-    @just build-godot-local
-    ./godot/bin/godot.macos.editor.arm64 --path sandbox_demo -e
-
 run-godot-local-windows:
     @just build-godot-local
     ./godot/bin/godot.windows.editor.x86_64 --path sandbox_demo -e
@@ -233,6 +233,3 @@ deploy_vsekai:
 
 full_build_deploy:
     just build_vsekai deploy_vsekai build_docker push_docker
-
-default:
-    @just --choose
