@@ -48,7 +48,7 @@ RUN echo 'source "/emsdk/emsdk_env.sh"' >> $HOME/.bashrc
 RUN git clone https://github.com/tpoechtrager/osxcross.git /osxcross
 RUN curl -o /osxcross/tarballs/MacOSX15.0.sdk.tar.xz -L https://github.com/V-Sekai/world/releases/download/v0.0.1/MacOSX15.0.sdk.tar.xz
 RUN cd  /osxcross && UNATTENDED=1 ./build.sh && ./build_compiler_rt.sh
-RUN curl -o llvm-mingw.tar.xz -L https://github.com/mstorsjo/llvm-mingw/releases/download/20240917/llvm-mingw-20240917-ucrt-ubuntu-20.04-aarch64.tar.xz
+RUN curl -o llvm-mingw.tar.xz -L https://github.com/mstorsjo/llvm-mingw/releases/download/20240917/llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64.tar.xz
 RUN tar -xf llvm-mingw.tar.xz -C /
 RUN rm -rf llvm-mingw.tar.xz 
 ENV JAVA_HOME=/usr/lib/jvm/java-openjdk

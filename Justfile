@@ -67,7 +67,7 @@ push_docker:
     echo "groupsinfra/gocd-agent-centos-8-groups:$LABEL_TEMPLATE" > docker_image.txt
 
 build_just_docker:
-    docker build -t just-fedora-app .
+    docker build --platform linux/x86_64 -t just-fedora-app .
 
 deploy_osxcross:
     #!/usr/bin/env bash
