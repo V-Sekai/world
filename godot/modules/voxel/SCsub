@@ -25,6 +25,11 @@ env.Append(CPPDEFINES=[
 
 env_voxel = env_modules.Clone()
 
+env_voxel.Append(CPPDEFINES=[
+	# Tell engine-agnostic code we are using Godot Engine as a module
+	"ZN_GODOT"
+])
+
 voxel_files = common.get_sources(env_voxel, env.editor_build, INCLUDE_TESTS)
 
 
