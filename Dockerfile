@@ -32,7 +32,9 @@ RUN dnf install -y \
     libxml2-devel \
     openssl \ 
     openssl-devel \
-    git
+    git \
+    java-latest-openjdk-devel \
+    java-latest-openjdk
 RUN git clone https://github.com/emscripten-core/emsdk.git /emsdk
 RUN /emsdk/emsdk install 3.1.67
 RUN /emsdk/emsdk activate 3.1.67
