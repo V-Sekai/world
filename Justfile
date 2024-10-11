@@ -93,22 +93,8 @@ build-all:
             windows)
                 EXTRA_FLAGS="LINKFLAGS='\''-Wl,-pdb='\'' CCFLAGS='\''-gcodeview'\''"
                 ;;
-            macos)
-                # Loop through architectures
-                for arch in arm64 x86_64; do
-                    EXTRA_FLAGS="OSXCROSS_ROOT='\''/osxcross'\'' osxcross_sdk=darwin24 vulkan=no arch=$arch"
-                    echo scons platform=$platform \
-                        werror=no \
-                        compiledb=yes \
-                        dev_build=no \
-                        generate_bundle=yes \
-                        precision=double \
-                        target=$target \
-                        test=yes \
-                        debug_symbol=yes \
-                        $EXTRA_FLAGS
-                done
-                continue  # Skip the general echo at the end of the loop
+            mac)
+                EXTRA_FLAGS="OSXCROSS_ROOT='\''/osxcross'\'' osxcross_sdk=darwin24 vulkan=no arch=$arch"
                 ;;
             linux|android)
                 EXTRA_FLAGS="use_llvm=yes linker=mold"
@@ -117,12 +103,9 @@ build-all:
                 EXTRA_FLAGS="threads=yes linker=mold lto=none dlink_enabled=yes builtin_glslang=yes builtin_openxr=yes module_raycast_enabled=no module_speech_enabled=no javascript_eval=no"
                 ;;
         esac
-
-        # General build command (not executed for macOS due to 'continue')
-        echo scons platform=$platform \
+        scons platform=$platform \
             werror=no \
             compiledb=yes \
-            dev_build=no \
             generate_bundle=yes \
             precision=double \
             target=$target \
