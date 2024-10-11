@@ -219,6 +219,7 @@ build-godot:
     echo task macos-editor start; just build-godot-macos-editor; echo task macos-editor done
     echo task linux-editor start; just build-godot-linux-editor; echo task linux-editor done
     echo task web-template-release start; just build-godot-web-template-release; echo task web-template-release done
+    echo task build-godot-android-editor start; just build-godot-android-editor; echo task build-godot-android-editor done
 
 build-godot-local:
     #!/usr/bin/env bash
