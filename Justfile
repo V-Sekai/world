@@ -131,6 +131,22 @@ build-all:
             $EXTRA_FLAGS
     ' ::: windows macos linux web android \
     ::: editor template_release template_debug
+    case "$platform" in
+        android)
+            if [ "$target" = "editor" ]; then
+                cd platform/android/java
+                ./gradlew generateGodotEditor
+                ./gradlew generateGodotHorizonOSEditor
+                cd ../../..
+                ls -l bin/android_editor_builds/
+            elif [ "$target" = "template_release" ] || [ "$target" = "template_debug" ]; then
+                cd platform/android/java
+                ./gradlew generateGodotTemplates
+                cd ../../..
+                ls -l bin/
+            fi
+            ;;
+    esac
 
 build-godot-local:
     #!/usr/bin/env bash
