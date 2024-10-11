@@ -89,13 +89,26 @@ build-all:
         platform={1}
         target={2}
         cd godot
-
         case "$platform" in
             windows)
                 EXTRA_FLAGS="LINKFLAGS='\''-Wl,-pdb='\'' CCFLAGS='\''-gcodeview'\''"
                 ;;
             macos)
-                EXTRA_FLAGS="OSXCROSS_ROOT='\''/osxcross'\'' osxcross_sdk=darwin24 vulkan=no arch=arm64"
+                # Loop through architectures
+                for arch in arm64 x86_64; do
+                    EXTRA_FLAGS="OSXCROSS_ROOT='\''/osxcross'\'' osxcross_sdk=darwin24 vulkan=no arch=$arch"
+                    echo scons platform=$platform \
+                        werror=no \
+                        compiledb=yes \
+                        dev_build=no \
+                        generate_bundle=yes \
+                        precision=double \
+                        target=$target \
+                        test=yes \
+                        debug_symbol=yes \
+                        $EXTRA_FLAGS
+                done
+                continue  # Skip the general echo at the end of the loop
                 ;;
             linux|android)
                 EXTRA_FLAGS="use_llvm=yes linker=mold"
@@ -105,6 +118,7 @@ build-all:
                 ;;
         esac
 
+        # General build command (not executed for macOS due to 'continue')
         echo scons platform=$platform \
             werror=no \
             compiledb=yes \
