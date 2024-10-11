@@ -55,8 +55,7 @@ RUN mkdir -p sdk && cd sdk && \
     rm ${CMDLINETOOLS} && \
     yes | cmdline-tools/bin/sdkmanager --sdk_root="${ANDROID_SDK_ROOT}" --licenses && \
     cmdline-tools/bin/sdkmanager --sdk_root="${ANDROID_SDK_ROOT}" "ndk;${ANDROID_NDK_VERSION}" 'cmdline-tools;latest' 'build-tools;34.0.0' 'platforms;android-34' 'cmake;3.22.1'
-
-    RUN curl -O https://download.blender.org/release/Blender4.1/blender-4.1.1-linux-x64.tar.xz && \
+RUN curl -O https://download.blender.org/release/Blender4.1/blender-4.1.1-linux-x64.tar.xz && \
     tar -xf blender-4.1.1-linux-x64.tar.xz -C /opt/ && \
     rm blender-4.1.1-linux-x64.tar.xz && \
     ln -s /opt/blender-4.1.1-linux-x64/blender /usr/local/bin/blender
