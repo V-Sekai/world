@@ -64,5 +64,4 @@ RUN mkdir -p sdk && cd sdk && \
     yes | cmdline-tools/bin/sdkmanager --sdk_root="${ANDROID_SDK_ROOT}" --licenses && \
     cmdline-tools/bin/sdkmanager --sdk_root="${ANDROID_SDK_ROOT}" "ndk;${ANDROID_NDK_VERSION}" 'cmdline-tools;latest' 'build-tools;34.0.0' 'platforms;android-34' 'cmake;3.22.1'
 WORKDIR /app
-RUN git clone https://github.com/V-Sekai/world.git /app
 CMD ["bash"]
