@@ -14,11 +14,12 @@ export GROUPS_LABEL_TEMPLATE := "groups-4.3.$GODOT_GROUPS_EDITOR_PIPELINE_DEPEND
 export GODOT_STATUS := "groups-4.3"
 export GIT_URL_DOCKER := "https://github.com/V-Sekai/docker-groups.git"
 export GIT_URL_VSEKAI := "https://github.com/V-Sekai/v-sekai-game.git"
+export WORLD_PWD := invocation_directory()
 
 deploy_just_docker:
     set windows-shell := ["powershell.exe", "-NoLogo", "-Command"]
     @just build_just_docker
-    docker run -it --rm -v "%(pwd)":/app just-fedora-app
+    docker run -it --rm -v $WORLD_PWD:/app just-fedora-app
 
 run-godot-local:
     @just build-godot-local
@@ -254,6 +255,11 @@ build-godot-android-editor:
     target=editor \
     tests=yes \
     debug_symbols=yes
+    cd platform/android/java
+    ./gradlew generateGodotEditor
+    ./gradlew generateGodotHorizonOSEditor
+    cd ../../..
+    ls -l bin/android_editor_builds/
 
 build-godot-android-template-release:
     #!/usr/bin/env bash
@@ -269,6 +275,10 @@ build-godot-android-template-release:
     target=template_release \
     tests=no \
     debug_symbols=no
+    cd platform/android/java
+    ./gradlew generateGodotTemplates
+    cd ../../..
+    ls -l bin/
 
 build-godot-android-template-debug:
     #!/usr/bin/env bash
@@ -284,6 +294,10 @@ build-godot-android-template-debug:
     target=template_debug \
     tests=yes \
     debug_symbols=yes
+    cd platform/android/java
+    ./gradlew generateGodotTemplates
+    cd ../../..
+    ls -l bin/
 
 build-godot-web-editor:
     #!/usr/bin/env bash
