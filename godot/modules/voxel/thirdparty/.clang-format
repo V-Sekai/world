@@ -1,4 +1,0 @@
-# Dummy configuration to turn off clang-format on third-party code
----
-DisableFormat: true
-SortIncludes: Never
