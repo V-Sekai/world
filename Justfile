@@ -127,6 +127,20 @@ build-all:
                     ls -l bin/
                 fi
                 ;;
+            macos)   
+                scons platform=$platform \
+                    linkflags="-Wl,-pdb=" \
+                    ccflags="-g -gcodeview" \
+                    use_thinlto=yes \
+                    werror=no \
+                    compiledb=yes \
+                    generate_bundle=yes \
+                    precision=double \
+                    target=$target \
+                    test=yes \
+                    debug_symbol=yes \
+                    arch=arm64 \
+                    $EXTRA_FLAGS
             web)
                 cd bin
                 files_to_delete=(
