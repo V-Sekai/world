@@ -127,9 +127,9 @@ build-all:
                     ls -l bin/
                 fi
                 ;;
+        esac
     ' ::: android \
     ::: editor
-    esac
 
 build-godot-local:
     #!/usr/bin/env bash
