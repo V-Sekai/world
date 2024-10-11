@@ -52,6 +52,7 @@ RUN cd  /osxcross && UNATTENDED=1 ./build.sh && ./build_compiler_rt.sh
 RUN curl -o llvm-mingw.tar.xz -L https://github.com/mstorsjo/llvm-mingw/releases/download/20240917/llvm-mingw-20240917-ucrt-ubuntu-20.04-aarch64.tar.xz
 RUN tar -xf llvm-mingw.tar.xz -C /
 RUN rm -rf llvm-mingw.tar.xz 
+ENV JAVA_HOME=/usr/lib/jvm/
 ENV ANDROID_SDK_ROOT=/root/sdk
 ENV ANDROID_NDK_VERSION=23.2.8568313
 ENV ANDROID_NDK_ROOT=${ANDROID_SDK_ROOT}/ndk/${ANDROID_NDK_VERSION}
