@@ -15,6 +15,10 @@ export GODOT_STATUS := "groups-4.3"
 export GIT_URL_DOCKER := "https://github.com/V-Sekai/docker-groups.git"
 export GIT_URL_VSEKAI := "https://github.com/V-Sekai/v-sekai-game.git"
 
+deploy_just_docker:
+    @just build_just_docker
+    docker run -it --rm -v "$(pwd)":/app just-fedora-app
+
 run-godot-local:
     @just build-godot-local
     ./godot/bin/godot.macos.editor.arm64 --path sandbox_demo -e
@@ -64,10 +68,6 @@ push_docker:
 
 build_just_docker:
     docker build -t just-fedora-app .
-
-deploy_just_docker:
-    @just build_just_docker
-    docker run -it --rm -v "$(pwd)":/app just-fedora-app
 
 deploy_osxcross:
     #!/usr/bin/env bash
