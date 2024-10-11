@@ -147,7 +147,9 @@ build-all:
                 ;;            
         esac
     ' ::: windows android web linux macos \
-    ::: editor template_release template_debug
+    ::: editor
+    # ' ::: windows android web linux macos \
+    # ::: editor template_release template_debug
 
 build_vsekai:
     just clone_repo_vsekai generate_build_constants prepare_exports copy_binaries list_files
