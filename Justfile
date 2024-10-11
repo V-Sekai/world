@@ -21,10 +21,6 @@ deploy_just_docker:
     @just build_just_docker
     docker run -it --rm -v $WORLD_PWD:/app just-fedora-app
 
-run-godot-local:
-    @just build-godot-local
-    ./godot/bin/godot.macos.editor.arm64 --path sandbox_demo -e
-
 list_files:
     ls export_windows
     ls export_linuxbsd
@@ -54,10 +50,10 @@ clone_repo_vsekai:
         git -C v pull origin main; \
     fi
 
-push_docker:
-    set -x; \
-    docker push "groupsinfra/gocd-agent-centos-8-groups:$LABEL_TEMPLATE" && \
-    echo "groupsinfra/gocd-agent-centos-8-groups:$LABEL_TEMPLATE" > docker_image.txt
+# push_docker:
+#     set -x; \
+#     docker push "groupsinfra/gocd-agent-centos-8-groups:$LABEL_TEMPLATE" && \
+#     echo "groupsinfra/gocd-agent-centos-8-groups:$LABEL_TEMPLATE" > docker_image.txt
 
 build_just_docker:
     docker build --platform linux/x86_64 -t just-fedora-app . --cache-from just-fedora-app:latest
@@ -80,7 +76,7 @@ clone_repo:
     fi
 
 run-editor:
-    @just build-godot
+    @just build-all
     @just {{ EDITOR_TYPE_COMMAND }}
 
 build-all:
@@ -135,31 +131,5 @@ build-all:
     ' ::: windows android web linux macos \
     ::: editor template_release template_debug
 
-build-godot-local:
-    #!/usr/bin/env bash
-    cd godot 
-    scons platform=$OPERATING_SYSTEM \
-    use_mingw=yes \
-    use_llvm=yes \
-    werror=no \
-    vulkan=no \
-    compiledb=yes \
-    dev_build=no \
-    generate_bundle="no" \
-    precision=single \
-    target="editor" \
-    test=yes \
-    debug_symbol="on"
-
-run-godot-local-windows:
-    @just build-godot-local
-    ./godot/bin/godot.windows.editor.x86_64 --path sandbox_demo -e
-
 build_vsekai:
     just clone_repo_vsekai generate_build_constants prepare_exports copy_binaries list_files
-
-deploy_vsekai:
-    just deploy_game
-
-full_build_deploy:
-    just build_vsekai deploy_vsekai build_docker push_docker
