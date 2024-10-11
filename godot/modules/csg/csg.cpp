@@ -319,7 +319,7 @@ static void pack_manifold(
 		uint32_t reserved_id = r_manifold.ReserveIDs(1);
 		mesh.runOriginalID.push_back(reserved_id);
 		Ref<Material> material;
-		if (material_id >= 0 && material_id < p_mesh_merge->materials.size()) {
+		if (material_id < p_mesh_merge->materials.size()) {
 			material = p_mesh_merge->materials[material_id];
 		}
 		mesh_materials.insert(reserved_id, material);
