@@ -128,8 +128,8 @@ build-all:
                 fi
                 ;;
         esac
-    ' ::: android \
-    ::: editor
+    ' ::: android web windows linux macos \
+    ::: editor template_release template_debug
 
 build-godot-local:
     #!/usr/bin/env bash
