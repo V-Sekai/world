@@ -127,7 +127,8 @@ build-all:
                     ls -l bin/
                 fi
                 ;;
-            macos)   
+            macos)
+                # Build the mac platform for arm64 so we can build universal macos builds.
                 scons platform=$platform \
                     linkflags="-Wl,-pdb=" \
                     ccflags="-g -gcodeview" \
