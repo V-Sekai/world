@@ -94,10 +94,10 @@ build-all:
                 EXTRA_FLAGS="OSXCROSS_ROOT='\''/osxcross'\'' osxcross_sdk=darwin24 vulkan=no arch=$arch"
                 ;;
             linux|android)
-                EXTRA_FLAGS="use_llvm=yes linker=mold"
+                EXTRA_FLAGS=""
                 ;;
             web)
-                EXTRA_FLAGS="threads=yes linker=mold lto=none dlink_enabled=yes builtin_glslang=yes builtin_openxr=yes module_raycast_enabled=no module_speech_enabled=no javascript_eval=no"
+                EXTRA_FLAGS="threads=yes lto=none dlink_enabled=yes builtin_glslang=yes builtin_openxr=yes module_raycast_enabled=no module_speech_enabled=no javascript_eval=no"
                 ;;
         esac        
         scons platform=$platform \
@@ -130,8 +130,6 @@ build-all:
             macos)
                 # Build the mac platform for arm64 so we can build universal macos builds.
                 scons platform=$platform \
-                    linkflags="-Wl,-pdb=" \
-                    ccflags="-g -gcodeview" \
                     use_thinlto=yes \
                     werror=no \
                     compiledb=yes \
