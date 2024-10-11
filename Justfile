@@ -161,6 +161,40 @@ build-godot-macos-editor:
     arch=arm64 \
     debug_symbols=yes
 
+build-godot-macos-template-release:
+    #!/usr/bin/env bash
+    export OSXCROSS_ROOT="/osxcross"
+    cd godot 
+    scons platform=macos \
+    osxcross_sdk=darwin24 \
+    werror=no \
+    vulkan=no \
+    compiledb=yes \
+    dev_build=no \
+    generate_bundle=yes \
+    precision=double \
+    target=template_release \
+    tests=no \
+    arch=arm64 \
+    debug_symbols=no
+
+build-godot-macos-template-debug:
+    #!/usr/bin/env bash
+    export OSXCROSS_ROOT="/osxcross"
+    cd godot 
+    scons platform=macos \
+    osxcross_sdk=darwin24 \
+    werror=no \
+    vulkan=no \
+    compiledb=yes \
+    dev_build=no \
+    generate_bundle=yes \
+    precision=double \
+    target=template_debug \
+    tests=yes \
+    arch=arm64 \
+    debug_symbols=yes
+
 build-godot-linux-editor:
     #!/usr/bin/env bash
     cd godot
@@ -173,6 +207,36 @@ build-godot-linux-editor:
     generate_bundle=no \
     precision=double \
     target=editor \
+    tests=yes \
+    debug_symbols=yes
+
+build-godot-linux-template-release:
+    #!/usr/bin/env bash
+    cd godot
+    scons platform=linux \
+    use_llvm=yes \
+    werror=no \
+    compiledb=yes \
+    linker=mold \
+    dev_build=no \
+    generate_bundle=yes \
+    precision=double \
+    target=template_release \
+    tests=no \
+    debug_symbols=no
+
+build-godot-linux-template-debug:
+    #!/usr/bin/env bash
+    cd godot
+    scons platform=linux \
+    use_llvm=yes \
+    werror=no \
+    compiledb=yes \
+    linker=mold \
+    dev_build=no \
+    generate_bundle=yes \
+    precision=double \
+    target=template_debug \
     tests=yes \
     debug_symbols=yes
 
@@ -190,6 +254,59 @@ build-godot-android-editor:
     target=editor \
     tests=yes \
     debug_symbols=yes
+
+build-godot-android-template-release:
+    #!/usr/bin/env bash
+    cd godot
+    scons platform=android \
+    use_llvm=yes \
+    werror=no \
+    compiledb=yes \
+    linker=mold \
+    dev_build=no \
+    generate_bundle=yes \
+    precision=double \
+    target=template_release \
+    tests=no \
+    debug_symbols=no
+
+build-godot-android-template-debug:
+    #!/usr/bin/env bash
+    cd godot
+    scons platform=android \
+    use_llvm=yes \
+    werror=no \
+    compiledb=yes \
+    linker=mold \
+    dev_build=no \
+    generate_bundle=yes \
+    precision=double \
+    target=template_debug \
+    tests=yes \
+    debug_symbols=yes
+
+build-godot-web-editor:
+    #!/usr/bin/env bash
+    cd godot 
+    # Needs 59+ gigabytes of ram for the editor web build.
+    scons platform=web \
+    werror=no \
+    compiledb=yes \
+    threads=yes \
+    linker=mold \
+    dev_build=no \
+    generate_bundle=no \
+    precision=double \
+    target=editor \
+    tests=yes \
+    debug_symbols=yes \
+    lto=none \
+    dlink_enabled=yes \
+    builtin_glslang=yes \
+    builtin_openxr=yes \
+    module_raycast_enabled=no \
+    module_speech_enabled=no \
+    javascript_eval=no
 
 build-godot-web-template-release:
     #!/usr/bin/env bash
@@ -214,13 +331,45 @@ build-godot-web-template-release:
     module_speech_enabled=no \
     javascript_eval=no
 
+build-godot-web-template-debug:
+    #!/usr/bin/env bash
+    cd godot 
+    scons platform=web \
+    werror=no \
+    compiledb=yes \
+    threads=yes \
+    linker=mold \
+    dev_build=no \
+    generate_bundle=yes \
+    precision=double \
+    target=template_debug \
+    tests=yes \
+    debug_symbols=yes \
+    lto=none \
+    dlink_enabled=yes \
+    builtin_glslang=yes \
+    builtin_openxr=yes \
+    module_raycast_enabled=no \
+    module_speech_enabled=no \
+    javascript_eval=no
+
 build-godot:
     #!/usr/bin/env -S parallel --shebang --ungroup --jobs {{ num_cpus() }}
-    echo task windows start; just build-godot-windows; echo task windows done
+    echo task windows-editor start; just build-godot-windows-editor; echo task windows-editor done
+    echo task windows-template-release start; just build-godot-windows-template-release; echo task windows-template-release done
+    echo task windows-template-debug start; just build-godot-windows-template-debug; echo task windows-template-debug done
     echo task macos-editor start; just build-godot-macos-editor; echo task macos-editor done
+    echo task macos-template-release start; just build-godot-macos-template-release; echo task macos-template-release done
+    echo task macos-template-debug start; just build-godot-macos-template-debug; echo task macos-template-debug done
     echo task linux-editor start; just build-godot-linux-editor; echo task linux-editor done
+    echo task linux-template-release start; just build-godot-linux-template-release; echo task linux-template-release done
+    echo task linux-template-debug start; just build-godot-linux-template-debug; echo task linux-template-debug done
+    echo task android-editor start; just build-godot-android-editor; echo task android-editor done
+    echo task android-template-release start; just build-godot-android-template-release; echo task android-template-release done
+    echo task android-template-debug start; just build-godot-android-template-debug; echo task android-template-debug done
+    echo task web-editor start; just build-web-editor; echo task web-editor done
     echo task web-template-release start; just build-godot-web-template-release; echo task web-template-release done
-    echo task build-godot-android-editor start; just build-godot-android-editor; echo task build-godot-android-editor done
+    echo task web-template-debug start; just build-godot-web-template-debug; echo task web-template-debug done
 
 build-godot-local:
     #!/usr/bin/env bash
