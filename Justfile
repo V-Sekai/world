@@ -17,7 +17,7 @@ export GIT_URL_VSEKAI := "https://github.com/V-Sekai/v-sekai-game.git"
 
 deploy_just_docker:
     @just build_just_docker
-    docker run -it --rm -v "$(pwd)":/app just-fedora-app
+    docker run -it --rm -v "$(pwd)":/app just build-godot
 
 run-godot-local:
     @just build-godot-local
