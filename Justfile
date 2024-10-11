@@ -127,6 +127,24 @@ build-all:
                     ls -l bin/
                 fi
                 ;;
+            web)
+                cd bin
+                files_to_delete=(
+                    "*.wasm"
+                    "*.js"
+                    "*.html"
+                    "*.worker.js"
+                    "*.engine.js"
+                    "*.service.worker.js"
+                    "*.wrapped.js"
+                )
+                for file_pattern in "${files_to_delete[@]}"; do
+                    echo "Deleting files: $file_pattern"
+                    rm -f $file_pattern
+                done
+                cd ..
+                ls -l bin/
+                ;;            
         esac
     ' ::: windows android web linux macos \
     ::: editor template_release template_debug
