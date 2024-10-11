@@ -59,7 +59,7 @@ push_docker:
     echo "groupsinfra/gocd-agent-centos-8-groups:$LABEL_TEMPLATE" > docker_image.txt
 
 build_just_docker:
-    docker build --platform linux/x86_64 -t just-fedora-app .
+    docker build --platform linux/x86_64 -t just-fedora-app . --cache-from just-fedora-app:latest
 
 deploy_osxcross:
     #!/usr/bin/env bash
@@ -85,62 +85,38 @@ run-editor:
 build-all:
     #!/usr/bin/env bash
     export PATH=/llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64/bin:$PATH
-
-    build_godot() {
-        local platform=$1
-        local target=$2
-        local bundle=$3
-        local test=$4
-        local debug_symbol=$5
-        echo "task ${platform}-${target} start"
+    parallel --ungroup --jobs 1 '
+        platform={1}
+        target={2}
         cd godot
-        if [ "$platform" = "windows" ]; then
-            EXTRA_FLAGS="LINKFLAGS='-Wl,-pdb=' CCFLAGS='-gcodeview'"
-        elif [ "$platform" = "macos" ]; then
-            EXTRA_FLAGS="OSXCROSS_ROOT='/osxcross' osxcross_sdk=darwin24 vulkan=no arch=arm64"
-        elif [ "$platform" = "linux" ] || [ "$platform" = "android" ]; then
-            EXTRA_FLAGS="use_llvm=yes linker=mold"
-        elif [ "$platform" = "web" ]; then
-            EXTRA_FLAGS="threads=yes linker=mold lto=none dlink_enabled=yes builtin_glslang=yes builtin_openxr=yes module_raycast_enabled=no module_speech_enabled=no javascript_eval=no"
-        fi
 
-        scons platform=$platform \
+        case "$platform" in
+            windows)
+                EXTRA_FLAGS="LINKFLAGS='\''-Wl,-pdb='\'' CCFLAGS='\''-gcodeview'\''"
+                ;;
+            macos)
+                EXTRA_FLAGS="OSXCROSS_ROOT='\''/osxcross'\'' osxcross_sdk=darwin24 vulkan=no arch=arm64"
+                ;;
+            linux|android)
+                EXTRA_FLAGS="use_llvm=yes linker=mold"
+                ;;
+            web)
+                EXTRA_FLAGS="threads=yes linker=mold lto=none dlink_enabled=yes builtin_glslang=yes builtin_openxr=yes module_raycast_enabled=no module_speech_enabled=no javascript_eval=no"
+                ;;
+        esac
+
+        echo scons platform=$platform \
             werror=no \
             compiledb=yes \
             dev_build=no \
-            generate_bundle=$bundle \
+            generate_bundle=yes \
             precision=double \
             target=$target \
-            test=$test \
-            debug_symbol=$debug_symbol \
+            test=yes \
+            debug_symbol=yes \
             $EXTRA_FLAGS
-
-        if [ "$platform" = "android" ]; then
-            if [ "$target" = "editor" ]; then
-                cd platform/android/java
-                ./gradlew generateGodotEditor
-                ./gradlew generateGodotHorizonOSEditor
-                cd ../../../..
-                ls -l bin/android_editor_builds/
-            else
-                cd platform/android/java
-                ./gradlew generateGodotTemplates
-                cd ../../../..
-                ls -l bin/
-            fi
-        fi
-
-        echo "task ${platform}-${target} done"
-    }
-    export -f build_godot
-
-    parallel --ungroup --jobs 1 build_godot {1} {2} {3} {4} {5} \
-    ::: windows macos linux android web \
-    ::: editor template_release template_debug \
-    ::+ no yes yes no yes yes no yes yes no yes yes no no yes \
-    ::+ yes no no yes no yes yes no yes yes yes no yes yes yes \
-    ::+ on no no on on on on no on on on no on on on
-
+    ' ::: windows macos linux web android \
+    ::: editor template_release template_debug
 
 build-godot-local:
     #!/usr/bin/env bash
