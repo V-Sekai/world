@@ -163,7 +163,6 @@ build-all:
         esac
     ' ::: windows android web linux macos \
     ::: editor
-    # ' ::: windows android web linux macos \
     # ::: editor template_release template_debug
 
 build_vsekai:
