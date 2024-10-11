@@ -153,7 +153,7 @@ build-godot-macos-editor:
     vulkan=no \
     compiledb=yes \
     dev_build=no \
-    generate_bundle=no \
+    generate_bundle=yes \
     precision=double \
     target=editor \
     tests=yes \
