@@ -14,6 +14,7 @@ export GODOT_STATUS := "groups-4.3"
 export GIT_URL_DOCKER := "https://github.com/V-Sekai/docker-groups.git"
 export GIT_URL_VSEKAI := "https://github.com/V-Sekai/v-sekai-game.git"
 export WORLD_PWD := invocation_directory()
+export SCONS_CACHE := "/app/.scons_cache"
 
 deploy_just_docker:
     set windows-shell := ["powershell.exe", "-NoLogo", "-Command"]
