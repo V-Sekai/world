@@ -33,8 +33,6 @@ RUN dnf install -y \
     openssl \ 
     openssl-devel \
     git \
-    java-latest-openjdk-devel \
-    java-latest-openjdk \
     unzip
 RUN git clone https://github.com/tpoechtrager/osxcross.git /osxcross
 RUN curl -o /osxcross/tarballs/MacOSX15.0.sdk.tar.xz -L https://github.com/V-Sekai/world/releases/download/v0.0.1/MacOSX15.0.sdk.tar.xz
@@ -63,5 +61,10 @@ RUN git clone https://github.com/emscripten-core/emsdk.git /emsdk
 RUN /emsdk/emsdk install 3.1.67
 RUN /emsdk/emsdk activate 3.1.67
 RUN echo 'source "/emsdk/emsdk_env.sh"' >> $HOME/.bashrc
+ENV JAVA_HOME="/jre"
+RUN curl --fail --location --silent --show-error "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.11%2B9/OpenJDK17U-jre_$(uname -m | sed -e s/86_//g)_linux_hotspot_17.0.11_9.tar.gz" --output /tmp/jre.tar.gz && \
+RUN mkdir -p /jre && \
+RUN tar -xf /tmp/jre.tar.gz -C /jre --strip 1 && \
+RUN rm -rf /tmp/jre.tar.gz && \
 WORKDIR /app
 CMD ["bash"]
