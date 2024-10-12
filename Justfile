@@ -82,6 +82,7 @@ run-editor:
 build-all:
     #!/usr/bin/env bash
     export PATH=/llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64/bin:$PATH
+    export OSXCROSS_ROOT=/osxcross
     parallel --ungroup --jobs 2 '
         platform={1}
         target={2}
@@ -91,7 +92,7 @@ build-all:
                 EXTRA_FLAGS="use_mingw=yes use_llvm=yes"
                 ;;
             mac)
-                EXTRA_FLAGS="OSXCROSS_ROOT='\''/osxcross'\'' osxcross_sdk=darwin24 vulkan=no arch=$arch"
+                EXTRA_FLAGS="osxcross_sdk=darwin24 vulkan=no arch=$arch"
                 ;;
             linux|android)
                 EXTRA_FLAGS=""
