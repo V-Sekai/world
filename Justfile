@@ -89,7 +89,7 @@ build-all:
         cd godot
         case "$platform" in
             windows)
-                EXTRA_FLAGS="use_mingw=yes use_llvm=yes"
+                EXTRA_FLAGS=use_mingw=yes use_llvm=yes linkflags="-Wl,-pdb=" ccflags="-g -gcodeview"
                 ;;
             mac)
                 EXTRA_FLAGS="osxcross_sdk=darwin24 vulkan=no arch=$arch"
@@ -102,8 +102,6 @@ build-all:
                 ;;
         esac        
         scons platform=$platform \
-            linkflags="-Wl,-pdb=" \
-            ccflags="-g -gcodeview" \
             use_thinlto=yes \
             werror=no \
             compiledb=yes \
