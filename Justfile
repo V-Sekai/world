@@ -56,7 +56,7 @@ clone_repo_vsekai:
 #     echo "groupsinfra/gocd-agent-centos-8-groups:$LABEL_TEMPLATE" > docker_image.txt
 
 build_just_docker:
-    docker build --platform linux/x86_64 -t just-fedora-app . --cache-from just-fedora-app:latest
+    docker build --platform linux/x86_64 -t just-fedora-app .
 
 deploy_osxcross:
     #!/usr/bin/env bash
@@ -66,7 +66,7 @@ deploy_osxcross:
 
 build_docker:
     set -x; \
-    docker build -t "groupsinfra/gocd-agent-centos-8-groups:$LABEL_TEMPLATE" "g/gocd-agent-centos-8-groups"
+    docker build --build-arg FETCH_SDKS=true -t "groupsinfra/gocd-agent-centos-8-groups:$LABEL_TEMPLATE" "g/gocd-agent-centos-8-groups"
 
 clone_repo:
     if [ ! -d "g" ]; then \

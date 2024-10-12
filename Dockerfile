@@ -1,6 +1,6 @@
 FROM fedora:39
 
-ENV FETCH_SDKS=true
+ARG FETCH_SDKS=false
 
 RUN dnf install -y \
     xz \
@@ -73,10 +73,10 @@ RUN if [ "$FETCH_SDKS" = "true" ]; then \
 
 RUN mkdir -p /opt/cargo /opt/rust && curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly --no-modify-path && . "$HOME/.cargo/env" && rustup default nightly && rustup target add aarch64-linux-android x86_64-linux-android x86_64-unknown-linux-gnu aarch64-apple-ios x86_64-apple-ios x86_64-apple-darwin aarch64-apple-darwin x86_64-pc-windows-gnu x86_64-pc-windows-msvc wasm32-wasi
 
-RUN git clone https://github.com/emscripten-core/emsdk.git /emsdk
-RUN /emsdk/emsdk install 3.1.67
-RUN /emsdk/emsdk activate 3.1.67
-RUN echo 'source "/emsdk/emsdk_env.sh"' >> $HOME/.bashrc
+RUN git clone https://github.com/emscripten-core/emsdk.git /emsdk \
+    && /emsdk/emsdk install 3.1.67 \
+    && /emsdk/emsdk activate 3.1.67 \
+    && echo 'source "/emsdk/emsdk_env.sh"' >> $HOME/.bashrc
 
 RUN git clone https://github.com/tpoechtrager/osxcross.git /osxcross
 
