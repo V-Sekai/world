@@ -108,6 +108,7 @@ build-all:
         scons platform=$platform \
             CC=ccache \
             CXX=ccache \
+            use_lld=yes \
             use_thinlto=yes \
             werror=no \
             compiledb=yes \
