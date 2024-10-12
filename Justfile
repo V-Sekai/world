@@ -93,10 +93,7 @@ build-all:
                 EXTRA_FLAGS=use_mingw=yes use_llvm=yes linkflags="-Wl,-pdb=" ccflags="-g -gcodeview"
                 ;;
             mac)
-                EXTRA_FLAGS="osxcross_sdk=darwin24 vulkan=no arch=$arch"
-                ;;
-            linux|android)
-                EXTRA_FLAGS=""
+                EXTRA_FLAGS="osxcross_sdk=darwin24 vulkan=no arch=arm64"
                 ;;
             web)
                 EXTRA_FLAGS="threads=yes lto=none dlink_enabled=yes builtin_glslang=yes builtin_openxr=yes module_raycast_enabled=no module_speech_enabled=no javascript_eval=no"
@@ -127,19 +124,6 @@ build-all:
                     ls -l bin/
                 fi
                 ;;
-            macos)
-                # Build the mac platform for arm64 so we can build universal macos builds.
-                scons platform=$platform \
-                    use_thinlto=yes \
-                    werror=no \
-                    compiledb=yes \
-                    generate_bundle=yes \
-                    precision=double \
-                    target=$target \
-                    test=yes \
-                    debug_symbol=yes \
-                    arch=arm64 \
-                    $EXTRA_FLAGS
             web)
                 cd bin
                 files_to_delete=(
