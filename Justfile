@@ -83,6 +83,7 @@ build-all:
     #!/usr/bin/env bash
     export PATH=/llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64/bin:$PATH
     export OSXCROSS_ROOT=/osxcross
+    export ANDROID_SDK_ROOT="/root/sdk"
     parallel --ungroup --jobs 2 '
         platform={1}
         target={2}
