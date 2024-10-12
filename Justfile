@@ -16,10 +16,19 @@ export GIT_URL_VSEKAI := "https://github.com/V-Sekai/v-sekai-game.git"
 export WORLD_PWD := invocation_directory()
 export SCONS_CACHE := "/app/.scons_cache"
 
-deploy_just_docker:
-    set windows-shell := ["powershell.exe", "-NoLogo", "-Command"]
-    @just build_just_docker
-    docker run -it --rm -v $WORLD_PWD:/app just-fedora-app
+export IMAGE_NAME := "just-fedora-app"
+build_just_docker:
+    @if ! command -v docker >/dev/null 2>&1; then \
+        echo "Docker is not installed, running alternative build."; \
+        just build-all; \
+    else \
+        if ! docker images $(IMAGE_NAME) | awk '{ print $$1 }' | grep -q $(IMAGE_NAME); then \
+            echo "Image $(IMAGE_NAME) does not exist, building now..."; \
+            docker build --build-arg FETCH_SDKS=true --platform linux/x86_64 -t $(IMAGE_NAME) .; \
+        else \
+            echo "Docker is installed and image $(IMAGE_NAME) already exists, skipping build."; \
+        fi; \
+    fi
 
 list_files:
     ls export_windows
@@ -54,9 +63,6 @@ clone_repo_vsekai:
 #     set -x; \
 #     docker push "groupsinfra/gocd-agent-centos-8-groups:$LABEL_TEMPLATE" && \
 #     echo "groupsinfra/gocd-agent-centos-8-groups:$LABEL_TEMPLATE" > docker_image.txt
-
-build_just_docker:
-    docker build --build-arg FETCH_SDKS=true --platform linux/x86_64 -t just-fedora-app .
 
 deploy_osxcross:
     #!/usr/bin/env bash
