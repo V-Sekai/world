@@ -92,7 +92,7 @@ build-all:
             windows)
                 EXTRA_FLAGS=use_mingw=yes use_llvm=yes linkflags="-Wl,-pdb=" ccflags="-g -gcodeview"
                 ;;
-            mac)
+            macos)
                 EXTRA_FLAGS="osxcross_sdk=darwin24 vulkan=no arch=arm64"
                 ;;
             web)
