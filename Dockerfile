@@ -51,19 +51,28 @@ RUN if [ "$FETCH_SDKS" = "true" ]; then \
         rm -rf /tmp/jdk.tar.gz; \
     fi
 
-ENV ANDROID_SDK_ROOT=/root/sdk
-ENV ANDROID_NDK_VERSION=23.2.8568313
-ENV ANDROID_NDK_ROOT=${ANDROID_SDK_ROOT}/ndk/${ANDROID_NDK_VERSION}
-RUN mkdir -p sdk && cd sdk && \
-    export CMDLINETOOLS=commandlinetools-linux-11076708_latest.zip && \
-    if [ "$FETCH_SDKS" = "true" ]; then \
-        curl -LO https://dl.google.com/android/repository/${CMDLINETOOLS}; \
-        unzip ${CMDLINETOOLS}; \
-        rm ${CMDLINETOOLS}; \
-    fi && \
-    yes | cmdline-tools/bin/sdkmanager --sdk_root="${ANDROID_SDK_ROOT}" --licenses && \
-    cmdline-tools/bin/sdkmanager --sdk_root="${ANDROID_SDK_ROOT}" "ndk;${ANDROID_NDK_VERSION}" 'cmdline-tools;latest' 'build-tools;34.0.0' 'platforms;android-34' 'cmake;3.22.1'
+ARG ANDROID_SDK_ROOT="/root/sdk"
+ARG ANDROID_NDK_VERSION="23.2.8568313"
+ARG CMDLINETOOLS="commandlinetools-linux-11076708_latest.zip"
 
+RUN mkdir -p ${ANDROID_SDK_ROOT} && cd ${ANDROID_SDK_ROOT} && \
+    if [ "$FETCH_SDKS" = "true" ]; then \
+        curl -LO https://dl.google.com/android/repository/${CMDLINETOOLS} && \
+        unzip ${CMDLINETOOLS} && \
+        rm ${CMDLINETOOLS}; \
+    fi
+
+RUN if [ -d "${ANDROID_SDK_ROOT}/cmdline-tools" ]; then \
+        yes | ${ANDROID_SDK_ROOT}/cmdline-tools/bin/sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --licenses && \
+        ${ANDROID_SDK_ROOT}/cmdline-tools/bin/sdkmanager --sdk_root=${ANDROID_SDK_ROOT} \
+            "ndk;${ANDROID_NDK_VERSION}" \
+            'cmdline-tools;latest' \
+            'build-tools;34.0.0' \
+            'platforms;android-34' \
+            'cmake;3.22.1'; \
+    else \
+        echo "Android cmdline-tools not found, skipping SDK manager commands."; \
+    fi
 RUN if [ "$FETCH_SDKS" = "true" ]; then \
         curl -O https://download.blender.org/release/Blender4.1/blender-4.1.1-linux-x64.tar.xz; \
         tar -xf blender-4.1.1-linux-x64.tar.xz -C /opt/; \
