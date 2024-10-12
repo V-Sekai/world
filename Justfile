@@ -100,6 +100,8 @@ build-all:
                 ;;
         esac        
         scons platform=$platform \
+            CC=ccache \
+            CXX=ccache \
             use_thinlto=yes \
             werror=no \
             compiledb=yes \

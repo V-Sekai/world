@@ -30,6 +30,7 @@ RUN dnf install -y \
     libstdc++-static \
     libatomic-static \
     cmake \
+    ccache \
     patch \
     libxml2-devel \
     openssl \
