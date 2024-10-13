@@ -20,13 +20,14 @@ export IMAGE_NAME := "just-fedora-app"
 build_just_docker:
     @if ! command -v docker >/dev/null 2>&1; then \
         echo "Docker is not installed, running alternative build."; \
-        just build-all; \
     else \
         if ! docker images $IMAGE_NAME | awk '{ print $$1 }' | grep -q $IMAGE_NAME; then \
             echo "Image $IMAGE_NAME does not exist, building now..."; \
             docker build --build-arg FETCH_SDKS=true --platform linux/x86_64 -t $IMAGE_NAME .; \
+            just build-all; \
         else \
             echo "Docker is installed and image $IMAGE_NAME already exists, skipping build."; \
+            docker build --build-arg FETCH_SDKS=true --platform linux/x86_64 -t $IMAGE_NAME .; \
         fi; \
     fi
 
