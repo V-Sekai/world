@@ -53,6 +53,7 @@
 #include "core/io/file_access_encrypted.h"
 #include "core/os/os.h"
 
+#include "scene/resources/packed_scene.h"
 #include "scene/scene_string_names.h"
 
 #ifdef TOOLS_ENABLED
@@ -136,7 +137,7 @@ void GDScript::_super_implicit_constructor(GDScript *p_script, GDScriptInstance 
 		}
 	}
 	ERR_FAIL_NULL(p_script->implicit_initializer);
-	if (likely(valid)) {
+	if (likely(p_script->valid)) {
 		p_script->implicit_initializer->call(p_instance, nullptr, 0, r_error);
 	} else {
 		r_error.error = Callable::CallError::CALL_ERROR_INVALID_METHOD;
@@ -878,6 +879,11 @@ Error GDScript::reload(bool p_keep_state) {
 	if (can_run && p_keep_state) {
 		_restore_old_static_data();
 	}
+
+	if (p_keep_state) {
+		// Update the properties in the inspector.
+		update_exports();
+	}
 #endif
 
 	reloading = false;
@@ -904,7 +910,7 @@ void GDScript::get_members(HashSet<StringName> *p_members) {
 	}
 }
 
-const Variant GDScript::get_rpc_config() const {
+Variant GDScript::get_rpc_config() const {
 	return rpc_config;
 }
 
@@ -952,7 +958,8 @@ bool GDScript::_get(const StringName &p_name, Variant &r_ret) const {
 			if (E) {
 				if (likely(top->valid) && E->value.getter) {
 					Callable::CallError ce;
-					r_ret = const_cast<GDScript *>(this)->callp(E->value.getter, nullptr, 0, ce);
+					const Variant ret = const_cast<GDScript *>(this)->callp(E->value.getter, nullptr, 0, ce);
+					r_ret = (ce.error == Callable::CallError::CALL_OK) ? ret : Variant();
 					return true;
 				}
 				r_ret = top->static_variables[E->value.index];
@@ -1725,10 +1732,9 @@ bool GDScriptInstance::get(const StringName &p_name, Variant &r_ret) const {
 		if (E) {
 			if (likely(script->valid) && E->value.getter) {
 				Callable::CallError err;
-				r_ret = const_cast<GDScriptInstance *>(this)->callp(E->value.getter, nullptr, 0, err);
-				if (err.error == Callable::CallError::CALL_OK) {
-					return true;
-				}
+				const Variant ret = const_cast<GDScriptInstance *>(this)->callp(E->value.getter, nullptr, 0, err);
+				r_ret = (err.error == Callable::CallError::CALL_OK) ? ret : Variant();
+				return true;
 			}
 			r_ret = members[E->value.index];
 			return true;
@@ -1750,7 +1756,8 @@ bool GDScriptInstance::get(const StringName &p_name, Variant &r_ret) const {
 			if (E) {
 				if (likely(sptr->valid) && E->value.getter) {
 					Callable::CallError ce;
-					r_ret = const_cast<GDScript *>(sptr)->callp(E->value.getter, nullptr, 0, ce);
+					const Variant ret = const_cast<GDScript *>(sptr)->callp(E->value.getter, nullptr, 0, ce);
+					r_ret = (ce.error == Callable::CallError::CALL_OK) ? ret : Variant();
 					return true;
 				}
 				r_ret = sptr->static_variables[E->value.index];
@@ -2503,7 +2510,7 @@ void GDScriptLanguage::reload_scripts(const Array &p_scripts, bool p_soft_reload
 		SelfList<GDScript> *elem = script_list.first();
 		while (elem) {
 			// Scripts will reload all subclasses, so only reload root scripts.
-			if (elem->self()->is_root_script() && elem->self()->get_path().is_resource_file()) {
+			if (elem->self()->is_root_script() && !elem->self()->get_path().is_empty()) {
 				scripts.push_back(Ref<GDScript>(elem->self())); //cast to gdscript to avoid being erased by accident
 			}
 			elem = elem->next();
@@ -2571,7 +2578,19 @@ void GDScriptLanguage::reload_scripts(const Array &p_scripts, bool p_soft_reload
 	for (KeyValue<Ref<GDScript>, HashMap<ObjectID, List<Pair<StringName, Variant>>>> &E : to_reload) {
 		Ref<GDScript> scr = E.key;
 		print_verbose("GDScript: Reloading: " + scr->get_path());
-		scr->load_source_code(scr->get_path());
+		if (scr->is_built_in()) {
+			// TODO: It would be nice to do it more efficiently than loading the whole scene again.
+			Ref<PackedScene> scene = ResourceLoader::load(scr->get_path().get_slice("::", 0), "", ResourceFormatLoader::CACHE_MODE_IGNORE_DEEP);
+			ERR_CONTINUE(scene.is_null());
+
+			Ref<SceneState> state = scene->get_state();
+			Ref<GDScript> fresh = state->get_sub_resource(scr->get_path());
+			ERR_CONTINUE(fresh.is_null());
+
+			scr->set_source_code(fresh->get_source_code());
+		} else {
+			scr->load_source_code(scr->get_path());
+		}
 		scr->reload(p_soft_reload);
 
 		//restore state if saved
@@ -2857,8 +2876,11 @@ GDScriptLanguage::GDScriptLanguage() {
 	_debug_parse_err_line = -1;
 	_debug_parse_err_file = "";
 
+#ifdef DEBUG_ENABLED
 	profiling = false;
+	profile_native_calls = false;
 	script_frame_time = 0;
+#endif
 
 	int dmcs = GLOBAL_DEF(PropertyInfo(Variant::INT, "debug/settings/gdscript/max_call_stack", PROPERTY_HINT_RANGE, "512," + itos(GDScriptFunction::MAX_CALL_DEPTH - 1) + ",1"), 1024);
 

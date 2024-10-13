@@ -1562,11 +1562,11 @@ RenIK::SpineTransforms RenIK::perform_torso_ik() {
 		// Calculate and return the parent bone position for the arms
 		Transform3D left_global_parent_pose = Transform3D();
 		Transform3D right_global_parent_pose = Transform3D();
-		if (limb_arm_left != nullptr) {
+		if (limb_arm_left.is_valid()) {
 			left_global_parent_pose = get_global_parent_pose(
 					limb_arm_left->upper_id, ik_map, hipGlobalTransform);
 		}
-		if (limb_arm_right != nullptr) {
+		if (limb_arm_right.is_valid()) {
 			right_global_parent_pose = get_global_parent_pose(
 					limb_arm_right->upper_id, ik_map, hipGlobalTransform);
 		}
@@ -1579,7 +1579,7 @@ RenIK::SpineTransforms RenIK::perform_torso_ik() {
 void RenIK::perform_hand_left_ik(Transform3D global_parent, Transform3D target) {
 	if (hand_left_target_spatial && skeleton &&
 			limb_arm_left->is_valid_in_skeleton(skeleton)) {
-		Transform3D root = global_parent; //  skeleton->get_global_transform() * global_parent
+		Transform3D root = global_parent;
 		BoneId rootBone =
 				skeleton->get_bone_parent(limb_arm_left->get_upper_bone());
 		if (rootBone >= 0) {
@@ -1615,10 +1615,6 @@ void RenIK::perform_hand_right_ik(Transform3D global_parent, Transform3D target)
 				skeleton->get_bone_parent(limb_arm_right->get_upper_bone());
 		if (rootBone >= 0) {
 			if (right_shoulder_enabled) {
-				// BoneId shoulderParent = skeleton->get_bone_parent(rootBone);
-				// if (shoulderParent >= 0) {
-				// 	root = root * skeleton->get_bone_global_pose(shoulderParent);
-				// }
 				root = root * skeleton->get_bone_rest(rootBone);
 				Vector3 targetVector = root.affine_inverse().xform(target.origin);
 				Quaternion offsetQuat = Quaternion::from_euler(right_shoulder_offset);
@@ -1655,12 +1651,6 @@ void RenIK::perform_foot_left_ik(Transform3D global_parent, Transform3D target) 
 void RenIK::perform_foot_right_ik(Transform3D global_parent, Transform3D target) {
 	if (skeleton && limb_leg_right->is_valid_in_skeleton(skeleton)) {
 		Transform3D root = global_parent;
-		// Transform3D root = skeleton->get_global_transform();
-		// BoneId rootBone =
-		// skeleton->get_bone_parent(limb_leg_right->get_upper_bone()); if
-		// (rootBone >= 0) { 	root = root *
-		// skeleton->get_bone_global_pose(rootBone);
-		// }
 		apply_ik_map(solve_trig_ik_redux(
 							 limb_leg_right, root, target),
 				global_parent, bone_id_order(limb_leg_right));

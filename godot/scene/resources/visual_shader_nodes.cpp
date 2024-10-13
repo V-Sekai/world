@@ -29,6 +29,7 @@
 /**************************************************************************/
 
 #include "visual_shader_nodes.h"
+#include "visual_shader_nodes.compat.inc"
 
 #include "scene/resources/image_texture.h"
 
@@ -1353,12 +1354,12 @@ String VisualShaderNodeTexture2DArray::generate_global(Shader::Mode p_mode, Visu
 	return String();
 }
 
-void VisualShaderNodeTexture2DArray::set_texture_array(Ref<Texture2DArray> p_texture_array) {
+void VisualShaderNodeTexture2DArray::set_texture_array(Ref<TextureLayered> p_texture_array) {
 	texture_array = p_texture_array;
 	emit_changed();
 }
 
-Ref<Texture2DArray> VisualShaderNodeTexture2DArray::get_texture_array() const {
+Ref<TextureLayered> VisualShaderNodeTexture2DArray::get_texture_array() const {
 	return texture_array;
 }
 
@@ -1375,7 +1376,7 @@ void VisualShaderNodeTexture2DArray::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_texture_array", "value"), &VisualShaderNodeTexture2DArray::set_texture_array);
 	ClassDB::bind_method(D_METHOD("get_texture_array"), &VisualShaderNodeTexture2DArray::get_texture_array);
 
-	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "texture_array", PROPERTY_HINT_RESOURCE_TYPE, "Texture2DArray"), "set_texture_array", "get_texture_array");
+	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "texture_array", PROPERTY_HINT_RESOURCE_TYPE, "Texture2DArray,CompressedTexture2DArray,PlaceholderTexture2DArray,Texture2DArrayRD"), "set_texture_array", "get_texture_array");
 }
 
 VisualShaderNodeTexture2DArray::VisualShaderNodeTexture2DArray() {
@@ -1568,12 +1569,12 @@ VisualShaderNodeCubemap::Source VisualShaderNodeCubemap::get_source() const {
 	return source;
 }
 
-void VisualShaderNodeCubemap::set_cube_map(Ref<Cubemap> p_cube_map) {
+void VisualShaderNodeCubemap::set_cube_map(Ref<TextureLayered> p_cube_map) {
 	cube_map = p_cube_map;
 	emit_changed();
 }
 
-Ref<Cubemap> VisualShaderNodeCubemap::get_cube_map() const {
+Ref<TextureLayered> VisualShaderNodeCubemap::get_cube_map() const {
 	return cube_map;
 }
 
@@ -1618,7 +1619,7 @@ void VisualShaderNodeCubemap::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_texture_type"), &VisualShaderNodeCubemap::get_texture_type);
 
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "source", PROPERTY_HINT_ENUM, "Texture,SamplerPort"), "set_source", "get_source");
-	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "cube_map", PROPERTY_HINT_RESOURCE_TYPE, "Cubemap"), "set_cube_map", "get_cube_map");
+	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "cube_map", PROPERTY_HINT_RESOURCE_TYPE, "Cubemap,CompressedCubemap,PlaceholderCubemap,TextureCubemapRD"), "set_cube_map", "get_cube_map");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "texture_type", PROPERTY_HINT_ENUM, "Data,Color,Normal Map"), "set_texture_type", "get_texture_type");
 
 	BIND_ENUM_CONSTANT(SOURCE_TEXTURE);
@@ -5368,6 +5369,20 @@ String VisualShaderNodeIntParameter::generate_global(Shader::Mode p_mode, Visual
 		code += _get_qual_str() + "uniform int " + get_parameter_name() + " : hint_range(" + itos(hint_range_min) + ", " + itos(hint_range_max) + ")";
 	} else if (hint == HINT_RANGE_STEP) {
 		code += _get_qual_str() + "uniform int " + get_parameter_name() + " : hint_range(" + itos(hint_range_min) + ", " + itos(hint_range_max) + ", " + itos(hint_range_step) + ")";
+	} else if (hint == HINT_ENUM) {
+		code += _get_qual_str() + "uniform int " + get_parameter_name() + " : hint_enum(";
+
+		bool first = true;
+		for (const String &_name : hint_enum_names) {
+			if (first) {
+				first = false;
+			} else {
+				code += ", ";
+			}
+			code += "\"" + _name.c_escape() + "\"";
+		}
+
+		code += ")";
 	} else {
 		code += _get_qual_str() + "uniform int " + get_parameter_name();
 	}
@@ -5439,6 +5454,18 @@ int VisualShaderNodeIntParameter::get_step() const {
 	return hint_range_step;
 }
 
+void VisualShaderNodeIntParameter::set_enum_names(const PackedStringArray &p_names) {
+	if (hint_enum_names == p_names) {
+		return;
+	}
+	hint_enum_names = p_names;
+	emit_changed();
+}
+
+PackedStringArray VisualShaderNodeIntParameter::get_enum_names() const {
+	return hint_enum_names;
+}
+
 void VisualShaderNodeIntParameter::set_default_value_enabled(bool p_default_value_enabled) {
 	if (default_value_enabled == p_default_value_enabled) {
 		return;
@@ -5476,22 +5503,27 @@ void VisualShaderNodeIntParameter::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_step", "value"), &VisualShaderNodeIntParameter::set_step);
 	ClassDB::bind_method(D_METHOD("get_step"), &VisualShaderNodeIntParameter::get_step);
 
+	ClassDB::bind_method(D_METHOD("set_enum_names", "names"), &VisualShaderNodeIntParameter::set_enum_names);
+	ClassDB::bind_method(D_METHOD("get_enum_names"), &VisualShaderNodeIntParameter::get_enum_names);
+
 	ClassDB::bind_method(D_METHOD("set_default_value_enabled", "enabled"), &VisualShaderNodeIntParameter::set_default_value_enabled);
 	ClassDB::bind_method(D_METHOD("is_default_value_enabled"), &VisualShaderNodeIntParameter::is_default_value_enabled);
 
 	ClassDB::bind_method(D_METHOD("set_default_value", "value"), &VisualShaderNodeIntParameter::set_default_value);
 	ClassDB::bind_method(D_METHOD("get_default_value"), &VisualShaderNodeIntParameter::get_default_value);
 
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "hint", PROPERTY_HINT_ENUM, "None,Range,Range + Step"), "set_hint", "get_hint");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "hint", PROPERTY_HINT_ENUM, "None,Range,Range + Step,Enum"), "set_hint", "get_hint");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "min"), "set_min", "get_min");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "max"), "set_max", "get_max");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "step"), "set_step", "get_step");
+	ADD_PROPERTY(PropertyInfo(Variant::PACKED_STRING_ARRAY, "enum_names"), "set_enum_names", "get_enum_names");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "default_value_enabled"), "set_default_value_enabled", "is_default_value_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "default_value"), "set_default_value", "get_default_value");
 
 	BIND_ENUM_CONSTANT(HINT_NONE);
 	BIND_ENUM_CONSTANT(HINT_RANGE);
 	BIND_ENUM_CONSTANT(HINT_RANGE_STEP);
+	BIND_ENUM_CONSTANT(HINT_ENUM);
 	BIND_ENUM_CONSTANT(HINT_MAX);
 }
 
@@ -5512,6 +5544,9 @@ Vector<StringName> VisualShaderNodeIntParameter::get_editable_properties() const
 	}
 	if (hint == HINT_RANGE_STEP) {
 		props.push_back("step");
+	}
+	if (hint == HINT_ENUM) {
+		props.push_back("enum_names");
 	}
 	props.push_back("default_value_enabled");
 	if (default_value_enabled) {
@@ -6180,15 +6215,6 @@ bool VisualShaderNodeTransformParameter::is_default_value_enabled() const {
 	return default_value_enabled;
 }
 
-void VisualShaderNodeTransformParameter::set_hint_triplanar_enabled(bool p_enabled) {
-	hint_triplanar_enabled = p_enabled;
-	emit_changed();
-}
-
-bool VisualShaderNodeTransformParameter::is_hint_triplanar_enabled() const {
-	return hint_triplanar_enabled;
-}
-
 void VisualShaderNodeTransformParameter::set_default_value(const Transform3D &p_value) {
 	default_value = p_value;
 	emit_changed();
@@ -6200,9 +6226,6 @@ Transform3D VisualShaderNodeTransformParameter::get_default_value() const {
 
 String VisualShaderNodeTransformParameter::generate_global(Shader::Mode p_mode, VisualShader::Type p_type, int p_id) const {
 	String code = _get_qual_str() + "uniform mat4 " + get_parameter_name();
-	if (hint_triplanar_enabled) {
-		code += " : hint_triplanar_mat";
-	}
 	if (default_value_enabled) {
 		Vector3 row0 = default_value.basis.rows[0];
 		Vector3 row1 = default_value.basis.rows[1];
@@ -6222,14 +6245,10 @@ void VisualShaderNodeTransformParameter::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_default_value_enabled", "enabled"), &VisualShaderNodeTransformParameter::set_default_value_enabled);
 	ClassDB::bind_method(D_METHOD("is_default_value_enabled"), &VisualShaderNodeTransformParameter::is_default_value_enabled);
 
-	ClassDB::bind_method(D_METHOD("set_hint_triplanar_enabled", "enabled"), &VisualShaderNodeTransformParameter::set_hint_triplanar_enabled);
-	ClassDB::bind_method(D_METHOD("is_hint_triplanar_enabled"), &VisualShaderNodeTransformParameter::is_hint_triplanar_enabled);
-
 	ClassDB::bind_method(D_METHOD("set_default_value", "value"), &VisualShaderNodeTransformParameter::set_default_value);
 	ClassDB::bind_method(D_METHOD("get_default_value"), &VisualShaderNodeTransformParameter::get_default_value);
 
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "default_value_enabled"), "set_default_value_enabled", "is_default_value_enabled");
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "hint_triplanar_enabled"), "set_hint_triplanar_enabled", "is_hint_triplanar_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::TRANSFORM3D, "default_value"), "set_default_value", "get_default_value");
 }
 
@@ -6254,7 +6273,6 @@ bool VisualShaderNodeTransformParameter::is_convertible_to_constant() const {
 
 Vector<StringName> VisualShaderNodeTransformParameter::get_editable_properties() const {
 	Vector<StringName> props = VisualShaderNodeParameter::get_editable_properties();
-	props.push_back("hint_triplanar_enabled");
 	props.push_back("default_value_enabled");
 	if (default_value_enabled) {
 		props.push_back("default_value");
@@ -6764,14 +6782,9 @@ String VisualShaderNodeTextureParameterTriplanar::generate_global_per_func(Shade
 	if (p_type == VisualShader::TYPE_VERTEX) {
 		code += "// " + get_caption() + "\n";
 		code += "	{\n";
-		if (world_triplanar_enabled) {
-			code += "		triplanar_power_normal = pow(abs(mat3(TRIPLANAR_MATRIX) * NORMAL), vec3(triplanar_sharpness));\n";
-			code += "		triplanar_pos = TRIPLANAR_POSITION * triplanar_scale + triplanar_offset;\n";
-		} else {
-			code += "		triplanar_power_normal = pow(abs(NORMAL), vec3(triplanar_sharpness));\n";
-			code += "		triplanar_pos = VERTEX * triplanar_scale + triplanar_offset;\n";
-		}
+		code += "		triplanar_power_normal = pow(abs(NORMAL), vec3(triplanar_sharpness));\n";
 		code += "		triplanar_power_normal /= dot(triplanar_power_normal, vec3(1.0));\n";
+		code += "		triplanar_pos = VERTEX * triplanar_scale + triplanar_offset;\n";
 		code += "		triplanar_pos *= vec3(1.0, -1.0, 1.0);\n";
 		code += "	}\n";
 	}
@@ -6803,18 +6816,6 @@ String VisualShaderNodeTextureParameterTriplanar::generate_code(Shader::Mode p_m
 	return code;
 }
 
-Vector<StringName> VisualShaderNodeTextureParameterTriplanar::get_editable_properties() const {
-	auto props = VisualShaderNodeTextureParameter::get_editable_properties();
-	props.push_back("world_triplanar_enabled");
-	return props;
-}
-
-HashMap<StringName, String> VisualShaderNodeTextureParameterTriplanar::get_editable_properties_names() const {
-	auto names = VisualShaderNodeTextureParameter::get_editable_properties_names();
-	names.insert("world_triplanar_enabled", RTR("World Triplanar"));
-	return names;
-}
-
 bool VisualShaderNodeTextureParameterTriplanar::is_input_port_default(int p_port, Shader::Mode p_mode) const {
 	if (p_port == 0) {
 		return true;
@@ -6822,22 +6823,6 @@ bool VisualShaderNodeTextureParameterTriplanar::is_input_port_default(int p_port
 		return true;
 	}
 	return false;
-}
-
-void VisualShaderNodeTextureParameterTriplanar::set_world_triplanar_enabled(bool p_enabled) {
-	world_triplanar_enabled = p_enabled;
-	emit_changed();
-}
-
-bool VisualShaderNodeTextureParameterTriplanar::is_world_triplanar_enabled() const {
-	return world_triplanar_enabled;
-}
-
-void VisualShaderNodeTextureParameterTriplanar::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("set_world_triplanar_enabled", "p_enabled"), &VisualShaderNodeTextureParameterTriplanar::set_world_triplanar_enabled);
-	ClassDB::bind_method(D_METHOD("is_world_triplanar_enabled"), &VisualShaderNodeTextureParameterTriplanar::is_world_triplanar_enabled);
-
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "world_triplanar_enabled"), "set_world_triplanar_enabled", "is_world_triplanar_enabled");
 }
 
 VisualShaderNodeTextureParameterTriplanar::VisualShaderNodeTextureParameterTriplanar() {
@@ -8096,17 +8081,28 @@ int VisualShaderNodeRemap::get_input_port_count() const {
 }
 
 VisualShaderNodeRemap::PortType VisualShaderNodeRemap::get_input_port_type(int p_port) const {
-	switch (p_port) {
-		case 0:
-			return PORT_TYPE_SCALAR;
-		case 1:
-			return PORT_TYPE_SCALAR;
-		case 2:
-			return PORT_TYPE_SCALAR;
-		case 3:
-			return PORT_TYPE_SCALAR;
-		case 4:
-			return PORT_TYPE_SCALAR;
+	switch (op_type) {
+		case OP_TYPE_VECTOR_2D:
+			return PORT_TYPE_VECTOR_2D;
+		case OP_TYPE_VECTOR_2D_SCALAR:
+			if (p_port == 0) {
+				return PORT_TYPE_VECTOR_2D;
+			}
+			break;
+		case OP_TYPE_VECTOR_3D:
+			return PORT_TYPE_VECTOR_3D;
+		case OP_TYPE_VECTOR_3D_SCALAR:
+			if (p_port == 0) {
+				return PORT_TYPE_VECTOR_3D;
+			}
+			break;
+		case OP_TYPE_VECTOR_4D:
+			return PORT_TYPE_VECTOR_4D;
+		case OP_TYPE_VECTOR_4D_SCALAR:
+			if (p_port == 0) {
+				return PORT_TYPE_VECTOR_4D;
+			}
+			break;
 		default:
 			break;
 	}
@@ -8138,21 +8134,157 @@ int VisualShaderNodeRemap::get_output_port_count() const {
 }
 
 VisualShaderNodeRemap::PortType VisualShaderNodeRemap::get_output_port_type(int p_port) const {
-	return PORT_TYPE_SCALAR;
+	switch (op_type) {
+		case OP_TYPE_VECTOR_2D:
+		case OP_TYPE_VECTOR_2D_SCALAR:
+			return PORT_TYPE_VECTOR_2D;
+		case OP_TYPE_VECTOR_3D:
+		case OP_TYPE_VECTOR_3D_SCALAR:
+			return PORT_TYPE_VECTOR_3D;
+		case OP_TYPE_VECTOR_4D:
+		case OP_TYPE_VECTOR_4D_SCALAR:
+			return PORT_TYPE_VECTOR_4D;
+		default:
+			return PORT_TYPE_SCALAR;
+	}
 }
 
 String VisualShaderNodeRemap::get_output_port_name(int p_port) const {
 	return "value";
 }
 
+void VisualShaderNodeRemap::set_op_type(OpType p_op_type) {
+	ERR_FAIL_INDEX(int(p_op_type), int(OP_TYPE_MAX));
+	if (op_type == p_op_type) {
+		return;
+	}
+	switch (p_op_type) {
+		case OP_TYPE_SCALAR: {
+			set_input_port_default_value(0, 0.0, get_input_port_default_value(0));
+			set_input_port_default_value(1, 0.0, get_input_port_default_value(1));
+			set_input_port_default_value(2, 1.0, get_input_port_default_value(2));
+			set_input_port_default_value(3, 0.0, get_input_port_default_value(3));
+			set_input_port_default_value(4, 1.0, get_input_port_default_value(4));
+		} break;
+		case OP_TYPE_VECTOR_2D: {
+			set_input_port_default_value(0, Vector2(), get_input_port_default_value(0));
+			set_input_port_default_value(1, Vector2(), get_input_port_default_value(1));
+			set_input_port_default_value(2, Vector2(1.0, 1.0), get_input_port_default_value(2));
+			set_input_port_default_value(3, Vector2(), get_input_port_default_value(3));
+			set_input_port_default_value(4, Vector2(1.0, 1.0), get_input_port_default_value(4));
+		} break;
+		case OP_TYPE_VECTOR_2D_SCALAR: {
+			set_input_port_default_value(0, Vector2(), get_input_port_default_value(0));
+			set_input_port_default_value(1, 0.0, get_input_port_default_value(1));
+			set_input_port_default_value(2, 1.0, get_input_port_default_value(2));
+			set_input_port_default_value(3, 0.0, get_input_port_default_value(3));
+			set_input_port_default_value(4, 1.0, get_input_port_default_value(4));
+		} break;
+		case OP_TYPE_VECTOR_3D: {
+			set_input_port_default_value(0, Vector3(), get_input_port_default_value(0));
+			set_input_port_default_value(1, Vector3(), get_input_port_default_value(1));
+			set_input_port_default_value(2, Vector3(1.0, 1.0, 1.0), get_input_port_default_value(2));
+			set_input_port_default_value(3, Vector3(), get_input_port_default_value(3));
+			set_input_port_default_value(4, Vector3(1.0, 1.0, 1.0), get_input_port_default_value(4));
+		} break;
+		case OP_TYPE_VECTOR_3D_SCALAR: {
+			set_input_port_default_value(0, Vector3(), get_input_port_default_value(0));
+			set_input_port_default_value(1, 0.0, get_input_port_default_value(1));
+			set_input_port_default_value(2, 1.0, get_input_port_default_value(2));
+			set_input_port_default_value(3, 0.0, get_input_port_default_value(3));
+			set_input_port_default_value(4, 1.0, get_input_port_default_value(4));
+		} break;
+		case OP_TYPE_VECTOR_4D: {
+			set_input_port_default_value(0, Quaternion(), get_input_port_default_value(0));
+			set_input_port_default_value(1, Quaternion(), get_input_port_default_value(1));
+			set_input_port_default_value(2, Quaternion(1.0, 1.0, 1.0, 1.0), get_input_port_default_value(2));
+			set_input_port_default_value(3, Quaternion(), get_input_port_default_value(3));
+			set_input_port_default_value(4, Quaternion(1.0, 1.0, 1.0, 1.0), get_input_port_default_value(4));
+		} break;
+		case OP_TYPE_VECTOR_4D_SCALAR: {
+			set_input_port_default_value(0, Quaternion(), get_input_port_default_value(0));
+			set_input_port_default_value(1, 0.0, get_input_port_default_value(1));
+			set_input_port_default_value(2, 1.0, get_input_port_default_value(2));
+			set_input_port_default_value(3, 0.0, get_input_port_default_value(3));
+			set_input_port_default_value(4, 1.0, get_input_port_default_value(4));
+		} break;
+		default:
+			break;
+	}
+	op_type = p_op_type;
+	emit_changed();
+}
+
+VisualShaderNodeRemap::OpType VisualShaderNodeRemap::get_op_type() const {
+	return op_type;
+}
+
 String VisualShaderNodeRemap::generate_code(Shader::Mode p_mode, VisualShader::Type p_type, int p_id, const String *p_input_vars, const String *p_output_vars, bool p_for_preview) const {
 	String code;
 	code += "	{\n";
-	code += vformat("		float __input_range = %s - %s;\n", p_input_vars[2], p_input_vars[1]);
-	code += vformat("		float __output_range = %s - %s;\n", p_input_vars[4], p_input_vars[3]);
-	code += vformat("		%s = %s + __output_range * ((%s - %s) / __input_range);\n", p_output_vars[0], p_input_vars[3], p_input_vars[0], p_input_vars[1]);
+	switch (op_type) {
+		case OP_TYPE_SCALAR: {
+			code += vformat("		float __input_range = %s - %s;\n", p_input_vars[2], p_input_vars[1]);
+			code += vformat("		float __output_range = %s - %s;\n", p_input_vars[4], p_input_vars[3]);
+			code += vformat("		%s = %s + __output_range * ((%s - %s) / __input_range);\n", p_output_vars[0], p_input_vars[3], p_input_vars[0], p_input_vars[1]);
+		} break;
+		case OP_TYPE_VECTOR_2D: {
+			code += vformat("		vec2 __input_range = %s - %s;\n", p_input_vars[2], p_input_vars[1]);
+			code += vformat("		vec2 __output_range = %s - %s;\n", p_input_vars[4], p_input_vars[3]);
+			code += vformat("		%s = %s + __output_range * ((%s - %s) / __input_range);\n", p_output_vars[0], p_input_vars[3], p_input_vars[0], p_input_vars[1]);
+		} break;
+		case OP_TYPE_VECTOR_2D_SCALAR: {
+			code += vformat("		vec2 __input_range = vec2(%s - %s);\n", p_input_vars[2], p_input_vars[1]);
+			code += vformat("		vec2 __output_range = vec2(%s - %s);\n", p_input_vars[4], p_input_vars[3]);
+			code += vformat("		%s = vec2(%s) + __output_range * ((%s - vec2(%s)) / __input_range);\n", p_output_vars[0], p_input_vars[3], p_input_vars[0], p_input_vars[1]);
+		} break;
+		case OP_TYPE_VECTOR_3D: {
+			code += vformat("		vec3 __input_range = %s - %s;\n", p_input_vars[2], p_input_vars[1]);
+			code += vformat("		vec3 __output_range = %s - %s;\n", p_input_vars[4], p_input_vars[3]);
+			code += vformat("		%s = %s + __output_range * ((%s - %s) / __input_range);\n", p_output_vars[0], p_input_vars[3], p_input_vars[0], p_input_vars[1]);
+		} break;
+		case OP_TYPE_VECTOR_3D_SCALAR: {
+			code += vformat("		vec3 __input_range = vec3(%s - %s);\n", p_input_vars[2], p_input_vars[1]);
+			code += vformat("		vec3 __output_range = vec3(%s - %s);\n", p_input_vars[4], p_input_vars[3]);
+			code += vformat("		%s = vec3(%s) + __output_range * ((%s - vec3(%s)) / __input_range);\n", p_output_vars[0], p_input_vars[3], p_input_vars[0], p_input_vars[1]);
+		} break;
+		case OP_TYPE_VECTOR_4D: {
+			code += vformat("		vec4 __input_range = %s - %s;\n", p_input_vars[2], p_input_vars[1]);
+			code += vformat("		vec4 __output_range = %s - %s;\n", p_input_vars[4], p_input_vars[3]);
+			code += vformat("		%s = %s + __output_range * ((%s - %s) / __input_range);\n", p_output_vars[0], p_input_vars[3], p_input_vars[0], p_input_vars[1]);
+		} break;
+		case OP_TYPE_VECTOR_4D_SCALAR: {
+			code += vformat("		vec4 __input_range = vec4(%s - %s);\n", p_input_vars[2], p_input_vars[1]);
+			code += vformat("		vec4 __output_range = vec4(%s - %s);\n", p_input_vars[4], p_input_vars[3]);
+			code += vformat("		%s = vec4(%s) + __output_range * ((%s - vec4(%s)) / __input_range);\n", p_output_vars[0], p_input_vars[3], p_input_vars[0], p_input_vars[1]);
+		} break;
+		default:
+			break;
+	}
 	code += "	}\n";
 	return code;
+}
+
+Vector<StringName> VisualShaderNodeRemap::get_editable_properties() const {
+	Vector<StringName> props;
+	props.push_back("op_type");
+	return props;
+}
+
+void VisualShaderNodeRemap::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("set_op_type", "op_type"), &VisualShaderNodeRemap::set_op_type);
+	ClassDB::bind_method(D_METHOD("get_op_type"), &VisualShaderNodeRemap::get_op_type);
+
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "op_type", PROPERTY_HINT_ENUM, "Scalar,Vector2,Vector2Scalar,Vector3,Vector3Scalar,Vector4,Vector4Scalar"), "set_op_type", "get_op_type");
+
+	BIND_ENUM_CONSTANT(OP_TYPE_SCALAR);
+	BIND_ENUM_CONSTANT(OP_TYPE_VECTOR_2D);
+	BIND_ENUM_CONSTANT(OP_TYPE_VECTOR_2D_SCALAR);
+	BIND_ENUM_CONSTANT(OP_TYPE_VECTOR_3D);
+	BIND_ENUM_CONSTANT(OP_TYPE_VECTOR_3D_SCALAR);
+	BIND_ENUM_CONSTANT(OP_TYPE_VECTOR_4D);
+	BIND_ENUM_CONSTANT(OP_TYPE_VECTOR_4D_SCALAR);
+	BIND_ENUM_CONSTANT(OP_TYPE_MAX);
 }
 
 VisualShaderNodeRemap::VisualShaderNodeRemap() {
