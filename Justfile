@@ -22,11 +22,11 @@ build_just_docker:
         echo "Docker is not installed, running alternative build."; \
         just build-all; \
     else \
-        if ! docker images $(IMAGE_NAME) | awk '{ print $$1 }' | grep -q $(IMAGE_NAME); then \
-            echo "Image $(IMAGE_NAME) does not exist, building now..."; \
-            docker build --build-arg FETCH_SDKS=true --platform linux/x86_64 -t $(IMAGE_NAME) .; \
+        if ! docker images $IMAGE_NAME | awk '{ print $$1 }' | grep -q $IMAGE_NAME; then \
+            echo "Image $IMAGE_NAME does not exist, building now..."; \
+            docker build --build-arg FETCH_SDKS=true --platform linux/x86_64 -t $IMAGE_NAME .; \
         else \
-            echo "Docker is installed and image $(IMAGE_NAME) already exists, skipping build."; \
+            echo "Docker is installed and image $IMAGE_NAME already exists, skipping build."; \
         fi; \
     fi
 
@@ -99,16 +99,15 @@ build-all:
                 EXTRA_FLAGS=use_mingw=yes use_llvm=yes linkflags="-Wl,-pdb=" ccflags="-g -gcodeview"
                 ;;
             macos)
-                EXTRA_FLAGS="osxcross_sdk=darwin24 vulkan=no arch=arm64"
+                EXTRA_FLAGS="osxcross_sdk=darwin24 vulkan=no arch=arm64 linker=mold"
                 ;;
             web)
                 EXTRA_FLAGS="threads=yes lto=none dlink_enabled=yes builtin_glslang=yes builtin_openxr=yes module_raycast_enabled=no module_speech_enabled=no javascript_eval=no"
                 ;;
         esac        
         scons platform=$platform \
-            CC=ccache \
-            CXX=ccache \
-            use_lld=yes \
+            cc="ccache clang" \
+            cxx="ccache clang++" \
             use_thinlto=yes \
             werror=no \
             compiledb=yes \
@@ -152,7 +151,7 @@ build-all:
                 ls -l bin/
                 ;;            
         esac
-    ' ::: windows android web linux macos \
+    ' ::: macos \
     ::: editor # template_release template_debug
 
 build_vsekai:
