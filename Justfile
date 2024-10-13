@@ -17,19 +17,16 @@ export WORLD_PWD := invocation_directory()
 export SCONS_CACHE := "/app/.scons_cache"
 
 export IMAGE_NAME := "just-fedora-app"
+
 build_just_docker:
-    @if ! command -v docker >/dev/null 2>&1; then \
-        echo "Docker is not installed, running alternative build."; \
+    if ! docker images $IMAGE_NAME | awk '{ print $$1 }' | grep -q $IMAGE_NAME; then \
+        echo "Image $IMAGE_NAME does not exist, building now..."; \
+        docker build --build-arg FETCH_SDKS=true --platform linux/x86_64 -t $IMAGE_NAME .; \
+        just build-all; \
     else \
-        if ! docker images $IMAGE_NAME | awk '{ print $$1 }' | grep -q $IMAGE_NAME; then \
-            echo "Image $IMAGE_NAME does not exist, building now..."; \
-            docker build --build-arg FETCH_SDKS=true --platform linux/x86_64 -t $IMAGE_NAME .; \
-            just build-all; \
-        else \
-            echo "Docker is installed and image $IMAGE_NAME already exists, skipping build."; \
-            docker build --build-arg FETCH_SDKS=true --platform linux/x86_64 -t $IMAGE_NAME .; \
-        fi; \
-    fi
+        echo "Docker is installed and image $IMAGE_NAME already exists, skipping build."; \
+        docker run -it -v $WORLD_PWD:/app $IMAGE_NAME just build-all; \
+    fi; \
 
 list_files:
     ls export_windows
@@ -86,6 +83,12 @@ run-editor:
     @just build-all
     @just {{ EDITOR_TYPE_COMMAND }}
 
+build-osxcross:
+    git clone https://github.com/tpoechtrager/osxcross.git /osxcross
+    curl -o /osxcross/tarballs/MacOSX15.0.sdk.tar.xz -L https://github.com/V-Sekai/world/releases/download/v0.0.1/MacOSX15.0.sdk.tar.xz; \
+    ls -l /osxcross/tarballs/; \
+    cd /osxcross && UNATTENDED=1 ./build.sh && ./build_compiler_rt.sh
+
 build-all:
     #!/usr/bin/env bash
     export PATH=/llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64/bin:$PATH
@@ -100,6 +103,7 @@ build-all:
                 EXTRA_FLAGS=use_mingw=yes use_llvm=yes linkflags="-Wl,-pdb=" ccflags="-g -gcodeview"
                 ;;
             macos)
+                @just build-osxcross
                 EXTRA_FLAGS="osxcross_sdk=darwin24 vulkan=no arch=arm64 linker=mold"
                 ;;
             web)
@@ -152,7 +156,7 @@ build-all:
                 ls -l bin/
                 ;;            
         esac
-    ' ::: macos \
+    ' ::: windows \
     ::: editor # template_release template_debug
 
 build_vsekai:

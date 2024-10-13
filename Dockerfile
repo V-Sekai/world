@@ -88,14 +88,5 @@ RUN git clone https://github.com/emscripten-core/emsdk.git /emsdk \
     && /emsdk/emsdk activate 3.1.67 \
     && echo 'source "/emsdk/emsdk_env.sh"' >> $HOME/.bashrc
 
-RUN git clone https://github.com/tpoechtrager/osxcross.git /osxcross
-
-RUN if [ "$FETCH_SDKS" = "true" ]; then \
-    curl -o /osxcross/tarballs/MacOSX15.0.sdk.tar.xz -L https://github.com/V-Sekai/world/releases/download/v0.0.1/MacOSX15.0.sdk.tar.xz && \
-    ls -l /osxcross/tarballs/; \
-    fi
-
-RUN cd /osxcross && UNATTENDED=1 ./build.sh && ./build_compiler_rt.sh
-
 WORKDIR /app
 CMD ["bash"]
