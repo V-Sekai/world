@@ -60,11 +60,6 @@ class StringName {
 		uint32_t debug_references = 0;
 #endif
 		String get_name() const { return cname ? String(cname) : name; }
-		bool operator==(const String &p_name) const;
-		bool operator!=(const String &p_name) const;
-		bool operator==(const char *p_name) const;
-		bool operator!=(const char *p_name) const;
-
 		int idx = 0;
 		uint32_t hash = 0;
 		_Data *prev = nullptr;
@@ -72,7 +67,7 @@ class StringName {
 		_Data() {}
 	};
 
-	static inline _Data *_table[STRING_TABLE_LEN];
+	static _Data *_table[STRING_TABLE_LEN];
 
 	_Data *_data = nullptr;
 
@@ -80,11 +75,10 @@ class StringName {
 	friend void register_core_types();
 	friend void unregister_core_types();
 	friend class Main;
-	static inline Mutex mutex;
+	static Mutex mutex;
 	static void setup();
 	static void cleanup();
-	static uint32_t get_empty_hash();
-	static inline bool configured = false;
+	static bool configured;
 #ifdef DEBUG_ENABLED
 	struct DebugSortReferences {
 		bool operator()(const _Data *p_left, const _Data *p_right) const {
@@ -92,7 +86,7 @@ class StringName {
 		}
 	};
 
-	static inline bool debug_stringname = false;
+	static bool debug_stringname;
 #endif
 
 	StringName(_Data *p_data) { _data = p_data; }
@@ -104,10 +98,6 @@ public:
 	bool operator==(const char *p_name) const;
 	bool operator!=(const String &p_name) const;
 	bool operator!=(const char *p_name) const;
-
-	char32_t operator[](int p_index) const;
-	int length() const;
-	bool is_empty() const;
 
 	_FORCE_INLINE_ bool is_node_unique_name() const {
 		if (!_data) {
@@ -140,7 +130,7 @@ public:
 		if (_data) {
 			return _data->hash;
 		} else {
-			return get_empty_hash();
+			return 0;
 		}
 	}
 	_FORCE_INLINE_ const void *data_unique_pointer() const {
@@ -185,7 +175,7 @@ public:
 		}
 	};
 
-	StringName &operator=(const StringName &p_name);
+	void operator=(const StringName &p_name);
 	StringName(const char *p_name, bool p_static = false);
 	StringName(const StringName &p_name);
 	StringName(const String &p_name, bool p_static = false);

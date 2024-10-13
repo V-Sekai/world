@@ -90,7 +90,7 @@ public:
 
 	// Stack Dump variables
 	String get_stack_variable(const String &p_var);
-	void add_stack_variable(const Array &p_arr, int p_offset = -1);
+	void add_stack_variable(const Array &p_arr);
 	void clear_stack_variables();
 };
 

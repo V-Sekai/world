@@ -164,11 +164,10 @@ const engine = new Engine(GODOT_CONFIG);
 				new Promise((resolve) => {
 					setTimeout(() => resolve(), 2000);
 				}),
-			]).then(() => {
-				// Reload if there was no error.
-				window.location.reload();
-			}).catch((err) => {
+			]).catch((err) => {
 				console.error('Error while registering service worker:', err);
+			}).then(() => {
+				window.location.reload();
 			});
 		} else {
 			// Display the message as usual

@@ -394,12 +394,7 @@ namespace Godot.NativeInterop
             return array;
         }
 
-        public static godot_packed_byte_array ConvertSystemArrayToNativePackedByteArray(Span<byte> p_array)
-        {
-            return ConvertSystemArrayToNativePackedByteArray((ReadOnlySpan<byte>)p_array);
-        }
-
-        public static unsafe godot_packed_byte_array ConvertSystemArrayToNativePackedByteArray(ReadOnlySpan<byte> p_array)
+        public static unsafe godot_packed_byte_array ConvertSystemArrayToNativePackedByteArray(Span<byte> p_array)
         {
             if (p_array.IsEmpty)
                 return new godot_packed_byte_array();
@@ -422,12 +417,7 @@ namespace Godot.NativeInterop
             return array;
         }
 
-        public static godot_packed_int32_array ConvertSystemArrayToNativePackedInt32Array(Span<int> p_array)
-        {
-            return ConvertSystemArrayToNativePackedInt32Array((ReadOnlySpan<int>)p_array);
-        }
-
-        public static unsafe godot_packed_int32_array ConvertSystemArrayToNativePackedInt32Array(ReadOnlySpan<int> p_array)
+        public static unsafe godot_packed_int32_array ConvertSystemArrayToNativePackedInt32Array(Span<int> p_array)
         {
             if (p_array.IsEmpty)
                 return new godot_packed_int32_array();
@@ -450,12 +440,7 @@ namespace Godot.NativeInterop
             return array;
         }
 
-        public static godot_packed_int64_array ConvertSystemArrayToNativePackedInt64Array(Span<long> p_array)
-        {
-            return ConvertSystemArrayToNativePackedInt64Array((ReadOnlySpan<long>)p_array);
-        }
-
-        public static unsafe godot_packed_int64_array ConvertSystemArrayToNativePackedInt64Array(ReadOnlySpan<long> p_array)
+        public static unsafe godot_packed_int64_array ConvertSystemArrayToNativePackedInt64Array(Span<long> p_array)
         {
             if (p_array.IsEmpty)
                 return new godot_packed_int64_array();
@@ -478,13 +463,8 @@ namespace Godot.NativeInterop
             return array;
         }
 
-        public static godot_packed_float32_array ConvertSystemArrayToNativePackedFloat32Array(Span<float> p_array)
-        {
-            return ConvertSystemArrayToNativePackedFloat32Array((ReadOnlySpan<float>)p_array);
-        }
-
         public static unsafe godot_packed_float32_array ConvertSystemArrayToNativePackedFloat32Array(
-            ReadOnlySpan<float> p_array)
+            Span<float> p_array)
         {
             if (p_array.IsEmpty)
                 return new godot_packed_float32_array();
@@ -507,13 +487,8 @@ namespace Godot.NativeInterop
             return array;
         }
 
-        public static godot_packed_float64_array ConvertSystemArrayToNativePackedFloat64Array(Span<double> p_array)
-        {
-            return ConvertSystemArrayToNativePackedFloat64Array((ReadOnlySpan<double>)p_array);
-        }
-
         public static unsafe godot_packed_float64_array ConvertSystemArrayToNativePackedFloat64Array(
-            ReadOnlySpan<double> p_array)
+            Span<double> p_array)
         {
             if (p_array.IsEmpty)
                 return new godot_packed_float64_array();
@@ -536,11 +511,6 @@ namespace Godot.NativeInterop
         }
 
         public static godot_packed_string_array ConvertSystemArrayToNativePackedStringArray(Span<string> p_array)
-        {
-            return ConvertSystemArrayToNativePackedStringArray((ReadOnlySpan<string>)p_array);
-        }
-
-        public static godot_packed_string_array ConvertSystemArrayToNativePackedStringArray(ReadOnlySpan<string> p_array)
         {
             godot_packed_string_array dest = new godot_packed_string_array();
 
@@ -574,13 +544,8 @@ namespace Godot.NativeInterop
             return array;
         }
 
-        public static godot_packed_vector2_array ConvertSystemArrayToNativePackedVector2Array(Span<Vector2> p_array)
-        {
-            return ConvertSystemArrayToNativePackedVector2Array((ReadOnlySpan<Vector2>)p_array);
-        }
-
         public static unsafe godot_packed_vector2_array ConvertSystemArrayToNativePackedVector2Array(
-            ReadOnlySpan<Vector2> p_array)
+            Span<Vector2> p_array)
         {
             if (p_array.IsEmpty)
                 return new godot_packed_vector2_array();
@@ -603,13 +568,8 @@ namespace Godot.NativeInterop
             return array;
         }
 
-        public static godot_packed_vector3_array ConvertSystemArrayToNativePackedVector3Array(Span<Vector3> p_array)
-        {
-            return ConvertSystemArrayToNativePackedVector3Array((ReadOnlySpan<Vector3>)p_array);
-        }
-
         public static unsafe godot_packed_vector3_array ConvertSystemArrayToNativePackedVector3Array(
-            ReadOnlySpan<Vector3> p_array)
+            Span<Vector3> p_array)
         {
             if (p_array.IsEmpty)
                 return new godot_packed_vector3_array();
@@ -632,13 +592,8 @@ namespace Godot.NativeInterop
             return array;
         }
 
-        public static godot_packed_vector4_array ConvertSystemArrayToNativePackedVector4Array(Span<Vector4> p_array)
-        {
-            return ConvertSystemArrayToNativePackedVector4Array((ReadOnlySpan<Vector4>)p_array);
-        }
-
         public static unsafe godot_packed_vector4_array ConvertSystemArrayToNativePackedVector4Array(
-            ReadOnlySpan<Vector4> p_array)
+            Span<Vector4> p_array)
         {
             if (p_array.IsEmpty)
                 return new godot_packed_vector4_array();
@@ -661,12 +616,7 @@ namespace Godot.NativeInterop
             return array;
         }
 
-        public static godot_packed_color_array ConvertSystemArrayToNativePackedColorArray(Span<Color> p_array)
-        {
-            return ConvertSystemArrayToNativePackedColorArray((ReadOnlySpan<Color>)p_array);
-        }
-
-        public static unsafe godot_packed_color_array ConvertSystemArrayToNativePackedColorArray(ReadOnlySpan<Color> p_array)
+        public static unsafe godot_packed_color_array ConvertSystemArrayToNativePackedColorArray(Span<Color> p_array)
         {
             if (p_array.IsEmpty)
                 return new godot_packed_color_array();

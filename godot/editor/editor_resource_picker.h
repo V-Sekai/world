@@ -36,6 +36,7 @@
 class Button;
 class ConfirmationDialog;
 class EditorFileDialog;
+class EditorQuickOpen;
 class PopupMenu;
 class TextureRect;
 class Tree;
@@ -58,6 +59,7 @@ class EditorResourcePicker : public HBoxContainer {
 	TextureRect *preview_rect = nullptr;
 	Button *edit_button = nullptr;
 	EditorFileDialog *file_dialog = nullptr;
+	EditorQuickOpen *quick_open = nullptr;
 
 	ConfirmationDialog *duplicate_resources_dialog = nullptr;
 	Tree *duplicate_resources_tree = nullptr;
@@ -86,10 +88,8 @@ class EditorResourcePicker : public HBoxContainer {
 	void _update_resource_preview(const String &p_path, const Ref<Texture2D> &p_preview, const Ref<Texture2D> &p_small_preview, ObjectID p_obj);
 
 	void _resource_selected();
-	void _resource_changed();
+	void _file_quick_selected();
 	void _file_selected(const String &p_path);
-
-	void _resource_saved(Object *p_resource);
 
 	void _update_menu();
 	void _update_menu_items();
@@ -135,7 +135,6 @@ public:
 	void set_toggle_mode(bool p_enable);
 	bool is_toggle_mode() const;
 	void set_toggle_pressed(bool p_pressed);
-	bool is_toggle_pressed() const;
 
 	void set_editable(bool p_editable);
 	bool is_editable() const;

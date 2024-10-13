@@ -57,30 +57,24 @@ template <typename T>
 class Ref {
 	T *reference = nullptr;
 
-	_FORCE_INLINE_ void ref(const Ref &p_from) {
-		ref_pointer<false>(p_from.reference);
-	}
-
-	template <bool Init>
-	_FORCE_INLINE_ void ref_pointer(T *p_refcounted) {
-		if (p_refcounted == reference) {
+	void ref(const Ref &p_from) {
+		if (p_from.reference == reference) {
 			return;
 		}
 
-		// This will go out of scope and get unref'd.
-		Ref cleanup_ref;
-		cleanup_ref.reference = reference;
-		reference = p_refcounted;
+		unref();
+
+		reference = p_from.reference;
 		if (reference) {
-			if constexpr (Init) {
-				if (!reference->init_ref()) {
-					reference = nullptr;
-				}
-			} else {
-				if (!reference->reference()) {
-					reference = nullptr;
-				}
-			}
+			reference->reference();
+		}
+	}
+
+	void ref_pointer(T *p_ref) {
+		ERR_FAIL_NULL(p_ref);
+
+		if (p_ref->init_ref()) {
+			reference = p_ref;
 		}
 	}
 
@@ -92,11 +86,6 @@ public:
 	_FORCE_INLINE_ bool operator!=(const T *p_ptr) const {
 		return reference != p_ptr;
 	}
-#ifdef STRICT_CHECKS
-	// Delete these to prevent raw comparisons with `nullptr`.
-	bool operator==(std::nullptr_t) const = delete;
-	bool operator!=(std::nullptr_t) const = delete;
-#endif // STRICT_CHECKS
 
 	_FORCE_INLINE_ bool operator<(const Ref<T> &p_r) const {
 		return reference < p_r.reference;
@@ -130,11 +119,15 @@ public:
 
 	template <typename T_Other>
 	void operator=(const Ref<T_Other> &p_from) {
-		ref_pointer<false>(Object::cast_to<T>(p_from.ptr()));
-	}
-
-	void operator=(T *p_from) {
-		ref_pointer<true>(p_from);
+		RefCounted *refb = const_cast<RefCounted *>(static_cast<const RefCounted *>(p_from.ptr()));
+		if (!refb) {
+			unref();
+			return;
+		}
+		Ref r;
+		r.reference = Object::cast_to<T>(refb);
+		ref(r);
+		r.reference = nullptr;
 	}
 
 	void operator=(const Variant &p_variant) {
@@ -144,7 +137,16 @@ public:
 			return;
 		}
 
-		ref_pointer<false>(Object::cast_to<T>(object));
+		unref();
+
+		if (!object) {
+			return;
+		}
+
+		T *r = Object::cast_to<T>(object);
+		if (r && r->reference()) {
+			reference = r;
+		}
 	}
 
 	template <typename T_Other>
@@ -152,25 +154,48 @@ public:
 		if (reference == p_ptr) {
 			return;
 		}
+		unref();
 
-		ref_pointer<true>(Object::cast_to<T>(p_ptr));
+		T *r = Object::cast_to<T>(p_ptr);
+		if (r) {
+			ref_pointer(r);
+		}
 	}
 
 	Ref(const Ref &p_from) {
-		this->operator=(p_from);
+		ref(p_from);
 	}
 
 	template <typename T_Other>
 	Ref(const Ref<T_Other> &p_from) {
-		this->operator=(p_from);
+		RefCounted *refb = const_cast<RefCounted *>(static_cast<const RefCounted *>(p_from.ptr()));
+		if (!refb) {
+			unref();
+			return;
+		}
+		Ref r;
+		r.reference = Object::cast_to<T>(refb);
+		ref(r);
+		r.reference = nullptr;
 	}
 
-	Ref(T *p_from) {
-		this->operator=(p_from);
+	Ref(T *p_reference) {
+		if (p_reference) {
+			ref_pointer(p_reference);
+		}
 	}
 
-	Ref(const Variant &p_from) {
-		this->operator=(p_from);
+	Ref(const Variant &p_variant) {
+		Object *object = p_variant.get_validated_object();
+
+		if (!object) {
+			return;
+		}
+
+		T *r = Object::cast_to<T>(object);
+		if (r && r->reference()) {
+			reference = r;
+		}
 	}
 
 	inline bool is_valid() const { return reference != nullptr; }
@@ -192,7 +217,7 @@ public:
 		ref(memnew(T(p_params...)));
 	}
 
-	Ref() = default;
+	Ref() {}
 
 	~Ref() {
 		unref();
@@ -269,13 +294,13 @@ struct GetTypeInfo<const Ref<T> &> {
 template <typename T>
 struct VariantInternalAccessor<Ref<T>> {
 	static _FORCE_INLINE_ Ref<T> get(const Variant *v) { return Ref<T>(*VariantInternal::get_object(v)); }
-	static _FORCE_INLINE_ void set(Variant *v, const Ref<T> &p_ref) { VariantInternal::object_assign(v, p_ref); }
+	static _FORCE_INLINE_ void set(Variant *v, const Ref<T> &p_ref) { VariantInternal::refcounted_object_assign(v, p_ref.ptr()); }
 };
 
 template <typename T>
 struct VariantInternalAccessor<const Ref<T> &> {
 	static _FORCE_INLINE_ Ref<T> get(const Variant *v) { return Ref<T>(*VariantInternal::get_object(v)); }
-	static _FORCE_INLINE_ void set(Variant *v, const Ref<T> &p_ref) { VariantInternal::object_assign(v, p_ref); }
+	static _FORCE_INLINE_ void set(Variant *v, const Ref<T> &p_ref) { VariantInternal::refcounted_object_assign(v, p_ref.ptr()); }
 };
 
 #endif // REF_COUNTED_H

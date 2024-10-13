@@ -32,10 +32,8 @@
 
 #include "core/config/project_settings.h"
 #include "core/input/input.h"
-#include "core/io/resource_importer.h"
 #include "core/os/keyboard.h"
 #include "editor/debugger/editor_debugger_node.h"
-#include "editor/editor_main_screen.h"
 #include "editor/editor_node.h"
 #include "editor/editor_settings.h"
 #include "editor/editor_string_names.h"
@@ -48,7 +46,6 @@
 #include "editor/scene_tree_dock.h"
 #include "editor/themes/editor_scale.h"
 #include "editor/themes/editor_theme_manager.h"
-#include "scene/2d/animated_sprite_2d.h"
 #include "scene/2d/audio_stream_player_2d.h"
 #include "scene/2d/polygon_2d.h"
 #include "scene/2d/skeleton_2d.h"
@@ -63,12 +60,10 @@
 #include "scene/gui/view_panner.h"
 #include "scene/main/canvas_layer.h"
 #include "scene/main/window.h"
-#include "scene/resources/atlas_texture.h"
 #include "scene/resources/packed_scene.h"
 #include "scene/resources/style_box_texture.h"
 
 #define RULER_WIDTH (15 * EDSCALE)
-#define DRAG_THRESHOLD (8 * EDSCALE)
 constexpr real_t SCALE_HANDLE_DISTANCE = 25;
 constexpr real_t MOVE_HANDLE_DISTANCE = 25;
 
@@ -2324,7 +2319,7 @@ bool CanvasItemEditor::_gui_input_select(const Ref<InputEvent> &p_event) {
 	Ref<InputEventMouseMotion> m = p_event;
 	Ref<InputEventKey> k = p_event;
 
-	if (drag_type == DRAG_NONE || (drag_type == DRAG_BOX_SELECTION && b.is_valid() && !b->is_pressed())) {
+	if (drag_type == DRAG_NONE) {
 		if (b.is_valid() && b->is_pressed() &&
 				((b->get_button_index() == MouseButton::RIGHT && b->is_alt_pressed() && tool == TOOL_SELECT) ||
 						(b->get_button_index() == MouseButton::LEFT && tool == TOOL_LIST_SELECT))) {
@@ -2416,58 +2411,47 @@ bool CanvasItemEditor::_gui_input_select(const Ref<InputEvent> &p_event) {
 			return true;
 		}
 
-		Point2 click;
-		bool can_select = b.is_valid() && b->get_button_index() == MouseButton::LEFT && !panner->is_panning() && (tool == TOOL_SELECT || tool == TOOL_MOVE || tool == TOOL_SCALE || tool == TOOL_ROTATE);
-		if (can_select) {
-			click = transform.affine_inverse().xform(b->get_position());
-			// Allow selecting on release when performed very small box selection (necessary when Shift is pressed, see below).
-			can_select = b->is_pressed() || (drag_type == DRAG_BOX_SELECTION && click.distance_to(drag_from) <= DRAG_THRESHOLD);
-		}
+		if (b.is_valid() && b->get_button_index() == MouseButton::LEFT && b->is_pressed() && !panner->is_panning() && (tool == TOOL_SELECT || tool == TOOL_MOVE || tool == TOOL_SCALE || tool == TOOL_ROTATE)) {
+			// Single item selection
+			Point2 click = transform.affine_inverse().xform(b->get_position());
 
-		if (can_select) {
-			// Single item selection.
 			Node *scene = EditorNode::get_singleton()->get_edited_scene();
 			if (!scene) {
 				return true;
 			}
 
-			// Find the item to select.
+			// Find the item to select
 			CanvasItem *ci = nullptr;
 
 			Vector<_SelectResult> selection = Vector<_SelectResult>();
-			// Retrieve the canvas items.
+			// Retrieve the canvas items
 			_get_canvas_items_at_pos(click, selection);
 			if (!selection.is_empty()) {
 				ci = selection[0].item;
 			}
 
-			// Shift also allows forcing box selection when item was clicked.
-			if (!ci || (b->is_shift_pressed() && b->is_pressed())) {
-				// Start a box selection.
+			if (!ci) {
+				// Start a box selection
 				if (!b->is_shift_pressed()) {
-					// Clear the selection if not additive.
+					// Clear the selection if not additive
 					editor_selection->clear();
 					viewport->queue_redraw();
 					selected_from_canvas = true;
 				};
 
-				if (b->is_pressed()) {
-					drag_from = click;
-					drag_type = DRAG_BOX_SELECTION;
-					box_selecting_to = drag_from;
-					return true;
-				}
+				drag_from = click;
+				drag_type = DRAG_BOX_SELECTION;
+				box_selecting_to = drag_from;
+				return true;
 			} else {
 				bool still_selected = _select_click_on_item(ci, click, b->is_shift_pressed());
-				// Start dragging.
-				if (still_selected && (tool == TOOL_SELECT || tool == TOOL_MOVE) && b->is_pressed()) {
-					// Drag the node(s) if requested.
+				// Start dragging
+				if (still_selected && (tool == TOOL_SELECT || tool == TOOL_MOVE)) {
+					// Drag the node(s) if requested
 					drag_start_origin = click;
 					drag_type = DRAG_QUEUED;
-				} else if (!b->is_pressed()) {
-					_reset_drag();
 				}
-				// Select the item.
+				// Select the item
 				return true;
 			}
 		}
@@ -4015,8 +3999,6 @@ void CanvasItemEditor::_project_settings_changed() {
 void CanvasItemEditor::_notification(int p_what) {
 	switch (p_what) {
 		case NOTIFICATION_READY: {
-			_update_lock_and_group_button();
-
 			EditorRunBar::get_singleton()->connect("play_pressed", callable_mp(this, &CanvasItemEditor::_update_override_camera_button).bind(true));
 			EditorRunBar::get_singleton()->connect("stop_pressed", callable_mp(this, &CanvasItemEditor::_update_override_camera_button).bind(false));
 			ProjectSettings::get_singleton()->connect("settings_changed", callable_mp(this, &CanvasItemEditor::_project_settings_changed));
@@ -4126,8 +4108,7 @@ void CanvasItemEditor::_notification(int p_what) {
 			}
 		} break;
 
-		case NOTIFICATION_APPLICATION_FOCUS_OUT:
-		case NOTIFICATION_WM_WINDOW_FOCUS_OUT: {
+		case NOTIFICATION_APPLICATION_FOCUS_OUT: {
 			if (drag_type != DRAG_NONE) {
 				_reset_drag();
 				viewport->queue_redraw();
@@ -4338,13 +4319,13 @@ void CanvasItemEditor::_insert_animation_keys(bool p_location, bool p_rotation, 
 			Node2D *n2d = Object::cast_to<Node2D>(ci);
 
 			if (key_pos && p_location) {
-				te->insert_node_value_key(n2d, "position", p_on_existing);
+				te->insert_node_value_key(n2d, "position", n2d->get_position(), p_on_existing);
 			}
 			if (key_rot && p_rotation) {
-				te->insert_node_value_key(n2d, "rotation", p_on_existing);
+				te->insert_node_value_key(n2d, "rotation", n2d->get_rotation(), p_on_existing);
 			}
 			if (key_scale && p_scale) {
-				te->insert_node_value_key(n2d, "scale", p_on_existing);
+				te->insert_node_value_key(n2d, "scale", n2d->get_scale(), p_on_existing);
 			}
 
 			if (n2d->has_meta("_edit_bone_") && n2d->get_parent_item()) {
@@ -4370,13 +4351,13 @@ void CanvasItemEditor::_insert_animation_keys(bool p_location, bool p_rotation, 
 				if (has_chain && ik_chain.size()) {
 					for (Node2D *&F : ik_chain) {
 						if (key_pos) {
-							te->insert_node_value_key(F, "position", p_on_existing);
+							te->insert_node_value_key(F, "position", F->get_position(), p_on_existing);
 						}
 						if (key_rot) {
-							te->insert_node_value_key(F, "rotation", p_on_existing);
+							te->insert_node_value_key(F, "rotation", F->get_rotation(), p_on_existing);
 						}
 						if (key_scale) {
-							te->insert_node_value_key(F, "scale", p_on_existing);
+							te->insert_node_value_key(F, "scale", F->get_scale(), p_on_existing);
 						}
 					}
 				}
@@ -4386,13 +4367,13 @@ void CanvasItemEditor::_insert_animation_keys(bool p_location, bool p_rotation, 
 			Control *ctrl = Object::cast_to<Control>(ci);
 
 			if (key_pos) {
-				te->insert_node_value_key(ctrl, "position", p_on_existing);
+				te->insert_node_value_key(ctrl, "position", ctrl->get_position(), p_on_existing);
 			}
 			if (key_rot) {
-				te->insert_node_value_key(ctrl, "rotation", p_on_existing);
+				te->insert_node_value_key(ctrl, "rotation", ctrl->get_rotation(), p_on_existing);
 			}
 			if (key_scale) {
-				te->insert_node_value_key(ctrl, "size", p_on_existing);
+				te->insert_node_value_key(ctrl, "size", ctrl->get_size(), p_on_existing);
 			}
 		}
 	}
@@ -5390,7 +5371,7 @@ CanvasItemEditor::CanvasItemEditor() {
 	main_menu_hbox->add_child(pivot_button);
 	pivot_button->set_toggle_mode(true);
 	pivot_button->connect(SceneStringName(pressed), callable_mp(this, &CanvasItemEditor::_button_tool_select).bind(TOOL_EDIT_PIVOT));
-	pivot_button->set_tooltip_text(TTR("Click to change object's rotation pivot.") + "\n" + TTR("Shift: Set temporary rotation pivot.") + "\n" + TTR("Click this button while holding Shift to put the temporary rotation pivot in the center of the selected nodes."));
+	pivot_button->set_tooltip_text(TTR("Click to change object's rotation pivot.") + "\n" + TTR("Shift: Set temporary rotation pivot.") + "\n" + TTR("Click this button while holding Shift to put the rotation pivot in the center of the selected nodes."));
 
 	pan_button = memnew(Button);
 	pan_button->set_theme_type_variation("FlatButton");
@@ -5416,7 +5397,7 @@ CanvasItemEditor::CanvasItemEditor() {
 	smart_snap_button->set_theme_type_variation("FlatButton");
 	main_menu_hbox->add_child(smart_snap_button);
 	smart_snap_button->set_toggle_mode(true);
-	smart_snap_button->connect(SceneStringName(toggled), callable_mp(this, &CanvasItemEditor::_button_toggle_smart_snap));
+	smart_snap_button->connect("toggled", callable_mp(this, &CanvasItemEditor::_button_toggle_smart_snap));
 	smart_snap_button->set_tooltip_text(TTR("Toggle smart snapping."));
 	smart_snap_button->set_shortcut(ED_SHORTCUT("canvas_item_editor/use_smart_snap", TTR("Use Smart Snap"), KeyModifierMask::SHIFT | Key::S));
 	smart_snap_button->set_shortcut_context(this);
@@ -5425,7 +5406,7 @@ CanvasItemEditor::CanvasItemEditor() {
 	grid_snap_button->set_theme_type_variation("FlatButton");
 	main_menu_hbox->add_child(grid_snap_button);
 	grid_snap_button->set_toggle_mode(true);
-	grid_snap_button->connect(SceneStringName(toggled), callable_mp(this, &CanvasItemEditor::_button_toggle_grid_snap));
+	grid_snap_button->connect("toggled", callable_mp(this, &CanvasItemEditor::_button_toggle_grid_snap));
 	grid_snap_button->set_tooltip_text(TTR("Toggle grid snapping."));
 	grid_snap_button->set_shortcut(ED_SHORTCUT("canvas_item_editor/use_grid_snap", TTR("Use Grid Snap"), KeyModifierMask::SHIFT | Key::G));
 	grid_snap_button->set_shortcut_context(this);
@@ -5518,7 +5499,7 @@ CanvasItemEditor::CanvasItemEditor() {
 	override_camera_button = memnew(Button);
 	override_camera_button->set_theme_type_variation("FlatButton");
 	main_menu_hbox->add_child(override_camera_button);
-	override_camera_button->connect(SceneStringName(toggled), callable_mp(this, &CanvasItemEditor::_button_override_camera));
+	override_camera_button->connect("toggled", callable_mp(this, &CanvasItemEditor::_button_override_camera));
 	override_camera_button->set_toggle_mode(true);
 	override_camera_button->set_disabled(true);
 	_update_override_camera_button(false);
@@ -5741,7 +5722,7 @@ void CanvasItemEditorPlugin::_notification(int p_what) {
 CanvasItemEditorPlugin::CanvasItemEditorPlugin() {
 	canvas_item_editor = memnew(CanvasItemEditor);
 	canvas_item_editor->set_v_size_flags(Control::SIZE_EXPAND_FILL);
-	EditorNode::get_singleton()->get_editor_main_screen()->get_control()->add_child(canvas_item_editor);
+	EditorNode::get_singleton()->get_main_screen_control()->add_child(canvas_item_editor);
 	canvas_item_editor->set_anchors_and_offsets_preset(Control::PRESET_FULL_RECT);
 	canvas_item_editor->hide();
 }
@@ -5898,23 +5879,6 @@ void CanvasItemEditorViewport::_create_texture_node(Node *p_parent, Node *p_chil
 			Vector2(0, texture_size.height)
 		};
 		undo_redo->add_do_property(p_child, "polygon", list);
-	} else if (Object::cast_to<AnimatedSprite2D>(p_child)) {
-		Dictionary meta = ResourceFormatImporter::get_singleton()->get_resource_metadata(p_path);
-		Ref<SpriteFrames> frames;
-		frames.instantiate();
-		frames->set_animation_speed(SceneStringName(default_), meta.get("fps", 5));
-		Size2i sprite_size = meta["sprite_size"];
-		for (int i = 0; i < (int)meta["frame_count"]; i++) {
-			int x = i % (int)meta["columns"] * sprite_size.width;
-			int y = i / (int)meta["columns"] * sprite_size.height;
-			Ref<AtlasTexture> atlas_texture;
-			atlas_texture.instantiate();
-			atlas_texture->set_atlas(texture);
-			atlas_texture->set_region(Rect2(x, y, sprite_size.width, sprite_size.height));
-			frames->add_frame(SceneStringName(default_), atlas_texture);
-		}
-		undo_redo->add_do_property(p_child, "autoplay", SceneStringName(default_));
-		undo_redo->add_do_property(p_child, "frames", frames);
 	}
 
 	// Compute the global position
@@ -6320,7 +6284,6 @@ CanvasItemEditorViewport::CanvasItemEditorViewport(CanvasItemEditor *p_canvas_it
 	texture_node_types.push_back("GPUParticles2D");
 	texture_node_types.push_back("Polygon2D");
 	texture_node_types.push_back("TouchScreenButton");
-	texture_node_types.push_back("AnimatedSprite2D");
 	// Control
 	texture_node_types.push_back("TextureRect");
 	texture_node_types.push_back("TextureButton");

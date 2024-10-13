@@ -202,6 +202,15 @@ msgstr "3D 聲像強度"
 msgid "iOS"
 msgstr "iOS"
 
+msgid "Editor"
+msgstr "編輯器"
+
+msgid "Script"
+msgstr "腳本"
+
+msgid "Search in File Extensions"
+msgstr "按照副檔名搜尋"
+
 msgid "Subwindows"
 msgstr "子視窗"
 
@@ -804,9 +813,6 @@ msgstr "切換模式"
 
 msgid "Interface"
 msgstr "界面"
-
-msgid "Editor"
-msgstr "編輯器"
 
 msgid "Editor Language"
 msgstr "編輯器語言"
@@ -2440,9 +2446,6 @@ msgstr "SSH私鑰路徑"
 msgid "Main Run Args"
 msgstr "主執行參數"
 
-msgid "Script"
-msgstr "腳本"
-
 msgid "Templates Search Path"
 msgstr "範本搜索路徑"
 
@@ -2655,9 +2658,6 @@ msgstr "Android"
 
 msgid "Text Driver"
 msgstr "文字驅動"
-
-msgid "Search in File Extensions"
-msgstr "按照副檔名搜尋"
 
 msgid "Mouse Cursor"
 msgstr "滑鼠游標"

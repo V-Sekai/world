@@ -30,7 +30,6 @@
 
 #include "font_config_plugin.h"
 
-#include "core/string/translation_server.h"
 #include "editor/editor_settings.h"
 #include "editor/import/dynamic_font_import_settings.h"
 #include "editor/themes/editor_scale.h"
@@ -62,6 +61,9 @@ bool EditorPropertyFontMetaObject::_get(const StringName &p_name, Variant &r_ret
 	}
 
 	return false;
+}
+
+void EditorPropertyFontMetaObject::_bind_methods() {
 }
 
 void EditorPropertyFontMetaObject::set_dict(const Dictionary &p_dict) {
@@ -121,8 +123,13 @@ bool EditorPropertyFontOTObject::_property_can_revert(const StringName &p_name) 
 
 	if (name.begins_with("keys")) {
 		int key = name.get_slicec('/', 1).to_int();
-		return defaults_dict.has(key) && dict.has(key);
+		if (defaults_dict.has(key) && dict.has(key)) {
+			int value = dict[key];
+			Vector3i range = defaults_dict[key];
+			return range.z != value;
+		}
 	}
+
 	return false;
 }
 
@@ -137,6 +144,7 @@ bool EditorPropertyFontOTObject::_property_get_revert(const StringName &p_name, 
 			return true;
 		}
 	}
+
 	return false;
 }
 
@@ -916,8 +924,7 @@ void FontPreview::_notification(int p_what) {
 						name = vformat("%s (%s)", prev_font->get_font_name(), prev_font->get_font_style_name());
 					}
 					if (prev_font->is_class("FontVariation")) {
-						// TRANSLATORS: This refers to variable font config, appended to the font name.
-						name += " - " + TTR("Variation");
+						name += " " + TTR(" - Variation");
 					}
 					font->draw_string(get_canvas_item(), Point2(0, font->get_height(font_size) + 2 * EDSCALE), name, HORIZONTAL_ALIGNMENT_CENTER, get_size().x, font_size, text_color);
 

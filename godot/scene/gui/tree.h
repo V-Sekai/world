@@ -60,11 +60,9 @@ private:
 		TreeCellMode mode = TreeItem::CELL_MODE_STRING;
 
 		Ref<Texture2D> icon;
-		Ref<Texture2D> icon_overlay;
 		Rect2i icon_region;
 		String text;
 		String xl_text;
-		Node::AutoTranslateMode auto_translate_mode = Node::AUTO_TRANSLATE_MODE_INHERIT;
 		bool edit_multiline = false;
 		String suffix;
 		Ref<TextParagraph> text_buf;
@@ -138,7 +136,6 @@ private:
 	TreeItem *prev = nullptr; // previous in list
 	TreeItem *next = nullptr; // next in list
 	TreeItem *first_child = nullptr;
-	TreeItem *last_child = nullptr;
 
 	Vector<TreeItem *> children_cache;
 	bool is_root = false; // for tree root
@@ -180,9 +177,6 @@ private:
 			if (parent->first_child == this) {
 				parent->first_child = next;
 			}
-			if (parent->last_child == this) {
-				parent->last_child = prev;
-			}
 		}
 	}
 
@@ -211,10 +205,6 @@ public:
 	void set_cell_mode(int p_column, TreeCellMode p_mode);
 	TreeCellMode get_cell_mode(int p_column) const;
 
-	/* auto translate mode */
-	void set_auto_translate_mode(int p_column, Node::AutoTranslateMode p_mode);
-	Node::AutoTranslateMode get_auto_translate_mode(int p_column) const;
-
 	/* multiline editable */
 	void set_edit_multiline(int p_column, bool p_multiline);
 	bool is_edit_multiline(int p_column) const;
@@ -226,8 +216,6 @@ public:
 	bool is_indeterminate(int p_column) const;
 
 	void propagate_check(int p_column, bool p_emit_signal = true);
-
-	String atr(int p_column, const String &p_text) const;
 
 private:
 	// Check helpers.
@@ -264,9 +252,6 @@ public:
 
 	void set_icon(int p_column, const Ref<Texture2D> &p_icon);
 	Ref<Texture2D> get_icon(int p_column) const;
-
-	void set_icon_overlay(int p_column, const Ref<Texture2D> &p_icon_overlay);
-	Ref<Texture2D> get_icon_overlay(int p_column) const;
 
 	void set_icon_region(int p_column, const Rect2 &p_icon_region);
 	Rect2 get_icon_region(int p_column) const;

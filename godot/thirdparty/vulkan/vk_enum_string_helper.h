@@ -13,7 +13,11 @@
 #ifdef __cplusplus
 #include <string>
 #endif
-#include "drivers/vulkan/godot_vulkan.h"
+#ifdef USE_VOLK
+    #include <volk.h>
+#else
+    #include <vulkan/vulkan.h>
+#endif
 static inline const char* string_VkResult(VkResult input_value) {
     switch (input_value) {
         case VK_SUCCESS:

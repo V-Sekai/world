@@ -35,7 +35,6 @@
 #include "core/io/stream_peer_tls.h"
 #include "core/os/keyboard.h"
 #include "core/version.h"
-#include "editor/editor_main_screen.h"
 #include "editor/editor_node.h"
 #include "editor/editor_paths.h"
 #include "editor/editor_settings.h"
@@ -47,7 +46,7 @@
 #include "scene/resources/image_texture.h"
 
 static inline void setup_http_request(HTTPRequest *request) {
-	request->set_use_threads(EDITOR_GET("asset_library/use_threads"));
+	request->set_use_threads(EDITOR_DEF("asset_library/use_threads", true));
 
 	const String proxy_host = EDITOR_GET("network/http_proxy/host");
 	const int proxy_port = EDITOR_GET("network/http_proxy/port");
@@ -703,7 +702,6 @@ void EditorAssetLibrary::_notification(int p_what) {
 }
 
 void EditorAssetLibrary::_update_repository_options() {
-	// TODO: Move to editor_settings.cpp
 	Dictionary default_urls;
 	default_urls["godotengine.org (Official)"] = "https://godotengine.org/asset-library/api";
 	Dictionary available_urls = _EDITOR_DEF("asset_library/available_urls", default_urls, true);
@@ -993,8 +991,7 @@ void EditorAssetLibrary::_request_image(ObjectID p_for, int p_asset_id, String p
 		String url_host;
 		int url_port;
 		String url_path;
-		String url_fragment;
-		Error err = trimmed_url.parse_url(url_scheme, url_host, url_port, url_path, url_fragment);
+		Error err = trimmed_url.parse_url(url_scheme, url_host, url_port, url_path);
 		if (err != OK) {
 			if (is_print_verbose_enabled()) {
 				ERR_PRINT(vformat("Asset Library: Invalid image URL '%s' for asset # %d.", trimmed_url, p_asset_id));
@@ -1797,7 +1794,7 @@ void AssetLibraryEditorPlugin::make_visible(bool p_visible) {
 AssetLibraryEditorPlugin::AssetLibraryEditorPlugin() {
 	addon_library = memnew(EditorAssetLibrary);
 	addon_library->set_v_size_flags(Control::SIZE_EXPAND_FILL);
-	EditorNode::get_singleton()->get_editor_main_screen()->get_control()->add_child(addon_library);
+	EditorNode::get_singleton()->get_main_screen_control()->add_child(addon_library);
 	addon_library->set_anchors_and_offsets_preset(Control::PRESET_FULL_RECT);
 	addon_library->hide();
 }

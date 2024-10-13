@@ -2,15 +2,11 @@ import os
 import sys
 from typing import TYPE_CHECKING
 
-from methods import detect_darwin_sdk_path, get_compiler_version, is_vanilla_clang, print_error, print_warning
+from methods import detect_darwin_sdk_path, get_compiler_version, is_vanilla_clang, print_error
 from platform_methods import detect_arch, detect_mvk
 
 if TYPE_CHECKING:
     from SCons.Script.SConscript import SConsEnvironment
-
-# To match other platforms
-STACK_SIZE = 8388608
-STACK_SIZE_SANITIZERS = 30 * 1024 * 1024
 
 
 def get_name():
@@ -60,8 +56,7 @@ def get_flags():
     return {
         "arch": detect_arch(),
         "use_volk": False,
-        "metal": True,
-        "supported": ["metal", "mono"],
+        "supported": ["mono"],
     }
 
 
@@ -187,10 +182,6 @@ def configure(env: "SConsEnvironment"):
             env.Append(CCFLAGS=["-fsanitize=thread"])
             env.Append(LINKFLAGS=["-fsanitize=thread"])
 
-        env.Append(LINKFLAGS=["-Wl,-stack_size," + hex(STACK_SIZE_SANITIZERS)])
-    else:
-        env.Append(LINKFLAGS=["-Wl,-stack_size," + hex(STACK_SIZE)])
-
     if env["use_coverage"]:
         env.Append(CCFLAGS=["-ftest-coverage", "-fprofile-arcs"])
         env.Append(LINKFLAGS=["-ftest-coverage", "-fprofile-arcs"])
@@ -248,22 +239,9 @@ def configure(env: "SConsEnvironment"):
 
     env.Append(LINKFLAGS=["-rpath", "@executable_path/../Frameworks", "-rpath", "@executable_path"])
 
-    if env["metal"] and env["arch"] != "arm64":
-        print_warning("Target architecture '{}' does not support the Metal rendering driver".format(env["arch"]))
-        env["metal"] = False
-
-    extra_frameworks = set()
-
-    if env["metal"]:
-        env.AppendUnique(CPPDEFINES=["METAL_ENABLED", "RD_ENABLED"])
-        extra_frameworks.add("Metal")
-        extra_frameworks.add("MetalKit")
-        env.Prepend(CPPPATH=["#thirdparty/spirv-cross"])
-
     if env["vulkan"]:
-        env.AppendUnique(CPPDEFINES=["VULKAN_ENABLED", "RD_ENABLED"])
-        extra_frameworks.add("Metal")
-        extra_frameworks.add("IOSurface")
+        env.Append(CPPDEFINES=["VULKAN_ENABLED", "RD_ENABLED"])
+        env.Append(LINKFLAGS=["-framework", "Metal", "-framework", "IOSurface"])
         if not env["use_volk"]:
             env.Append(LINKFLAGS=["-lMoltenVK"])
 
@@ -282,7 +260,3 @@ def configure(env: "SConsEnvironment"):
                     "MoltenVK SDK installation directory not found, use 'vulkan_sdk_path' SCons parameter to specify SDK path."
                 )
                 sys.exit(255)
-
-    if len(extra_frameworks) > 0:
-        frameworks = [item for key in extra_frameworks for item in ["-framework", key]]
-        env.Append(LINKFLAGS=frameworks)

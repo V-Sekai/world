@@ -334,7 +334,7 @@ public:
 	virtual void get_constants(HashMap<StringName, Variant> *p_constants) override;
 	virtual void get_members(HashSet<StringName> *p_members) override;
 
-	virtual Variant get_rpc_config() const override;
+	virtual const Variant get_rpc_config() const override;
 
 	void unload_static() const;
 
@@ -459,11 +459,9 @@ class GDScriptLanguage : public ScriptLanguage {
 	friend class GDScriptFunction;
 
 	SelfList<GDScriptFunction>::List function_list;
-#ifdef DEBUG_ENABLED
 	bool profiling;
 	bool profile_native_calls;
 	uint64_t script_frame_time;
-#endif
 
 	HashMap<String, ObjectID> orphan_subclasses;
 

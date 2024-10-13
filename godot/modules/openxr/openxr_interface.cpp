@@ -36,8 +36,7 @@
 
 #include "extensions/openxr_eye_gaze_interaction.h"
 #include "extensions/openxr_hand_interaction_extension.h"
-
-#include <openxr/openxr.h>
+#include "thirdparty/openxr/include/openxr/openxr.h"
 
 void OpenXRInterface::_bind_methods() {
 	// lifecycle signals

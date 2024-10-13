@@ -31,7 +31,11 @@
 #ifndef VULKAN_HOOKS_H
 #define VULKAN_HOOKS_H
 
-#include "drivers/vulkan/godot_vulkan.h"
+#ifdef USE_VOLK
+#include <volk.h>
+#else
+#include <vulkan/vulkan.h>
+#endif
 
 class VulkanHooks {
 private:

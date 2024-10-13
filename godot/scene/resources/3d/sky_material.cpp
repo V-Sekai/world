@@ -269,7 +269,7 @@ void ProceduralSkyMaterial::cleanup_shader() {
 }
 
 void ProceduralSkyMaterial::_update_shader() {
-	MutexLock shader_lock(shader_mutex);
+	shader_mutex.lock();
 	if (shader_cache[0].is_null()) {
 		for (int i = 0; i < 2; i++) {
 			shader_cache[i] = RS::get_singleton()->shader_create();
@@ -354,10 +354,10 @@ void sky() {
 																		  i ? "render_mode use_debanding;" : ""));
 		}
 	}
+	shader_mutex.unlock();
 }
 
 ProceduralSkyMaterial::ProceduralSkyMaterial() {
-	_set_material(RS::get_singleton()->material_create());
 	set_sky_top_color(Color(0.385, 0.454, 0.55));
 	set_sky_horizon_color(Color(0.6463, 0.6558, 0.6708));
 	set_sky_curve(0.15);
@@ -463,7 +463,7 @@ void PanoramaSkyMaterial::cleanup_shader() {
 }
 
 void PanoramaSkyMaterial::_update_shader() {
-	MutexLock shader_lock(shader_mutex);
+	shader_mutex.lock();
 	if (shader_cache[0].is_null()) {
 		for (int i = 0; i < 2; i++) {
 			shader_cache[i] = RS::get_singleton()->shader_create();
@@ -484,10 +484,11 @@ void sky() {
 																		  i ? "filter_linear" : "filter_nearest"));
 		}
 	}
+
+	shader_mutex.unlock();
 }
 
 PanoramaSkyMaterial::PanoramaSkyMaterial() {
-	_set_material(RS::get_singleton()->material_create());
 	set_energy_multiplier(1.0);
 }
 
@@ -691,7 +692,7 @@ void PhysicalSkyMaterial::cleanup_shader() {
 }
 
 void PhysicalSkyMaterial::_update_shader() {
-	MutexLock shader_lock(shader_mutex);
+	shader_mutex.lock();
 	if (shader_cache[0].is_null()) {
 		for (int i = 0; i < 2; i++) {
 			shader_cache[i] = RS::get_singleton()->shader_create();
@@ -784,10 +785,11 @@ void sky() {
 																		  i ? "render_mode use_debanding;" : ""));
 		}
 	}
+
+	shader_mutex.unlock();
 }
 
 PhysicalSkyMaterial::PhysicalSkyMaterial() {
-	_set_material(RS::get_singleton()->material_create());
 	set_rayleigh_coefficient(2.0);
 	set_rayleigh_color(Color(0.3, 0.405, 0.6));
 	set_mie_coefficient(0.005);

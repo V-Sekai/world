@@ -348,6 +348,7 @@ bool ProjectSettings::_get(const StringName &p_name, Variant &r_ret) const {
 	_THREAD_SAFE_METHOD_
 
 	if (!props.has(p_name)) {
+		WARN_PRINT("Property not found: " + String(p_name));
 		return false;
 	}
 	r_ret = props[p_name].variant;
@@ -1015,7 +1016,7 @@ Error ProjectSettings::save_custom(const String &p_path, const CustomMap &p_cust
 		}
 	}
 	// Check for the existence of a csproj file.
-	if (_csproj_exists(get_resource_path())) {
+	if (_csproj_exists(p_path.get_base_dir())) {
 		// If there is a csproj file, add the C# feature if it doesn't already exist.
 		if (!project_features.has("C#")) {
 			project_features.append("C#");
@@ -1167,16 +1168,22 @@ bool ProjectSettings::is_project_loaded() const {
 }
 
 bool ProjectSettings::_property_can_revert(const StringName &p_name) const {
-	return props.has(p_name);
+	if (!props.has(p_name)) {
+		return false;
+	}
+
+	return props[p_name].initial != props[p_name].variant;
 }
 
 bool ProjectSettings::_property_get_revert(const StringName &p_name, Variant &r_property) const {
-	const RBMap<StringName, ProjectSettings::VariantContainer>::Element *value = props.find(p_name);
-	if (value) {
-		r_property = value->value().initial.duplicate();
-		return true;
+	if (!props.has(p_name)) {
+		return false;
 	}
-	return false;
+
+	// Duplicate so that if value is array or dictionary, changing the setting will not change the stored initial value.
+	r_property = props[p_name].initial.duplicate();
+
+	return true;
 }
 
 void ProjectSettings::set_setting(const String &p_setting, const Variant &p_value) {
@@ -1391,7 +1398,7 @@ void ProjectSettings::_add_builtin_input_map() {
 			}
 
 			Dictionary action;
-			action["deadzone"] = Variant(0.2f);
+			action["deadzone"] = Variant(0.5f);
 			action["events"] = events;
 
 			String action_name = "input/" + E.key;
@@ -1465,6 +1472,10 @@ ProjectSettings::ProjectSettings() {
 	GLOBAL_DEF(PropertyInfo(Variant::INT, "display/window/size/window_height_override", PROPERTY_HINT_RANGE, "0,4320,1,or_greater"), 0); // 8K resolution
 
 	GLOBAL_DEF("display/window/energy_saving/keep_screen_on", true);
+#ifdef TOOLS_ENABLED
+	GLOBAL_DEF("display/window/energy_saving/keep_screen_on.editor_hint", false);
+#endif
+
 	GLOBAL_DEF("animation/warnings/check_invalid_track_paths", true);
 	GLOBAL_DEF("animation/warnings/check_angle_interpolation_type_conflicting", true);
 
@@ -1477,6 +1488,15 @@ ProjectSettings::ProjectSettings() {
 
 	GLOBAL_DEF(PropertyInfo(Variant::INT, "audio/general/ios/session_category", PROPERTY_HINT_ENUM, "Ambient,Multi Route,Play and Record,Playback,Record,Solo Ambient"), 0);
 	GLOBAL_DEF("audio/general/ios/mix_with_others", false);
+
+	PackedStringArray extensions;
+	extensions.push_back("gd");
+	if (ClassDB::class_exists("CSharpScript")) {
+		extensions.push_back("cs");
+	}
+	extensions.push_back("gdshader");
+
+	GLOBAL_DEF(PropertyInfo(Variant::PACKED_STRING_ARRAY, "editor/script/search_in_file_extensions"), extensions);
 
 	_add_builtin_input_map();
 
@@ -1550,11 +1570,6 @@ ProjectSettings::ProjectSettings() {
 
 	GLOBAL_DEF("collada/use_ambient", false);
 
-	// Input settings
-	GLOBAL_DEF_BASIC("input_devices/pointing/android/enable_long_press_as_right_click", false);
-	GLOBAL_DEF_BASIC("input_devices/pointing/android/enable_pan_and_scale_gestures", false);
-	GLOBAL_DEF_BASIC(PropertyInfo(Variant::INT, "input_devices/pointing/android/rotary_input_scroll_axis", PROPERTY_HINT_ENUM, "Horizontal,Vertical"), 1);
-
 	// These properties will not show up in the dialog. If you want to exclude whole groups, use add_hidden_prefix().
 	GLOBAL_DEF_INTERNAL("application/config/features", PackedStringArray());
 	GLOBAL_DEF_INTERNAL("internationalization/locale/translation_remaps", PackedStringArray());
@@ -1567,7 +1582,6 @@ ProjectSettings::ProjectSettings() {
 
 ProjectSettings::ProjectSettings(const String &p_path) {
 	if (load_custom(p_path) == OK) {
-		resource_path = p_path.get_base_dir();
 		project_loaded = true;
 	}
 }

@@ -96,9 +96,6 @@ HB_OT_CORE_TABLE (OT, avar)
 HB_OT_CORE_TABLE (OT, cvar)
 HB_OT_ACCELERATOR (OT, gvar)
 HB_OT_CORE_TABLE (OT, MVAR)
-#ifndef HB_NO_VAR_COMPOSITES
-HB_OT_CORE_TABLE (OT, VARC)
-#endif
 #endif
 
 /* Legacy kern. */

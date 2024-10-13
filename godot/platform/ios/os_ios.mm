@@ -56,7 +56,11 @@
 #import <QuartzCore/CAMetalLayer.h>
 
 #if defined(VULKAN_ENABLED)
-#include "drivers/vulkan/godot_vulkan.h"
+#ifdef USE_VOLK
+#include <volk.h>
+#else
+#include <vulkan/vulkan.h>
+#endif
 #endif // VULKAN_ENABLED
 #endif
 

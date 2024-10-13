@@ -283,7 +283,12 @@ enum {
 	MANIFOLD_PROPERTY_INVERT,
 	MANIFOLD_PROPERTY_SMOOTH_GROUP,
 	MANIFOLD_PROPERTY_UV_X_0,
+	MANIFOLD_PROPERTY_UV_X_1,
+	MANIFOLD_PROPERTY_UV_X_2,
 	MANIFOLD_PROPERTY_UV_Y_0,
+	MANIFOLD_PROPERTY_UV_Y_1,
+	MANIFOLD_PROPERTY_UV_Y_2,
+	MANIFOLD_PROPERTY_PLACEHOLDER_MATERIAL,
 	MANIFOLD_MAX
 };
 
@@ -303,7 +308,7 @@ static void pack_manifold(
 		faces_by_material[face.material].push_back(face);
 	}
 
-	manifold::MeshGL64 mesh;
+	manifold::MeshGL mesh;
 	mesh.numProp = MANIFOLD_MAX;
 	mesh.runOriginalID.reserve(faces_by_material.size());
 	mesh.runIndex.reserve(faces_by_material.size() + 1);
@@ -319,7 +324,7 @@ static void pack_manifold(
 		uint32_t reserved_id = r_manifold.ReserveIDs(1);
 		mesh.runOriginalID.push_back(reserved_id);
 		Ref<Material> material;
-		if (material_id < p_mesh_merge->materials.size()) {
+		if (material_id >= 0 && material_id < p_mesh_merge->materials.size()) {
 			material = p_mesh_merge->materials[material_id];
 		}
 		mesh_materials.insert(reserved_id, material);
@@ -335,7 +340,7 @@ static void pack_manifold(
 				mesh.vertProperties.resize(mesh.vertProperties.size() + MANIFOLD_MAX);
 				// Add the vertex properties.
 				// Use CSGBrush constants rather than push_back for clarity.
-				double *vert = &mesh.vertProperties[begin];
+				float *vert = &mesh.vertProperties[begin];
 				vert[MANIFOLD_PROPERTY_POSITION_X] = face.vertices[i].x;
 				vert[MANIFOLD_PROPERTY_POSITION_Y] = face.vertices[i].y;
 				vert[MANIFOLD_PROPERTY_POSITION_Z] = face.vertices[i].z;
@@ -354,8 +359,8 @@ static void pack_manifold(
 	mesh.precision = p_snap;
 
 	/**
-	 * MeshGL64::merge(): updates the mergeFromVert and mergeToVert vectors in order to create a
-	 * manifold solid. If the MeshGL64 is already manifold, no change will occur, and
+	 * MeshGL::merge(): updates the mergeFromVert and mergeToVert vectors in order to create a
+	 * manifold solid. If the MeshGL is already manifold, no change will occur, and
 	 * the function will return false.
 	 */
 	if (mesh.Merge()) {
@@ -386,7 +391,7 @@ static void unpack_manifold(
 	Ref<StandardMaterial3D> default_material;
 	default_material.instantiate();
 
-	manifold::MeshGL64 mesh = p_manifold.GetMeshGL64();
+	manifold::MeshGL mesh = p_manifold.GetMeshGL();
 
 	constexpr int32_t order[3] = { 0, 2, 1 };
 

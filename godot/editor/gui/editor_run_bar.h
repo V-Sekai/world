@@ -37,6 +37,7 @@
 
 class Button;
 class EditorRunNative;
+class EditorQuickOpen;
 class PanelContainer;
 class HBoxContainer;
 
@@ -67,6 +68,8 @@ class EditorRunBar : public MarginContainer {
 	PanelContainer *write_movie_panel = nullptr;
 	Button *write_movie_button = nullptr;
 
+	EditorQuickOpen *quick_run = nullptr;
+
 	RunMode current_mode = RunMode::STOPPED;
 	String run_custom_filename;
 	String run_current_filename;
@@ -75,7 +78,7 @@ class EditorRunBar : public MarginContainer {
 	void _update_play_buttons();
 
 	void _write_movie_toggled(bool p_enabled);
-	void _quick_run_selected(const String &p_file_path);
+	void _quick_run_selected();
 
 	void _play_current_pressed();
 	void _play_custom_pressed();

@@ -53,7 +53,6 @@ private:
 
 	Node *node = nullptr;
 	Callable play_callable;
-	Callable stop_callable;
 	bool physical = false;
 	AudioServer::PlaybackType playback_type = AudioServer::PlaybackType::PLAYBACK_TYPE_DEFAULT;
 
@@ -95,7 +94,7 @@ public:
 
 	Ref<AudioStreamPlayback> play_basic();
 	void seek(float p_seconds);
-	void stop_basic();
+	void stop();
 	bool is_playing() const;
 	float get_playback_position();
 
@@ -111,7 +110,7 @@ public:
 	void set_playback_type(AudioServer::PlaybackType p_playback_type);
 	AudioServer::PlaybackType get_playback_type() const;
 
-	AudioStreamPlayerInternal(Node *p_node, const Callable &p_play_callable, const Callable &p_stop_callable, bool p_physical);
+	AudioStreamPlayerInternal(Node *p_node, const Callable &p_play_callable, bool p_physical);
 };
 
 #endif // AUDIO_STREAM_PLAYER_INTERNAL_H

@@ -482,9 +482,8 @@ Error WSLPeer::connect_to_url(const String &p_url, Ref<TLSOptions> p_options) {
 	String host;
 	String path;
 	String scheme;
-	String fragment;
 	int port = 0;
-	Error err = p_url.parse_url(scheme, host, port, path, fragment);
+	Error err = p_url.parse_url(scheme, host, port, path);
 	ERR_FAIL_COND_V_MSG(err != OK, err, "Invalid URL: " + p_url);
 	if (scheme.is_empty()) {
 		scheme = "ws://";

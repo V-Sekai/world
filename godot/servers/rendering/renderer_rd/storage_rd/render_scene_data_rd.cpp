@@ -34,6 +34,9 @@
 #include "servers/rendering/renderer_rd/storage_rd/texture_storage.h"
 #include "servers/rendering/rendering_server_default.h"
 
+void RenderSceneDataRD::_bind_methods() {
+}
+
 Transform3D RenderSceneDataRD::get_cam_transform() const {
 	return cam_transform;
 }
@@ -83,7 +86,7 @@ void RenderSceneDataRD::update_ubo(RID p_uniform_buffer, RS::ViewportDebugDraw p
 	Projection correction;
 	correction.set_depth_correction(flip_y);
 	correction.add_jitter_offset(taa_jitter);
-	Projection projection = correction * cam_projection;
+	Projection projection = correction * view_projection[0];
 
 	//store camera into ubo
 	RendererRD::MaterialStorage::store_camera(projection, ubo.projection_matrix);
@@ -112,7 +115,6 @@ void RenderSceneDataRD::update_ubo(RID p_uniform_buffer, RS::ViewportDebugDraw p
 
 	ubo.taa_jitter[0] = taa_jitter.x;
 	ubo.taa_jitter[1] = taa_jitter.y;
-	ubo.taa_frame_count = taa_frame_count;
 
 	ubo.z_far = z_far;
 	ubo.z_near = z_near;
@@ -267,7 +269,7 @@ void RenderSceneDataRD::update_ubo(RID p_uniform_buffer, RS::ViewportDebugDraw p
 		Projection prev_correction;
 		prev_correction.set_depth_correction(true);
 		prev_correction.add_jitter_offset(prev_taa_jitter);
-		Projection prev_projection = prev_correction * prev_cam_projection;
+		Projection prev_projection = prev_correction * view_projection[0];
 
 		//store camera into ubo
 		RendererRD::MaterialStorage::store_camera(prev_projection, prev_ubo.projection_matrix);

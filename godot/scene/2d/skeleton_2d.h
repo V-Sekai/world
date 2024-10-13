@@ -123,7 +123,7 @@ class Skeleton2D : public Node2D {
 		bool local_pose_override_persistent = false;
 	};
 
-	LocalVector<Bone> bones;
+	Vector<Bone> bones;
 
 	bool bone_setup_dirty = true;
 	void _make_bone_setup_dirty();
