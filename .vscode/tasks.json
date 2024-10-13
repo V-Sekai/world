@@ -1,0 +1,22 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "options": {
+      "env": {}
+    },
+    "tasks": [
+      {
+        "label": "Godot Engine",
+        "type": "shell",
+        "options": {
+          "cwd": "${workspaceFolder}/godot",
+          "env": {
+          }
+        },
+        "command": [
+          "scons werror=no compiledb=yes dev_build=no generate_bundle=no precision=double target=editor tests=yes debug_symbols=yes"
+        ],
+      },
+    ]
+  }
