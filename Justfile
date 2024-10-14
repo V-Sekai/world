@@ -153,7 +153,7 @@ build-all:
                 ls -l bin/
                 ;;            
         esac
-    ' ::: windows \
+    ' ::: android \
     ::: editor # template_release template_debug
 
 build_vsekai:
