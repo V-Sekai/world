@@ -19,14 +19,11 @@ export SCONS_CACHE := "/app/.scons_cache"
 export IMAGE_NAME := "just-fedora-app"
 
 build_just_docker:
-    if ! docker images $IMAGE_NAME | awk '{ print $$1 }' | grep -q $IMAGE_NAME; then \
-        echo "Image $IMAGE_NAME does not exist, building now..."; \
-        docker build --build-arg FETCH_SDKS=true --platform linux/x86_64 -t $IMAGE_NAME .; \
-        just build-all; \
-    else \
-        echo "Docker is installed and image $IMAGE_NAME already exists, skipping build."; \
-        docker run -it -v $WORLD_PWD:/app $IMAGE_NAME just build-all; \
-    fi; \
+    docker build --build-arg FETCH_SDKS=true --platform linux/x86_64 -t $IMAGE_NAME .; \
+    just run_just_docker
+
+run_just_docker:
+    docker run -it -v $WORLD_PWD:/app $IMAGE_NAME just build-all;
 
 list_files:
     ls export_windows
