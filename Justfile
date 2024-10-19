@@ -41,12 +41,14 @@ fetch_sdks:
     tar -xf llvm-mingw.tar.xz -C /
     rm -rf llvm-mingw.tar.xz
 
+    cd /app
     just prepare_workspace
     curl --fail --location --silent --show-error "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.11%2B9/OpenJDK17U-jdk_$(uname -m | sed -e s/86_//g)_linux_hotspot_17.0.11_9.tar.gz" --output /tmp/jdk.tar.gz
     mkdir -p {{JAVA_HOME}}
     tar -xf /tmp/jdk.tar.gz -C {{JAVA_HOME}} --strip 1
     rm -rf /tmp/jdk.tar.gz
 
+    cd /app
     just prepare_workspace
     mkdir -p {{ANDROID_SDK_ROOT}}
     cd {{ANDROID_SDK_ROOT}}
@@ -57,6 +59,7 @@ fetch_sdks:
     yes | {{ANDROID_SDK_ROOT}}/cmdline-tools/bin/sdkmanager --sdk_root={{ANDROID_SDK_ROOT}} --licenses
     {{ANDROID_SDK_ROOT}}/cmdline-tools/bin/sdkmanager --sdk_root={{ANDROID_SDK_ROOT}} "ndk;{{ANDROID_NDK_VERSION}}" 'cmdline-tools;latest' 'build-tools;34.0.0' 'platforms;android-34' 'cmake;3.22.1'
 
+    cd /app
     just prepare_workspace
     curl -O https://download.blender.org/release/Blender4.1/blender-4.1.1-linux-x64.tar.xz
     tar -xf blender-4.1.1-linux-x64.tar.xz -C /opt/
@@ -124,10 +127,6 @@ clone_repo:
     else \
         git -C g pull origin master; \
     fi
-
-run-editor:
-    @just build-all
-    @just {{ EDITOR_TYPE_COMMAND }}
 
 build-osxcross:
     #!/usr/bin/env bash
