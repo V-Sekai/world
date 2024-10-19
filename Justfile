@@ -144,7 +144,7 @@ build-all:
         cd godot
         case "$platform" in
             windows)
-                EXTRA_FLAGS=use_mingw=yes use_llvm=yes linkflags="-Wl,-pdb=" ccflags="-g -gcodeview"
+                EXTRA_FLAGS=use_mingw=yes use_llvm=yes linkflags='-Wl,-pdb=' ccflags='-g \-gcodeview'
                 ;;
             macos)
                 @just build-osxcross
