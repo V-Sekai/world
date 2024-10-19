@@ -36,7 +36,7 @@
 #include "scene/resources/mesh_data_tool.h"
 #include "scene/resources/surface_tool.h"
 
-#include "manifold.h"
+#include "thirdparty/manifold/include/manifold/manifold.h"
 
 // Static helper functions.
 
@@ -287,15 +287,13 @@ enum {
 	MANIFOLD_MAX
 };
 
-static void pack_manifold(
+static void _pack_manifold(
 		const CSGBrush *const p_mesh_merge,
 		manifold::Manifold &r_manifold,
-		HashMap<int32_t, Ref<Material>> &mesh_materials,
-		const float p_snap) {
-	if (!p_mesh_merge) {
-		ERR_PRINT("p_mesh_merge is null");
-		return;
-	}
+		HashMap<int32_t, Ref<Material>> &p_mesh_materials,
+		Ref<Material> p_default_material,
+		float p_snap) {
+	ERR_FAIL_NULL_MSG(p_mesh_merge, "p_mesh_merge is null");
 
 	HashMap<uint32_t, Vector<CSGBrush::Face>> faces_by_material;
 	for (int face_i = 0; face_i < p_mesh_merge->faces.size(); face_i++) {
@@ -322,7 +320,12 @@ static void pack_manifold(
 		if (material_id < p_mesh_merge->materials.size()) {
 			material = p_mesh_merge->materials[material_id];
 		}
-		mesh_materials.insert(reserved_id, material);
+
+		if (material.is_null()) {
+			material = p_default_material;
+		}
+
+		p_mesh_materials.insert(reserved_id, material);
 
 		for (const CSGBrush::Face &face : faces) {
 			for (int32_t tri_order_i = 0; tri_order_i < 3; tri_order_i++) {
@@ -349,7 +352,7 @@ static void pack_manifold(
 	// runIndex needs an explicit end value.
 	mesh.runIndex.push_back(mesh.triVerts.size());
 
-	ERR_FAIL_COND_MSG(mesh.vertProperties.size() % mesh.numProp != 0, "Invalid vertex properties size");
+	ERR_FAIL_COND_MSG(mesh.vertProperties.size() % mesh.numProp != 0, "Invalid vertex properties size.");
 
 	mesh.precision = p_snap;
 
@@ -379,13 +382,10 @@ static void pack_manifold(
 	}
 }
 
-static void unpack_manifold(
+static void _unpack_manifold(
 		const manifold::Manifold &p_manifold,
-		const HashMap<int32_t, Ref<Material>> &mesh_materials,
+		const HashMap<int32_t, Ref<Material>> &p_mesh_materials,
 		CSGBrush *r_mesh_merge) {
-	Ref<StandardMaterial3D> default_material;
-	default_material.instantiate();
-
 	manifold::MeshGL64 mesh = p_manifold.GetMeshGL64();
 
 	constexpr int32_t order[3] = { 0, 2, 1 };
@@ -396,9 +396,9 @@ static void unpack_manifold(
 			original_id = mesh.runOriginalID[run_i];
 		}
 
-		Ref<Material> material = default_material;
-		if (mesh_materials.has(original_id)) {
-			material = mesh_materials[original_id];
+		Ref<Material> material;
+		if (p_mesh_materials.has(original_id)) {
+			material = p_mesh_materials[original_id];
 		}
 		// Find or reserve a material ID in the brush.
 		int run_material = 0;
@@ -443,12 +443,12 @@ static void unpack_manifold(
 
 // CSGBrushOperation
 
-void CSGBrushOperation::merge_brushes(Operation p_operation, const CSGBrush &p_brush_a, const CSGBrush &p_brush_b, CSGBrush &r_merged_brush, float p_vertex_snap) {
+void CSGBrushOperation::merge_brushes(Operation p_operation, const CSGBrush &p_brush_a, const CSGBrush &p_brush_b, CSGBrush &r_merged_brush, float p_vertex_snap, Ref<Material> p_default_material) {
 	HashMap<int32_t, Ref<Material>> mesh_materials;
 	manifold::Manifold brush_a;
-	pack_manifold(&p_brush_a, brush_a, mesh_materials, p_vertex_snap);
+	_pack_manifold(&p_brush_a, brush_a, mesh_materials, p_default_material, p_vertex_snap);
 	manifold::Manifold brush_b;
-	pack_manifold(&p_brush_b, brush_b, mesh_materials, p_vertex_snap);
+	_pack_manifold(&p_brush_b, brush_b, mesh_materials, p_default_material, p_vertex_snap);
 	manifold::Manifold merged_brush;
 	switch (p_operation) {
 		case OPERATION_UNION:
@@ -461,7 +461,7 @@ void CSGBrushOperation::merge_brushes(Operation p_operation, const CSGBrush &p_b
 			merged_brush = brush_a - brush_b;
 			break;
 	}
-	unpack_manifold(merged_brush, mesh_materials, &r_merged_brush);
+	_unpack_manifold(merged_brush, mesh_materials, &r_merged_brush);
 }
 
 // CSGBrushOperation::MeshMerge

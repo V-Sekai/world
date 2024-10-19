@@ -810,7 +810,10 @@ void PostImportPluginSkeletonRestFixer::internal_process(InternalImportCategory 
 				}
 			}
 			if (is_using_global_pose && warning_detected) {
-				WARN_PRINT_ED("Animated extra bone between mapped bones detected, consider disabling Use Global Animation option to prevent that the pose origin be overridden by the RetargetModifier3D.");
+				// TODO:
+				// Theoretically, if A and its conversion are calculated correctly taking into account the difference in the number of bones,
+				// there is no need to disable use_global_pose, but this is probably a fairly niche case.
+				WARN_PRINT_ED("Animated extra bone between mapped bones detected, consider disabling Use Global Pose option to prevent that the pose origin be overridden by the RetargetModifier3D.");
 			}
 
 			if (p_options.has("retarget/rest_fixer/reset_all_bone_poses_after_import") && !bool(p_options["retarget/rest_fixer/reset_all_bone_poses_after_import"])) {

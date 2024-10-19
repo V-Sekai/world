@@ -75,7 +75,7 @@ struct CSGBrushOperation {
 		OPERATION_INTERSECTION,
 		OPERATION_SUBTRACTION,
 	};
-	void merge_brushes(Operation p_operation, const CSGBrush &p_brush_a, const CSGBrush &p_brush_b, CSGBrush &r_merged_brush, float p_vertex_snap);
+	void merge_brushes(Operation p_operation, const CSGBrush &p_brush_a, const CSGBrush &p_brush_b, CSGBrush &r_merged_brush, float p_vertex_snap, Ref<Material> p_default_material);
 
 	struct MeshMerge {
 		struct Face {

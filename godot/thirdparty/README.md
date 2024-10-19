@@ -352,11 +352,6 @@ a new version of the web instance.
 Some changes have been made in order to allow loading OpenGL and OpenGLES APIs at the same time.
 See the patches in the `patches` directory.
 
-## glm
-
-- Upstream: https://github.com/g-truc/glm.git
-- Version: 1.0.1 (0af55ccecd98d4e5a8d1fad7de25ba429d60e863, 2024)
-- License: MIT
 
 ## glslang
 
@@ -624,7 +619,7 @@ in the MSVC debugger.
 ## manifold
 
 - Upstream: https://github.com/elalish/manifold
-- Version: master (6f009ca13fab71e53f118179742cc2bb40455721, 2024)
+- Version: master (6ade357e4b308a77e3a7a0ee0486a2f3c3416ada, 2024)
 - License: Apache 2.0
 
 File extracted from upstream source:
