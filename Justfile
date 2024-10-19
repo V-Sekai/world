@@ -130,9 +130,10 @@ run-editor:
     @just {{ EDITOR_TYPE_COMMAND }}
 
 build-osxcross:
+    #!/usr/bin/env bash
     git clone https://github.com/tpoechtrager/osxcross.git /osxcross
-    curl -o /osxcross/tarballs/MacOSX15.0.sdk.tar.xz -L https://github.com/V-Sekai/world/releases/download/v0.0.1/MacOSX15.0.sdk.tar.xz; \
-    ls -l /osxcross/tarballs/; \
+    curl -o /osxcross/tarballs/MacOSX15.0.sdk.tar.xz -L https://github.com/V-Sekai/world/releases/download/v0.0.1/MacOSX15.0.sdk.tar.xz
+    ls -l /osxcross/tarballs/
     cd /osxcross && UNATTENDED=1 ./build.sh && ./build_compiler_rt.sh
 
 build-all:
