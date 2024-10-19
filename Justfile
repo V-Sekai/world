@@ -54,11 +54,6 @@ clone_repo_vsekai:
         git -C v pull origin main; \
     fi
 
-# push_docker:
-#     set -x; \
-#     docker push "groupsinfra/gocd-agent-centos-8-groups:$LABEL_TEMPLATE" && \
-#     echo "groupsinfra/gocd-agent-centos-8-groups:$LABEL_TEMPLATE" > docker_image.txt
-
 deploy_osxcross:
     #!/usr/bin/env bash
     git clone https://github.com/tpoechtrager/osxcross.git || true
@@ -91,6 +86,7 @@ build-all:
     export PATH=/llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64/bin:$PATH
     export OSXCROSS_ROOT=/osxcross
     export ANDROID_SDK_ROOT="/root/sdk"
+    source "/emsdk/emsdk_env.sh"
     parallel --ungroup --jobs 2 '
         platform={1}
         target={2}
@@ -153,8 +149,5 @@ build-all:
                 ls -l bin/
                 ;;            
         esac
-    ' ::: android \
+    ' ::: android web macos linux windows \
     ::: editor # template_release template_debug
-
-build_vsekai:
-    just clone_repo_vsekai generate_build_constants prepare_exports copy_binaries list_files
