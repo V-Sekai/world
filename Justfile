@@ -199,6 +199,10 @@ build-all:
                     echo "Deleting files: $file_pattern"
                     rm -f $file_pattern
                 done
+                if [ -d ".web_zip" ]; then
+                    echo "Deleting directory: .web_zip"
+                    rm -rf .web_zip
+                fi
                 cd ..
                 ls -l bin/
                 ;;            
