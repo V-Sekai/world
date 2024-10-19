@@ -35,6 +35,7 @@ install_packages:
 
 fetch_sdks:
     #!/usr/bin/env bash
+    cd /app
     just prepare_workspace
     curl -o llvm-mingw.tar.xz -L https://github.com/mstorsjo/llvm-mingw/releases/download/20240917/llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64.tar.xz
     tar -xf llvm-mingw.tar.xz -C /
@@ -64,6 +65,7 @@ fetch_sdks:
 
 setup_rust:
     #!/usr/bin/env bash
+    cd /app
     just prepare_workspace
     mkdir -p /opt/cargo /opt/rust
     curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly --no-modify-path
@@ -73,6 +75,7 @@ setup_rust:
 
 setup_emscripten:
     #!/usr/bin/env bash
+    cd /app
     just prepare_workspace
     git clone https://github.com/emscripten-core/emsdk.git /emsdk
     /emsdk/emsdk install 3.1.67
@@ -138,7 +141,7 @@ build-all:
     export OSXCROSS_ROOT=/osxcross
     export ANDROID_SDK_ROOT="/root/sdk"
     source "/emsdk/emsdk_env.sh"
-    parallel --ungroup --jobs 2 '
+    parallel --ungroup --jobs 1 '
         platform={1}
         target={2}
         cd godot
