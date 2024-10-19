@@ -138,6 +138,7 @@ build-osxcross:
 
 build-all:
     #!/usr/bin/env bash
+    cd /app
     export PATH=/llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64/bin:$PATH
     export OSXCROSS_ROOT=/osxcross
     export ANDROID_SDK_ROOT="/root/sdk"
@@ -151,7 +152,7 @@ build-all:
                 EXTRA_FLAGS=use_mingw=yes use_llvm=yes linkflags='-Wl,-pdb=' ccflags='-g \-gcodeview'
                 ;;
             macos)
-                @just build-osxcross
+                just build-osxcross
                 EXTRA_FLAGS="osxcross_sdk=darwin24 vulkan=no arch=arm64 linker=mold"
                 ;;
             web)
@@ -208,5 +209,5 @@ build-all:
                 ls -l bin/
                 ;;            
         esac
-    ' ::: android web macos linux windows \
+    ' ::: macos android web linux windows \
     ::: editor # template_release template_debug
