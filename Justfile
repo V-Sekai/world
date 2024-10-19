@@ -147,65 +147,63 @@ build-all:
         platform={1}
         target={2}
         cd godot
-        case "$platform" in
-            windows)
-                EXTRA_FLAGS=use_mingw=yes use_llvm=yes linkflags='-Wl,-pdb=' ccflags='-g \-gcodeview'
-                ;;
-            macos)
-                just build-osxcross
-                EXTRA_FLAGS="osxcross_sdk=darwin24 vulkan=no arch=arm64 linker=mold"
-                ;;
-            web)
-                EXTRA_FLAGS="threads=yes lto=none dlink_enabled=yes builtin_glslang=yes builtin_openxr=yes module_raycast_enabled=no module_speech_enabled=no javascript_eval=no"
-                ;;
-        esac        
-        scons platform=$platform \
-            cc="ccache clang" \
-            cxx="ccache clang++" \
-            use_thinlto=yes \
-            werror=no \
-            compiledb=yes \
-            generate_bundle=yes \
-            precision=double \
-            target=$target \
-            test=yes \
-            debug_symbol=yes \
-            $EXTRA_FLAGS
-        case "$platform" in
-            android)
-                if [ "$target" = "editor" ]; then
-                    cd platform/android/java
-                    ./gradlew generateGodotEditor
-                    ./gradlew generateGodotHorizonOSEditor
-                    cd ../../..
-                    ls -l bin/android_editor_builds/
-                elif [ "$target" = "template_release" ] || [ "$target" = "template_debug" ]; then
-                    cd platform/android/java
-                    ./gradlew generateGodotTemplates
-                    cd ../../..
-                    ls -l bin/
-                fi
-                ;;
-            web)
-                cd bin
-                files_to_delete=(
-                    "*.wasm"
-                    "*.js"
-                    "*.html"
-                    "*.worker.js"
-                    "*.engine.js"
-                    "*.service.worker.js"
-                    "*.wrapped.js"
-                )
-                for file_pattern in "${files_to_delete[@]}"; do
-                    echo "Deleting files: $file_pattern"
-                    rm -f $file_pattern
-                done
-                if [ -d ".web_zip" ]; then
-                    echo "Deleting directory: .web_zip"
-                    rm -rf .web_zip
-                fi
-                cd ..
+    case "$platform" in
+        macos)
+            # macOS does not use LLVM or MinGW
+            EXTRA_FLAGS=""
+            ;;
+        *)
+            # All other platforms use LLVM and MinGW
+            EXTRA_FLAGS="use_llvm=yes use_mingw=yes"
+            ;;
+    esac
+    scons platform=$platform \
+        cc="ccache clang" \
+        cxx="ccache clang++" \
+        use_thinlto=yes \
+        werror=no \
+        compiledb=yes \
+        generate_bundle=yes \
+        precision=double \
+        target=$target \
+        test=yes \
+        debug_symbol=yes \
+        $EXTRA_FLAGS
+    case "$platform" in
+        android)
+            if [ "$target" = "editor" ]; then
+                cd platform/android/java
+                ./gradlew generateGodotEditor
+                ./gradlew generateGodotHorizonOSEditor
+                cd ../../..
+                ls -l bin/android_editor_builds/
+            elif [ "$target" = "template_release" ] || [ "$target" = "template_debug" ]; then
+                cd platform/android/java
+                ./gradlew generateGodotTemplates
+                cd ../../..
+                ls -l bin/
+            fi
+            ;;
+        web)
+            cd bin
+            files_to_delete=(
+                "*.wasm"
+                "*.js"
+                "*.html"
+                "*.worker.js"
+                "*.engine.js"
+                "*.service.worker.js"
+                "*.wrapped.js"
+            )
+            for file_pattern in "${files_to_delete[@]}"; do
+                echo "Deleting files: $file_pattern"
+                rm -f $file_pattern
+            done
+            if [ -d ".web_zip" ]; then
+                echo "Deleting directory: .web_zip"
+                rm -rf .web_zip
+            fi
+            cd ..
                 ls -l bin/
                 ;;            
         esac
