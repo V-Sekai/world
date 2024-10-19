@@ -11,3 +11,5 @@ VSK_godot/modules/mvsqlite/thirdparty/mvsqlite/mvsqlite-sqlite3/sqlite3
 profile.json
 osxcross
 .scons_cache
+commandlinetools-linux-11076708_latest.zip
+cmdline-tools/

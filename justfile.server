@@ -3,3 +3,7 @@
 #     set -x; \
 #     docker push "groupsinfra/gocd-agent-centos-8-groups:$LABEL_TEMPLATE" && \
 #     echo "groupsinfra/gocd-agent-centos-8-groups:$LABEL_TEMPLATE" > docker_image.txt
+
+build_docker:
+    set -x; \
+    docker build -t "groupsinfra/gocd-agent-centos-8-groups:$LABEL_TEMPLATE" "g/gocd-agent-centos-8-groups"
