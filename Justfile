@@ -14,62 +14,53 @@ export GODOT_STATUS := "groups-4.3"
 export GIT_URL_DOCKER := "https://github.com/V-Sekai/docker-groups.git"
 export GIT_URL_VSEKAI := "https://github.com/V-Sekai/v-sekai-game.git"
 export WORLD_PWD := invocation_directory()
-export SCONS_CACHE := "/app/.scons_cache"
+export SCONS_CACHE := "$APP_HOME/.scons_cache"
 
 export IMAGE_NAME := "just-fedora-app"
 
-export ANDROID_SDK_ROOT := "/root/sdk"
+export APP_HOME := "/Users/ernest.lee/Documents/world"
+export ANDROID_SDK_ROOT := APP_HOME + "/sdk"
 export ANDROID_NDK_VERSION := "23.2.8568313"
 export cmdlinetools := "commandlinetools-linux-11076708_latest.zip"
 export JAVA_HOME := "/jdk"
 
-run_just_docker:
-    docker run -it -v $WORLD_PWD:/app --platform linux/x86_64 fedora:39 /bin/bash -c "dnf install just -y && cd /app && just prepare_workspace install_packages fetch_sdks setup_rust setup_emscripten prepare_workspace build-all"
+# To use. Run `lima`.
 
-prepare_workspace:
-    mkdir -p /app
-    cd /app
+run:
+    just install_packages fetch_sdks setup_rust setup_emscripten build-all
 
 install_packages:
     sudo dnf install -y xz gcc gcc-c++ zlib-devel libmpc-devel mpfr-devel gmp-devel clang just parallel scons mold pkgconfig libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel libXi-devel wayland-devel mesa-libGL-devel mesa-libGLU-devel alsa-lib-devel pulseaudio-libs-devel libudev-devel libstdc++-static libatomic-static cmake ccache patch libxml2-devel openssl openssl-devel git unzip
 
-fetch_sdks:
+fetch_llvm_mingw:
     #!/usr/bin/env bash
-    cd /app
-    just prepare_workspace
-    curl -o llvm-mingw.tar.xz -L https://github.com/mstorsjo/llvm-mingw/releases/download/20240917/llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64.tar.xz
-    tar -xf llvm-mingw.tar.xz -C /
-    rm -rf llvm-mingw.tar.xz
+    cd $APP_HOME
+    curl -o /tmp/llvm-mingw.tar.xz -L https://github.com/mstorsjo/llvm-mingw/releases/download/20240917/llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64.tar.xz
+    sudo tar -xf /tmp/llvm-mingw.tar.xz -C /
+    rm -rf /tmp/llvm-mingw.tar.xz
 
-    cd /app
-    just prepare_workspace
+fetch_openjdk:
     curl --fail --location --silent --show-error "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.11%2B9/OpenJDK17U-jdk_$(uname -m | sed -e s/86_//g)_linux_hotspot_17.0.11_9.tar.gz" --output /tmp/jdk.tar.gz
-    mkdir -p {{JAVA_HOME}}
-    tar -xf /tmp/jdk.tar.gz -C {{JAVA_HOME}} --strip 1
+    sudo mkdir -p {{JAVA_HOME}}
+    sudo tar -xf /tmp/jdk.tar.gz -C {{JAVA_HOME}} --strip 1
     rm -rf /tmp/jdk.tar.gz
 
-    cd /app
-    just prepare_workspace
-    mkdir -p {{ANDROID_SDK_ROOT}}
-    cd {{ANDROID_SDK_ROOT}}
-    pwd
-    curl -LO https://dl.google.com/android/repository/{{cmdlinetools}}
-    unzip -o {{cmdlinetools}}
-    rm {{cmdlinetools}}
+setup_android_sdk:
+    sudo mkdir -p {{ANDROID_SDK_ROOT}}
+    curl -LO https://dl.google.com/android/repository/{{cmdlinetools}} -o {{APP_HOME}}/{{cmdlinetools}}
+    cd {{APP_HOME}} && unzip -o {{APP_HOME}}/{{cmdlinetools}}
+    rm {{APP_HOME}}/{{cmdlinetools}}
     yes | {{ANDROID_SDK_ROOT}}/cmdline-tools/bin/sdkmanager --sdk_root={{ANDROID_SDK_ROOT}} --licenses
     {{ANDROID_SDK_ROOT}}/cmdline-tools/bin/sdkmanager --sdk_root={{ANDROID_SDK_ROOT}} "ndk;{{ANDROID_NDK_VERSION}}" 'cmdline-tools;latest' 'build-tools;34.0.0' 'platforms;android-34' 'cmake;3.22.1'
 
-    cd /app
-    just prepare_workspace
-    curl -O https://download.blender.org/release/Blender4.1/blender-4.1.1-linux-x64.tar.xz
-    tar -xf blender-4.1.1-linux-x64.tar.xz -C /opt/
-    rm blender-4.1.1-linux-x64.tar.xz
-    ln -s /opt/blender-4.1.1-linux-x64/blender /usr/local/bin/blender
+fetch_sdks:
+    just fetch_llvm_mingw
+    just fetch_openjdk
+    just setup_android_sdk
 
 setup_rust:
     #!/usr/bin/env bash
-    cd /app
-    just prepare_workspace
+    cd $APP_HOME
     mkdir -p /opt/cargo /opt/rust
     curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly --no-modify-path
     . "$HOME/.cargo/env"
@@ -78,7 +69,7 @@ setup_rust:
 
 setup_emscripten:
     #!/usr/bin/env bash
-    cd /app
+    cd $APP_HOME
     just prepare_workspace
     git clone https://github.com/emscripten-core/emsdk.git /emsdk
     /emsdk/emsdk install 3.1.67
@@ -137,7 +128,7 @@ build-osxcross:
 
 build-all:
     #!/usr/bin/env bash
-    cd /app
+    cd $APP_HOME
     export PATH=/llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64/bin:$PATH
     export OSXCROSS_ROOT=/osxcross
     export ANDROID_SDK_ROOT="/root/sdk"
