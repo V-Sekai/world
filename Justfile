@@ -157,9 +157,6 @@ build-all:
             ;;
     esac
     scons platform=$platform \
-        cc="ccache clang" \
-        cxx="ccache clang++" \
-        use_thinlto=yes \
         werror=no \
         compiledb=yes \
         generate_bundle=yes \
@@ -206,5 +203,5 @@ build-all:
                 ls -l bin/
                 ;;            
         esac
-    ' ::: macos android web linux windows \
+    ' ::: macos \
     ::: editor # template_release template_debug
