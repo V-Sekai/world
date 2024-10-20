@@ -30,7 +30,7 @@ run:
     just install_packages fetch_sdks setup_rust setup_emscripten build-all
 
 install_packages:
-    sudo dnf install -y xz gcc gcc-c++ zlib-devel libmpc-devel mpfr-devel gmp-devel clang just parallel scons mold pkgconfig libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel libXi-devel wayland-devel mesa-libGL-devel mesa-libGLU-devel alsa-lib-devel pulseaudio-libs-devel libudev-devel libstdc++-static libatomic-static cmake ccache patch libxml2-devel openssl openssl-devel git unzip
+    sudo dnf install -y vulkan xz gcc gcc-c++ zlib-devel libmpc-devel mpfr-devel gmp-devel clang just parallel scons mold pkgconfig libX11-devel libXcursor-devel libXrandr-devel libXinerama-devel libXi-devel wayland-devel mesa-libGL-devel mesa-libGLU-devel alsa-lib-devel pulseaudio-libs-devel libudev-devel libstdc++-static libatomic-static cmake ccache patch libxml2-devel openssl openssl-devel git unzip
 
 fetch_llvm_mingw:
     #!/usr/bin/env bash
@@ -139,8 +139,7 @@ build-all:
         cd godot
     case "$platform" in
         macos)
-            # macOS does not use LLVM or MinGW
-            EXTRA_FLAGS=""
+            EXTRA_FLAGS="vukan=no"
             ;;
         *)
             # All other platforms use LLVM and MinGW
