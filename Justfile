@@ -47,6 +47,7 @@ fetch_openjdk:
 fetch_sdks:
     just fetch_llvm_mingw
     just fetch_openjdk
+    just build-osxcross
 
 setup_rust:
     #!/usr/bin/env bash
