@@ -209,4 +209,4 @@ build-all:
                 ;;            
         esac
     ' ::: macos linux windows android web \
-    ::: editor # template_release template_debug
+    ::: editor template_release template_debug
