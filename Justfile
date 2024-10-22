@@ -51,7 +51,7 @@ fetch_sdks:
 setup_rust:
     #!/usr/bin/env bash
     cd $WORLD_PWD
-    mkdir -p /opt/cargo /opt/rust
+    sudo mkdir -p /opt/cargo /opt/rust
     curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly --no-modify-path
     . "$HOME/.cargo/env"
     rustup default nightly
