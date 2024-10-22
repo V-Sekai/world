@@ -138,6 +138,10 @@ build-osxcross:
     ls -l /osxcross/tarballs/
     cd /osxcross && UNATTENDED=1 ./build.sh && ./build_compiler_rt.sh
 
+install-lazygit:
+    sudo dnf copr enable atim/lazygit -y
+    sudo dnf install lazygit -y
+
 build-all:
     #!/usr/bin/env bash
     cd $WORLD_PWD
