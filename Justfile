@@ -134,8 +134,9 @@ build-osxcross:
     #!/usr/bin/env bash
     sudo git clone https://github.com/tpoechtrager/osxcross.git /osxcross
     sudo curl -o /osxcross/tarballs/MacOSX15.0.sdk.tar.xz -L https://github.com/V-Sekai/world/releases/download/v0.0.1/MacOSX15.0.sdk.tar.xz
+    sudo chown -R $(whoami):$(whoami) /osxcross
     ls -l /osxcross/tarballs/
-    sudo bash -c "cd /osxcross && UNATTENDED=1 ./build.sh && ./build_compiler_rt.sh"
+    cd /osxcross && UNATTENDED=1 ./build.sh && ./build_compiler_rt.sh
 
 build-all:
     #!/usr/bin/env bash
