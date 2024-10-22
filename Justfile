@@ -44,11 +44,18 @@ fetch_openjdk:
     sudo tar -xf /tmp/jdk.tar.gz -C {{JAVA_HOME}} --strip 1
     rm -rf /tmp/jdk.tar.gz
 
+fetch_vulkan_sdk:
+    curl -L "https://github.com/godotengine/moltenvk-osxcross/releases/download/vulkan-sdk-1.3.283.0-2/MoltenVK-all.tar" -o /tmp/vulkan-sdk.zip
+    sudo mkdir -p /opt/vulkan_sdk
+    sudo tar -xf /tmp/vulkan-sdk.zip -C /opt/vulkan_sdk/
+    rm /tmp/vulkan-sdk.zip
+
 fetch_sdks:
     just fetch_llvm_mingw
     just fetch_openjdk
     just build-osxcross
-
+    just fetch_vulkan_sdk
+    
 setup_rust:
     #!/usr/bin/env bash
     cd $WORLD_PWD
@@ -110,7 +117,6 @@ clone_repo:
         git -C g pull origin master; \
     fi
 
-
 # !!! Use aarch64-apple-darwin24-* instead of arm64-* when dealing with Automake !!!
 # !!! CC=aarch64-apple-darwin24-clang ./configure --host=aarch64-apple-darwin24 !!!
 # !!! CC="aarch64-apple-darwin24-clang -arch arm64e" ./configure --host=aarch64-apple-darwin24 !!!
@@ -126,6 +132,7 @@ build-all:
     #!/usr/bin/env bash
     cd $WORLD_PWD
     export PATH=/llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64/bin:$PATH
+    export PATH=/osxcross/target/bin/:$PATH
     export OSXCROSS_ROOT=/osxcross
     export ANDROID_SDK_ROOT="/root/sdk"
     source "/emsdk/emsdk_env.sh"
@@ -135,7 +142,7 @@ build-all:
         cd godot
     case "$platform" in
         macos)
-            EXTRA_FLAGS="osxcross_sdk=darwin24 vulkan=no arch=arm64"
+            EXTRA_FLAGS="vulkan_sdk_path=/opt/vulkan_sdk/MoltenVK/MoltenVK/static/MoltenVK.xcframework osxcross_sdk=darwin24 vulkan=yes arch=arm64"
             ;;
         *)
             # All other platforms use LLVM and MinGW
@@ -143,6 +150,7 @@ build-all:
             ;;
     esac
     scons platform=$platform \
+        scu_build=yes \
         werror=no \
         compiledb=yes \
         generate_bundle=yes \
