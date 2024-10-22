@@ -208,5 +208,5 @@ build-all:
                 ls -l bin/
                 ;;            
         esac
-    ' ::: macos linux windows android ios web \
+    ' ::: macos linux windows android web \
     ::: editor template_release template_debug
