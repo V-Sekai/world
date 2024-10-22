@@ -78,10 +78,9 @@ setup_rust:
 setup_emscripten:
     #!/usr/bin/env bash
     cd $WORLD_PWD
-    just prepare_workspace
-    git clone https://github.com/emscripten-core/emsdk.git /emsdk
-    /emsdk/emsdk install 3.1.67
-    /emsdk/emsdk activate 3.1.67
+    sudo git clone https://github.com/emscripten-core/emsdk.git /emsdk
+    sudo /emsdk/emsdk install 3.1.67
+    sudo /emsdk/emsdk activate 3.1.67
     source "/emsdk/emsdk_env.sh"
     echo 'source "/emsdk/emsdk_env.sh"' >> $HOME/.bashrc
 
@@ -205,5 +204,5 @@ build-all:
                 ls -l bin/
                 ;;            
         esac
-    ' ::: android windows linux web \
+    ' ::: macos \
     ::: editor # template_release template_debug
