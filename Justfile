@@ -135,7 +135,7 @@ build-all:
         cd godot
     case "$platform" in
         macos)
-            EXTRA_FLAGS="vukan=no"
+            EXTRA_FLAGS="osxcross_sdk=darwin24 vulkan=no arch=arm64"
             ;;
         *)
             # All other platforms use LLVM and MinGW
