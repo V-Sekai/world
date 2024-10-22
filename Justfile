@@ -110,12 +110,17 @@ clone_repo:
         git -C g pull origin master; \
     fi
 
+
+# !!! Use aarch64-apple-darwin24-* instead of arm64-* when dealing with Automake !!!
+# !!! CC=aarch64-apple-darwin24-clang ./configure --host=aarch64-apple-darwin24 !!!
+# !!! CC="aarch64-apple-darwin24-clang -arch arm64e" ./configure --host=aarch64-apple-darwin24 !!!
+
 build-osxcross:
     #!/usr/bin/env bash
-    git clone https://github.com/tpoechtrager/osxcross.git /osxcross
-    curl -o /osxcross/tarballs/MacOSX15.0.sdk.tar.xz -L https://github.com/V-Sekai/world/releases/download/v0.0.1/MacOSX15.0.sdk.tar.xz
+    sudo git clone https://github.com/tpoechtrager/osxcross.git /osxcross
+    sudo curl -o /osxcross/tarballs/MacOSX15.0.sdk.tar.xz -L https://github.com/V-Sekai/world/releases/download/v0.0.1/MacOSX15.0.sdk.tar.xz
     ls -l /osxcross/tarballs/
-    cd /osxcross && UNATTENDED=1 ./build.sh && ./build_compiler_rt.sh
+    sudo bash -c "cd /osxcross && UNATTENDED=1 ./build.sh && ./build_compiler_rt.sh"
 
 build-all:
     #!/usr/bin/env bash
