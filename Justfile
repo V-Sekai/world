@@ -142,71 +142,82 @@ install-lazygit:
     sudo dnf copr enable atim/lazygit -y
     sudo dnf install lazygit -y
 
+set shell := ["bash", "-cu"]
+
 build-all:
+    #!/usr/bin/env -S parallel --jobs 1 just build-platform-target {0} {1} ::: mac windows linux android ::: editor template_release template_debug
+
+build-platform-target platform target:
     #!/usr/bin/env bash
     cd $WORLD_PWD
     export PATH=/llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64/bin:$PATH
     export PATH=/osxcross/target/bin/:$PATH
     export OSXCROSS_ROOT=/osxcross
     source "/emsdk/emsdk_env.sh"
-    parallel --ungroup --jobs 1 '
-        platform={1}
-        target={2}
-        cd godot
-    case "$platform" in
+    cd godot
+    case "{{platform}}" in \
         macos)
-            EXTRA_FLAGS="vulkan_sdk_path=/opt/vulkan_sdk/MoltenVK/MoltenVK/static/MoltenVK.xcframework osxcross_sdk=darwin24 vulkan=yes arch=arm64"
-            ;;
-        *)
-            # All other platforms use LLVM and MinGW
-            EXTRA_FLAGS="use_llvm=yes use_mingw=yes"
-            ;;
+            EXTRA_FLAGS="vulkan_sdk_path=/opt/vulkan_sdk/MoltenVK/MoltenVK/static/MoltenVK.xcframework osxcross_sdk=darwin24 vulkan=yes arch=arm64" \
+            ;; \
+        *) \
+            EXTRA_FLAGS="use_llvm=yes use_mingw=yes" \
+            ;; \
     esac
-    scons platform=$platform \
-        werror=no \
-        compiledb=yes \
-        precision=double \
-        target=$target \
-        test=yes \
-        debug_symbol=yes \
-        $EXTRA_FLAGS
-    case "$platform" in
-        android)
-            if [ "$target" = "editor" ]; then
-                cd platform/android/java
-                ./gradlew generateGodotEditor
-                ./gradlew generateGodotHorizonOSEditor
-                cd ../../..
-                ls -l bin/android_editor_builds/
-            elif [ "$target" = "template_release" ] || [ "$target" = "template_debug" ]; then
-                cd platform/android/java
-                ./gradlew generateGodotTemplates
-                cd ../../..
-                ls -l bin/
-            fi
-            ;;
-        web)
-            cd bin
-            files_to_delete=(
-                "*.wasm"
-                "*.js"
-                "*.html"
-                "*.worker.js"
-                "*.engine.js"
-                "*.service.worker.js"
-                "*.wrapped.js"
-            )
-            for file_pattern in "${files_to_delete[@]}"; do
-                echo "Deleting files: $file_pattern"
-                rm -f $file_pattern
-            done
-            if [ -d ".web_zip" ]; then
-                echo "Deleting directory: .web_zip"
-                rm -rf .web_zip
-            fi
-            cd ..
-                ls -l bin/
-                ;;            
-        esac
-    ' ::: macos linux windows android web \
-    ::: editor template_release template_debug
+    scons platform={{platform}} \
+          werror=no \
+          compiledb=yes \
+          precision=double \
+          target={{target}} \
+          test=yes \
+          debug_symbol=yes \
+          $EXTRA_FLAGS
+    just handle-special-cases {{platform}} {{target}}
+
+handle-special-cases platform target:
+    #!/usr/bin/env bash
+    case "{{platform}}" in \
+        android) \ 
+            just handle-android {{target}} \
+            ;; \
+        web) \
+            just handle-web \
+            ;; \
+    esac
+
+handle-android target:
+    #!/usr/bin/env bash
+    if [ "{{target}}" = "editor" ]; then
+        cd platform/android/java
+        ./gradlew generateGodotEditor
+        ./gradlew generateGodotHorizonOSEditor
+        cd ../../..
+        ls -l bin/android_editor_builds/
+    elif [ "{{target}}" = "template_release" ] || [ "{{target}}" = "template_debug" ]; then
+        cd platform/android/java
+        ./gradlew generateGodotTemplates
+        cd ../../..
+        ls -l bin/
+    fi
+
+handle-web:
+    #!/usr/bin/env bash
+    cd bin
+    files_to_delete=(
+        "*.wasm"
+        "*.js"
+        "*.html"
+        "*.worker.js"
+        "*.engine.js"
+        "*.service.worker.js"
+        "*.wrapped.js"
+    )
+    for file_pattern in "${files_to_delete[@]}"; do
+        echo "Deleting files: $file_pattern"
+        rm -f $file_pattern
+    done
+    if [ -d ".web_zip" ]; then
+        echo "Deleting directory: .web_zip"
+        rm -rf .web_zip
+    fi
+    cd ..
+    ls -l bin/
