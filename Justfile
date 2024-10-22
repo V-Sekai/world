@@ -60,11 +60,11 @@ setup_android_sdk:
     yes | {{WORLD_PWD}}/cmdline-tools/bin/sdkmanager --sdk_root={{ANDROID_SDK_ROOT}} "ndk;{{ANDROID_NDK_VERSION}}" 'cmdline-tools;latest' 'build-tools;34.0.0' 'platforms;android-34' 'cmake;3.22.1'
 
 fetch_sdks:
+    just setup_android_sdk
+    just fetch_vulkan_sdk
     just fetch_llvm_mingw
     just fetch_openjdk
     just build-osxcross
-    just fetch_vulkan_sdk
-    just setup_android_sdk
     
 setup_rust:
     #!/usr/bin/env bash
@@ -144,7 +144,6 @@ build-all:
     export PATH=/llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64/bin:$PATH
     export PATH=/osxcross/target/bin/:$PATH
     export OSXCROSS_ROOT=/osxcross
-    export ANDROID_SDK_ROOT="/root/sdk"
     source "/emsdk/emsdk_env.sh"
     parallel --ungroup --jobs 1 '
         platform={1}
