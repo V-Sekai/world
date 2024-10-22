@@ -159,7 +159,6 @@ build-all:
             ;;
     esac
     scons platform=$platform \
-        scu_build=yes \
         werror=no \
         compiledb=yes \
         generate_bundle=yes \
