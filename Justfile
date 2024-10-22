@@ -165,7 +165,6 @@ build-all:
     scons platform=$platform \
         werror=no \
         compiledb=yes \
-        generate_bundle=yes \
         precision=double \
         target=$target \
         test=yes \
