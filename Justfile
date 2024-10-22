@@ -142,7 +142,7 @@ install-lazygit:
     sudo dnf copr enable atim/lazygit -y
     sudo dnf install lazygit -y
 
-build-all: fetch_sdks
+build-all:
     #!/usr/bin/env -S parallel --jobs 1 just build-platform-target {0} {1} ::: mac windows linux android ::: editor template_release template_debug
 
 build-platform-target platform target:
