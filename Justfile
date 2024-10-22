@@ -14,12 +14,11 @@ export GODOT_STATUS := "groups-4.3"
 export GIT_URL_DOCKER := "https://github.com/V-Sekai/docker-groups.git"
 export GIT_URL_VSEKAI := "https://github.com/V-Sekai/v-sekai-game.git"
 export WORLD_PWD := invocation_directory()
-export SCONS_CACHE := "$APP_HOME/.scons_cache"
+export SCONS_CACHE := "$WORLD_PWD/.scons_cache"
 
 export IMAGE_NAME := "just-fedora-app"
 
-export APP_HOME := "/Users/ernest.lee/Documents/world"
-export ANDROID_SDK_ROOT := APP_HOME + "/sdk"
+export ANDROID_SDK_ROOT := WORLD_PWD + "/sdk"
 export ANDROID_NDK_VERSION := "23.2.8568313"
 export cmdlinetools := "commandlinetools-linux-11076708_latest.zip"
 export JAVA_HOME := "/jdk"
@@ -34,7 +33,7 @@ install_packages:
 
 fetch_llvm_mingw:
     #!/usr/bin/env bash
-    cd $APP_HOME
+    cd $WORLD_PWD
     curl -o /tmp/llvm-mingw.tar.xz -L https://github.com/mstorsjo/llvm-mingw/releases/download/20240917/llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64.tar.xz
     sudo tar -xf /tmp/llvm-mingw.tar.xz -C /
     rm -rf /tmp/llvm-mingw.tar.xz
@@ -47,9 +46,9 @@ fetch_openjdk:
 
 setup_android_sdk:
     sudo mkdir -p {{ANDROID_SDK_ROOT}}
-    curl -LO https://dl.google.com/android/repository/{{cmdlinetools}} -o {{APP_HOME}}/{{cmdlinetools}}
-    cd {{APP_HOME}} && unzip -o {{APP_HOME}}/{{cmdlinetools}}
-    rm {{APP_HOME}}/{{cmdlinetools}}
+    curl -LO https://dl.google.com/android/repository/{{cmdlinetools}} -o {{WORLD_PWD}}/{{cmdlinetools}}
+    cd {{WORLD_PWD}} && unzip -o {{WORLD_PWD}}/{{cmdlinetools}}
+    rm {{WORLD_PWD}}/{{cmdlinetools}}
     yes | {{ANDROID_SDK_ROOT}}/cmdline-tools/bin/sdkmanager --sdk_root={{ANDROID_SDK_ROOT}} --licenses
     {{ANDROID_SDK_ROOT}}/cmdline-tools/bin/sdkmanager --sdk_root={{ANDROID_SDK_ROOT}} "ndk;{{ANDROID_NDK_VERSION}}" 'cmdline-tools;latest' 'build-tools;34.0.0' 'platforms;android-34' 'cmake;3.22.1'
 
@@ -60,7 +59,7 @@ fetch_sdks:
 
 setup_rust:
     #!/usr/bin/env bash
-    cd $APP_HOME
+    cd $WORLD_PWD
     mkdir -p /opt/cargo /opt/rust
     curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly --no-modify-path
     . "$HOME/.cargo/env"
@@ -69,7 +68,7 @@ setup_rust:
 
 setup_emscripten:
     #!/usr/bin/env bash
-    cd $APP_HOME
+    cd $WORLD_PWD
     just prepare_workspace
     git clone https://github.com/emscripten-core/emsdk.git /emsdk
     /emsdk/emsdk install 3.1.67
@@ -128,7 +127,7 @@ build-osxcross:
 
 build-all:
     #!/usr/bin/env bash
-    cd $APP_HOME
+    cd $WORLD_PWD
     export PATH=/llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64/bin:$PATH
     export OSXCROSS_ROOT=/osxcross
     export ANDROID_SDK_ROOT="/root/sdk"
