@@ -13,3 +13,4 @@ osxcross
 .scons_cache
 commandlinetools-linux-11076708_latest.zip
 cmdline-tools/
+sdk

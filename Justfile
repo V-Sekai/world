@@ -50,11 +50,21 @@ fetch_vulkan_sdk:
     sudo tar -xf /tmp/vulkan-sdk.zip -C /opt/vulkan_sdk/
     rm /tmp/vulkan-sdk.zip
 
+setup_android_sdk:
+    #!/usr/bin/env bash
+    mkdir -p {{ANDROID_SDK_ROOT}}
+    curl -LO https://dl.google.com/android/repository/{{cmdlinetools}} -o {{WORLD_PWD}}/{{cmdlinetools}}
+    cd {{WORLD_PWD}} && unzip -o {{WORLD_PWD}}/{{cmdlinetools}}
+    rm {{WORLD_PWD}}/{{cmdlinetools}}
+    yes | {{WORLD_PWD}}/cmdline-tools/bin/sdkmanager --sdk_root={{ANDROID_SDK_ROOT}} --licenses
+    yes | {{WORLD_PWD}}/cmdline-tools/bin/sdkmanager --sdk_root={{ANDROID_SDK_ROOT}} "ndk;{{ANDROID_NDK_VERSION}}" 'cmdline-tools;latest' 'build-tools;34.0.0' 'platforms;android-34' 'cmake;3.22.1'
+
 fetch_sdks:
     just fetch_llvm_mingw
     just fetch_openjdk
     just build-osxcross
     just fetch_vulkan_sdk
+    just setup_android_sdk
     
 setup_rust:
     #!/usr/bin/env bash
@@ -197,5 +207,5 @@ build-all:
                 ls -l bin/
                 ;;            
         esac
-    ' ::: macos \
+    ' ::: android windows linux web \
     ::: editor # template_release template_debug
