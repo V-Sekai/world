@@ -243,17 +243,31 @@ void EditorFileSystem::_first_scan_filesystem() {
 	first_scan_root_dir = memnew(ScannedDirectory);
 	first_scan_root_dir->full_path = "res://";
 	HashSet<String> existing_class_names;
+	HashSet<String> extensions;
 
 	ep.step(TTR("Scanning file structure..."), 0, true);
 	nb_files_total = _scan_new_dir(first_scan_root_dir, d);
 
+	// Preloading GDExtensions file extensions to prevent looping on all the resource loaders
+	// for each files in _first_scan_process_scripts.
+	List<String> gdextension_extensions;
+	ResourceLoader::get_recognized_extensions_for_type("GDExtension", &gdextension_extensions);
+
 	// This loads the global class names from the scripts and ensures that even if the
 	// global_script_class_cache.cfg was missing or invalid, the global class names are valid in ScriptServer.
+	// At the same time, to prevent looping multiple times in all files, it looks for extensions.
 	ep.step(TTR("Loading global class names..."), 1, true);
-	_first_scan_process_scripts(first_scan_root_dir, existing_class_names);
+	_first_scan_process_scripts(first_scan_root_dir, gdextension_extensions, existing_class_names, extensions);
 
 	// Removing invalid global class to prevent having invalid paths in ScriptServer.
 	_remove_invalid_global_class_names(existing_class_names);
+
+	// Processing extensions to add new extensions or remove invalid ones.
+	// Important to do it in the first scan so custom types, new class names, custom importers, etc...
+	// from extensions are ready to go before plugins, autoloads and resources validation/importation.
+	// At this point, a restart of the editor should not be needed so we don't use the return value.
+	ep.step(TTR("Verifying GDExtensions..."), 2, true);
+	GDExtensionManager::get_singleton()->ensure_extensions_loaded(extensions);
 
 	// Now that all the global class names should be loaded, create autoloads and plugins.
 	// This is done after loading the global class names because autoloads and plugins can use
@@ -267,16 +281,16 @@ void EditorFileSystem::_first_scan_filesystem() {
 	ep.step(TTR("Starting file scan..."), 5, true);
 }
 
-void EditorFileSystem::_first_scan_process_scripts(const ScannedDirectory *p_scan_dir, HashSet<String> &p_existing_class_names) {
+void EditorFileSystem::_first_scan_process_scripts(const ScannedDirectory *p_scan_dir, List<String> &p_gdextension_extensions, HashSet<String> &p_existing_class_names, HashSet<String> &p_extensions) {
 	for (ScannedDirectory *scan_sub_dir : p_scan_dir->subdirs) {
-		_first_scan_process_scripts(scan_sub_dir, p_existing_class_names);
+		_first_scan_process_scripts(scan_sub_dir, p_gdextension_extensions, p_existing_class_names, p_extensions);
 	}
 
 	for (const String &scan_file : p_scan_dir->files) {
 		// Optimization to skip the ResourceLoader::get_resource_type for files
 		// that are not scripts. Some loader get_resource_type methods read the file
 		// which can be very slow on large projects.
-		String ext = scan_file.get_extension().to_lower();
+		const String ext = scan_file.get_extension().to_lower();
 		bool is_script = false;
 		for (int i = 0; i < ScriptServer::get_language_count(); i++) {
 			if (ScriptServer::get_language(i)->get_extension() == ext) {
@@ -284,21 +298,28 @@ void EditorFileSystem::_first_scan_process_scripts(const ScannedDirectory *p_sca
 				break;
 			}
 		}
-		if (!is_script) {
-			continue; // Not a script.
+		if (is_script) {
+			const String path = p_scan_dir->full_path.path_join(scan_file);
+			const String type = ResourceLoader::get_resource_type(path);
+
+			if (ClassDB::is_parent_class(type, SNAME("Script"))) {
+				String script_class_extends;
+				String script_class_icon_path;
+				String script_class_name = _get_global_script_class(type, path, &script_class_extends, &script_class_icon_path);
+				_register_global_class_script(path, path, type, script_class_name, script_class_extends, script_class_icon_path);
+
+				if (!script_class_name.is_empty()) {
+					p_existing_class_names.insert(script_class_name);
+				}
+			}
 		}
 
-		String path = p_scan_dir->full_path.path_join(scan_file);
-		String type = ResourceLoader::get_resource_type(path);
-
-		if (ClassDB::is_parent_class(type, SNAME("Script"))) {
-			String script_class_extends;
-			String script_class_icon_path;
-			String script_class_name = _get_global_script_class(type, path, &script_class_extends, &script_class_icon_path);
-			_register_global_class_script(path, path, type, script_class_name, script_class_extends, script_class_icon_path);
-
-			if (!script_class_name.is_empty()) {
-				p_existing_class_names.insert(script_class_name);
+		// Check for GDExtensions.
+		if (p_gdextension_extensions.find(ext)) {
+			const String path = p_scan_dir->full_path.path_join(scan_file);
+			const String type = ResourceLoader::get_resource_type(path);
+			if (type == SNAME("GDExtension")) {
+				p_extensions.insert(path);
 			}
 		}
 	}
@@ -3289,57 +3310,7 @@ bool EditorFileSystem::_scan_extensions() {
 
 	_scan_extensions_dir(d, extensions);
 
-	//verify against loaded extensions
-
-	Vector<String> extensions_added;
-	Vector<String> extensions_removed;
-
-	for (const String &E : extensions) {
-		if (!GDExtensionManager::get_singleton()->is_extension_loaded(E)) {
-			extensions_added.push_back(E);
-		}
-	}
-
-	Vector<String> loaded_extensions = GDExtensionManager::get_singleton()->get_loaded_extensions();
-	for (int i = 0; i < loaded_extensions.size(); i++) {
-		if (!extensions.has(loaded_extensions[i])) {
-			// The extension may not have a .gdextension file.
-			if (!FileAccess::exists(loaded_extensions[i])) {
-				extensions_removed.push_back(loaded_extensions[i]);
-			}
-		}
-	}
-
-	String extension_list_config_file = GDExtension::get_extension_list_config_file();
-	if (extensions.size()) {
-		if (extensions_added.size() || extensions_removed.size()) { //extensions were added or removed
-			Ref<FileAccess> f = FileAccess::open(extension_list_config_file, FileAccess::WRITE);
-			for (const String &E : extensions) {
-				f->store_line(E);
-			}
-		}
-	} else {
-		if (loaded_extensions.size() || FileAccess::exists(extension_list_config_file)) { //extensions were removed
-			Ref<DirAccess> da = DirAccess::create(DirAccess::ACCESS_RESOURCES);
-			da->remove(extension_list_config_file);
-		}
-	}
-
-	bool needs_restart = false;
-	for (int i = 0; i < extensions_added.size(); i++) {
-		GDExtensionManager::LoadStatus st = GDExtensionManager::get_singleton()->load_extension(extensions_added[i]);
-		if (st == GDExtensionManager::LOAD_STATUS_NEEDS_RESTART) {
-			needs_restart = true;
-		}
-	}
-	for (int i = 0; i < extensions_removed.size(); i++) {
-		GDExtensionManager::LoadStatus st = GDExtensionManager::get_singleton()->unload_extension(extensions_removed[i]);
-		if (st == GDExtensionManager::LOAD_STATUS_NEEDS_RESTART) {
-			needs_restart = true;
-		}
-	}
-
-	return needs_restart;
+	return GDExtensionManager::get_singleton()->ensure_extensions_loaded(extensions);
 }
 
 void EditorFileSystem::_bind_methods() {
