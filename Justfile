@@ -14,14 +14,15 @@ export GODOT_STATUS := "groups-4.3"
 export GIT_URL_DOCKER := "https://github.com/V-Sekai/docker-groups.git"
 export GIT_URL_VSEKAI := "https://github.com/V-Sekai/v-sekai-game.git"
 export WORLD_PWD := invocation_directory()
-export SCONS_CACHE := invocation_directory() + "/.scons_cache"
-
-export IMAGE_NAME := "just-fedora-app"
-
-export ANDROID_SDK_ROOT := WORLD_PWD + "/sdk"
 export ANDROID_NDK_VERSION := "23.2.8568313"
 export cmdlinetools := "commandlinetools-linux-11076708_latest.zip"
-export JAVA_HOME := "/jdk"
+
+export SCONS_CACHE := WORLD_PWD + "/.scons_cache"
+export ANDROID_SDK_ROOT := WORLD_PWD + "/android_sdk"
+export JAVA_HOME := WORLD_PWD + "/jdk"
+export VULKAN_SDK_ROOT := WORLD_PWD + "/vulkan_sdk/"
+export EMSDK_ROOT := WORLD_PWD + "/emsdk"
+export OSXCROSS_ROOT := WORLD_PWD + "/osxcross"
 
 run-all:
     just fetch-openjdk
@@ -46,19 +47,33 @@ fetch-llvm-mingw:
     rm -rf /tmp/llvm-mingw.tar.xz
 
 fetch-openjdk:
+    #!/usr/bin/env bash
+    if [ ! -d "${JAVA_HOME}" ]; then
+        echo "JAVA_HOME is created."
+        exit 0
+    fi
     curl --fail --location --silent --show-error "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.11%2B9/OpenJDK17U-jdk_$(uname -m | sed -e s/86_//g)_linux_hotspot_17.0.11_9.tar.gz" --output /tmp/jdk.tar.gz
     mkdir -p {{JAVA_HOME}}
     tar -xf /tmp/jdk.tar.gz -C {{JAVA_HOME}} --strip 1
     rm -rf /tmp/jdk.tar.gz
 
 fetch-vulkan-sdk:
+    #!/usr/bin/env bash
+    if [ ! -d "${VULKAN_SDK_ROOT}" ]; then
+        echo "VULKAN_SDK_ROOT is created."
+        exit 0
+    fi
     curl -L "https://github.com/godotengine/moltenvk-osxcross/releases/download/vulkan-sdk-1.3.283.0-2/MoltenVK-all.tar" -o /tmp/vulkan-sdk.zip
     mkdir -p /opt/vulkan_sdk
-    tar -xf /tmp/vulkan-sdk.zip -C /opt/vulkan_sdk/
+    tar -xf /tmp/vulkan-sdk.zip -C {{VULKAN_SDK_ROOT}}
     rm /tmp/vulkan-sdk.zip
 
 setup-android-sdk:
     #!/usr/bin/env bash
+    if [ ! -d "${ANDROID_SDK_ROOT}" ]; then
+        echo "ANDROID_SDK_ROOT is created."
+        exit 0
+    fi
     mkdir -p {{ANDROID_SDK_ROOT}}
     curl -LO https://dl.google.com/android/repository/{{cmdlinetools}} -o {{WORLD_PWD}}/{{cmdlinetools}}
     cd {{WORLD_PWD}} && unzip -o {{WORLD_PWD}}/{{cmdlinetools}}
@@ -77,8 +92,12 @@ setup-rust:
 
 setup-emscripten:
     #!/usr/bin/env bash
+    if [ ! -d "${EMSDK_ROOT}" ]; then
+        echo "EMSDK_ROOT is created."
+        exit 0
+    fi
     cd $WORLD_PWD
-    git clone https://github.com/emscripten-core/emsdk.git /emsdk
+    git clone https://github.com/emscripten-core/emsdk.git $EMSDK_ROOT
     /emsdk/emsdk install 3.1.67
 
 copy_binaries:
@@ -104,18 +123,20 @@ deploy_osxcross:
 
 build-osxcross:
     #!/usr/bin/env bash
-    git clone https://github.com/tpoechtrager/osxcross.git /osxcross
+    if [ ! -d "${EMSDK_ROOT}" ]; then
+        echo "EMSDK_ROOT is created."
+        exit 0
+    fi
+    git clone https://github.com/tpoechtrager/osxcross.git 
     curl -o /osxcross/tarballs/MacOSX15.0.sdk.tar.xz -L https://github.com/V-Sekai/world/releases/download/v0.0.1/MacOSX15.0.sdk.tar.xz
-    chown -R $(whoami):$(whoami) /osxcross
-    ls -l /osxcross/tarballs/
-    cd /osxcross && UNATTENDED=1 ./build.sh && ./build_compiler_rt.sh
+    ls -l $OSXCROSS_ROOT/tarballs/
+    cd $OSXCROSS_ROOT/osxcross && UNATTENDED=1 ./build.sh && ./build_compiler_rt.sh
 
 # build-platform-target platform target:
 #     #!/usr/bin/env bash
 #     cd $WORLD_PWD
 #     export PATH=/llvm-mingw-20240917-ucrt-ubuntu-20.04-x86_64/bin:$PATH
 #     export PATH=/osxcross/target/bin/:$PATH
-#     export OSXCROSS_ROOT=/osxcross
 #     source "/emsdk/emsdk_env.sh"
 #     cd godot
 #     case "{{platform}}" in \
