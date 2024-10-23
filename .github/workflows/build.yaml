@@ -98,4 +98,13 @@ jobs:
         with:
           name: build-${{ matrix.platform }}-${{ matrix.target }}
           path: godot/bin/*
-          
+  
+  merge:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Merge Artifacts
+        uses: actions/upload-artifact/merge@v4
+        with:
+          name: v-sekai-world
+          delete-merged: true
