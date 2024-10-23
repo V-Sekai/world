@@ -42,14 +42,17 @@ jobs:
         with:
           path:  |
             .scons_cache
-            /osxcross
+            emsdk
+            osxcross
+            jdk
+            android_sdk
+            vulkan_sdk
           key: ${{ runner.os }}-scons-${{ matrix.platform }}-${{ matrix.target }}
           restore-keys: |
             ${{ runner.os }}-scons-${{ matrix.platform }}-${{ matrix.target }}
             ${{ runner.os }}-scons-
             ${{ runner.os }}
 
-      
       - uses: bencherdev/bencher@main
 
       - name: Fetch dependencies and Build Platform Target
