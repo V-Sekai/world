@@ -1,0 +1,71 @@
+name: Build Platform Target
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, edited, synchronize]
+
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest    
+    # DO NOT REMOVE: For handling Fork PRs see Pull Requests from Forks
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      pull-requests: write
+    container:
+      image: fedora:39
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      BENCHER_API_TOKEN: ${{ secrets.BENCHER_API_TOKEN }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [macos, linux, windows, android, web]
+        target: [editor, template_release, template_debug]
+
+    steps:
+      - name: Set up dependencies
+        run: dnf install -y just git
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Cache SCons cache
+        uses: actions/cache@v4
+        with:
+          path:  |
+            .scons_cache
+            /osxcross
+          key: ${{ runner.os }}-scons-${{ matrix.platform }}-${{ matrix.target }}
+          restore-keys: |
+            ${{ runner.os }}-scons-${{ matrix.platform }}-${{ matrix.target }}
+            ${{ runner.os }}-scons-
+            ${{ runner.os }}
+
+      
+      - uses: bencherdev/bencher@main
+
+      - name: Fetch dependencies and Build Platform Target
+        run: |
+          PLATFORM_ARGS=""
+          case "${{ matrix.platform }}" in
+            android) PLATFORM_ARGS="fetch-openjdk setup-android-sdk" ;;
+            web) PLATFORM_ARGS="setup-emscripten" ;;
+            windows) PLATFORM_ARGS="fetch-llvm-mingw" ;;
+            macos) PLATFORM_ARGS="build-osxcross fetch-vulkan-sdk" ;;
+          esac
+            just install_packages
+            just $PLATFORM_ARGS
+            # just build-platform-target ${{ matrix.platform }} ${{ matrix.target }}
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.platform }}-${{ matrix.target }}
+          path: godot/bin/*
