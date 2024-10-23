@@ -25,6 +25,9 @@ export EMSDK_ROOT := WORLD_PWD + "/emsdk"
 export OSXCROSS_ROOT := WORLD_PWD + "/osxcross"
 export MINGW_ROOT := WORLD_PWD + "/mingw"
 
+print-binary-folder: run-all
+    ls -al godot/bin
+
 run-all:
     just fetch-openjdk
     just setup-android-sdk
@@ -169,10 +172,7 @@ handle-special-cases platform target:
     case "{{platform}}" in \
         android) \ 
             just handle-android {{target}} \
-            ;; \
-        web) \
-            just handle-web \
-            ;; \
+            ;;
     esac
 
 handle-android target:
@@ -189,25 +189,4 @@ handle-android target:
         ./gradlew generateGodotTemplates
         cd ../../..
         ls -l bin/
-    fi
-
-handle-web:
-    #!/usr/bin/env bash
-    cd godot/bin
-    files_to_delete=(
-        "*.wasm"
-        "*.js"
-        "*.html"
-        "*.worker.js"
-        "*.engine.js"
-        "*.service.worker.js"
-        "*.wrapped.js"
-    )
-    for file_pattern in "${files_to_delete[@]}"; do
-        echo "Deleting files: $file_pattern"
-        rm -f $file_pattern
-    done
-    if [ -d ".web_zip" ]; then
-        echo "Deleting directory: .web_zip"
-        rm -rf .web_zip
     fi
