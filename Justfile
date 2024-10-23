@@ -163,8 +163,8 @@ build-platform-target platform target:
 
 all-build-platform-target:
     #!/usr/bin/env bash
-    parallel --ungroup --jobs 1 'just build-platform-target {1} {2}' \
-    ::: windows linux macos android web \
+    parallel --ungroup --jobs 1 --exclude 'ios\beditor' 'just build-platform-target {1} {2}' \
+    ::: windows linux macos android web ios \
     ::: editor template_debug template_release
 
 handle-special-cases platform target:
