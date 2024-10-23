@@ -41,12 +41,13 @@ jobs:
         uses: actions/cache@v4
         with:
           path:  |
-            .scons_cache
-            emsdk
-            osxcross
-            jdk
-            android_sdk
-            vulkan_sdk
+             .scons_cache
+              emsdk
+              osxcross
+              jdk
+              android_sdk
+              vulkan_sdk
+              mingw
           key: ${{ runner.os }}-scons-${{ matrix.platform }}-${{ matrix.target }}
           restore-keys: |
             ${{ runner.os }}-scons-${{ matrix.platform }}-${{ matrix.target }}
@@ -57,18 +58,44 @@ jobs:
 
       - name: Fetch dependencies and Build Platform Target
         run: |
-          PLATFORM_ARGS=""
-          case "${{ matrix.platform }}" in
-            android) PLATFORM_ARGS="fetch-openjdk setup-android-sdk" ;;
-            web) PLATFORM_ARGS="setup-emscripten" ;;
-            windows) PLATFORM_ARGS="fetch-llvm-mingw" ;;
-            macos) PLATFORM_ARGS="build-osxcross fetch-vulkan-sdk" ;;
-          esac
             just install_packages
-            just $PLATFORM_ARGS
-            # just build-platform-target ${{ matrix.platform }} ${{ matrix.target }}
+            export PLATFORM_ARGS=""
+            case "${{ matrix.platform }}" in
+              android)
+                PLATFORM_ARGS="fetch-openjdk setup-android-sdk"
+                ;;
+              web)
+                PLATFORM_ARGS="setup-emscripten"
+                ;;
+              windows)
+                PLATFORM_ARGS="fetch-llvm-mingw"
+                ;;
+              macos)
+                PLATFORM_ARGS="build-osxcross fetch-vulkan-sdk"
+                ;;
+              *)
+                PLATFORM_ARGS="nil"
+                ;;
+            esac
+            bencher run \
+            --project 'v-sekai-world' \
+            --adapter shell_hyperfine \
+            --branch '${{ github.head_ref }}' \
+            --testbed ubuntu-latest \
+            --threshold-measure latency \
+            --threshold-test t_test \
+            --threshold-max-sample-size 64 \
+            --threshold-upper-boundary 0.99 \
+            --thresholds-reset \
+            --ci-id ${{ runner.os }}-scons-${{ matrix.platform }}-${{ matrix.target }} \
+            --err \
+            --token '${{ secrets.BENCHER_API_TOKEN }}' \
+            --github-actions '${{ secrets.GITHUB_TOKEN }}' \
+            --file results.json \
+            "hyperfine --show-output --runs 1 --export-json results.json 'just $PLATFORM_ARGS && just build-platform-target ${{ matrix.platform }} ${{ matrix.target }}'"
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-${{ matrix.platform }}-${{ matrix.target }}
           path: godot/bin/*
+          

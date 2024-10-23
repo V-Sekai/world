@@ -17,3 +17,9 @@ sdk
 android_sdk/
 
 jdk/
+
+mingw/
+
+emsdk
+
+vulkan_sdk/
