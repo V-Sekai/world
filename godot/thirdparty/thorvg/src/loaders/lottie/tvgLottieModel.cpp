@@ -39,7 +39,7 @@
 
 void LottieSlot::reset()
 {
-    if (!overriden) return;
+    if (!overridden) return;
 
     for (auto pair = pairs.begin(); pair < pairs.end(); ++pair) {
         switch (type) {
@@ -66,7 +66,7 @@ void LottieSlot::reset()
         delete(pair->prop);
         pair->prop = nullptr;
     }
-    overriden = false;
+    overridden = false;
 }
 
 
@@ -77,7 +77,7 @@ void LottieSlot::assign(LottieObject* target)
         //backup the original properties before overwriting
         switch (type) {
             case LottieProperty::Type::ColorStop: {
-                if (!overriden) {
+                if (!overridden) {
                     pair->prop = new LottieColorStop;
                     *static_cast<LottieColorStop*>(pair->prop) = static_cast<LottieGradient*>(pair->obj)->colorStops;
                 }
@@ -86,7 +86,7 @@ void LottieSlot::assign(LottieObject* target)
                 break;
             }
             case LottieProperty::Type::Color: {
-                if (!overriden) {
+                if (!overridden) {
                     pair->prop = new LottieColor;
                     *static_cast<LottieColor*>(pair->prop) = static_cast<LottieSolid*>(pair->obj)->color;
                 }
@@ -95,7 +95,7 @@ void LottieSlot::assign(LottieObject* target)
                 break;
             }
             case LottieProperty::Type::TextDoc: {
-                if (!overriden) {
+                if (!overridden) {
                     pair->prop = new LottieTextDoc;
                     *static_cast<LottieTextDoc*>(pair->prop) = static_cast<LottieText*>(pair->obj)->doc;
                 }
@@ -106,7 +106,25 @@ void LottieSlot::assign(LottieObject* target)
             default: break;
         }
     }
-    overriden = true;
+    overridden = true;
+}
+
+
+void LottieTextRange::range(float frameNo, float totalLen, float& start, float& end)
+{
+    auto divisor = (rangeUnit == Unit::Percent) ? (100.0f / totalLen) : 1.0f;
+    auto offset = this->offset(frameNo) / divisor;
+    start = nearbyintf(this->start(frameNo) / divisor) + offset;
+    end = nearbyintf(this->end(frameNo) / divisor) + offset;
+
+    if (start > end) std::swap(start, end);
+
+    if (random == 0) return;
+
+    auto range = end - start;
+    auto len = (rangeUnit == Unit::Percent) ? 100.0f : totalLen;
+    start = static_cast<float>(random % int(len - range));
+    end = start + range;
 }
 
 
@@ -141,36 +159,38 @@ void LottieImage::prepare()
 void LottieTrimpath::segment(float frameNo, float& start, float& end, LottieExpressions* exps)
 {
     start = this->start(frameNo, exps) * 0.01f;
+    tvg::clamp(start, 0.0f, 1.0f);
     end = this->end(frameNo, exps) * 0.01f;
+    tvg::clamp(end, 0.0f, 1.0f);
 
     auto o = fmodf(this->offset(frameNo, exps), 360.0f) / 360.0f;  //0 ~ 1
 
     auto diff = fabs(start - end);
-    if (mathZero(diff)) {
+    if (tvg::zero(diff)) {
         start = 0.0f;
         end = 0.0f;
         return;
     }
-    if (mathEqual(diff, 1.0f) || mathEqual(diff, 2.0f)) {
+    if (tvg::equal(diff, 1.0f) || tvg::equal(diff, 2.0f)) {
         start = 0.0f;
         end = 1.0f;
         return;
     }
 
+    if (start > end) std::swap(start, end);
     start += o;
     end += o;
 }
 
 
-uint32_t LottieGradient::populate(ColorStop& color)
+uint32_t LottieGradient::populate(ColorStop& color, size_t count)
 {
-    colorStops.populated = true;
     if (!color.input) return 0;
 
-    uint32_t alphaCnt = (color.input->count - (colorStops.count * 4)) / 2;
-    Array<Fill::ColorStop> output(colorStops.count + alphaCnt);
+    uint32_t alphaCnt = (color.input->count - (count * 4)) / 2;
+    Array<Fill::ColorStop> output(count + alphaCnt);
     uint32_t cidx = 0;               //color count
-    uint32_t clast = colorStops.count * 4;
+    uint32_t clast = count * 4;
     if (clast > color.input->count) clast = color.input->count;
     uint32_t aidx = clast;           //alpha count
     Fill::ColorStop cs;
@@ -194,8 +214,8 @@ uint32_t LottieGradient::populate(ColorStop& color)
             //generate alpha value
             if (output.count > 0) {
                 auto p = ((*color.input)[cidx] - output.last().offset) / ((*color.input)[aidx] - output.last().offset);
-                cs.a = mathLerp<uint8_t>(output.last().a, (uint8_t)nearbyint((*color.input)[aidx + 1] * 255.0f), p);
-            } else cs.a = 255;
+                cs.a = lerp<uint8_t>(output.last().a, (uint8_t)nearbyint((*color.input)[aidx + 1] * 255.0f), p);
+            } else cs.a = (uint8_t)nearbyint((*color.input)[aidx + 1] * 255.0f);
             cidx += 4;
         } else {
             cs.offset = (*color.input)[aidx];
@@ -203,10 +223,14 @@ uint32_t LottieGradient::populate(ColorStop& color)
             //generate color value
             if (output.count > 0) {
                 auto p = ((*color.input)[aidx] - output.last().offset) / ((*color.input)[cidx] - output.last().offset);
-                cs.r = mathLerp<uint8_t>(output.last().r, (uint8_t)nearbyint((*color.input)[cidx + 1] * 255.0f), p);
-                cs.g = mathLerp<uint8_t>(output.last().g, (uint8_t)nearbyint((*color.input)[cidx + 2] * 255.0f), p);
-                cs.b = mathLerp<uint8_t>(output.last().b, (uint8_t)nearbyint((*color.input)[cidx + 3] * 255.0f), p);
-            } else cs.r = cs.g = cs.b = 255;
+                cs.r = lerp<uint8_t>(output.last().r, (uint8_t)nearbyint((*color.input)[cidx + 1] * 255.0f), p);
+                cs.g = lerp<uint8_t>(output.last().g, (uint8_t)nearbyint((*color.input)[cidx + 2] * 255.0f), p);
+                cs.b = lerp<uint8_t>(output.last().b, (uint8_t)nearbyint((*color.input)[cidx + 3] * 255.0f), p);
+            } else {
+                cs.r = (uint8_t)nearbyint((*color.input)[cidx + 1] * 255.0f);
+                cs.g = (uint8_t)nearbyint((*color.input)[cidx + 2] * 255.0f);
+                cs.b = (uint8_t)nearbyint((*color.input)[cidx + 3] * 255.0f);
+            }
             aidx += 2;
         }
         output.push(cs);
@@ -248,6 +272,9 @@ uint32_t LottieGradient::populate(ColorStop& color)
 
 Fill* LottieGradient::fill(float frameNo, LottieExpressions* exps)
 {
+    auto opacity = this->opacity(frameNo);
+    if (opacity == 0) return nullptr;
+
     Fill* fill = nullptr;
     auto s = start(frameNo, exps);
     auto e = end(frameNo, exps);
@@ -266,15 +293,15 @@ Fill* LottieGradient::fill(float frameNo, LottieExpressions* exps)
         auto r = (w > h) ? (w + 0.375f * h) : (h + 0.375f * w);
         auto progress = this->height(frameNo, exps) * 0.01f;
 
-        if (mathZero(progress)) {
+        if (tvg::zero(progress)) {
             P(static_cast<RadialGradient*>(fill))->radial(s.x, s.y, r, s.x, s.y, 0.0f);
         } else {
-            if (mathEqual(progress, 1.0f)) progress = 0.99f;
-            auto startAngle = mathRad2Deg(mathAtan2(e.y - s.y, e.x - s.x));
-            auto angle = mathDeg2Rad((startAngle + this->angle(frameNo, exps)));
+            if (tvg::equal(progress, 1.0f)) progress = 0.99f;
+            auto startAngle = rad2deg(tvg::atan2(e.y - s.y, e.x - s.x));
+            auto angle = deg2rad((startAngle + this->angle(frameNo, exps)));
             auto fx = s.x + cos(angle) * progress * r;
             auto fy = s.y + sin(angle) * progress * r;
-            // Lottie dosen't have any focal radius concept
+            // Lottie doesn't have any focal radius concept
             P(static_cast<RadialGradient*>(fill))->radial(s.x, s.y, r, fx, fy, 0.0f);
         }
     }
@@ -282,6 +309,15 @@ Fill* LottieGradient::fill(float frameNo, LottieExpressions* exps)
     if (!fill) return nullptr;
 
     colorStops(frameNo, fill, exps);
+
+    //multiply the current opacity with the fill
+    if (opacity < 255) {
+        const Fill::ColorStop* colorStops;
+        auto cnt = fill->colorStops(&colorStops);
+        for (uint32_t i = 0; i < cnt; ++i) {
+            const_cast<Fill::ColorStop*>(&colorStops[i])->a = MULTIPLY(colorStops[i].a, opacity);
+        }
+    }
 
     return fill;
 }
@@ -377,6 +413,10 @@ LottieLayer::~LottieLayer()
 
     for (auto m = masks.begin(); m < masks.end(); ++m) {
         delete(*m);
+    }
+
+    for (auto e = effects.begin(); e < effects.end(); ++e) {
+        delete(*e);
     }
 
     delete(transform);

@@ -46,7 +46,7 @@ public:
     Key key;
     char* dirName = nullptr;            //base resource directory
     bool copy = false;                  //"content" is owned by this loader
-    bool overriden = false;             //overridden properties with slots
+    bool overridden = false;             //overridden properties with slots
     bool rebuild = false;               //require building the lottie scene
 
     LottieLoader();
@@ -77,6 +77,7 @@ private:
     void clear();
     float startFrame();
     void run(unsigned tid) override;
+    void release();
 };
 
 
