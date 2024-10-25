@@ -24,6 +24,10 @@ jobs:
         platform: [macos, linux, windows, android, web]
         target: [editor, template_release, template_debug]
 
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.platform }}-${{ matrix.target }}
+      cancel-in-progress: true
+      
     steps:
       - name: Set up dependencies
         run: dnf install -y just git

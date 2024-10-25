@@ -43,7 +43,6 @@ public:
     const char* dirName = nullptr;       //base resource directory
 
 private:
-    BlendMethod getBlendMethod();
     RGB24 getColor(const char *str);
     CompositeMethod getMatteType();
     FillRule getFillRule();
@@ -51,8 +50,9 @@ private:
     StrokeJoin getStrokeJoin();
     CompositeMethod getMaskMethod(bool inversed);
     LottieInterpolator* getInterpolator(const char* key, Point& in, Point& out);
+    LottieEffect* getEffect(int type);
 
-    void getInperpolatorPoint(Point& pt);
+    void getInterpolatorPoint(Point& pt);
     void getPathSet(LottiePathSet& path);
     void getLayerSize(float& val);
     void getValue(TextDocument& doc);
@@ -61,8 +61,9 @@ private:
     void getValue(ColorStop& color);
     void getValue(float& val);
     void getValue(uint8_t& val);
-    void getValue(Point& pt);
+    void getValue(int8_t& val);
     void getValue(RGB24& color);
+    bool getValue(Point& pt);
 
     template<typename T> bool parseTangent(const char *key, LottieVectorFrame<T>& value);
     template<typename T> bool parseTangent(const char *key, LottieScalarFrame<T>& value);
@@ -94,21 +95,25 @@ private:
     LottieFont* parseFont();
     LottieMarker* parseMarker();
 
+    void parseGaussianBlur(LottieGaussianBlur* effect);
+
     bool parseDirection(LottieShape* shape, const char* key);
     bool parseCommon(LottieObject* obj, const char* key);
     void parseObject(Array<LottieObject*>& parent);
     void parseShapes(Array<LottieObject*>& parent);
     void parseText(Array<LottieObject*>& parent);
     void parseMasks(LottieLayer* layer);
+    void parseEffects(LottieLayer* layer);
     void parseTimeRemap(LottieLayer* layer);
     void parseStrokeDash(LottieStroke* stroke);
     void parseGradient(LottieGradient* gradient, const char* key);
     void parseTextRange(LottieText* text);
     void parseAssets();
     void parseFonts();
-    void parseChars(Array<LottieGlyph*>& glyphes);
+    void parseChars(Array<LottieGlyph*>& glyphs);
     void parseMarkers();
-    void postProcess(Array<LottieGlyph*>& glyphes);
+    void parseEffect(LottieEffect* effect);
+    void postProcess(Array<LottieGlyph*>& glyphs);
 
     //Current parsing context
     struct Context {
